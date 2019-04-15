@@ -52,8 +52,17 @@ export interface GenericUnitMessenger {
 }
 
 /**
- * Create a generic messenger with custom input/output processors.
- * @param arg0 Arguments that handles platform-specific functionalities.
+ * Represents a messenger that deals with a platform request end-to-end, from
+ * handling data to sending response. Note that each generic messenger should
+ * have a generic unit messenger that handles requests one-by-one.
+ */
+export interface GenericMessenger {
+  processPlatformRequest(req: PlatformRequest): PromiseLike<unknown>;
+}
+
+/**
+ * Create a generic unit messenger.
+ * @param communicator A service communicator instance.
  * @return A generic messenger.
  */
 export function createGenericUnitMessenger(
@@ -99,4 +108,38 @@ export function createGenericUnitMessenger(
   };
 
   return messenger;
+}
+
+/**
+ * Create a generic messenger. Note that a platform request may include multiple
+ * generic requests, so it's safer to return an Array of generic requests.
+ * @param arg0 Required dependencies to perform platform-specific work.
+ * @return A generic messenger instance.
+ */
+export function createGenericMessenger({
+  unitMessenger: messenger,
+  requestMapper,
+  responseMapper
+}: Readonly<{
+  unitMessenger: GenericUnitMessenger;
+  requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest[]>;
+  responseMapper: (res: GenericResponse) => PromiseLike<PlatformResponse>;
+}>): GenericMessenger {
+  return {
+    processPlatformRequest: async platformRequest => {
+      const requests = await requestMapper(platformRequest);
+
+      const responses = await Promise.all(
+        requests.map(async req => messenger.processGenericRequest(req))
+      );
+
+      const platformResponses = await Promise.all(
+        responses.map(async res => responseMapper(res))
+      );
+
+      return Promise.all(
+        platformResponses.map(async res => messenger.sendPlatformResponse(res))
+      );
+    }
+  };
 }

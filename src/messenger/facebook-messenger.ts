@@ -2,7 +2,9 @@ import { DeepReadonly } from 'ts-essentials';
 import {
   GenericRequest,
   GenericUnitMessenger,
-  createGenericUnitMessenger
+  createGenericUnitMessenger,
+  GenericMessenger,
+  createGenericMessenger
 } from './generic-messenger';
 import { isType, formatFacebookError } from './utils';
 import { HTTPCommunicator } from './http-communicator';
@@ -54,7 +56,7 @@ export type FacebookWebhookRequest = Readonly<{
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
-export async function mapPlatformRequest(webhook: FacebookWebhookRequest) {
+export async function mapWebhook(webhook: FacebookWebhookRequest) {
   const { object, entry } = webhook;
 
   /**
@@ -154,4 +156,31 @@ export function createUnitFacebookMessenger(
 ): GenericUnitMessenger {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
   return createGenericUnitMessenger(comm);
+}
+
+/**
+ * Create a Facebook mesenger.
+ * @param unitMessenger A unit messenger.
+ * @return A generic messenger.
+ */
+export function createFacebookMessenger(
+  unitMessenger: GenericUnitMessenger
+): GenericMessenger {
+  return createGenericMessenger({
+    unitMessenger,
+    requestMapper: req => {
+      if (isType<FacebookWebhookRequest>(req, 'object', 'entry')) {
+        return mapWebhook(req);
+      }
+
+      throw new Error(
+        formatFacebookError(`Invalid webhook: ${JSON.stringify(req)}`)
+      );
+    },
+    responseMapper: async ({ senderID, newContext, data }) => ({
+      senderID,
+      newContext,
+      data
+    })
+  });
 }
