@@ -35,30 +35,16 @@ export type GenericResponse = Readonly<{
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface GenericMessenger {
+export interface GenericUnitMessenger {
   /**
-   * Map a platform-specific request to a generic incoming request.
-   * @param req A request object.
-   * @returns A Promise of incoming request.
-   */
-  receivePlatformRequest(req: PlatformRequest): PromiseLike<GenericRequest>;
-
-  /**
-   * Map an incoming request to an outgoing response.
+   * Map an incoming generic request to an outgoing generic response.
    * @param req A request object.
    * @return A Promise of some response.
    */
-  mapGenericRequest(req: GenericRequest): PromiseLike<GenericResponse>;
+  processGenericRequest(req: GenericRequest): PromiseLike<GenericResponse>;
 
   /**
-   * Map an outgoing response to a plarform response.
-   * @param res A response object.
-   * @return A Promise of some response.
-   */
-  mapGenericResponse(res: GenericResponse): PromiseLike<PlatformResponse>;
-
-  /**
-   * Send an outgoing response.
+   * Send an outgoing platform response.
    * @param res A response object.
    * @return A Promise of some response.
    */
@@ -70,15 +56,9 @@ export interface GenericMessenger {
  * @param arg0 Arguments that handles platform-specific functionalities.
  * @return A generic messenger.
  */
-export function createGenericMessenger({
-  communicator,
-  platformRequestMapper,
-  platformResponseMapper
-}: Readonly<{
-  communicator: ServiceCommunicator;
-  platformRequestMapper: GenericMessenger['receivePlatformRequest'];
-  platformResponseMapper: GenericMessenger['mapGenericResponse'];
-}>): GenericMessenger {
+export function createGenericUnitMessenger(
+  communicator: ServiceCommunicator
+): GenericUnitMessenger {
   async function processText(oldContext: Context, text: string) {
     throw new Error('Not implemented');
   }
@@ -97,10 +77,8 @@ export function createGenericMessenger({
     throw Error(`Cannot process data ${JSON.stringify(datum)}`);
   }
 
-  const messenger: GenericMessenger = {
-    receivePlatformRequest: platformRequestMapper,
-    mapGenericResponse: platformResponseMapper,
-    mapGenericRequest: async ({ senderID, oldContext, data }) => {
+  const messenger: GenericUnitMessenger = {
+    processGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
         data.map(async datum => processDatum(oldContext, datum))
       );

@@ -11,3 +11,12 @@ export function isType<T, K extends keyof T = keyof T>(
   if (!object) return false;
   return keys.every(key => object[key] !== undefined);
 }
+
+/**
+ * Format an error for Facebook.
+ * @param error A string value.
+ * @return A string value.
+ */
+export function formatFacebookError(error: string): string {
+  return `FACEBOOK: ${error}`;
+}

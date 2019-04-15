@@ -1,6 +1,13 @@
 import { DeepReadonly } from 'ts-essentials';
-import { GenericRequest } from './generic-messenger';
-import { isType } from './utils';
+import {
+  GenericRequest,
+  GenericUnitMessenger,
+  createGenericUnitMessenger
+} from './generic-messenger';
+import { isType, formatFacebookError } from './utils';
+import { HTTPCommunicator } from './http-communicator';
+import { createFacebookCommunicator } from './facebook-communicator';
+import { FacebookConfigurations } from './type';
 
 type BaseFacebookRequest = Readonly<{
   sender: Readonly<{ id: string }>;
@@ -47,7 +54,7 @@ export type FacebookWebhookRequest = Readonly<{
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
-export function mapPlatformRequest(webhook: FacebookWebhookRequest) {
+export async function mapPlatformRequest(webhook: FacebookWebhookRequest) {
   const { object, entry } = webhook;
 
   /**
@@ -91,12 +98,16 @@ export function mapPlatformRequest(webhook: FacebookWebhookRequest) {
             return { image_url: payload.url, text: payload.url };
           }
 
-          throw Error(`FB: Unsupported payload: ${JSON.stringify(payload)}`);
+          throw Error(
+            formatFacebookError(`Invalid payload: ${JSON.stringify(payload)}`)
+          );
         });
       }
     }
 
-    throw Error(`FB: Unsupported messaging ${JSON.stringify(request)}`);
+    throw Error(
+      formatFacebookError(`Invalid request ${JSON.stringify(request)}`)
+    );
   }
 
   switch (object) {
@@ -126,5 +137,21 @@ export function mapPlatformRequest(webhook: FacebookWebhookRequest) {
       break;
   }
 
-  throw new Error(`FB: Invalid request: ${JSON.stringify(webhook)}`);
+  throw new Error(
+    formatFacebookError(`Invalid webhook: ${JSON.stringify(webhook)}`)
+  );
+}
+
+/**
+ * Create a unit Facebook messenger.
+ * @param httpCommunicator A HTTP communicator instance.
+ * @param configurations Facebook configurations.
+ * @return A generic unit messenger.
+ */
+export function createUnitFacebookMessenger(
+  httpCommunicator: HTTPCommunicator,
+  configurations: FacebookConfigurations
+): GenericUnitMessenger {
+  const comm = createFacebookCommunicator(httpCommunicator, configurations);
+  return createGenericUnitMessenger(comm);
 }

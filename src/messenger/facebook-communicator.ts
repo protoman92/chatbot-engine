@@ -1,15 +1,16 @@
 import { HTTPCommunicator } from './http-communicator';
 import { ServiceCommunicator } from './service-communicator';
+import { FacebookConfigurations } from './type';
 
 /**
  * Create a service communicator for Facebook.
  * @param communicator A HTTP communicator instance.
- * @param configVars Config variables.
+ * @param configurations Config variables.
  * @return A service communicator instance.
  */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  configVars: Readonly<{ facebookPageToken: string }>
+  configurations: FacebookConfigurations
 ): ServiceCommunicator {
   async function communicate<T>({
     method,
@@ -25,7 +26,7 @@ export function createFacebookCommunicator(
       body,
       url: `https://graph.facebook.com/v2.6/${additionalPaths.join(
         '/'
-      )}?access_token=${configVars.facebookPageToken}`,
+      )}?access_token=${configurations.facebookPageToken}`,
       headers: { 'Content-Type': 'application/json' }
     });
   }

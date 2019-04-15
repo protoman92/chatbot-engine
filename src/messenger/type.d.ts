@@ -7,3 +7,6 @@ export type FacebookUser = Readonly<{
   profile_pic?: string;
   id: string;
 }>;
+
+/** Represents Facebook configurations. */
+export type FacebookConfigurations = Readonly<{ facebookPageToken: string }>;
