@@ -1,55 +1,16 @@
-import { DeepReadonly } from 'ts-essentials';
-import {
-  GenericRequest,
-  GenericUnitMessenger,
-  createGenericUnitMessenger,
-  GenericMessenger,
-  createGenericMessenger
-} from './generic-messenger';
-import { isType, formatFacebookError } from './utils';
-import { HTTPCommunicator } from './http-communicator';
 import { createFacebookCommunicator } from './facebook-communicator';
-import { FacebookConfigurations } from './type';
-
-type BaseFacebookRequest = Readonly<{
-  sender: Readonly<{ id: string }>;
-  recipient: Readonly<{ id: string }>;
-  timestamp: number;
-}>;
-
-namespace FacebookRequest {
-  export type Postback = BaseFacebookRequest &
-    DeepReadonly<{ postback: { payload: string; title: string } }>;
-
-  export type Message = BaseFacebookRequest &
-    DeepReadonly<{ message: { mid: string; seq: number } }>;
-
-  export namespace Message {
-    export type Text = Message & DeepReadonly<{ message: { text: string } }>;
-
-    export type Attachment = Message &
-      DeepReadonly<{ attachments: { type: 'image'; payload: unknown }[] }>;
-
-    export namespace Attachment {
-      export type Image = Attachment &
-        DeepReadonly<{
-          attachments: { type: 'image'; payload: { url: string } }[];
-        }>;
-    }
-  }
-}
-
-/** Represents possible combinations of Facebook requests. */
-export type FacebookRequest =
-  | FacebookRequest.Message.Text
-  | FacebookRequest.Message.Attachment.Image
-  | FacebookRequest.Postback;
-
-/** Represents a webhook request. */
-export type FacebookWebhookRequest = Readonly<{
-  object: 'page';
-  entry: Readonly<{ messaging: FacebookRequest[] }>[] | undefined | null;
-}>;
+import {
+  FacebookConfigurations,
+  FacebookRequest,
+  FacebookWebhookRequest
+} from './facebook-type';
+import {
+  createGenericMessenger,
+  createGenericUnitMessenger
+} from './generic-messenger';
+import { HTTPCommunicator } from './http-communicator';
+import { GenericMessenger, GenericRequest, GenericUnitMessenger } from './type';
+import { formatFacebookError, isType } from './utils';
 
 /**
  * Map platform request to generic request for generic processing.

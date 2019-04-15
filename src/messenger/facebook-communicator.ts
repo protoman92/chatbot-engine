@@ -1,6 +1,6 @@
+import { FacebookConfigurations } from './facebook-type';
 import { HTTPCommunicator } from './http-communicator';
 import { ServiceCommunicator } from './service-communicator';
-import { FacebookConfigurations } from './type';
 
 /**
  * Create a service communicator for Facebook.
