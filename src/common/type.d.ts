@@ -1,1 +1,2 @@
-export type Context = Readonly<{ [K: string]: unknown }>;
+export type KV<V> = Readonly<{ [K: string]: V }>;
+export type Context = KV<unknown>;

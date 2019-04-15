@@ -10,7 +10,7 @@ import {
 } from './generic-messenger';
 import { HTTPCommunicator } from './http-communicator';
 import { GenericMessenger, GenericRequest, GenericUnitMessenger } from './type';
-import { formatFacebookError, isType } from './utils';
+import { formatFacebookError, isType } from '../common/utils';
 
 /**
  * Map platform request to generic request for generic processing.
