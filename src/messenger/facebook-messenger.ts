@@ -42,14 +42,6 @@ export type FacebookWebhookRequest = Readonly<{
   entry: Readonly<{ messaging: FacebookRequest[] }>[] | undefined | null;
 }>;
 
-/** Represents a Facebook user. */
-export type FacebookUser = Readonly<{
-  first_name?: string;
-  last_name?: string;
-  profile_pic?: string;
-  id: string;
-}>;
-
 /**
  * Map platform request to generic request for generic processing.
  * @param webhook Facebook webhook data.
