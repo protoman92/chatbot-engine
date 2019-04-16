@@ -5,7 +5,7 @@ import { LeafSelector } from './leaf-selector';
 
 /** Represents input for a pipeline. */
 export interface LeafPipelineInput<Ctx extends Context> {
-  readonly rootBranch: Branch<Ctx>;
+  readonly parentBranch: Branch<Ctx>;
   readonly prefixLeafPaths: string[];
   readonly leaf: Leaf<Ctx>;
   readonly leafID: string;
