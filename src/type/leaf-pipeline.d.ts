@@ -1,21 +1,23 @@
-import { Context } from './common';
 import { Branch } from './branch';
+import { Context } from './common';
 import { Leaf } from './leaf';
 import { LeafSelector } from './leaf-selector';
 
-/** Represents input for a pipeline. */
-export interface LeafPipelineInput<Ctx extends Context> {
-  readonly parentBranch: Branch<Ctx>;
-  readonly prefixLeafPaths: string[];
-  readonly leaf: Leaf<Ctx>;
-  readonly leafID: string;
-}
+declare namespace LeafPipeline {
+  /** Represents input for a pipeline. */
+  export interface Input<Ctx extends Context> {
+    readonly parentBranch: Branch<Ctx>;
+    readonly prefixLeafPaths: string[];
+    readonly leaf: Leaf<Ctx>;
+    readonly leafID: string;
+  }
 
-/** Represents parameteters common to all pipelines. */
-export interface AdditionalLeafPipelineParams<Ctx extends Context> {
-  readonly inputText?: string;
-  readonly inputImageURL: string;
-  readonly oldContext: Ctx;
+  /** Represents parameteters common to all pipelines. */
+  export interface AdditionalParams<Ctx extends Context> {
+    readonly inputText?: string;
+    readonly inputImageURL: string;
+    readonly oldContext: Ctx;
+  }
 }
 
 /**
@@ -32,7 +34,7 @@ export interface LeafPipeline<Ctx extends Context> {
    * @return A Promise of leaf result.
    */
   processLeaf(
-    pipelineInput: LeafPipelineInput<Ctx>,
-    additionalParams: AdditionalLeafPipelineParams<Ctx>
+    pipelineInput: LeafPipeline.Input<Ctx>,
+    additionalParams: LeafPipeline.AdditionalParams<Ctx>
   ): PromiseLike<LeafSelector.Result<Ctx> | null>;
 }

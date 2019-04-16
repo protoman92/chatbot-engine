@@ -2,10 +2,7 @@ import { deepClone, toArray } from '../common/utils';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
 import { Leaf, LeafInput } from '../type/leaf';
-import {
-  AdditionalLeafPipelineParams,
-  LeafPipelineInput
-} from '../type/leaf-pipeline';
+import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 
 /**
@@ -17,12 +14,12 @@ import { LeafSelector } from '../type/leaf-selector';
  */
 export function enumerateLeafPipelineInputs<Ctx extends Context>(
   branches: KV<Branch<Ctx>>
-): LeafPipelineInput<Ctx>[] {
+): LeafPipeline.Input<Ctx>[] {
   function enumerate(
     allBranches: KV<Branch<Ctx>>,
     prefixPaths?: string[]
-  ): LeafPipelineInput<Ctx>[] {
-    let inputs: LeafPipelineInput<Ctx>[] = [];
+  ): LeafPipeline.Input<Ctx>[] {
+    let inputs: LeafPipeline.Input<Ctx>[] = [];
     const branchEntries = Object.entries(allBranches);
 
     for (const [branchID, parentBranch] of branchEntries) {
@@ -71,8 +68,8 @@ export async function createLeafPipeline<Ctx extends Context>() {
     },
 
     processLeaf: async (
-      { prefixLeafPaths, leaf, leafID }: LeafPipelineInput<Ctx>,
-      { oldContext: originalCtx, inputText }: AdditionalLeafPipelineParams<Ctx>
+      { prefixLeafPaths, leaf, leafID }: LeafPipeline.Input<Ctx>,
+      { oldContext: originalCtx, inputText }: LeafPipeline.AdditionalParams<Ctx>
     ): Promise<LeafSelector.Result<Ctx> | null> => {
       const oldContext = deepClone(originalCtx);
       if (!(await leaf.checkContextConditions(oldContext))) return null;
