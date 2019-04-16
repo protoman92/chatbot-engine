@@ -1,3 +1,4 @@
+import { Omit } from 'ts-essentials';
 import { Context } from './common';
 import { QuickReply } from './quick-reply';
 
@@ -54,7 +55,7 @@ export interface Leaf<Ctx extends Context> {
    * @return Contents that will be sent to the user.
    */
   produceOutgoingContent(
-    leafInput: LeafInput<Ctx>
+    leafInput: Omit<LeafInput<Ctx>, 'newContext'>
   ): PromiseLike<
     Readonly<{ newContext: Ctx; outgoingContents: OutgoingContent[] }>
   >;

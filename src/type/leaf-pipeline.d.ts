@@ -11,6 +11,13 @@ export interface LeafPipelineInput<Ctx extends Context> {
   readonly leafID: string;
 }
 
+/** Represents parameteters common to all pipelines. */
+export interface AdditionalLeafPipelineParams<Ctx extends Context> {
+  readonly inputText?: string;
+  readonly inputImageURL: string;
+  readonly oldContext: Ctx;
+}
+
 /**
  * Represents a pipeline that processes a leaf to decide whether it has the
  * correct content to deliver to user. A pipeline may do many things, incl.
@@ -26,10 +33,6 @@ export interface LeafPipeline<Ctx extends Context> {
    */
   processLeaf(
     pipelineInput: LeafPipelineInput<Ctx>,
-    additionalParams: Readonly<{
-      inputText?: string;
-      inputImageURL: string;
-      oldContext: Ctx;
-    }>
+    additionalParams: AdditionalLeafPipelineParams<Ctx>
   ): PromiseLike<LeafSelector.Result<Ctx> | null>;
 }

@@ -1,6 +1,12 @@
-import { Context, KV } from '../type/common';
+import { deepClone, toArray } from '../common/utils';
 import { Branch } from '../type/branch';
-import { LeafPipelineInput } from '../type/leaf-pipeline';
+import { Context, KV } from '../type/common';
+import { Leaf, LeafInput } from '../type/leaf';
+import {
+  AdditionalLeafPipelineParams,
+  LeafPipelineInput
+} from '../type/leaf-pipeline';
+import { LeafSelector } from '../type/leaf-selector';
 
 /**
  * Enumerate a key-value branch object to produce the entire list of pipeline
@@ -42,4 +48,60 @@ export function enumerateLeafPipelineInputs<Ctx extends Context>(
   }
 
   return enumerate(branches);
+}
+
+/**
+ * Create a leaf pipeline.
+ * @return A leaf pipeline instance.
+ */
+export async function createLeafPipeline<Ctx extends Context>() {
+  const pipeline = {
+    extractTextMatches: async (leaf: Leaf<Ctx>, inputText?: string) => {
+      const textMatches = !!inputText
+        ? await leaf.checkTextConditions(inputText)
+        : ['This should be ignored'];
+
+      if (typeof textMatches === 'boolean') {
+        return { allTextMatches: [] };
+      }
+
+      const allTextMatches = toArray(textMatches);
+      const lastTextMatch = allTextMatches[allTextMatches.length - 1];
+      return { allTextMatches, lastTextMatch };
+    },
+
+    processLeaf: async (
+      { prefixLeafPaths, leaf, leafID }: LeafPipelineInput<Ctx>,
+      { oldContext: originalCtx, inputText }: AdditionalLeafPipelineParams<Ctx>
+    ): Promise<LeafSelector.Result<Ctx> | null> => {
+      const oldContext = deepClone(originalCtx);
+      if (!(await leaf.checkContextConditions(oldContext))) return null;
+
+      const {
+        allTextMatches,
+        lastTextMatch
+      } = await pipeline.extractTextMatches(leaf, inputText);
+
+      if (!lastTextMatch) return null;
+      const placeboNewContext = deepClone(oldContext);
+
+      const leafInput: LeafInput<Ctx> = {
+        oldContext,
+        inputText,
+        allTextMatches,
+        lastTextMatch,
+        newContext: placeboNewContext
+      };
+
+      const {
+        newContext,
+        outgoingContents
+      } = await leaf.produceOutgoingContent(leafInput);
+
+      if (!outgoingContents.length) return null;
+      return { leafID, outgoingContents, newContext };
+    }
+  };
+
+  return pipeline;
 }

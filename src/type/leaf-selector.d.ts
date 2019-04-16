@@ -4,7 +4,7 @@ import { OutgoingContent } from './leaf';
 declare namespace LeafSelector {
   export interface Result<Ctx extends Context> {
     readonly leafID: string;
-    readonly outgoingContent: OutgoingContent[];
+    readonly outgoingContents: OutgoingContent[];
     readonly newContext: Ctx;
   }
 }
