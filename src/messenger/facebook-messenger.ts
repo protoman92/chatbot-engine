@@ -9,7 +9,11 @@ import {
   createGenericUnitMessenger
 } from './generic-messenger';
 import { HTTPCommunicator } from './http-communicator';
-import { GenericMessenger, GenericRequest, GenericUnitMessenger } from './type';
+import {
+  GenericMessenger,
+  GenericRequest,
+  GenericUnitMessenger
+} from './generic-type';
 import { formatFacebookError, isType } from '../common/utils';
 
 /**

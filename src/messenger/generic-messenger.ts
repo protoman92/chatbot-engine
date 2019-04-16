@@ -8,7 +8,7 @@ import {
   PlatformResponse,
   GenericUnitMessenger,
   GenericMessenger
-} from './type';
+} from './generic-type';
 
 /**
  * Create a generic unit messenger.
