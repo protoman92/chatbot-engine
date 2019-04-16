@@ -1,28 +1,28 @@
-import { Context } from '../common/type';
+import { Context } from './common';
 
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
 
 /** A platform-specific response. */
-export type PlatformResponse = Readonly<{
-  senderID: string;
-  newContext: Context;
-  data: unknown[];
-}>;
+export interface PlatformResponse {
+  readonly senderID: string;
+  readonly newContext: Context;
+  readonly data: unknown[];
+}
 
 /** A generic incoming request. */
-export type GenericRequest = Readonly<{
-  senderID: string;
-  oldContext: Context;
-  data: Readonly<{ text?: string; imageURL?: string }>[];
-}>;
+export interface GenericRequest {
+  readonly senderID: string;
+  readonly oldContext: Context;
+  readonly data: Readonly<{ text?: string; imageURL?: string }>[];
+}
 
 /** A generic outgoing response. */
-export type GenericResponse = Readonly<{
-  senderID: string;
-  newContext: Context;
-  data: unknown[];
-}>;
+export interface GenericResponse {
+  readonly senderID: string;
+  readonly newContext: Context;
+  readonly data: unknown[];
+}
 
 /**
  * Represents a messenger that can process incoming request (including parsing,
@@ -33,7 +33,7 @@ export type GenericResponse = Readonly<{
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface GenericUnitMessenger {
+export interface UnitMessenger {
   /**
    * Map an incoming generic request to an outgoing generic response.
    * @param req A request object.
@@ -54,6 +54,6 @@ export interface GenericUnitMessenger {
  * handling data to sending response. Note that each generic messenger should
  * have a generic unit messenger that handles requests one-by-one.
  */
-export interface GenericMessenger {
+export interface Messenger {
   processPlatformRequest(req: PlatformRequest): PromiseLike<unknown>;
 }

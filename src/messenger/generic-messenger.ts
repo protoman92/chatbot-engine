@@ -1,14 +1,14 @@
 import { Omit } from 'ts-essentials';
-import { Context } from '../common/type';
-import { ServiceCommunicator } from './service-communicator';
+import { Context } from '../type/common';
+import { ServiceCommunicator } from '../type/communicator';
 import {
   GenericRequest,
   GenericResponse,
+  Messenger,
   PlatformRequest,
   PlatformResponse,
-  GenericUnitMessenger,
-  GenericMessenger
-} from './generic-type';
+  UnitMessenger
+} from '../type/messenger';
 
 /**
  * Create a generic unit messenger.
@@ -17,7 +17,7 @@ import {
  */
 export function createGenericUnitMessenger(
   communicator: ServiceCommunicator
-): GenericUnitMessenger {
+): UnitMessenger {
   async function processText(oldContext: Context, text: string) {
     throw new Error('Not implemented');
   }
@@ -36,7 +36,7 @@ export function createGenericUnitMessenger(
     throw Error(`Cannot process data ${JSON.stringify(datum)}`);
   }
 
-  const messenger: GenericUnitMessenger = {
+  const messenger: UnitMessenger = {
     processGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
         data.map(async datum => processDatum(oldContext, datum))
@@ -71,10 +71,10 @@ export function createGenericMessenger({
   requestMapper,
   responseMapper
 }: Readonly<{
-  unitMessenger: GenericUnitMessenger;
+  unitMessenger: UnitMessenger;
   requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest[]>;
   responseMapper: (res: GenericResponse) => PromiseLike<PlatformResponse>;
-}>): GenericMessenger {
+}>): Messenger {
   return {
     processPlatformRequest: async platformRequest => {
       const requests = await requestMapper(platformRequest);

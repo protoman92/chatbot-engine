@@ -1,17 +1,19 @@
 import { DeepReadonly } from 'ts-essentials';
 
-type BaseFacebookRequest = Readonly<{
-  sender: Readonly<{ id: string }>;
-  recipient: Readonly<{ id: string }>;
-  timestamp: number;
-}>;
+interface BaseFacebookRequest {
+  readonly sender: Readonly<{ id: string }>;
+  readonly recipient: Readonly<{ id: string }>;
+  readonly timestamp: number;
+}
 
 declare namespace FacebookRequest {
-  export type Postback = BaseFacebookRequest &
-    DeepReadonly<{ postback: { payload: string; title: string } }>;
+  export interface Postback extends BaseFacebookRequest {
+    readonly postback: Readonly<{ payload: string; title: string }>;
+  }
 
-  export type Message = BaseFacebookRequest &
-    DeepReadonly<{ message: { mid: string; seq: number } }>;
+  export interface Message extends BaseFacebookRequest {
+    readonly message: Readonly<{ mid: string; seq: number }>;
+  }
 
   export namespace Message {
     export type Text = Message & DeepReadonly<{ message: { text: string } }>;
@@ -35,18 +37,23 @@ export type FacebookRequest =
   | FacebookRequest.Postback;
 
 /** Represents a webhook request. */
-export type FacebookWebhookRequest = Readonly<{
-  object: 'page';
-  entry: Readonly<{ messaging: FacebookRequest[] }>[] | undefined | null;
-}>;
+export interface FacebookWebhookRequest {
+  readonly object: 'page';
+  readonly entry:
+    | Readonly<{ messaging: FacebookRequest[] }>[]
+    | undefined
+    | null;
+}
 
 /** Represents a Facebook user. */
-export type FacebookUser = Readonly<{
-  first_name?: string;
-  last_name?: string;
-  profile_pic?: string;
-  id: string;
-}>;
+export interface FacebookUser {
+  readonly first_name?: string;
+  readonly last_name?: string;
+  readonly profile_pic?: string;
+  readonly id: string;
+}
 
 /** Represents Facebook configurations. */
-export type FacebookConfigurations = Readonly<{ facebookPageToken: string }>;
+export interface FacebookConfigs {
+  readonly facebookPageToken: string;
+}

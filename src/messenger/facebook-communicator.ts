@@ -1,6 +1,5 @@
-import { FacebookConfigurations } from './facebook-type';
-import { HTTPCommunicator } from './http-communicator';
-import { ServiceCommunicator } from './service-communicator';
+import { HTTPCommunicator, ServiceCommunicator } from '../type/communicator';
+import { FacebookConfigs } from '../type/facebook';
 
 /**
  * Create a service communicator for Facebook.
@@ -10,7 +9,7 @@ import { ServiceCommunicator } from './service-communicator';
  */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  configurations: FacebookConfigurations
+  configurations: FacebookConfigs
 ): ServiceCommunicator {
   async function communicate<T>({
     method,

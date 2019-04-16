@@ -1,20 +1,16 @@
 import { createFacebookCommunicator } from './facebook-communicator';
 import {
-  FacebookConfigurations,
+  FacebookConfigs,
   FacebookRequest,
   FacebookWebhookRequest
-} from './facebook-type';
+} from '../type/facebook';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
-import { HTTPCommunicator } from './http-communicator';
-import {
-  GenericMessenger,
-  GenericRequest,
-  GenericUnitMessenger
-} from './generic-type';
+import { Messenger, GenericRequest, UnitMessenger } from '../type/messenger';
 import { formatFacebookError, isType } from '../common/utils';
+import { HTTPCommunicator } from '../type/communicator';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -117,8 +113,8 @@ export async function mapWebhook(webhook: FacebookWebhookRequest) {
  */
 export function createUnitFacebookMessenger(
   httpCommunicator: HTTPCommunicator,
-  configurations: FacebookConfigurations
-): GenericUnitMessenger {
+  configurations: FacebookConfigs
+): UnitMessenger {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
   return createGenericUnitMessenger(comm);
 }
@@ -129,8 +125,8 @@ export function createUnitFacebookMessenger(
  * @return A generic messenger.
  */
 export function createFacebookMessenger(
-  unitMessenger: GenericUnitMessenger
-): GenericMessenger {
+  unitMessenger: UnitMessenger
+): Messenger {
   return createGenericMessenger({
     unitMessenger,
     requestMapper: req => {

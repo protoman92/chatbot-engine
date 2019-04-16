@@ -1,25 +1,21 @@
-import { KV, Context } from '../common/type';
-import { OutgoingContent } from './content-type';
+import { Context } from './common';
+import { QuickReply } from './quick-reply';
+
+/** Represents content that will go out to the user. */
+interface OutgoingContent {
+  readonly quickReplies: QuickReply[];
+  readonly response: Response;
+}
 
 /** Input for creation of a leaf. */
-export type LeafInput<Ctx extends Context> = Readonly<{
-  oldContext: Ctx;
-  newContext: Ctx;
-  inputText?: string;
-  inputImageURL?: string;
-  allTextMatches: string[];
-  lastTextMatch: string;
-}>;
-
-/** Checks conditions for a text. We usually use RegExp here. */
-export type TextConditionChecker = (
-  text: string
-) => PromiseLike<(string | string[] | boolean) | undefined | null>;
-
-/** Checks conditions for a context object. */
-export type ContextConditionChecker = (
-  oldContext: Context
-) => PromiseLike<boolean>;
+interface LeafInput<Ctx extends Context> {
+  readonly oldContext: Ctx;
+  readonly newContext: Ctx;
+  readonly inputText?: string;
+  readonly inputImageURL?: string;
+  readonly allTextMatches: string[];
+  readonly lastTextMatch: string;
+}
 
 /**
  * Represents a sequence of messenges that have some commonalities among each
@@ -42,9 +38,7 @@ export interface Leaf<Ctx extends Context> {
    * @param text A string value.
    * @return A Promise of text-checking results.
    */
-  checkTextConditions(
-    text: string
-  ): PromiseLike<(string | string[] | boolean) | undefined | null>;
+  checkTextConditions(text: string): PromiseLike<string | string[] | boolean>;
 
   /**
    * Check context conditions to see if this leaf can be navigated to.
@@ -74,7 +68,7 @@ export interface Leaf<Ctx extends Context> {
    * @param newContext The new context object.
    * @return A Promise of next leaf paths.
    */
-  goToNextLeaf?(newContext: Ctx): PromiseLike<string[]>;
+  isIntermediate?(newContext: Ctx): PromiseLike<string[]>;
 
   /**
    * Check if this leaf marks the end of a branch. We might do some cleanup
@@ -84,15 +78,3 @@ export interface Leaf<Ctx extends Context> {
    */
   isEndOfBranch?(newContext: Ctx): PromiseLike<boolean>;
 }
-
-/**
- * A branch contains zero or more leaves, and zero of more branches. A branch
- * may follow this structure:
- *
- * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
- */
-export type Branch<Ctx, Leaves = KV<Leaf<Ctx>>> = Readonly<{
-  contextKeys?: (keyof Ctx)[];
-  subBranches?: KV<Branch<Ctx, KV<Leaf<Ctx>>>>;
-  leaves?: Leaves;
-}>;

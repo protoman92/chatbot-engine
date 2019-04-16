@@ -1,3 +1,15 @@
+/** Handle HTTP communication. */
+export interface HTTPCommunicator {
+  communicate<T>(
+    params: Readonly<{
+      url: string;
+      method: 'GET' | 'POST';
+      body?: unknown;
+      headers: Readonly<{ [K: string]: unknown }>;
+    }>
+  ): PromiseLike<T>;
+}
+
 /**
  * Represents an object that handles the communicator to/from the relevant
  * service. For example, a Facebook service communicator should be able to
