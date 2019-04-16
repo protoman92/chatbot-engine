@@ -17,7 +17,7 @@ import { HTTPCommunicator } from '../type/communicator';
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
-export async function mapWebhook(webhook: FacebookWebhookRequest) {
+export function mapWebhook(webhook: FacebookWebhookRequest) {
   const { object, entry } = webhook;
 
   /**
@@ -129,7 +129,7 @@ export function createFacebookMessenger(
 ): Messenger {
   return createGenericMessenger({
     unitMessenger,
-    requestMapper: req => {
+    requestMapper: async req => {
       if (isType<FacebookWebhookRequest>(req, 'object', 'entry')) {
         return mapWebhook(req);
       }

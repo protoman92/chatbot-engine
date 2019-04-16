@@ -51,7 +51,7 @@ export function enumerateLeafPipelineInputs<Ctx extends Context>(
  * Create a leaf pipeline.
  * @return A leaf pipeline instance.
  */
-export async function createLeafPipeline<Ctx extends Context>() {
+export function createLeafPipeline<Ctx extends Context>() {
   const pipeline = {
     extractTextMatches: async (leaf: Leaf<Ctx>, inputText?: string) => {
       const textMatches = !!inputText

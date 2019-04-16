@@ -39,7 +39,7 @@ export function createGenericUnitMessenger(
   const messenger: UnitMessenger = {
     processGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
-        data.map(async datum => processDatum(oldContext, datum))
+        data.map(datum => processDatum(oldContext, datum))
       );
 
       return {
@@ -50,10 +50,8 @@ export function createGenericUnitMessenger(
         }))
       };
     },
-    sendPlatformResponse: async ({ data }) => {
-      return Promise.all(
-        data.map(async datum => communicator.sendResponse(datum))
-      );
+    sendPlatformResponse: ({ data }) => {
+      return Promise.all(data.map(datum => communicator.sendResponse(datum)));
     }
   };
 
@@ -80,15 +78,15 @@ export function createGenericMessenger({
       const requests = await requestMapper(platformRequest);
 
       const responses = await Promise.all(
-        requests.map(async req => messenger.processGenericRequest(req))
+        requests.map(req => messenger.processGenericRequest(req))
       );
 
       const platformResponses = await Promise.all(
-        responses.map(async res => responseMapper(res))
+        responses.map(res => responseMapper(res))
       );
 
       return Promise.all(
-        platformResponses.map(async res => messenger.sendPlatformResponse(res))
+        platformResponses.map(res => messenger.sendPlatformResponse(res))
       );
     }
   };

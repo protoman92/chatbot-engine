@@ -11,7 +11,7 @@ export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
   configurations: FacebookConfigs
 ): ServiceCommunicator {
-  async function communicate<T>({
+  function communicate<T>({
     method,
     additionalPaths = [],
     body
@@ -19,7 +19,7 @@ export function createFacebookCommunicator(
     method: 'GET' | 'POST';
     additionalPaths?: string[];
     body?: unknown;
-  }>): Promise<T> {
+  }>): PromiseLike<T> {
     return communicator.communicate<T>({
       method,
       body,
