@@ -1,6 +1,7 @@
 import { Omit } from 'ts-essentials';
 import { Context } from './common';
 import { QuickReply } from './quick-reply';
+import { Response } from './response';
 
 /** Represents content that will go out to the user. */
 interface OutgoingContent {

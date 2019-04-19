@@ -1,4 +1,5 @@
 import { Context } from './common';
+import { LeafSelector } from './leaf-selector';
 
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
@@ -10,7 +11,7 @@ export type PlatformRequest = unknown;
 export interface PlatformResponse<C extends Context> {
   readonly senderID: string;
   readonly newContext: C;
-  readonly data: unknown[];
+  readonly outgoingData: unknown[];
 }
 
 /**
@@ -30,7 +31,7 @@ export interface GenericRequest<C extends Context> {
 export interface GenericResponse<C extends Context> {
   readonly senderID: string;
   readonly newContext: C;
-  readonly data: unknown[];
+  readonly outgoingContents: LeafSelector.Result<C>['outgoingContents'];
 }
 
 /**

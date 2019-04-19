@@ -6,12 +6,20 @@ import {
   FacebookRequest,
   FacebookWebhookRequest
 } from '../type/facebook';
-import { GenericRequest, Messenger, UnitMessenger } from '../type/messenger';
+import {
+  GenericRequest,
+  Messenger,
+  UnitMessenger,
+  GenericResponse,
+  PlatformResponse
+} from '../type/messenger';
 import { createFacebookCommunicator } from './facebook-communicator';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
+import { Action, Response } from '../type/response';
+import { LeafSelector } from '../type/leaf-selector';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -110,6 +118,159 @@ export function mapWebhook<C extends Context>(
 }
 
 /**
+ * Create a Facebook response from multiple generic responses.
+ * @template C The shape of the context used by the current chatbot.
+ * @param responses An Array of generic responses.
+ * @return A platform response instance.
+ */
+async function createFacebookResponse<C extends Context>(
+  responses: GenericResponse<C>[]
+): Promise<PlatformResponse<C>[]> {
+  const MAX_GENERIC_ELEMENT_COUNT = 11;
+  const MAX_LIST_ELEMENT_COUNT = 4;
+
+  function createSingleAction(action: Action) {
+    const { text: title, type } = action;
+    const buttonPayload = { title, type };
+
+    if (isType<Action.Postback>(action, 'payload')) {
+      const { payload } = action;
+      return { ...buttonPayload, payload };
+    }
+
+    throw Error(
+      formatFacebookError(`Unrecognized action ${JSON.stringify(action)}`)
+    );
+  }
+
+  function createCarouselResponse({ items }: Response.Carousel) {
+    if (!items.length) {
+      throw Error(formatFacebookError('Not enough carousel items'));
+    }
+
+    return {
+      attachment: {
+        type: 'template',
+        payload: {
+          elements: items
+            .slice(0, MAX_GENERIC_ELEMENT_COUNT)
+            .map(
+              ({
+                title = '',
+                description: subtitle,
+                // tslint:disable-next-line:variable-name
+                media_url: image_url,
+                actions: buttons = []
+              }) => ({
+                title,
+                subtitle,
+                image_url,
+                buttons: buttons.length
+                  ? buttons.map(action => createSingleAction(action))
+                  : undefined
+              })
+            ),
+          template_type: 'generic'
+        }
+      }
+    };
+  }
+
+  function createListResponse(response: Response.List) {
+    const { items, actions: listButtons = [] } = response;
+
+    /**
+     * If there is only 1 element, Facebook throws an error, so we switch back
+     * to carousel if possible.
+     */
+    if (items.length <= 1) {
+      return createCarouselResponse({ ...response, type: 'carousel' });
+    }
+
+    return {
+      attachment: {
+        type: 'template',
+        payload: {
+          elements: items
+            .slice(0, MAX_LIST_ELEMENT_COUNT)
+            .map(
+              ({
+                title = '',
+                description: subtitle,
+                actions: itemButtons = []
+              }) => ({
+                title,
+                subtitle,
+                buttons: itemButtons.length
+                  ? itemButtons.map(action => createSingleAction(action))
+                  : undefined
+              })
+            ),
+          template_type: 'list',
+          top_element_style: 'compact',
+          buttons: listButtons.length ? listButtons : undefined
+        }
+      }
+    };
+  }
+
+  function createResponse(response: Response) {
+    if (isType<Response.Text>(response, 'text')) {
+      return { text: response.text };
+    }
+
+    if (
+      isType<Response.Carousel>(response, 'items', 'type') &&
+      response.type === 'carousel'
+    ) {
+      return createCarouselResponse(response);
+    }
+
+    if (
+      isType<Response.List>(response, 'items', 'type') &&
+      response.type === 'list'
+    ) {
+      return createListResponse(response);
+    }
+
+    throw Error(`FB: Unable to parse response ${JSON.stringify(response)}`);
+  }
+
+  function createPlatformResponse(
+    {
+      response,
+      quickReplies = []
+    }: LeafSelector.Result<C>['outgoingContents'][0],
+    senderID: string
+  ) {
+    const facebookQuickReplies = quickReplies.map(({ text: title }) => ({
+      title,
+      content_type: 'text',
+      payload: title
+    }));
+
+    return {
+      messaging_type: 'RESPONSE',
+      recipient: { id: senderID },
+      message: {
+        ...createResponse(response),
+        quick_replies: facebookQuickReplies.length
+          ? facebookQuickReplies
+          : undefined
+      }
+    };
+  }
+
+  return responses.map(({ senderID, newContext, outgoingContents }) => ({
+    senderID,
+    newContext,
+    outgoingData: outgoingContents.map(content =>
+      createPlatformResponse(content, senderID)
+    )
+  }));
+}
+
+/**
  * Create a unit Facebook messenger.
  * @template C The shape of the context used by the current chatbot.
  * @param httpCommunicator A HTTP communicator instance.
@@ -144,10 +305,6 @@ export function createFacebookMessenger<C extends Context>(
         formatFacebookError(`Invalid webhook: ${JSON.stringify(req)}`)
       );
     },
-    responseMapper: async ({ senderID, newContext, data }) => ({
-      senderID,
-      newContext,
-      data
-    })
+    responseMapper: response => createFacebookResponse(response)
   });
 }

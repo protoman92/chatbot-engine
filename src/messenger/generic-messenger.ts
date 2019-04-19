@@ -47,11 +47,11 @@ export function createGenericUnitMessenger<C extends Context>(
         senderID,
         ...outgoingData.reduce((acc, items) => ({
           newContext: Object.assign(acc.newContext, items.newContext),
-          data: [...acc.data, ...items.data]
+          outgoingContents: [...acc.outgoingContents, ...items.outgoingContents]
         }))
       };
     },
-    sendPlatformResponse: ({ data }) => {
+    sendPlatformResponse: ({ outgoingData: data }) => {
       return Promise.all(data.map(datum => communicator.sendResponse(datum)));
     }
   };
@@ -73,7 +73,9 @@ export function createGenericMessenger<C extends Context>({
 }: Readonly<{
   unitMessenger: UnitMessenger<C>;
   requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest<C>[]>;
-  responseMapper: (res: GenericResponse<C>) => PromiseLike<PlatformResponse<C>>;
+  responseMapper: (
+    res: GenericResponse<C>[]
+  ) => PromiseLike<PlatformResponse<C>[]>;
 }>): Messenger {
   return {
     processPlatformRequest: async platformRequest => {
@@ -83,9 +85,7 @@ export function createGenericMessenger<C extends Context>({
         requests.map(req => messenger.mapGenericRequest(req))
       );
 
-      const platformResponses = await Promise.all(
-        responses.map(res => responseMapper(res))
-      );
+      const platformResponses = await responseMapper(responses);
 
       return Promise.all(
         platformResponses.map(res => messenger.sendPlatformResponse(res))
