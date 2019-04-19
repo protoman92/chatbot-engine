@@ -30,7 +30,7 @@ import {
  */
 export function mapWebhook<C extends Context>(
   webhook: FacebookWebhookRequest
-): GenericRequest<C>[] {
+): readonly GenericRequest<C>[] {
   const { object, entry } = webhook;
 
   /**
@@ -38,7 +38,7 @@ export function mapWebhook<C extends Context>(
    * @param reqs A request Array.
    * @return A map of requests.
    */
-  function groupRequests(reqs: FacebookRequest[]) {
+  function groupRequests(reqs: readonly FacebookRequest[]) {
     const requestMap: { [K: string]: FacebookRequest[] } = {};
 
     reqs.forEach(args => {
@@ -125,8 +125,8 @@ export function mapWebhook<C extends Context>(
  * @return A platform response instance.
  */
 async function createFacebookResponse<C extends Context>(
-  responses: GenericResponse<C>[]
-): Promise<PlatformResponse<C>[]> {
+  responses: readonly GenericResponse<C>[]
+): Promise<readonly PlatformResponse<C>[]> {
   const MAX_GENERIC_ELEMENT_COUNT = 11;
   const MAX_LIST_ELEMENT_COUNT = 4;
 

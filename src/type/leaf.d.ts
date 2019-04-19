@@ -5,7 +5,7 @@ import { Response } from './response';
 
 /** Represents content that will go out to the user. */
 interface OutgoingContent {
-  readonly quickReplies: QuickReply[];
+  readonly quickReplies: readonly QuickReply[];
   readonly response: Response;
 }
 
@@ -18,7 +18,7 @@ interface LeafContentInput<C extends Context> {
   readonly newContext: C;
   readonly inputText?: string;
   readonly inputImageURL?: string;
-  readonly allTextMatches: string[];
+  readonly allTextMatches: readonly string[];
   readonly lastTextMatch: string;
 }
 
@@ -44,7 +44,9 @@ export interface Leaf<C extends Context> {
    * @param text A string value.
    * @return A Promise of text-checking results.
    */
-  checkTextConditions(text: string): PromiseLike<string | string[] | boolean>;
+  checkTextConditions(
+    text: string
+  ): PromiseLike<string | readonly string[] | boolean>;
 
   /**
    * Check context conditions to see if this leaf can be navigated to.
@@ -62,7 +64,7 @@ export interface Leaf<C extends Context> {
   produceOutgoingContent(
     leafInput: Omit<LeafContentInput<C>, 'newContext'>
   ): PromiseLike<
-    Readonly<{ newContext: C; outgoingContents: OutgoingContent[] }>
+    Readonly<{ newContext: C; outgoingContents: readonly OutgoingContent[] }>
   >;
 
   /**
@@ -74,7 +76,7 @@ export interface Leaf<C extends Context> {
    * @param newContext The new context object.
    * @return A Promise of next leaf paths.
    */
-  isIntermediate?(newContext: C): PromiseLike<string[]>;
+  isIntermediate?(newContext: C): PromiseLike<readonly string[]>;
 
   /**
    * Check if this leaf marks the end of a branch. We might do some cleanup

@@ -40,7 +40,7 @@ export type FacebookRequest =
 export interface FacebookWebhookRequest {
   readonly object: 'page';
   readonly entry:
-    | Readonly<{ messaging: FacebookRequest[] }>[]
+    | Readonly<{ messaging: readonly FacebookRequest[] }>[]
     | undefined
     | null;
 }

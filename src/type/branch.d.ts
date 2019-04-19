@@ -9,7 +9,7 @@ import { Leaf } from './leaf';
  * @template C The shape of the context used by the current chatbot.
  */
 export interface Branch<C extends Context, Leaves = KV<Leaf<C>>> {
-  readonly contextKeys?: (keyof C)[];
+  readonly contextKeys?: readonly (keyof C)[];
   readonly subBranches?: KV<Branch<C, KV<Leaf<C>>>>;
   readonly leaves?: Leaves;
 }

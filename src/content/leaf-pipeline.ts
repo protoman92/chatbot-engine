@@ -10,7 +10,7 @@ import { LeafSelector } from '../type/leaf-selector';
  * @param pathComponents An Array of path components.
  * @return The full path.
  */
-export function joinPaths(...pathComponents: string[]) {
+export function joinPaths(...pathComponents: readonly string[]) {
   return pathComponents.join('.');
 }
 
@@ -24,11 +24,11 @@ export function joinPaths(...pathComponents: string[]) {
  */
 export function enumerateLeafPipelineInputs<C extends Context>(
   branches: KV<Branch<C>>
-): LeafPipeline.Input<C>[] {
+): readonly LeafPipeline.Input<C>[] {
   function enumerate(
     allBranches: KV<Branch<C>>,
-    prefixPaths?: string[]
-  ): LeafPipeline.Input<C>[] {
+    prefixPaths?: readonly string[]
+  ): readonly LeafPipeline.Input<C>[] {
     let inputs: LeafPipeline.Input<C>[] = [];
     const branchEntries = Object.entries(allBranches);
 

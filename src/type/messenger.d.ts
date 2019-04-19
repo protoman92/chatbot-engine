@@ -11,7 +11,7 @@ export type PlatformRequest = unknown;
 export interface PlatformResponse<C extends Context> {
   readonly senderID: string;
   readonly newContext: C;
-  readonly outgoingData: unknown[];
+  readonly outgoingData: readonly unknown[];
 }
 
 /**
@@ -21,7 +21,7 @@ export interface PlatformResponse<C extends Context> {
 export interface GenericRequest<C extends Context> {
   readonly senderID: string;
   readonly oldContext: C;
-  readonly data: Readonly<{ text?: string; imageURL?: string }>[];
+  readonly data: readonly Readonly<{ text?: string; imageURL?: string }>[];
 }
 
 /**

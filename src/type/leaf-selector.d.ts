@@ -8,7 +8,7 @@ declare namespace LeafSelector {
    */
   export interface Result<C extends Context> {
     readonly currentLeafID: string;
-    readonly outgoingContents: OutgoingContent[];
+    readonly outgoingContents: readonly OutgoingContent[];
     readonly newContext: C;
   }
 }

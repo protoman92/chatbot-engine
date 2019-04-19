@@ -27,11 +27,11 @@ declare namespace Response {
       title: string;
       description?: string;
       media_url?: string;
-      actions?: Action[];
+      actions?: readonly Action[];
     }>[];
 
     readonly type: 'carousel';
-    readonly actions?: Action[];
+    readonly actions?: readonly Action[];
   }
 
   export interface List {
@@ -39,11 +39,11 @@ declare namespace Response {
       title: string;
       description?: string;
       size?: 'large' | 'small';
-      actions?: Action[];
+      actions?: readonly Action[];
     }>[];
 
     readonly type: 'list';
-    readonly actions?: Action[];
+    readonly actions?: readonly Action[];
   }
 }
 

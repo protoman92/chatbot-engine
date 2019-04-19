@@ -78,10 +78,12 @@ export function createGenericMessenger<C extends Context>({
   responseMapper
 }: Readonly<{
   unitMessenger: UnitMessenger<C>;
-  requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest<C>[]>;
+  requestMapper: (
+    req: PlatformRequest
+  ) => PromiseLike<readonly GenericRequest<C>[]>;
   responseMapper: (
-    res: GenericResponse<C>[]
-  ) => PromiseLike<PlatformResponse<C>[]>;
+    res: readonly GenericResponse<C>[]
+  ) => PromiseLike<readonly PlatformResponse<C>[]>;
 }>): Messenger {
   return {
     processPlatformRequest: async platformRequest => {

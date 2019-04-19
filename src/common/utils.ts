@@ -10,7 +10,7 @@ import { ComposeFunc } from '../type/common';
  */
 export function isType<T, K extends keyof T = keyof T>(
   object: any,
-  ...keys: K[]
+  ...keys: readonly K[]
 ): object is T {
   if (!object) return false;
   return keys.every(key => object[key] !== undefined);
@@ -22,7 +22,7 @@ export function isType<T, K extends keyof T = keyof T>(
  * @param value The value in question.
  * @return An Array of values.
  */
-export function toArray<T>(value: T | T[]): T[] {
+export function toArray<T>(value: T | readonly T[]): readonly T[] {
   return value instanceof Array ? value : [value];
 }
 
@@ -40,11 +40,11 @@ export function deepClone<T>(object: T): T {
  * Compose an object to compose functions to create a new wrapped object.
  * @template T The type of object to compose.
  * @param original The original object.
- * @param funcs Array of compose functions.
+ * @param fs Array of compose functions.
  * @return The wrapped object.
  */
-export function compose<T>(original: T, ...funcs: ComposeFunc<T>[]): T {
-  const reversedFuncs = funcs.reverse();
+export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
+  const reversedFuncs = [...fs].reverse();
   let newComposed = original;
 
   for (const func of reversedFuncs) {

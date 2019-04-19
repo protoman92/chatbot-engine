@@ -10,7 +10,7 @@ declare namespace LeafPipeline {
    */
   export interface Input<C extends Context> {
     readonly parentBranch: Branch<C>;
-    readonly prefixLeafPaths: string[];
+    readonly prefixLeafPaths: readonly string[];
     readonly currentLeaf: Leaf<C>;
     readonly currentLeafID: string;
   }
