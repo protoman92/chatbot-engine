@@ -18,17 +18,18 @@ export function joinPaths(...pathComponents: string[]) {
  * Enumerate a key-value branch object to produce the entire list of pipeline
  * inputs.  Each pipeline input will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
+ * @template C The shape of the context used by the current chatbot.
  * @param branches A key-value object of branches.
  * @return An Array of pipeline inputs.
  */
-export function enumerateLeafPipelineInputs<Ctx extends Context>(
-  branches: KV<Branch<Ctx>>
-): LeafPipeline.Input<Ctx>[] {
+export function enumerateLeafPipelineInputs<C extends Context>(
+  branches: KV<Branch<C>>
+): LeafPipeline.Input<C>[] {
   function enumerate(
-    allBranches: KV<Branch<Ctx>>,
+    allBranches: KV<Branch<C>>,
     prefixPaths?: string[]
-  ): LeafPipeline.Input<Ctx>[] {
-    let inputs: LeafPipeline.Input<Ctx>[] = [];
+  ): LeafPipeline.Input<C>[] {
+    let inputs: LeafPipeline.Input<C>[] = [];
     const branchEntries = Object.entries(allBranches);
 
     for (const [branchID, parentBranch] of branchEntries) {
@@ -63,9 +64,10 @@ export function enumerateLeafPipelineInputs<Ctx extends Context>(
 
 /**
  * Create a leaf pipeline.
+ * @template C The shape of the context used by the current chatbot.
  * @return A leaf pipeline instance.
  */
-export function createLeafPipeline<Ctx extends Context>() {
+export function createLeafPipeline<C extends Context>() {
   const pipeline = {
     /**
      * When we start a new pipeline, we may want to modify the old context, e.g.
@@ -76,8 +78,8 @@ export function createLeafPipeline<Ctx extends Context>() {
      * @param oldContext The old context.
      */
     prepareIncomingContext: async (
-      { parentBranch, prefixLeafPaths, currentLeaf }: LeafPipeline.Input<Ctx>,
-      oldContext: Ctx
+      { parentBranch, prefixLeafPaths, currentLeaf }: LeafPipeline.Input<C>,
+      oldContext: C
     ) => {
       if (
         !!currentLeaf.isStartOfBranch &&
@@ -96,8 +98,8 @@ export function createLeafPipeline<Ctx extends Context>() {
      * activeBranch key.
      */
     prepareOutgoingContext: async (
-      { parentBranch: { contextKeys }, currentLeaf }: LeafPipeline.Input<Ctx>,
-      newContext: Ctx
+      { parentBranch: { contextKeys }, currentLeaf }: LeafPipeline.Input<C>,
+      newContext: C
     ) => {
       if (
         !!currentLeaf.isEndOfBranch &&
@@ -117,7 +119,7 @@ export function createLeafPipeline<Ctx extends Context>() {
      * @param inputText The input text.
      * @return The relevant text matches.
      */
-    extractTextMatches: async (currentLeaf: Leaf<Ctx>, inputText?: string) => {
+    extractTextMatches: async (currentLeaf: Leaf<C>, inputText?: string) => {
       const textMatches = !!inputText
         ? await currentLeaf.checkTextConditions(inputText)
         : ['This should be ignored'];
@@ -132,12 +134,12 @@ export function createLeafPipeline<Ctx extends Context>() {
     },
 
     processLeaf: async (
-      input: LeafPipeline.Input<Ctx>,
+      input: LeafPipeline.Input<C>,
       {
         oldContext: originalContext,
         inputText
-      }: LeafPipeline.AdditionalParams<Ctx>
-    ): Promise<LeafSelector.Result<Ctx> | null> => {
+      }: LeafPipeline.AdditionalParams<C>
+    ): Promise<LeafSelector.Result<C> | null> => {
       const { currentLeaf, currentLeafID } = input;
       let oldContext = deepClone(originalContext);
       oldContext = await pipeline.prepareIncomingContext(input, oldContext);
@@ -151,7 +153,7 @@ export function createLeafPipeline<Ctx extends Context>() {
       if (!lastTextMatch) return null;
       let newContext = deepClone(oldContext);
 
-      const leafInput: LeafContentInput<Ctx> = {
+      const leafInput: LeafContentInput<C> = {
         oldContext,
         newContext,
         inputText,

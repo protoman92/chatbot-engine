@@ -12,20 +12,21 @@ import {
 
 /**
  * Create a generic unit messenger.
+ * @template C The shape of the context used by the current chatbot.
  * @param communicator A service communicator instance.
  * @return A generic messenger.
  */
-export function createGenericUnitMessenger<Ctx extends Context>(
+export function createGenericUnitMessenger<C extends Context>(
   communicator: ServiceCommunicator
-): UnitMessenger<Ctx> {
+): UnitMessenger<C> {
   async function processText(oldContext: Context, text: string) {
     throw new Error('Not implemented');
   }
 
   async function processDatum(
     oldContext: Context,
-    datum: GenericRequest<Ctx>['data'][0]
-  ): Promise<Omit<GenericResponse<Ctx>, 'senderID'>> {
+    datum: GenericRequest<C>['data'][0]
+  ): Promise<Omit<GenericResponse<C>, 'senderID'>> {
     const { text } = datum;
 
     if (text !== undefined && text !== null) {
@@ -36,8 +37,8 @@ export function createGenericUnitMessenger<Ctx extends Context>(
     throw Error(`Cannot process data ${JSON.stringify(datum)}`);
   }
 
-  const messenger: UnitMessenger<Ctx> = {
-    processGenericRequest: async ({ senderID, oldContext, data }) => {
+  const messenger: UnitMessenger<C> = {
+    mapGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
         data.map(datum => processDatum(oldContext, datum))
       );
@@ -61,26 +62,25 @@ export function createGenericUnitMessenger<Ctx extends Context>(
 /**
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
+ * @template C The shape of the context used by the current chatbot.
  * @param arg0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
-export function createGenericMessenger<Ctx extends Context>({
+export function createGenericMessenger<C extends Context>({
   unitMessenger: messenger,
   requestMapper,
   responseMapper
 }: Readonly<{
-  unitMessenger: UnitMessenger<Ctx>;
-  requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest<Ctx>[]>;
-  responseMapper: (
-    res: GenericResponse<Ctx>
-  ) => PromiseLike<PlatformResponse<Ctx>>;
+  unitMessenger: UnitMessenger<C>;
+  requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest<C>[]>;
+  responseMapper: (res: GenericResponse<C>) => PromiseLike<PlatformResponse<C>>;
 }>): Messenger {
   return {
     processPlatformRequest: async platformRequest => {
       const requests = await requestMapper(platformRequest);
 
       const responses = await Promise.all(
-        requests.map(req => messenger.processGenericRequest(req))
+        requests.map(req => messenger.mapGenericRequest(req))
       );
 
       const platformResponses = await Promise.all(

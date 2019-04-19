@@ -15,12 +15,13 @@ import {
 
 /**
  * Map platform request to generic request for generic processing.
+ * @template C The shape of the context used by the current chatbot.
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
-export function mapWebhook<Ctx extends Context>(
+export function mapWebhook<C extends Context>(
   webhook: FacebookWebhookRequest
-): GenericRequest<Ctx>[] {
+): GenericRequest<C>[] {
   const { object, entry } = webhook;
 
   /**
@@ -39,9 +40,7 @@ export function mapWebhook<Ctx extends Context>(
     return requestMap;
   }
 
-  function processRequest(
-    request: FacebookRequest
-  ): GenericRequest<Ctx>['data'] {
+  function processRequest(request: FacebookRequest): GenericRequest<C>['data'] {
     if (isType<FacebookRequest.Postback>(request, 'postback')) {
       return [{ text: request.postback.payload }];
     }
@@ -112,25 +111,27 @@ export function mapWebhook<Ctx extends Context>(
 
 /**
  * Create a unit Facebook messenger.
+ * @template C The shape of the context used by the current chatbot.
  * @param httpCommunicator A HTTP communicator instance.
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export function createUnitFacebookMessenger<Ctx extends Context>(
+export function createUnitFacebookMessenger<C extends Context>(
   httpCommunicator: HTTPCommunicator,
   configurations: FacebookConfigs
-): UnitMessenger<Ctx> {
+): UnitMessenger<C> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
   return createGenericUnitMessenger(comm);
 }
 
 /**
  * Create a Facebook mesenger.
+ * @template C The shape of the context used by the current chatbot.
  * @param unitMessenger A unit messenger.
  * @return A generic messenger.
  */
-export function createFacebookMessenger<Ctx extends Context>(
-  unitMessenger: UnitMessenger<Ctx>
+export function createFacebookMessenger<C extends Context>(
+  unitMessenger: UnitMessenger<C>
 ): Messenger {
   return createGenericMessenger({
     unitMessenger,

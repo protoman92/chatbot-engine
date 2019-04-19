@@ -6,9 +6,10 @@ import { Leaf } from './leaf';
  * may follow this structure:
  *
  * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
+ * @template C The shape of the context used by the current chatbot.
  */
-export interface Branch<Ctx extends Context, Leaves = KV<Leaf<Ctx>>> {
-  readonly contextKeys?: (keyof Ctx)[];
-  readonly subBranches?: KV<Branch<Ctx, KV<Leaf<Ctx>>>>;
+export interface Branch<C extends Context, Leaves = KV<Leaf<C>>> {
+  readonly contextKeys?: (keyof C)[];
+  readonly subBranches?: KV<Branch<C, KV<Leaf<C>>>>;
   readonly leaves?: Leaves;
 }

@@ -2,10 +2,14 @@ import { Context } from './common';
 import { OutgoingContent } from './leaf';
 
 declare namespace LeafSelector {
-  export interface Result<Ctx extends Context> {
+  /**
+   * The final result of a selection process.
+   * @template C The shape of the context used by the current chatbot.
+   */
+  export interface Result<C extends Context> {
     readonly currentLeafID: string;
     readonly outgoingContents: OutgoingContent[];
-    readonly newContext: Ctx;
+    readonly newContext: C;
   }
 }
 
@@ -13,7 +17,8 @@ declare namespace LeafSelector {
  * Represents a selector that chooses the most appropriate leaf out of all
  * available leaves, based on the user's input. Said leaf's content will be
  * delivered to the user.
+ * @template C The shape of the context used by the current chatbot.
  */
-export interface LeafSelector<Ctx extends Context> {
-  (oldContext: Ctx, text: string): PromiseLike<LeafSelector.Result<Ctx>>;
+export interface LeafSelector<C extends Context> {
+  (oldContext: C, text: string): PromiseLike<LeafSelector.Result<C>>;
 }

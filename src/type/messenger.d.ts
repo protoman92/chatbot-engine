@@ -3,24 +3,33 @@ import { Context } from './common';
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
 
-/** A platform-specific response. */
-export interface PlatformResponse<Ctx extends Context> {
+/**
+ * A platform-specific response.
+ * @template C The shape of the context used by the current chatbot.*
+ */
+export interface PlatformResponse<C extends Context> {
   readonly senderID: string;
-  readonly newContext: Ctx;
+  readonly newContext: C;
   readonly data: unknown[];
 }
 
-/** A generic incoming request. */
-export interface GenericRequest<Ctx extends Context> {
+/**
+ * A generic incoming request.
+ * @template C The shape of the context used by the current chatbot.
+ */
+export interface GenericRequest<C extends Context> {
   readonly senderID: string;
-  readonly oldContext: Ctx;
+  readonly oldContext: C;
   readonly data: Readonly<{ text?: string; imageURL?: string }>[];
 }
 
-/** A generic outgoing response. */
-export interface GenericResponse<Ctx extends Context> {
+/**
+ * A generic outgoing response.
+ * @template C The shape of the context used by the current chatbot.
+ */
+export interface GenericResponse<C extends Context> {
   readonly senderID: string;
-  readonly newContext: Ctx;
+  readonly newContext: C;
   readonly data: unknown[];
 }
 
@@ -32,23 +41,22 @@ export interface GenericResponse<Ctx extends Context> {
  *
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
+ * @template C The shape of the context used by the current chatbot.
  */
-export interface UnitMessenger<Ctx extends Context> {
+export interface UnitMessenger<C extends Context> {
   /**
    * Map an incoming generic request to an outgoing generic response.
    * @param req A request object.
    * @return A Promise of some response.
    */
-  processGenericRequest(
-    req: GenericRequest<Ctx>
-  ): PromiseLike<GenericResponse<Ctx>>;
+  mapGenericRequest(req: GenericRequest<C>): PromiseLike<GenericResponse<C>>;
 
   /**
    * Send an outgoing platform response.
    * @param res A response object.
    * @return A Promise of some response.
    */
-  sendPlatformResponse(res: PlatformResponse<Ctx>): PromiseLike<unknown>;
+  sendPlatformResponse(res: PlatformResponse<C>): PromiseLike<unknown>;
 }
 
 /**

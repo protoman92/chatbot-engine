@@ -8,10 +8,13 @@ interface OutgoingContent {
   readonly response: Response;
 }
 
-/** Input for creation of a leaf. */
-interface LeafContentInput<Ctx extends Context> {
-  readonly oldContext: Ctx;
-  readonly newContext: Ctx;
+/**
+ * Input for creation of a leaf.
+ * @template C The shape of the context used by the current chatbot.
+ */
+interface LeafContentInput<C extends Context> {
+  readonly oldContext: C;
+  readonly newContext: C;
   readonly inputText?: string;
   readonly inputImageURL?: string;
   readonly allTextMatches: string[];
@@ -24,8 +27,9 @@ interface LeafContentInput<Ctx extends Context> {
  * Subsequent messages are logic results of the ones before them.
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
+ * @template C The shape of the context used by the current chatbot.
  */
-export interface Leaf<Ctx extends Context> {
+export interface Leaf<C extends Context> {
   /**
    * Check if this leaf marks the start of a branch.
    * @return A Promise of boolean.
@@ -46,7 +50,7 @@ export interface Leaf<Ctx extends Context> {
    * @param oldContext The old context object.
    * @return A Promise of boolean.
    */
-  checkContextConditions(oldContext: Ctx): PromiseLike<boolean>;
+  checkContextConditions(oldContext: C): PromiseLike<boolean>;
 
   /**
    * Produce content to be sent to the user. We may also modify the old context
@@ -55,9 +59,9 @@ export interface Leaf<Ctx extends Context> {
    * @return Contents that will be sent to the user.
    */
   produceOutgoingContent(
-    leafInput: Omit<LeafContentInput<Ctx>, 'newContext'>
+    leafInput: Omit<LeafContentInput<C>, 'newContext'>
   ): PromiseLike<
-    Readonly<{ newContext: Ctx; outgoingContents: OutgoingContent[] }>
+    Readonly<{ newContext: C; outgoingContents: OutgoingContent[] }>
   >;
 
   /**
@@ -69,7 +73,7 @@ export interface Leaf<Ctx extends Context> {
    * @param newContext The new context object.
    * @return A Promise of next leaf paths.
    */
-  isIntermediate?(newContext: Ctx): PromiseLike<string[]>;
+  isIntermediate?(newContext: C): PromiseLike<string[]>;
 
   /**
    * Check if this leaf marks the end of a branch. We might do some cleanup
@@ -77,5 +81,5 @@ export interface Leaf<Ctx extends Context> {
    * @param newContext The newly transformed context.
    * @return A Promise of boolean.
    */
-  isEndOfBranch?(newContext: Ctx): PromiseLike<boolean>;
+  isEndOfBranch?(newContext: C): PromiseLike<boolean>;
 }

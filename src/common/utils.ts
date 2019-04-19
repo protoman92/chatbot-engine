@@ -1,5 +1,7 @@
 /**
  * Check if an object is of a certain type.
+ * @template T The type of object to check for.
+ * @template K The keys of the type to check for.
  * @param object Any object.
  * @param keys Possible object keys.
  * @return A boolean value.
@@ -14,6 +16,7 @@ export function isType<T, K extends keyof T = keyof T>(
 
 /**
  * Convert something that could either be a single value or an Array to Array.
+ * @template T The type of value to be converted to an Array.
  * @param value The value in question.
  * @return An Array of values.
  */
@@ -21,8 +24,13 @@ export function toArray<T>(value: T | T[]): T[] {
   return value instanceof Array ? value : [value];
 }
 
-/** Deep clone an object. */
-export function deepClone<Ctx>(object: Ctx): Ctx {
+/**
+ * Deep clone an object.
+ * @template T The type of object to deep-clone.
+ * @param object The object to be cloned.
+ * @return The cloned object.
+ */
+export function deepClone<T>(object: T): T {
   return JSON.parse(JSON.stringify(object));
 }
 
