@@ -1,6 +1,7 @@
 import { Omit } from 'ts-essentials';
 import { Context } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
+import { LeafSelector } from '../type/leaf-selector';
 import {
   GenericRequest,
   GenericResponse,
@@ -13,24 +14,26 @@ import {
 /**
  * Create a generic unit messenger.
  * @template C The shape of the context used by the current chatbot.
+ * @param leafSelector A leaf selector instance.
  * @param communicator A service communicator instance.
  * @return A generic messenger.
  */
 export function createGenericUnitMessenger<C extends Context>(
+  leafSelector: LeafSelector<C>,
   communicator: ServiceCommunicator
 ): UnitMessenger<C> {
-  async function processText(oldContext: Context, text: string) {
-    throw new Error('Not implemented');
+  async function processInputText(oldContext: C, inputText: string) {
+    return leafSelector.selectLeaf(oldContext, inputText);
   }
 
-  async function processDatum(
-    oldContext: Context,
+  async function processInputDatum(
+    oldContext: C,
     datum: GenericRequest<C>['data'][0]
   ): Promise<Omit<GenericResponse<C>, 'senderID'>> {
     const { text } = datum;
 
     if (text !== undefined && text !== null) {
-      const {} = await processText(oldContext, text);
+      const {} = await processInputText(oldContext, text);
       throw new Error('Not implemented');
     }
 
@@ -40,7 +43,7 @@ export function createGenericUnitMessenger<C extends Context>(
   const messenger: UnitMessenger<C> = {
     mapGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
-        data.map(datum => processDatum(oldContext, datum))
+        data.map(datum => processInputDatum(oldContext, datum))
       );
 
       return {

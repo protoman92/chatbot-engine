@@ -6,20 +6,20 @@ import {
   FacebookRequest,
   FacebookWebhookRequest
 } from '../type/facebook';
+import { LeafSelector } from '../type/leaf-selector';
 import {
   GenericRequest,
-  Messenger,
-  UnitMessenger,
   GenericResponse,
-  PlatformResponse
+  Messenger,
+  PlatformResponse,
+  UnitMessenger
 } from '../type/messenger';
+import { Action, Response } from '../type/response';
 import { createFacebookCommunicator } from './facebook-communicator';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
-import { Action, Response } from '../type/response';
-import { LeafSelector } from '../type/leaf-selector';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -278,11 +278,12 @@ async function createFacebookResponse<C extends Context>(
  * @return A generic unit messenger.
  */
 export function createUnitFacebookMessenger<C extends Context>(
+  leafSelector: LeafSelector<C>,
   httpCommunicator: HTTPCommunicator,
   configurations: FacebookConfigs
 ): UnitMessenger<C> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
-  return createGenericUnitMessenger(comm);
+  return createGenericUnitMessenger(leafSelector, comm);
 }
 
 /**
