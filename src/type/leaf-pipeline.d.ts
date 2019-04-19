@@ -8,8 +8,8 @@ declare namespace LeafPipeline {
   export interface Input<Ctx extends Context> {
     readonly parentBranch: Branch<Ctx>;
     readonly prefixLeafPaths: string[];
-    readonly leaf: Leaf<Ctx>;
-    readonly leafID: string;
+    readonly currentLeaf: Leaf<Ctx>;
+    readonly currentLeafID: string;
   }
 
   /** Represents parameteters common to all pipelines. */

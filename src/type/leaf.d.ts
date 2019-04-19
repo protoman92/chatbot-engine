@@ -9,7 +9,7 @@ interface OutgoingContent {
 }
 
 /** Input for creation of a leaf. */
-interface LeafInput<Ctx extends Context> {
+interface LeafContentInput<Ctx extends Context> {
   readonly oldContext: Ctx;
   readonly newContext: Ctx;
   readonly inputText?: string;
@@ -55,7 +55,7 @@ export interface Leaf<Ctx extends Context> {
    * @return Contents that will be sent to the user.
    */
   produceOutgoingContent(
-    leafInput: Omit<LeafInput<Ctx>, 'newContext'>
+    leafInput: Omit<LeafContentInput<Ctx>, 'newContext'>
   ): PromiseLike<
     Readonly<{ newContext: Ctx; outgoingContents: OutgoingContent[] }>
   >;
