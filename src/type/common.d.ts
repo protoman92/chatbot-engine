@@ -1,2 +1,6 @@
 export type KV<V> = Readonly<{ [K: string]: V }>;
-export type Context = KV<unknown>;
+
+export interface Context extends KV<unknown> {
+  readonly activeBranch?: string;
+  readonly userID: unknown;
+}

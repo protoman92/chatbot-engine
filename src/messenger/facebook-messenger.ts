@@ -1,23 +1,26 @@
-import { createFacebookCommunicator } from './facebook-communicator';
+import { formatFacebookError, isType } from '../common/utils';
+import { Context } from '../type/common';
+import { HTTPCommunicator } from '../type/communicator';
 import {
   FacebookConfigs,
   FacebookRequest,
   FacebookWebhookRequest
 } from '../type/facebook';
+import { GenericRequest, Messenger, UnitMessenger } from '../type/messenger';
+import { createFacebookCommunicator } from './facebook-communicator';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
-import { Messenger, GenericRequest, UnitMessenger } from '../type/messenger';
-import { formatFacebookError, isType } from '../common/utils';
-import { HTTPCommunicator } from '../type/communicator';
 
 /**
  * Map platform request to generic request for generic processing.
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
-export function mapWebhook(webhook: FacebookWebhookRequest) {
+export function mapWebhook<Ctx extends Context>(
+  webhook: FacebookWebhookRequest
+): GenericRequest<Ctx>[] {
   const { object, entry } = webhook;
 
   /**
@@ -36,7 +39,9 @@ export function mapWebhook(webhook: FacebookWebhookRequest) {
     return requestMap;
   }
 
-  function processRequest(request: FacebookRequest): GenericRequest['data'] {
+  function processRequest(
+    request: FacebookRequest
+  ): GenericRequest<Ctx>['data'] {
     if (isType<FacebookRequest.Postback>(request, 'postback')) {
       return [{ text: request.postback.payload }];
     }
@@ -86,7 +91,7 @@ export function mapWebhook(webhook: FacebookWebhookRequest) {
         return Object.entries(groupedRequests).map(
           ([senderID, requests]: [string, FacebookRequest[]]) => ({
             senderID,
-            oldContext: {},
+            oldContext: {} as any,
             data: requests
               .map(req => processRequest(req))
               .reduce((acc, items) => acc.concat(items), [])
@@ -111,10 +116,10 @@ export function mapWebhook(webhook: FacebookWebhookRequest) {
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export function createUnitFacebookMessenger(
+export function createUnitFacebookMessenger<Ctx extends Context>(
   httpCommunicator: HTTPCommunicator,
   configurations: FacebookConfigs
-): UnitMessenger {
+): UnitMessenger<Ctx> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
   return createGenericUnitMessenger(comm);
 }
@@ -124,8 +129,8 @@ export function createUnitFacebookMessenger(
  * @param unitMessenger A unit messenger.
  * @return A generic messenger.
  */
-export function createFacebookMessenger(
-  unitMessenger: UnitMessenger
+export function createFacebookMessenger<Ctx extends Context>(
+  unitMessenger: UnitMessenger<Ctx>
 ): Messenger {
   return createGenericMessenger({
     unitMessenger,

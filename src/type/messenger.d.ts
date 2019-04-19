@@ -4,23 +4,23 @@ import { Context } from './common';
 export type PlatformRequest = unknown;
 
 /** A platform-specific response. */
-export interface PlatformResponse {
+export interface PlatformResponse<Ctx extends Context> {
   readonly senderID: string;
-  readonly newContext: Context;
+  readonly newContext: Ctx;
   readonly data: unknown[];
 }
 
 /** A generic incoming request. */
-export interface GenericRequest {
+export interface GenericRequest<Ctx extends Context> {
   readonly senderID: string;
-  readonly oldContext: Context;
+  readonly oldContext: Ctx;
   readonly data: Readonly<{ text?: string; imageURL?: string }>[];
 }
 
 /** A generic outgoing response. */
-export interface GenericResponse {
+export interface GenericResponse<Ctx extends Context> {
   readonly senderID: string;
-  readonly newContext: Context;
+  readonly newContext: Ctx;
   readonly data: unknown[];
 }
 
@@ -33,20 +33,22 @@ export interface GenericResponse {
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface UnitMessenger {
+export interface UnitMessenger<Ctx extends Context> {
   /**
    * Map an incoming generic request to an outgoing generic response.
    * @param req A request object.
    * @return A Promise of some response.
    */
-  processGenericRequest(req: GenericRequest): PromiseLike<GenericResponse>;
+  processGenericRequest(
+    req: GenericRequest<Ctx>
+  ): PromiseLike<GenericResponse<Ctx>>;
 
   /**
    * Send an outgoing platform response.
    * @param res A response object.
    * @return A Promise of some response.
    */
-  sendPlatformResponse(res: PlatformResponse): PromiseLike<unknown>;
+  sendPlatformResponse(res: PlatformResponse<Ctx>): PromiseLike<unknown>;
 }
 
 /**

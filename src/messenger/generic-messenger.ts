@@ -15,17 +15,17 @@ import {
  * @param communicator A service communicator instance.
  * @return A generic messenger.
  */
-export function createGenericUnitMessenger(
+export function createGenericUnitMessenger<Ctx extends Context>(
   communicator: ServiceCommunicator
-): UnitMessenger {
+): UnitMessenger<Ctx> {
   async function processText(oldContext: Context, text: string) {
     throw new Error('Not implemented');
   }
 
   async function processDatum(
     oldContext: Context,
-    datum: GenericRequest['data'][0]
-  ): Promise<Omit<GenericResponse, 'senderID'>> {
+    datum: GenericRequest<Ctx>['data'][0]
+  ): Promise<Omit<GenericResponse<Ctx>, 'senderID'>> {
     const { text } = datum;
 
     if (text !== undefined && text !== null) {
@@ -36,7 +36,7 @@ export function createGenericUnitMessenger(
     throw Error(`Cannot process data ${JSON.stringify(datum)}`);
   }
 
-  const messenger: UnitMessenger = {
+  const messenger: UnitMessenger<Ctx> = {
     processGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
         data.map(datum => processDatum(oldContext, datum))
@@ -64,14 +64,16 @@ export function createGenericUnitMessenger(
  * @param arg0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
-export function createGenericMessenger({
+export function createGenericMessenger<Ctx extends Context>({
   unitMessenger: messenger,
   requestMapper,
   responseMapper
 }: Readonly<{
-  unitMessenger: UnitMessenger;
-  requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest[]>;
-  responseMapper: (res: GenericResponse) => PromiseLike<PlatformResponse>;
+  unitMessenger: UnitMessenger<Ctx>;
+  requestMapper: (req: PlatformRequest) => PromiseLike<GenericRequest<Ctx>[]>;
+  responseMapper: (
+    res: GenericResponse<Ctx>
+  ) => PromiseLike<PlatformResponse<Ctx>>;
 }>): Messenger {
   return {
     processPlatformRequest: async platformRequest => {

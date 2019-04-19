@@ -1,4 +1,4 @@
-import { KV } from './common';
+import { Context, KV } from './common';
 import { Leaf } from './leaf';
 
 /**
@@ -7,7 +7,7 @@ import { Leaf } from './leaf';
  *
  * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
  */
-export interface Branch<Ctx, Leaves = KV<Leaf<Ctx>>> {
+export interface Branch<Ctx extends Context, Leaves = KV<Leaf<Ctx>>> {
   readonly contextKeys?: (keyof Ctx)[];
   readonly subBranches?: KV<Branch<Ctx, KV<Leaf<Ctx>>>>;
   readonly leaves?: Leaves;
