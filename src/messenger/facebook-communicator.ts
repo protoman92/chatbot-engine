@@ -9,7 +9,7 @@ import { FacebookConfigs } from '../type/facebook';
  */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  configurations: FacebookConfigs
+  { apiVersion, pageToken }: FacebookConfigs
 ): ServiceCommunicator {
   function communicate<T>({
     method,
@@ -23,9 +23,9 @@ export function createFacebookCommunicator(
     return communicator.communicate<T>({
       method,
       body,
-      url: `https://graph.facebook.com/v2.6/${additionalPaths.join(
+      url: `https://graph.facebook.com/v${apiVersion}/${additionalPaths.join(
         '/'
-      )}?access_token=${configurations.facebookPageToken}`,
+      )}?access_token=${pageToken}`,
       headers: { 'Content-Type': 'application/json' }
     });
   }

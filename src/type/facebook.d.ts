@@ -55,5 +55,6 @@ export interface FacebookUser {
 
 /** Represents Facebook configurations. */
 export interface FacebookConfigs {
-  readonly facebookPageToken: string;
+  readonly apiVersion: string;
+  readonly pageToken: string;
 }
