@@ -58,7 +58,7 @@ export function injectContextOnReceive<C extends Context>(
  * @param getUserID Function to get user ID from the related chatbot user.
  * @return A compose function.
  */
-export function saveUserForSenderID<C extends Context, PUser, CUser>(
+export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
   communicator: ServiceCommunicator,
   saveUser: (platformUser: PUser) => PromiseLike<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
@@ -69,7 +69,7 @@ export function saveUserForSenderID<C extends Context, PUser, CUser>(
       let { oldContext } = request;
       const { senderID } = request;
 
-      if (!oldContext || !oldContext.userID) {
+      if (!oldContext || !oldContext.senderID) {
         const platformUser = await communicator.getUser<PUser>(senderID);
         const newUser = await saveUser(platformUser);
         const senderIDKey: keyof DefaultContext = 'senderID';

@@ -4,7 +4,8 @@ import { compose } from '../../src/common/utils';
 import {
   injectContextOnReceive,
   saveContextOnSend,
-  saveUserForSenderID
+  saveUserForSenderID,
+  setTypingIndicator
 } from '../../src/messenger/unit-compose';
 import { Context } from '../../src/type/common';
 import { ServiceCommunicator } from '../../src/type/communicator';
@@ -121,12 +122,8 @@ describe('Inject context on receive', () => {
 describe('Save user for sender ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
-    interface CUser {
-      readonly id: string;
-    }
-
-    const chatbotUser: CUser = { id: `${senderID}-2` };
-    const expectedContext: BotContext = { senderID: chatbotUser.id };
+    const chatbotUser = { id: senderID };
+    const expectedContext: BotContext = { senderID };
 
     when(messenger.mapGenericRequest(anything())).thenReturn(
       Promise.resolve({
@@ -142,7 +139,7 @@ describe('Save user for sender ID', () => {
 
     const composed = compose(
       instance(messenger),
-      saveUserForSenderID<BotContext, {}, CUser>(
+      saveUserForSenderID(
         instance(communicator),
         async () => chatbotUser,
         ({ id }) => id
@@ -166,5 +163,47 @@ describe('Save user for sender ID', () => {
         deepEqual({ ...genericRequest, oldContext: expectedContext })
       )
     ).once();
+  });
+});
+
+describe('Set typing indicator', () => {
+  it('Should set typing indicator on request and response', async () => {
+    // Setup
+    const oldContext: BotContext = { senderID };
+
+    when(messenger.mapGenericRequest(anything())).thenReturn(
+      Promise.resolve({
+        senderID,
+        newContext: oldContext,
+        outgoingContents: []
+      })
+    );
+
+    when(messenger.sendPlatformResponse(anything())).thenReturn(
+      Promise.resolve()
+    );
+
+    when(communicator.setTypingIndicator(senderID, anything())).thenReturn(
+      Promise.resolve()
+    );
+
+    const composed = compose(
+      instance(messenger),
+      setTypingIndicator(instance(communicator))
+    );
+
+    // When
+    await composed.mapGenericRequest({ senderID, oldContext, data: [] });
+
+    await composed.sendPlatformResponse({
+      senderID,
+      newContext: oldContext,
+      outgoingData: []
+    });
+
+    // Then
+    verify(communicator.setTypingIndicator(senderID, true)).calledBefore(
+      communicator.setTypingIndicator(senderID, false)
+    );
   });
 });
