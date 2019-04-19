@@ -1,6 +1,6 @@
 import { deepClone, toArray } from '../common/utils';
 import { Branch } from '../type/branch';
-import { Context, KV } from '../type/common';
+import { Context, DefaultContext, KV } from '../type/common';
 import { Leaf, LeafContentInput } from '../type/leaf';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
@@ -105,7 +105,7 @@ export function createLeafPipeline<C extends Context>() {
         !!currentLeaf.isEndOfBranch &&
         (await currentLeaf.isEndOfBranch(newContext))
       ) {
-        const activeBranchKey: Context['activeBranch'] = 'activeBranch';
+        const activeBranchKey: keyof DefaultContext = 'activeBranch';
         const clearableKeys = [activeBranchKey, ...(contextKeys || [])];
         clearableKeys.forEach(key => delete newContext[key]);
       }

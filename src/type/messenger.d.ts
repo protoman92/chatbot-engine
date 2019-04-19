@@ -46,6 +46,14 @@ export interface GenericResponse<C extends Context> {
  */
 export interface UnitMessenger<C extends Context> {
   /**
+   * Get the cache key that will be used by a context DAO to perform CRUD for
+   * a context object.
+   * @param senderID The sender's ID.
+   * @return The cache key.
+   */
+  getContextDAOCacheKey(senderID: string): string;
+
+  /**
    * Map an incoming generic request to an outgoing generic response.
    * @param req A request object.
    * @return A Promise of some response.
