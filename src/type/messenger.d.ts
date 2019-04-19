@@ -34,6 +34,11 @@ export interface GenericResponse<C extends Context> {
   readonly outgoingContents: LeafSelector.Result<C>['outgoingContents'];
 }
 
+/** Configurations for a messenger instance. */
+export interface MessengerConfigs {
+  readonly platform: 'FACEBOOK';
+}
+
 /**
  * Represents a messenger that can process incoming request (including parsing,
  * validating and sending data). Note that this messenger only handles one

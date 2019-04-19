@@ -6,6 +6,7 @@ import {
   GenericRequest,
   GenericResponse,
   Messenger,
+  MessengerConfigs,
   PlatformRequest,
   PlatformResponse,
   UnitMessenger
@@ -20,7 +21,8 @@ import {
  */
 export function createGenericUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
-  communicator: ServiceCommunicator
+  communicator: ServiceCommunicator,
+  { platform }: MessengerConfigs
 ): UnitMessenger<C> {
   async function processInputText(oldContext: C, inputText: string) {
     return leafSelector.selectLeaf(oldContext, inputText);
@@ -41,6 +43,7 @@ export function createGenericUnitMessenger<C extends Context>(
   }
 
   const messenger: UnitMessenger<C> = {
+    getContextDAOCacheKey: senderID => `${platform}-${senderID}`,
     mapGenericRequest: async ({ senderID, oldContext, data }) => {
       const outgoingData = await Promise.all(
         data.map(datum => processInputDatum(oldContext, datum))
