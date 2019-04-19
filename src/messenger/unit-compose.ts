@@ -69,7 +69,7 @@ export function saveUserForSenderID<C extends Context, PUser, CUser>(
       let { oldContext } = request;
       const { senderID } = request;
 
-      if (!oldContext || !oldContext.user_id) {
+      if (!oldContext || !oldContext.userID) {
         const platformUser = await communicator.getUser<PUser>(senderID);
         const newUser = await saveUser(platformUser);
         const userIDKey: keyof DefaultContext = 'userID';
