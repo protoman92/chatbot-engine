@@ -2,7 +2,7 @@ export type KV<V> = Readonly<{ [K: string]: V }>;
 
 export interface DefaultContext {
   readonly activeBranch?: string;
-  readonly userID: unknown;
+  readonly senderID: unknown;
 }
 
 export interface Context extends KV<unknown>, DefaultContext {}

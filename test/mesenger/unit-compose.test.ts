@@ -1,5 +1,5 @@
 import { describe } from 'mocha';
-import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito-2';
+import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import { compose } from '../../src/common/utils';
 import {
   injectContextOnReceive,
@@ -7,13 +7,13 @@ import {
   saveUserForSenderID
 } from '../../src/messenger/unit-compose';
 import { Context } from '../../src/type/common';
+import { ServiceCommunicator } from '../../src/type/communicator';
 import { ContextDAO } from '../../src/type/context-dao';
 import {
   GenericRequest,
-  UnitMessenger,
-  PlatformResponse
+  PlatformResponse,
+  UnitMessenger
 } from '../../src/type/messenger';
-import { ServiceCommunicator } from '../../src/type/communicator';
 
 interface BotContext extends Context {}
 
@@ -54,7 +54,7 @@ describe('Save context on send', () => {
       Promise.resolve()
     );
 
-    const newContext: BotContext = { userID: `${senderID}-2` };
+    const newContext: BotContext = { senderID };
 
     const composed = compose(
       instance(messenger),
@@ -79,7 +79,7 @@ describe('Save context on send', () => {
 describe('Inject context on receive', () => {
   it('Should inject context on send', async () => {
     // Setup
-    const expectedContext: BotContext = { userID: `${senderID}-2` };
+    const expectedContext: BotContext = { senderID };
 
     when(messenger.mapGenericRequest(anything())).thenReturn(
       Promise.resolve({
@@ -100,7 +100,7 @@ describe('Inject context on receive', () => {
 
     const genericRequest: GenericRequest<BotContext> = {
       senderID,
-      oldContext: { userID: '' },
+      oldContext: { senderID: '' },
       data: []
     };
 
@@ -126,7 +126,7 @@ describe('Save user for sender ID', () => {
     }
 
     const chatbotUser: CUser = { id: `${senderID}-2` };
-    const expectedContext: BotContext = { userID: chatbotUser.id };
+    const expectedContext: BotContext = { senderID: chatbotUser.id };
 
     when(messenger.mapGenericRequest(anything())).thenReturn(
       Promise.resolve({
@@ -151,7 +151,7 @@ describe('Save user for sender ID', () => {
 
     const genericRequest: GenericRequest<BotContext> = {
       senderID,
-      oldContext: { userID: '' },
+      oldContext: { senderID: '' },
       data: []
     };
 
