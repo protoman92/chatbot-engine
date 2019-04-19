@@ -1,3 +1,5 @@
+import { ComposeFunc } from '../type/common';
+
 /**
  * Check if an object is of a certain type.
  * @template T The type of object to check for.
@@ -32,6 +34,24 @@ export function toArray<T>(value: T | T[]): T[] {
  */
 export function deepClone<T>(object: T): T {
   return JSON.parse(JSON.stringify(object));
+}
+
+/**
+ * Compose an object to compose functions to create a new wrapped object.
+ * @template T The type of object to compose.
+ * @param original The original object.
+ * @param funcs Array of compose functions.
+ * @return The wrapped object.
+ */
+export function compose<T>(original: T, ...funcs: ComposeFunc<T>[]): T {
+  const reversedFuncs = funcs.reverse();
+  let newComposed = original;
+
+  for (const func of reversedFuncs) {
+    newComposed = func(newComposed);
+  }
+
+  return newComposed;
 }
 
 /**
