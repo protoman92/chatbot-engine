@@ -9,7 +9,7 @@ import { FacebookConfigs } from '../type/facebook';
  */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  { apiVersion, pageToken }: FacebookConfigs
+  { apiVersion, pageToken }: Pick<FacebookConfigs, 'apiVersion' | 'pageToken'>
 ): ServiceCommunicator {
   function communicate<T>({
     method,

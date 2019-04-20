@@ -4,6 +4,7 @@ import { HTTPCommunicator } from '../type/communicator';
 import {
   FacebookConfigs,
   FacebookRequest,
+  FacebookUnitMessenger,
   FacebookWebhookRequest
 } from '../type/facebook';
 import { LeafSelector } from '../type/leaf-selector';
@@ -276,16 +277,31 @@ async function createFacebookResponse<C extends Context>({
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export function createUnitFacebookMessenger<C extends Context>(
+export function createFacebookUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
   httpCommunicator: HTTPCommunicator,
   configurations: FacebookConfigs
-): UnitMessenger<C> {
+): FacebookUnitMessenger<C> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
 
-  return createGenericUnitMessenger(leafSelector, comm, response =>
-    createFacebookResponse(response)
+  const unitMessenger = createGenericUnitMessenger(
+    leafSelector,
+    comm,
+    response => createFacebookResponse(response)
   );
+
+  return {
+    ...unitMessenger,
+    resolveHubChallenge: async ({
+      'hub.mode': mode = '',
+      'hub.challenge': challenge = -1,
+      'hub.verify_token': token = ''
+    }) => {
+      const { verifyToken } = configurations;
+      if (mode === 'subscribe' && token === verifyToken) return challenge;
+      throw new Error(formatFacebookError('Invalid mode or verify token'));
+    }
+  };
 }
 
 /**

@@ -1,4 +1,6 @@
 import { DeepReadonly } from 'ts-essentials';
+import { Context } from './common';
+import { UnitMessenger } from './messenger';
 
 interface BaseFacebookRequest {
   readonly sender: Readonly<{ id: string }>;
@@ -57,4 +59,25 @@ export interface FacebookUser {
 export interface FacebookConfigs {
   readonly apiVersion: string;
   readonly pageToken: string;
+  readonly verifyToken: string;
+}
+
+/**
+ * Represents a Facebook-specific unit messenger.
+ * @template C The context used by the current chatbot.
+ */
+export interface FacebookUnitMessenger<C extends Context>
+  extends UnitMessenger<C> {
+  /**
+   * Resolve Facebook hub challenge to establish connection with chatbot.
+   * @param requestQuery The query parameters of the request.
+   * @return The hub challenge code.
+   */
+  resolveHubChallenge(
+    requestQuery: Readonly<{
+      'hub.mode'?: string;
+      'hub.challenge'?: number;
+      'hub.verify_token'?: string;
+    }>
+  ): Promise<number>;
 }

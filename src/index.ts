@@ -7,7 +7,7 @@ export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
 export * from './messenger/facebook-communicator';
 export {
   createFacebookMessenger,
-  createUnitFacebookMessenger
+  createFacebookUnitMessenger
 } from './messenger/facebook-messenger';
 export * from './messenger/generic-messenger';
 export * from './messenger/unit-compose';
