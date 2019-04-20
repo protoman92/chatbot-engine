@@ -9,18 +9,18 @@ import { Context } from './common';
 export interface ContextDAO<C extends Context> {
   /**
    * Get the whole context in storage.
-   * @param cacheKey The key identifying the change.
+   * @param senderID The sender ID.
    * @return A Promise of context.
    */
-  getContext(cacheKey: string): Promise<C>;
+  getContext(senderID: string): Promise<C>;
 
   /**
    * Set the whole context in storage.
-   * @param cacheKey The key identifying the cache.
+   * @param senderID The sender ID.
    * @param context The context object being saved.
    * @return A Promise of some response.
    */
-  setContext(cacheKey: string, context: C): Promise<unknown>;
+  setContext(senderID: string, context: C): Promise<unknown>;
 
   /**
    * Reset all context to factory.

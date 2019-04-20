@@ -13,12 +13,10 @@ import {
   setTypingIndicator,
   UnitMessenger
 } from '../../src';
-import { getContextDAOCacheKey } from '../../src/common/utils';
 
 interface TestContext extends Context {}
 
 const senderID = 'sender-id';
-const cacheKey = getContextDAOCacheKey('FACEBOOK', senderID);
 let messenger: UnitMessenger<TestContext>;
 let communicator: ServiceCommunicator;
 let contextDAO: ContextDAO<TestContext>;
@@ -46,12 +44,12 @@ describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
     when(messenger.sendResponse(anything())).thenResolve();
-    when(contextDAO.setContext(cacheKey, anything())).thenResolve();
+    when(contextDAO.setContext(senderID, anything())).thenResolve();
     const newContext: TestContext = { senderID };
 
     const composed = compose(
       instance(messenger),
-      saveContextOnSend(instance(contextDAO), 'FACEBOOK')
+      saveContextOnSend(instance(contextDAO))
     );
 
     const genericResponse: GenericResponse<TestContext> = {
@@ -64,7 +62,7 @@ describe('Save context on send', () => {
     await composed.sendResponse(genericResponse);
 
     // Then
-    verify(contextDAO.setContext(cacheKey, deepEqual(newContext))).once();
+    verify(contextDAO.setContext(senderID, deepEqual(newContext))).once();
     verify(messenger.sendResponse(deepEqual(genericResponse))).once();
   });
 });
@@ -80,11 +78,11 @@ describe('Inject context on receive', () => {
       visualContents: []
     });
 
-    when(contextDAO.getContext(cacheKey)).thenResolve(expectedContext);
+    when(contextDAO.getContext(senderID)).thenResolve(expectedContext);
 
     const composed = compose(
       instance(messenger),
-      injectContextOnReceive(instance(contextDAO), 'FACEBOOK')
+      injectContextOnReceive(instance(contextDAO))
     );
 
     const genericRequest: GenericRequest<TestContext> = {
@@ -97,7 +95,7 @@ describe('Inject context on receive', () => {
     await composed.mapRequest(genericRequest);
 
     // Then
-    verify(contextDAO.getContext(cacheKey)).once();
+    verify(contextDAO.getContext(senderID)).once();
 
     verify(
       messenger.mapRequest(

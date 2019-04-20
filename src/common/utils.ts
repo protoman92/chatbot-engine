@@ -1,5 +1,4 @@
 import { ComposeFunc } from '../type/common';
-import { SupportedPlatform } from '../type/messenger';
 
 /**
  * Check if an object is of a certain type.
@@ -62,20 +61,6 @@ export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
  */
 export function formatSpecialKey(key: string) {
   return `@//${key}//@`;
-}
-
-/**
- * Get the cache key that will be used by a context DAO to perform CRUD for
- * a context object.
- * @param platform The platform identifier.
- * @param senderID The sender's ID.
- * @return The cache key.
- */
-export function getContextDAOCacheKey(
-  platform: SupportedPlatform,
-  senderID: string
-) {
-  return `${platform}-${senderID}`;
 }
 
 /**
