@@ -153,8 +153,7 @@ describe('Main leaf processing', () => {
 
     additionalParams = spy<LeafPipeline.AdditionalParams<Context>>({
       oldContext: { senderID },
-      inputText: '',
-      inputImageURL: ''
+      inputText: ''
     });
   });
 

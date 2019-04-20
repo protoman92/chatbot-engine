@@ -18,7 +18,7 @@ declare namespace LeafPipeline {
   /** Represents parameteters common to all pipelines. */
   export interface AdditionalParams<C extends Context> {
     readonly inputText?: string;
-    readonly inputImageURL: string;
+    readonly inputImageURL?: string;
     readonly oldContext: C;
   }
 }

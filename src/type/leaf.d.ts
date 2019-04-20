@@ -5,7 +5,7 @@ import { Response } from './response';
 
 /** Represents content that will go out to the user. */
 interface VisualContent {
-  readonly quickReplies: readonly QuickReply[];
+  readonly quickReplies?: readonly QuickReply[];
   readonly response: Response;
 }
 
