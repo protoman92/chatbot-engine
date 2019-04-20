@@ -101,6 +101,6 @@ describe('Leaf selector', () => {
 
     // Then
     expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
-    verify(leafPipeline.processLeaf(anything(), anything())).times(iteration);
+    verify(leafPipeline.processLeaf(anything(), anything())).times(1);
   });
 });
