@@ -120,12 +120,14 @@ export function mapWebhook<C extends Context>(
 /**
  * Create a Facebook response from multiple generic responses.
  * @template C The shape of the context used by the current chatbot.
- * @param responses An Array of generic responses.
+ * @param response A generic responses.
  * @return A platform response instance.
  */
-async function createFacebookResponse<C extends Context>(
-  responses: readonly GenericResponse<C>[]
-): Promise<readonly PlatformResponse<C>[]> {
+async function createFacebookResponse<C extends Context>({
+  senderID,
+  newContext,
+  visualContents
+}: GenericResponse<C>): Promise<PlatformResponse<C>> {
   const MAX_GENERIC_ELEMENT_COUNT = 11;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
@@ -237,11 +239,8 @@ async function createFacebookResponse<C extends Context>(
   }
 
   function createPlatformResponse(
-    {
-      response,
-      quickReplies = []
-    }: LeafSelector.Result<C>['visualContents'][0],
-    senderID: string
+    senderID: string,
+    { response, quickReplies = [] }: LeafSelector.Result<C>['visualContents'][0]
   ) {
     const facebookQuickReplies = quickReplies.map(({ text: title }) => ({
       title,
@@ -261,13 +260,13 @@ async function createFacebookResponse<C extends Context>(
     };
   }
 
-  return responses.map(({ senderID, newContext, visualContents }) => ({
+  return {
     senderID,
     newContext,
     outgoingData: visualContents.map(content =>
-      createPlatformResponse(content, senderID)
+      createPlatformResponse(senderID, content)
     )
-  }));
+  };
 }
 
 /**
@@ -283,7 +282,10 @@ export function createUnitFacebookMessenger<C extends Context>(
   configurations: FacebookConfigs
 ): UnitMessenger<C> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
-  return createGenericUnitMessenger(leafSelector, comm);
+
+  return createGenericUnitMessenger(leafSelector, comm, response =>
+    createFacebookResponse(response)
+  );
 }
 
 /**
@@ -295,17 +297,12 @@ export function createUnitFacebookMessenger<C extends Context>(
 export function createFacebookMessenger<C extends Context>(
   unitMessenger: UnitMessenger<C>
 ): Messenger {
-  return createGenericMessenger({
-    unitMessenger,
-    requestMapper: async req => {
-      if (isType<FacebookWebhookRequest>(req, 'object', 'entry')) {
-        return mapWebhook(req);
-      }
+  return createGenericMessenger(unitMessenger, async req => {
+    if (isType<FacebookWebhookRequest>(req, 'object', 'entry')) {
+      return mapWebhook(req);
+    }
 
-      throw new Error(
-        formatFacebookError(`Invalid webhook: ${JSON.stringify(req)}`)
-      );
-    },
-    responseMapper: response => createFacebookResponse(response)
+    const errorMessage = `Invalid webhook: ${JSON.stringify(req)}`;
+    throw new Error(formatFacebookError(errorMessage));
   });
 }

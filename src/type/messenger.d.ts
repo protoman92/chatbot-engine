@@ -53,14 +53,14 @@ export interface UnitMessenger<C extends Context> {
    * @param req A request object.
    * @return A Promise of some response.
    */
-  mapGenericRequest(req: GenericRequest<C>): Promise<GenericResponse<C>>;
+  mapRequest(req: GenericRequest<C>): Promise<GenericResponse<C>>;
 
   /**
    * Send an outgoing platform response.
    * @param res A response object.
    * @return A Promise of some response.
    */
-  sendPlatformResponse(res: PlatformResponse<C>): Promise<unknown>;
+  sendResponse(res: GenericResponse<C>): Promise<unknown>;
 }
 
 /**

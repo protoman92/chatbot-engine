@@ -5,8 +5,8 @@ import {
   Context,
   ContextDAO,
   GenericRequest,
+  GenericResponse,
   injectContextOnReceive,
-  PlatformResponse,
   saveContextOnSend,
   saveUserForSenderID,
   ServiceCommunicator,
@@ -25,8 +25,8 @@ let contextDAO: ContextDAO<TestContext>;
 
 beforeEach(async () => {
   messenger = spy<UnitMessenger<TestContext>>({
-    mapGenericRequest: () => Promise.reject(''),
-    sendPlatformResponse: () => Promise.reject('')
+    mapRequest: () => Promise.reject(''),
+    sendResponse: () => Promise.reject('')
   });
 
   communicator = spy<ServiceCommunicator>({
@@ -45,7 +45,7 @@ beforeEach(async () => {
 describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
-    when(messenger.sendPlatformResponse(anything())).thenResolve();
+    when(messenger.sendResponse(anything())).thenResolve();
     when(contextDAO.setContext(cacheKey, anything())).thenResolve();
     const newContext: TestContext = { senderID };
 
@@ -54,18 +54,18 @@ describe('Save context on send', () => {
       saveContextOnSend(instance(contextDAO), 'FACEBOOK')
     );
 
-    const platformResponse: PlatformResponse<TestContext> = {
+    const genericResponse: GenericResponse<TestContext> = {
       senderID,
       newContext,
-      outgoingData: []
+      visualContents: []
     };
 
     // When
-    await composed.sendPlatformResponse(platformResponse);
+    await composed.sendResponse(genericResponse);
 
     // Then
     verify(contextDAO.setContext(cacheKey, deepEqual(newContext))).once();
-    verify(messenger.sendPlatformResponse(deepEqual(platformResponse))).once();
+    verify(messenger.sendResponse(deepEqual(genericResponse))).once();
   });
 });
 
@@ -74,7 +74,7 @@ describe('Inject context on receive', () => {
     // Setup
     const expectedContext: TestContext = { senderID };
 
-    when(messenger.mapGenericRequest(anything())).thenResolve({
+    when(messenger.mapRequest(anything())).thenResolve({
       senderID,
       newContext: expectedContext,
       visualContents: []
@@ -94,13 +94,13 @@ describe('Inject context on receive', () => {
     };
 
     // When
-    await composed.mapGenericRequest(genericRequest);
+    await composed.mapRequest(genericRequest);
 
     // Then
     verify(contextDAO.getContext(cacheKey)).once();
 
     verify(
-      messenger.mapGenericRequest(
+      messenger.mapRequest(
         deepEqual({ ...genericRequest, oldContext: expectedContext })
       )
     ).once();
@@ -113,7 +113,7 @@ describe('Save user for sender ID', () => {
     const chatbotUser = { id: senderID };
     const expectedContext: TestContext = { senderID };
 
-    when(messenger.mapGenericRequest(anything())).thenResolve({
+    when(messenger.mapRequest(anything())).thenResolve({
       senderID,
       newContext: expectedContext,
       visualContents: []
@@ -137,13 +137,13 @@ describe('Save user for sender ID', () => {
     };
 
     // When
-    await composed.mapGenericRequest(genericRequest);
+    await composed.mapRequest(genericRequest);
 
     // Then
     verify(communicator.getUser(senderID)).once();
 
     verify(
-      messenger.mapGenericRequest(
+      messenger.mapRequest(
         deepEqual({ ...genericRequest, oldContext: expectedContext })
       )
     ).once();
@@ -155,13 +155,13 @@ describe('Set typing indicator', () => {
     // Setup
     const oldContext: TestContext = { senderID };
 
-    when(messenger.mapGenericRequest(anything())).thenResolve({
+    when(messenger.mapRequest(anything())).thenResolve({
       senderID,
       newContext: oldContext,
       visualContents: []
     });
 
-    when(messenger.sendPlatformResponse(anything())).thenResolve();
+    when(messenger.sendResponse(anything())).thenResolve();
     when(communicator.setTypingIndicator(senderID, anything())).thenResolve();
 
     const composed = compose(
@@ -170,12 +170,12 @@ describe('Set typing indicator', () => {
     );
 
     // When
-    await composed.mapGenericRequest({ senderID, oldContext, data: [] });
+    await composed.mapRequest({ senderID, oldContext, data: [] });
 
-    await composed.sendPlatformResponse({
+    await composed.sendResponse({
       senderID,
       newContext: oldContext,
-      outgoingData: []
+      visualContents: []
     });
 
     // Then

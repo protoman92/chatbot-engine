@@ -17,9 +17,9 @@ export function saveContextOnSend<C extends Context>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    sendPlatformResponse: async response => {
+    sendResponse: async response => {
       const { senderID, newContext } = response;
-      const result = await unitMessenger.sendPlatformResponse(response);
+      const result = await unitMessenger.sendResponse(response);
       const cacheKey = getContextDAOCacheKey(platform, senderID);
       await contextDAO.setContext(cacheKey, newContext);
       return result;
@@ -41,11 +41,11 @@ export function injectContextOnReceive<C extends Context>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    mapGenericRequest: async request => {
+    mapRequest: async request => {
       const cacheKey = getContextDAOCacheKey(platform, request.senderID);
       let oldContext = await contextDAO.getContext(cacheKey);
       oldContext = deepClone({ ...request.oldContext, ...oldContext });
-      return unitMessenger.mapGenericRequest({ ...request, oldContext });
+      return unitMessenger.mapRequest({ ...request, oldContext });
     }
   });
 }
@@ -69,7 +69,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    mapGenericRequest: async request => {
+    mapRequest: async request => {
       let { oldContext } = request;
       const { senderID } = request;
 
@@ -81,7 +81,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
         oldContext = deepClone(Object.assign(oldContext, { [sidKey]: userID }));
       }
 
-      return unitMessenger.mapGenericRequest({ ...request, oldContext });
+      return unitMessenger.mapRequest({ ...request, oldContext });
     }
   });
 }
@@ -98,13 +98,13 @@ export function setTypingIndicator<C extends Context>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    mapGenericRequest: async request => {
+    mapRequest: async request => {
       const { senderID } = request;
       await communicator.setTypingIndicator(senderID, true);
-      return unitMessenger.mapGenericRequest(request);
+      return unitMessenger.mapRequest(request);
     },
-    sendPlatformResponse: async response => {
-      const result = await unitMessenger.sendPlatformResponse(response);
+    sendResponse: async response => {
+      const result = await unitMessenger.sendResponse(response);
       const { senderID } = response;
       await communicator.setTypingIndicator(senderID, false);
       return result;
