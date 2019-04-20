@@ -1,6 +1,6 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
-import { anything, instance, spy, verify, when } from 'ts-mockito';
+import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import {
   Context,
   createLeafSelector,
@@ -53,6 +53,14 @@ describe('Leaf selector', () => {
 
     when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
 
+    when(
+      leafSelector.clearPreviouslyActiveBranch(
+        deepEqual(pipelineInputs),
+        anything(),
+        anything()
+      )
+    ).thenCall(async (param0, param1) => param1);
+
     when(leafPipeline.processLeaf(anything(), anything())).thenCall(
       async ({ currentLeafID }) => {
         if (currentLeafID === `${validLeafID}`) {
@@ -66,18 +74,28 @@ describe('Leaf selector', () => {
     const oldContext: Context = { senderID };
 
     // When
-    const {
-      newContext: { activeBranch }
-    } = await instance(leafSelector).selectLeaf(oldContext, '');
+    const { newContext } = await instance(leafSelector).selectLeaf(
+      oldContext,
+      ''
+    );
 
     // Then
     const expectedCallTimes = validLeafID + 1;
+    const activeBranch = newContext.activeBranch;
     const currentLeafID = getCurrentLeafID(activeBranch);
     expectJs(currentLeafID).to.equal(`${validLeafID}`);
 
     verify(leafPipeline.processLeaf(anything(), anything())).times(
       expectedCallTimes
     );
+
+    verify(
+      leafSelector.clearPreviouslyActiveBranch(
+        deepEqual(pipelineInputs),
+        deepEqual(newContext),
+        anything()
+      )
+    ).once();
   });
 
   it('Should return error leaf if no leaves pass conditions', async () => {
@@ -95,15 +113,33 @@ describe('Leaf selector', () => {
 
     const error = new Error('');
     when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+
+    when(
+      leafSelector.clearPreviouslyActiveBranch(
+        deepEqual(pipelineInputs),
+        anything(),
+        anything()
+      )
+    ).thenCall(async (param0, param1) => param1);
+
     when(leafPipeline.processLeaf(anything(), anything())).thenThrow(error);
 
     // When
-    const {
-      newContext: { activeBranch }
-    } = await instance(leafSelector).selectLeaf({ senderID }, '');
+    const { newContext } = await instance(leafSelector).selectLeaf(
+      { senderID },
+      ''
+    );
 
     // Then
-    expectJs(activeBranch).to.equal(ERROR_LEAF_ID);
+    expectJs(newContext.activeBranch).to.equal(ERROR_LEAF_ID);
     verify(leafPipeline.processLeaf(anything(), anything())).times(1);
+
+    verify(
+      leafSelector.clearPreviouslyActiveBranch(
+        deepEqual(pipelineInputs),
+        deepEqual(newContext),
+        anything()
+      )
+    ).once();
   });
 });

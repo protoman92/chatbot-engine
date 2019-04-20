@@ -1,4 +1,4 @@
-import { deepClone, formatSpecialKey } from '../common/utils';
+import { deepClone, formatSpecialKey, joinPaths } from '../common/utils';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
@@ -24,8 +24,41 @@ export function createLeafSelector<C extends Context>(
 ) {
   const selector = {
     enumerateInputs: async () => enumerateLeafPipelineInputs(allBranches),
+    /**
+     * Clear previously active branch if current active branch differs.
+     * @param pipelineInputs All available pipeline inputs.
+     * @param newContext The new context object.
+     * @param previousActiveBranch The previously active branch.
+     * @return A Promise of context object.
+     */
+    clearPreviouslyActiveBranch: async (
+      pipelineInputs: readonly LeafPipeline.Input<C>[],
+      newContext: C,
+      previousActiveBranch?: string
+    ): Promise<C> => {
+      const { activeBranch } = newContext;
+
+      if (!!previousActiveBranch && activeBranch !== previousActiveBranch) {
+        const pipelineInput = pipelineInputs.find(
+          ({ prefixLeafPaths, currentLeafID }) => {
+            return (
+              joinPaths(...prefixLeafPaths, currentLeafID) ===
+              previousActiveBranch
+            );
+          }
+        );
+
+        if (!!pipelineInput && !!pipelineInput.parentBranch.contextKeys) {
+          const contextKeys = pipelineInput.parentBranch.contextKeys;
+          contextKeys.forEach(key => delete newContext[key]);
+        }
+      }
+
+      return newContext;
+    },
     selectLeaf: async (originalContext: C, inputText: string) => {
       const pipelineInputs = await selector.enumerateInputs();
+      const previousActiveBranch = originalContext.activeBranch;
 
       const result = await (async function() {
         try {
@@ -56,7 +89,13 @@ export function createLeafSelector<C extends Context>(
         }
       })();
 
-      return result;
+      const newContext = await selector.clearPreviouslyActiveBranch(
+        pipelineInputs,
+        result.newContext,
+        previousActiveBranch
+      );
+
+      return { ...result, newContext };
     }
   };
 
