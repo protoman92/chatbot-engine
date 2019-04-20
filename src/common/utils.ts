@@ -55,6 +55,15 @@ export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
 }
 
 /**
+ * Format a special key.
+ * @param key A string value.
+ * @return A string value.
+ */
+export function formatSpecialKey(key: string) {
+  return `@//${key}//@`;
+}
+
+/**
  * Format an error for Facebook.
  * @param error A string value.
  * @return A string value.

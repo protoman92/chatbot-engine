@@ -1,9 +1,15 @@
-import { deepClone } from '../common/utils';
+import { deepClone, formatSpecialKey } from '../common/utils';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 import { enumerateLeafPipelineInputs } from './leaf-pipeline';
+
+/**
+ * Represents the ID of the error leaf. This is used when the selector could
+ * not determine which leaf to select.
+ */
+export const ERROR_LEAF_ID = formatSpecialKey('error');
 
 /**
  * Create a leaf selector.
@@ -40,7 +46,7 @@ export function createLeafSelector<C extends Context>(
         );
       } catch ({ message: text }) {
         return {
-          currentLeafID: 'error',
+          currentLeafID: ERROR_LEAF_ID,
           newContext: deepClone(originalContext),
           visualContents: [{ response: { text } }]
         } as LeafSelector.Result<C>;

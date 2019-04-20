@@ -1,4 +1,4 @@
-import { deepClone, toArray } from '../common/utils';
+import { deepClone, formatSpecialKey, toArray } from '../common/utils';
 import { Branch } from '../type/branch';
 import { Context, DefaultContext, KV } from '../type/common';
 import { Leaf, LeafContentInput } from '../type/leaf';
@@ -6,7 +6,7 @@ import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 
 /** Represents an ignored text match. */
-export const IGNORED_TEXT_MATCH = '@//ignored-text-match//@';
+export const IGNORED_TEXT_MATCH = formatSpecialKey('ignored-text-match');
 
 /**
  * Join the path components of a branch to produce the full path.
