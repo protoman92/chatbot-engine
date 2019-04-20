@@ -1,12 +1,15 @@
 import expectJs from 'expect.js';
 import { describe } from 'mocha';
+import { anything, instance, spy, when } from 'ts-mockito';
 import {
   createLeafPipeline,
   IGNORED_TEXT_MATCH
 } from '../../src/content/leaf-pipeline';
 import { Context } from '../../src/type/common';
+import { Leaf } from '../../src/type/leaf';
+import { LeafPipeline } from '../../src/type/leaf-pipeline';
 
-export type Pipeline = ReturnType<
+type Pipeline = ReturnType<
   typeof import('../../src/content/leaf-pipeline')['createLeafPipeline']
 >;
 
@@ -119,5 +122,58 @@ describe('Supporting pipeline methods', () => {
     // Then
     expectJs(allTextMatches).to.eql([]);
     expectJs(lastTextMatch).to.not.be.ok();
+  });
+});
+
+describe('Main leaf processing', () => {
+  let pipeline: Pipeline;
+  let currentLeaf: Leaf<Context>;
+  let pipelineInput: LeafPipeline.Input<Context>;
+  let additionalParams: LeafPipeline.AdditionalParams<Context>;
+
+  beforeEach(() => {
+    pipeline = spy(createLeafPipeline());
+
+    currentLeaf = spy<Leaf<Context>>({
+      isStartOfBranch: () => Promise.reject(''),
+      checkTextConditions: () => Promise.reject(''),
+      checkContextConditions: () => Promise.reject(''),
+      produceOutgoingContent: () => Promise.reject(''),
+      isEndOfBranch: () => Promise.reject(''),
+      isIntermediate: () => Promise.reject('')
+    });
+
+    pipelineInput = spy<LeafPipeline.Input<Context>>({
+      currentLeaf: instance(currentLeaf),
+      currentLeafID: '',
+      parentBranch: {},
+      prefixLeafPaths: []
+    });
+
+    additionalParams = spy<LeafPipeline.AdditionalParams<Context>>({
+      oldContext: { senderID },
+      inputText: '',
+      inputImageURL: ''
+    });
+  });
+
+  it('Should fail if context checks fail', async () => {
+    // Setup
+    when(currentLeaf.checkContextConditions(anything())).thenReturn(
+      Promise.resolve(false)
+    );
+
+    when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
+      senderID
+    });
+
+    // When
+    const result = await instance(pipeline).processLeaf(
+      instance(pipelineInput),
+      instance(additionalParams)
+    );
+
+    // Then
+    expectJs(result).not.to.be.ok();
   });
 });
