@@ -1,3 +1,5 @@
+import { PlatformResponse } from './messenger';
+
 /** Handle HTTP communication. */
 export interface HTTPCommunicator {
   communicate<T>(
@@ -28,7 +30,7 @@ export interface ServiceCommunicator {
    * @param data Response payload.
    * @returns A Promise of some response.
    */
-  sendResponse(data: unknown): Promise<unknown>;
+  sendResponse(data: PlatformResponse): Promise<unknown>;
 
   /**
    * Toggle typing indicator.

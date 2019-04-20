@@ -5,15 +5,8 @@ import { VisualContent } from './leaf';
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
 
-/**
- * A platform-specific response.
- * @template C The context used by the current chatbot.*
- */
-export interface PlatformResponse<C extends Context> {
-  readonly senderID: string;
-  readonly newContext: C;
-  readonly outgoingData: readonly unknown[];
-}
+/** A platform-specific response. */
+export type PlatformResponse = unknown;
 
 /**
  * A generic incoming request.

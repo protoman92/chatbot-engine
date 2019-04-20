@@ -126,9 +126,8 @@ export function mapWebhook<C extends Context>(
  */
 async function createFacebookResponse<C extends Context>({
   senderID,
-  newContext,
-  visualContents
-}: GenericResponse<C>): Promise<PlatformResponse<C>> {
+  visualContents: contents
+}: GenericResponse<C>): Promise<readonly PlatformResponse[]> {
   const MAX_GENERIC_ELEMENT_COUNT = 11;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
@@ -261,13 +260,7 @@ async function createFacebookResponse<C extends Context>({
     };
   }
 
-  return {
-    senderID,
-    newContext,
-    outgoingData: visualContents.map(content =>
-      createPlatformResponse(senderID, content)
-    )
-  };
+  return contents.map(content => createPlatformResponse(senderID, content));
 }
 
 /**

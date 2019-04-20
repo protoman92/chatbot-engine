@@ -18,13 +18,15 @@ import {
  * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
  * @param communicator A service communicator instance.
- * @param responseMapper Function to map generic response to platform response.
+ * @param responseMapper Function to map generic response to platform responses.
  * @return A generic messenger.
  */
 export function createGenericUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
   communicator: ServiceCommunicator,
-  responseMapper: (res: GenericResponse<C>) => Promise<PlatformResponse<C>>
+  responseMapper: (
+    res: GenericResponse<C>
+  ) => Promise<readonly PlatformResponse[]>
 ): UnitMessenger<C> {
   async function processInputText(
     oldContext: C,
@@ -60,9 +62,9 @@ export function createGenericUnitMessenger<C extends Context>(
         }))
       };
     },
-    sendResponse: async responses => {
-      const data = await responseMapper(responses);
-      return communicator.sendResponse(data);
+    sendResponse: async response => {
+      const data = await responseMapper(response);
+      return Promise.all(data.map(datum => communicator.sendResponse(datum)));
     }
   };
 
