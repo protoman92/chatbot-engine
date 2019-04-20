@@ -1,4 +1,4 @@
-import { describe } from 'mocha';
+import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import { compose } from '../../src/common/utils';
 import {
@@ -16,16 +16,16 @@ import {
   UnitMessenger
 } from '../../src/type/messenger';
 
-interface BotContext extends Context {}
+interface TestContext extends Context {}
 
 const senderID = 'sender-id';
 const cacheKey = `cache-${senderID}`;
-let messenger: UnitMessenger<BotContext>;
+let messenger: UnitMessenger<TestContext>;
 let communicator: ServiceCommunicator;
-let contextDAO: ContextDAO<BotContext>;
+let contextDAO: ContextDAO<TestContext>;
 
-before(async () => {
-  messenger = spy<UnitMessenger<BotContext>>({
+beforeEach(async () => {
+  messenger = spy<UnitMessenger<TestContext>>({
     getContextDAOCacheKey: () => cacheKey,
     mapGenericRequest: () => Promise.reject(''),
     sendPlatformResponse: () => Promise.reject('')
@@ -37,7 +37,7 @@ before(async () => {
     setTypingIndicator: () => Promise.reject('')
   });
 
-  contextDAO = spy<ContextDAO<BotContext>>({
+  contextDAO = spy<ContextDAO<TestContext>>({
     getContext: () => Promise.reject(''),
     setContext: () => Promise.reject(''),
     resetAll: () => Promise.reject('')
@@ -55,14 +55,14 @@ describe('Save context on send', () => {
       Promise.resolve()
     );
 
-    const newContext: BotContext = { senderID };
+    const newContext: TestContext = { senderID };
 
     const composed = compose(
       instance(messenger),
       saveContextOnSend(instance(contextDAO))
     );
 
-    const platformResponse: PlatformResponse<BotContext> = {
+    const platformResponse: PlatformResponse<TestContext> = {
       senderID,
       newContext,
       outgoingData: []
@@ -80,7 +80,7 @@ describe('Save context on send', () => {
 describe('Inject context on receive', () => {
   it('Should inject context on send', async () => {
     // Setup
-    const expectedContext: BotContext = { senderID };
+    const expectedContext: TestContext = { senderID };
 
     when(messenger.mapGenericRequest(anything())).thenReturn(
       Promise.resolve({
@@ -99,7 +99,7 @@ describe('Inject context on receive', () => {
       injectContextOnReceive(instance(contextDAO))
     );
 
-    const genericRequest: GenericRequest<BotContext> = {
+    const genericRequest: GenericRequest<TestContext> = {
       senderID,
       oldContext: { senderID: '' },
       data: []
@@ -123,7 +123,7 @@ describe('Save user for sender ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
     const chatbotUser = { id: senderID };
-    const expectedContext: BotContext = { senderID };
+    const expectedContext: TestContext = { senderID };
 
     when(messenger.mapGenericRequest(anything())).thenReturn(
       Promise.resolve({
@@ -146,7 +146,7 @@ describe('Save user for sender ID', () => {
       )
     );
 
-    const genericRequest: GenericRequest<BotContext> = {
+    const genericRequest: GenericRequest<TestContext> = {
       senderID,
       oldContext: { senderID: '' },
       data: []
@@ -169,7 +169,7 @@ describe('Save user for sender ID', () => {
 describe('Set typing indicator', () => {
   it('Should set typing indicator on request and response', async () => {
     // Setup
-    const oldContext: BotContext = { senderID };
+    const oldContext: TestContext = { senderID };
 
     when(messenger.mapGenericRequest(anything())).thenReturn(
       Promise.resolve({

@@ -72,9 +72,9 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
       if (!oldContext || !oldContext.senderID) {
         const platformUser = await communicator.getUser<PUser>(senderID);
         const newUser = await saveUser(platformUser);
-        const senderIDKey: keyof DefaultContext = 'senderID';
+        const sidKey: keyof DefaultContext = 'senderID';
         const userID = getUserID(newUser);
-        oldContext = Object.assign({ [senderIDKey]: userID }, oldContext);
+        oldContext = deepClone(Object.assign(oldContext, { [sidKey]: userID }));
       }
 
       return unitMessenger.mapGenericRequest({ ...request, oldContext });
