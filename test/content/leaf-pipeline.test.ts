@@ -2,13 +2,16 @@ import expectJs from 'expect.js';
 import { describe } from 'mocha';
 import { anything, instance, spy, when } from 'ts-mockito';
 import {
+  Branch,
   Context,
   createLeafPipeline,
   IGNORED_TEXT_MATCH,
+  KV,
   Leaf,
   LeafPipeline,
   VisualContent
 } from '../../src';
+import { enumerateLeafPipelineInputs } from '../../src/content/leaf-pipeline';
 
 type Pipeline = ReturnType<
   typeof import('../../src/content/leaf-pipeline')['createLeafPipeline']
@@ -265,5 +268,101 @@ describe('Main leaf processing', () => {
 
     // Then
     expectJs(result).to.eql({ currentLeafID, newContext, visualContents });
+  });
+});
+
+describe('Pipeline utilities utilities', () => {
+  it('Should enumerate pipeline inputs correctly', () => {
+    /// Setup
+    function mapContextKeys(prefix: string) {
+      return [1, 2, 3].map(val => `${prefix}.${val}`);
+    }
+
+    const typicalLeaf: Leaf<Context> = {
+      checkContextConditions: () => Promise.reject(''),
+      checkTextConditions: () => Promise.reject(''),
+      produceVisualContent: () => Promise.reject('')
+    };
+
+    const branches: KV<Branch<Context>> = {
+      b1: {
+        contextKeys: mapContextKeys('b1'),
+        subBranches: {
+          b1_a: {
+            contextKeys: mapContextKeys('b1a'),
+            leaves: { b1_a_l1: typicalLeaf }
+          }
+        }
+      },
+      b2: { subBranches: undefined, leaves: undefined },
+      b3: {
+        contextKeys: mapContextKeys('b3'),
+        subBranches: {
+          b3_a: {
+            subBranches: { b3_a1: {} },
+            leaves: { b3_a_l1: typicalLeaf }
+          }
+        },
+        leaves: {
+          b3_l1: typicalLeaf,
+          b3_l2: typicalLeaf
+        }
+      }
+    };
+
+    /// When
+    const extractedStories = enumerateLeafPipelineInputs(branches);
+
+    /// Then
+    expectJs(extractedStories).to.eql([
+      {
+        currentLeaf: typicalLeaf,
+        currentLeafID: 'b1_a_l1',
+        parentBranch: {
+          contextKeys: mapContextKeys('b1a'),
+          leaves: { b1_a_l1: typicalLeaf }
+        },
+        prefixLeafPaths: ['b1', 'b1_a']
+      },
+      {
+        currentLeaf: typicalLeaf,
+        currentLeafID: 'b3_l1',
+        parentBranch: {
+          contextKeys: mapContextKeys('b3'),
+          subBranches: {
+            b3_a: {
+              subBranches: { b3_a1: {} },
+              leaves: { b3_a_l1: typicalLeaf }
+            }
+          },
+          leaves: { b3_l1: typicalLeaf, b3_l2: typicalLeaf }
+        },
+        prefixLeafPaths: ['b3']
+      },
+      {
+        currentLeaf: typicalLeaf,
+        currentLeafID: 'b3_l2',
+        parentBranch: {
+          contextKeys: mapContextKeys('b3'),
+          subBranches: {
+            b3_a: {
+              subBranches: { b3_a1: {} },
+              leaves: { b3_a_l1: typicalLeaf }
+            }
+          },
+          leaves: { b3_l1: typicalLeaf, b3_l2: typicalLeaf }
+        },
+        prefixLeafPaths: ['b3']
+      },
+      {
+        currentLeaf: typicalLeaf,
+        currentLeafID: 'b3_a_l1',
+        parentBranch: {
+          subBranches: { b3_a1: {} },
+          leaves: { b3_a_l1: typicalLeaf }
+        },
+        prefixLeafPaths: ['b3', 'b3_a']
+      }
+    ]);
   });
 });
