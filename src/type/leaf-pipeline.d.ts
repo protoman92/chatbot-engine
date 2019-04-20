@@ -40,5 +40,5 @@ export interface LeafPipeline<C extends Context> {
   processLeaf(
     pipelineInput: LeafPipeline.Input<C>,
     additionalParams: LeafPipeline.AdditionalParams<C>
-  ): PromiseLike<LeafSelector.Result<C> | null>;
+  ): Promise<LeafSelector.Result<C> | null>;
 }

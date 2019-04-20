@@ -20,5 +20,5 @@ declare namespace LeafSelector {
  * @template C The shape of the context used by the current chatbot.
  */
 export interface LeafSelector<C extends Context> {
-  selectLeaf(oldContext: C, text: string): PromiseLike<LeafSelector.Result<C>>;
+  selectLeaf(oldContext: C, text: string): Promise<LeafSelector.Result<C>>;
 }

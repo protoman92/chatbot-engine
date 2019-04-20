@@ -63,14 +63,14 @@ export interface UnitMessenger<C extends Context> {
    * @param req A request object.
    * @return A Promise of some response.
    */
-  mapGenericRequest(req: GenericRequest<C>): PromiseLike<GenericResponse<C>>;
+  mapGenericRequest(req: GenericRequest<C>): Promise<GenericResponse<C>>;
 
   /**
    * Send an outgoing platform response.
    * @param res A response object.
    * @return A Promise of some response.
    */
-  sendPlatformResponse(res: PlatformResponse<C>): PromiseLike<unknown>;
+  sendPlatformResponse(res: PlatformResponse<C>): Promise<unknown>;
 }
 
 /**
@@ -79,5 +79,5 @@ export interface UnitMessenger<C extends Context> {
  * have a generic unit messenger that handles requests one-by-one.
  */
 export interface Messenger {
-  processPlatformRequest(req: PlatformRequest): PromiseLike<unknown>;
+  processPlatformRequest(req: PlatformRequest): Promise<unknown>;
 }

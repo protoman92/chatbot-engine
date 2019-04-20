@@ -159,9 +159,7 @@ describe('Main leaf processing', () => {
 
   it('Should fail if context checks fail', async () => {
     // Setup
-    when(currentLeaf.checkContextConditions(anything())).thenReturn(
-      Promise.resolve(false)
-    );
+    when(currentLeaf.checkContextConditions(anything())).thenResolve(false);
 
     when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
       senderID

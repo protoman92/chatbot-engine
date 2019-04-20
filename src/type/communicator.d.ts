@@ -7,7 +7,7 @@ export interface HTTPCommunicator {
       body?: unknown;
       headers: Readonly<{ [K: string]: unknown }>;
     }>
-  ): PromiseLike<T>;
+  ): Promise<T>;
 }
 
 /**
@@ -21,14 +21,14 @@ export interface ServiceCommunicator {
    * @param senderID A string value.
    * @return A Promise of an user object.
    */
-  getUser<U>(senderID: string): PromiseLike<U>;
+  getUser<U>(senderID: string): Promise<U>;
 
   /**
    * Send a response to the related service.
    * @param data Response payload.
    * @returns A Promise of some response.
    */
-  sendResponse(data: unknown): PromiseLike<unknown>;
+  sendResponse(data: unknown): Promise<unknown>;
 
   /**
    * Toggle typing indicator.
@@ -36,5 +36,5 @@ export interface ServiceCommunicator {
    * @param enabled A boolean value.
    * @return A Promise of some response.
    */
-  setTypingIndicator(senderID: string, enabled: boolean): PromiseLike<unknown>;
+  setTypingIndicator(senderID: string, enabled: boolean): Promise<unknown>;
 }

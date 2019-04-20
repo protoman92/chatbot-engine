@@ -35,7 +35,7 @@ export interface Leaf<C extends Context> {
    * Check if this leaf marks the start of a branch.
    * @return A Promise of boolean.
    */
-  isStartOfBranch?(): PromiseLike<boolean>;
+  isStartOfBranch?(): Promise<boolean>;
 
   /**
    * Check text conditions to see if this leaf can be navigated to. This is
@@ -46,14 +46,14 @@ export interface Leaf<C extends Context> {
    */
   checkTextConditions(
     text: string
-  ): PromiseLike<string | readonly string[] | boolean>;
+  ): Promise<string | readonly string[] | boolean>;
 
   /**
    * Check context conditions to see if this leaf can be navigated to.
    * @param oldContext The old context object.
    * @return A Promise of boolean.
    */
-  checkContextConditions(oldContext: C): PromiseLike<boolean>;
+  checkContextConditions(oldContext: C): Promise<boolean>;
 
   /**
    * Produce content to be sent to the user. We may also modify the old context
@@ -63,7 +63,7 @@ export interface Leaf<C extends Context> {
    */
   produceOutgoingContent(
     leafInput: Omit<LeafContentInput<C>, 'newContext'>
-  ): PromiseLike<
+  ): Promise<
     Readonly<{ newContext: C; outgoingContents: readonly OutgoingContent[] }>
   >;
 
@@ -76,7 +76,7 @@ export interface Leaf<C extends Context> {
    * @param newContext The new context object.
    * @return A Promise of next leaf paths.
    */
-  isIntermediate?(newContext: C): PromiseLike<readonly string[]>;
+  isIntermediate?(newContext: C): Promise<readonly string[]>;
 
   /**
    * Check if this leaf marks the end of a branch. We might do some cleanup
@@ -84,5 +84,5 @@ export interface Leaf<C extends Context> {
    * @param newContext The newly transformed context.
    * @return A Promise of boolean.
    */
-  isEndOfBranch?(newContext: C): PromiseLike<boolean>;
+  isEndOfBranch?(newContext: C): Promise<boolean>;
 }

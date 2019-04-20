@@ -47,14 +47,8 @@ beforeEach(async () => {
 describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
-    when(messenger.sendPlatformResponse(anything())).thenReturn(
-      Promise.resolve()
-    );
-
-    when(contextDAO.setContext(cacheKey, anything())).thenReturn(
-      Promise.resolve()
-    );
-
+    when(messenger.sendPlatformResponse(anything())).thenResolve();
+    when(contextDAO.setContext(cacheKey, anything())).thenResolve();
     const newContext: TestContext = { senderID };
 
     const composed = compose(
@@ -82,17 +76,13 @@ describe('Inject context on receive', () => {
     // Setup
     const expectedContext: TestContext = { senderID };
 
-    when(messenger.mapGenericRequest(anything())).thenReturn(
-      Promise.resolve({
-        senderID,
-        newContext: expectedContext,
-        outgoingContents: []
-      })
-    );
+    when(messenger.mapGenericRequest(anything())).thenResolve({
+      senderID,
+      newContext: expectedContext,
+      outgoingContents: []
+    });
 
-    when(contextDAO.getContext(cacheKey)).thenReturn(
-      Promise.resolve(expectedContext)
-    );
+    when(contextDAO.getContext(cacheKey)).thenResolve(expectedContext);
 
     const composed = compose(
       instance(messenger),
@@ -125,17 +115,13 @@ describe('Save user for sender ID', () => {
     const chatbotUser = { id: senderID };
     const expectedContext: TestContext = { senderID };
 
-    when(messenger.mapGenericRequest(anything())).thenReturn(
-      Promise.resolve({
-        senderID,
-        newContext: expectedContext,
-        outgoingContents: []
-      })
-    );
+    when(messenger.mapGenericRequest(anything())).thenResolve({
+      senderID,
+      newContext: expectedContext,
+      outgoingContents: []
+    });
 
-    when(communicator.getUser(senderID)).thenReturn(
-      Promise.resolve(chatbotUser)
-    );
+    when(communicator.getUser(senderID)).thenResolve(chatbotUser);
 
     const composed = compose(
       instance(messenger),
@@ -171,21 +157,14 @@ describe('Set typing indicator', () => {
     // Setup
     const oldContext: TestContext = { senderID };
 
-    when(messenger.mapGenericRequest(anything())).thenReturn(
-      Promise.resolve({
-        senderID,
-        newContext: oldContext,
-        outgoingContents: []
-      })
-    );
+    when(messenger.mapGenericRequest(anything())).thenResolve({
+      senderID,
+      newContext: oldContext,
+      outgoingContents: []
+    });
 
-    when(messenger.sendPlatformResponse(anything())).thenReturn(
-      Promise.resolve()
-    );
-
-    when(communicator.setTypingIndicator(senderID, anything())).thenReturn(
-      Promise.resolve()
-    );
+    when(messenger.sendPlatformResponse(anything())).thenResolve();
+    when(communicator.setTypingIndicator(senderID, anything())).thenResolve();
 
     const composed = compose(
       instance(messenger),

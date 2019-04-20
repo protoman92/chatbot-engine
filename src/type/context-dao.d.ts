@@ -12,7 +12,7 @@ export interface ContextDAO<C extends Context> {
    * @param cacheKey The key identifying the change.
    * @return A Promise of context.
    */
-  getContext(cacheKey: string): PromiseLike<C>;
+  getContext(cacheKey: string): Promise<C>;
 
   /**
    * Set the whole context in storage.
@@ -20,11 +20,11 @@ export interface ContextDAO<C extends Context> {
    * @param context The context object being saved.
    * @return A Promise of some response.
    */
-  setContext(cacheKey: string, context: C): PromiseLike<unknown>;
+  setContext(cacheKey: string, context: C): Promise<unknown>;
 
   /**
    * Reset all context to factory.
    * @return A Promise of some response.
    */
-  resetAll(): PromiseLike<void>;
+  resetAll(): Promise<void>;
 }

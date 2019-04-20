@@ -19,7 +19,7 @@ export function createFacebookCommunicator(
     method: 'GET' | 'POST';
     additionalPaths?: readonly string[];
     body?: unknown;
-  }>): PromiseLike<T> {
+  }>): Promise<T> {
     return communicator.communicate<T>({
       method,
       body,

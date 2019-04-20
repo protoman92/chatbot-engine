@@ -60,7 +60,7 @@ export function injectContextOnReceive<C extends Context>(
  */
 export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
   communicator: ServiceCommunicator,
-  saveUser: (platformUser: PUser) => PromiseLike<CUser>,
+  saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
