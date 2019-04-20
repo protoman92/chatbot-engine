@@ -101,7 +101,10 @@ export function createLeafPipeline<C extends Context>() {
      * activeBranch key.
      */
     prepareOutgoingContext: async (
-      { parentBranch: { contextKeys }, currentLeaf }: LeafPipeline.Input<C>,
+      {
+        parentBranch: { contextKeys },
+        currentLeaf
+      }: Pick<LeafPipeline.Input<C>, 'parentBranch' | 'currentLeaf'>,
       newContext: C
     ) => {
       if (

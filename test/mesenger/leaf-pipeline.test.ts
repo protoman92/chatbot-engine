@@ -8,6 +8,7 @@ export type Pipeline = ReturnType<
 >;
 
 const senderID = 'sender-id';
+const activeBranch = 'active-branch';
 
 describe('Supporting pipeline methods', () => {
   it('Should update context when preparing incoming context', async () => {
@@ -38,5 +39,35 @@ describe('Supporting pipeline methods', () => {
 
     // Then
     expectJs(oldContext).not.to.have.key('a', 'b');
+  });
+
+  it('Should update context when preparing outgoing context', async () => {
+    // Setup
+    interface TestContext extends Context {
+      readonly a: number;
+      readonly b: string;
+    }
+
+    const pipeline = createLeafPipeline<TestContext>();
+    let oldContext: TestContext = { senderID, activeBranch, a: 1, b: '2' };
+
+    // When
+    oldContext = await pipeline.prepareOutgoingContext(
+      {
+        parentBranch: {
+          contextKeys: ['a', 'b']
+        },
+        currentLeaf: {
+          checkTextConditions: () => Promise.reject(''),
+          checkContextConditions: () => Promise.reject(''),
+          produceOutgoingContent: () => Promise.reject(''),
+          isEndOfBranch: async () => true
+        }
+      },
+      oldContext
+    );
+
+    // Then
+    expectJs(oldContext).not.to.have.key('activeBranch', 'a', 'b');
   });
 });
