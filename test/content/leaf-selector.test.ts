@@ -8,7 +8,7 @@ import {
   Leaf,
   LeafPipeline
 } from '../../src';
-import { getCurrentLeafID } from '../../src/content/leaf-pipeline';
+import { getCurrentLeafID } from '../../src/common/utils';
 
 type LeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']

@@ -27,7 +27,7 @@ export function createLeafSelector<C extends Context>(
     selectLeaf: async (originalContext: C, inputText: string) => {
       const pipelineInputs = await selector.enumerateInputs();
 
-      const result = (async function() {
+      const result = await (async function() {
         try {
           for (const input of pipelineInputs) {
             const oldContext = deepClone(originalContext);

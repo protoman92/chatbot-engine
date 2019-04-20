@@ -55,6 +55,26 @@ export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
 }
 
 /**
+ * Join the path components of a branch to produce the full path.
+ * @param pathComponents An Array of path components.
+ * @return The full path.
+ */
+export function joinPaths(...pathComponents: readonly string[]) {
+  return pathComponents.join('.');
+}
+
+/**
+ * Extract the current leaf ID from active branch.
+ * @param activeBranch The current active branch.
+ * @return The current leaf ID.
+ */
+export function getCurrentLeafID(activeBranch?: string): string | null {
+  if (!activeBranch) return null;
+  const branchPaths = activeBranch.split('.');
+  return branchPaths.length > 0 ? branchPaths[branchPaths.length - 1] : null;
+}
+
+/**
  * Format a special key.
  * @param key A string value.
  * @return A string value.

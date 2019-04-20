@@ -11,10 +11,8 @@ import {
   LeafPipeline,
   VisualContent
 } from '../../src';
-import {
-  enumerateLeafPipelineInputs,
-  joinPaths
-} from '../../src/content/leaf-pipeline';
+import { joinPaths } from '../../src/common/utils';
+import { enumerateLeafPipelineInputs } from '../../src/content/leaf-pipeline';
 
 type Pipeline = ReturnType<
   typeof import('../../src/content/leaf-pipeline')['createLeafPipeline']

@@ -1,11 +1,10 @@
-import { deepClone } from '../common/utils';
+import { deepClone, getCurrentLeafID, joinPaths } from '../common/utils';
 import { Context } from '../type/common';
 import { LeafSelector } from '../type/leaf-selector';
 import {
   EnumeratedElement,
   LeafCombinationTesterParam
 } from '../type/leaf-selector-tester';
-import { getCurrentLeafID, joinPaths } from './leaf-pipeline';
 
 /**
  * Enumerate all combinations of values, for e.g., we have:

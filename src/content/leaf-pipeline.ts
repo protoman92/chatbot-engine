@@ -1,4 +1,9 @@
-import { deepClone, formatSpecialKey, toArray } from '../common/utils';
+import {
+  deepClone,
+  formatSpecialKey,
+  joinPaths,
+  toArray
+} from '../common/utils';
 import { Branch } from '../type/branch';
 import { Context, DefaultContext, KV } from '../type/common';
 import { Leaf, LeafContentInput } from '../type/leaf';
@@ -7,26 +12,6 @@ import { LeafSelector } from '../type/leaf-selector';
 
 /** Represents an ignored text match. */
 export const IGNORED_TEXT_MATCH = formatSpecialKey('ignored-text-match');
-
-/**
- * Join the path components of a branch to produce the full path.
- * @param pathComponents An Array of path components.
- * @return The full path.
- */
-export function joinPaths(...pathComponents: readonly string[]) {
-  return pathComponents.join('.');
-}
-
-/**
- * Extract the current leaf ID from active branch.
- * @param activeBranch The current active branch.
- * @return The current leaf ID.
- */
-export function getCurrentLeafID(activeBranch?: string): string | null {
-  if (!activeBranch) return null;
-  const branchPaths = activeBranch.split('.');
-  return branchPaths.length > 0 ? branchPaths[branchPaths.length - 1] : null;
-}
 
 /**
  * Enumerate a key-value branch object to produce the entire list of pipeline
