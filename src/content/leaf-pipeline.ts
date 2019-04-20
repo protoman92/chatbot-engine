@@ -18,6 +18,17 @@ export function joinPaths(...pathComponents: readonly string[]) {
 }
 
 /**
+ * Extract the current leaf ID from active branch.
+ * @param activeBranch The current active branch.
+ * @return The current leaf ID.
+ */
+export function getCurrentLeafID(activeBranch?: string): string | null {
+  if (!activeBranch) return null;
+  const branchPaths = activeBranch.split('.');
+  return branchPaths.length > 0 ? branchPaths[branchPaths.length - 1] : null;
+}
+
+/**
  * Enumerate a key-value branch object to produce the entire list of pipeline
  * inputs.  Each pipeline input will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
@@ -160,7 +171,7 @@ export function createLeafPipeline<C extends Context>() {
         inputText
       }: Pick<LeafPipeline.AdditionalParams<C>, 'oldContext' | 'inputText'>
     ): Promise<LeafSelector.Result<C> | null> => {
-      const { currentLeaf, currentLeafID } = input;
+      const { currentLeaf } = input;
       let oldContext = deepClone(originalContext);
       oldContext = await pipeline.prepareIncomingContext(input, oldContext);
       if (!(await currentLeaf.checkContextConditions(oldContext))) return null;
@@ -186,7 +197,7 @@ export function createLeafPipeline<C extends Context>() {
       const { visualContents } = leafContent;
       if (!visualContents.length) return null;
       newContext = await pipeline.prepareOutgoingContext(input, newContext);
-      return { currentLeafID, newContext, visualContents };
+      return { newContext, visualContents };
     }
   };
 

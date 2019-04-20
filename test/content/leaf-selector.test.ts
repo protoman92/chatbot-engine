@@ -8,6 +8,7 @@ import {
   Leaf,
   LeafPipeline
 } from '../../src';
+import { getCurrentLeafID } from '../../src/content/leaf-pipeline';
 
 type LeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
@@ -54,7 +55,10 @@ describe('Leaf selector', () => {
 
     when(leafPipeline.processLeaf(anything(), anything())).thenCall(
       async ({ currentLeafID }) => {
-        if (currentLeafID === `${validLeafID}`) return { currentLeafID };
+        if (currentLeafID === `${validLeafID}`) {
+          return { newContext: { activeBranch: currentLeafID } };
+        }
+
         return null;
       }
     );
@@ -62,13 +66,13 @@ describe('Leaf selector', () => {
     const oldContext: Context = { senderID };
 
     // When
-    const { currentLeafID } = await instance(leafSelector).selectLeaf(
-      oldContext,
-      ''
-    );
+    const {
+      newContext: { activeBranch }
+    } = await instance(leafSelector).selectLeaf(oldContext, '');
 
     // Then
     const expectedCallTimes = validLeafID + 1;
+    const currentLeafID = getCurrentLeafID(activeBranch);
     expectJs(currentLeafID).to.equal(`${validLeafID}`);
 
     verify(leafPipeline.processLeaf(anything(), anything())).times(
@@ -94,13 +98,12 @@ describe('Leaf selector', () => {
     when(leafPipeline.processLeaf(anything(), anything())).thenThrow(error);
 
     // When
-    const { currentLeafID } = await instance(leafSelector).selectLeaf(
-      { senderID },
-      ''
-    );
+    const {
+      newContext: { activeBranch }
+    } = await instance(leafSelector).selectLeaf({ senderID }, '');
 
     // Then
-    expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
+    expectJs(activeBranch).to.equal(ERROR_LEAF_ID);
     verify(leafPipeline.processLeaf(anything(), anything())).times(1);
   });
 });

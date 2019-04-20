@@ -7,7 +7,6 @@ declare namespace LeafSelector {
    * @template C The context used by the current chatbot.
    */
   export interface Result<C extends Context> {
-    readonly currentLeafID: string;
     readonly newContext: C;
     readonly visualContents: readonly VisualContent[];
   }

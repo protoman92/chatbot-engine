@@ -5,7 +5,7 @@ import {
   EnumeratedElement,
   LeafCombinationTesterParam
 } from '../type/leaf-selector-tester';
-import { joinPaths } from './leaf-pipeline';
+import { getCurrentLeafID, joinPaths } from './leaf-pipeline';
 
 /**
  * Enumerate all combinations of values, for e.g., we have:
@@ -175,11 +175,8 @@ export function createLeafSelectorTester<C extends Context>(
       return Promise.all(
         sequence.map(async ({ text, leafID }, i) => {
           if (beforeEachIteration) await beforeEachIteration();
-
-          const { currentLeafID, newContext } = await selectLeaf(
-            oldContext,
-            text
-          );
+          const { newContext } = await selectLeaf(oldContext, text);
+          const currentLeafID = getCurrentLeafID(newContext.activeBranch);
 
           if (leafID !== currentLeafID) {
             throw Error(`${i}: Expected ${currentLeafID}, got ${leafID}`);

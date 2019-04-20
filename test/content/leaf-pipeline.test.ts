@@ -274,7 +274,7 @@ describe('Main leaf processing', () => {
     );
 
     // Then
-    expectJs(result).to.eql({ currentLeafID, newContext, visualContents });
+    expectJs(result).to.eql({ newContext, visualContents });
   });
 });
 

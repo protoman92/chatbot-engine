@@ -27,30 +27,36 @@ export function createLeafSelector<C extends Context>(
     selectLeaf: async (originalContext: C, inputText: string) => {
       const pipelineInputs = await selector.enumerateInputs();
 
-      try {
-        for (const input of pipelineInputs) {
-          const oldContext = deepClone(originalContext);
+      const result = (async function() {
+        try {
+          for (const input of pipelineInputs) {
+            const oldContext = deepClone(originalContext);
 
-          const result = await leafPipeline.processLeaf(input, {
-            oldContext,
-            inputText
-          });
+            const result = await leafPipeline.processLeaf(input, {
+              oldContext,
+              inputText
+            });
 
-          if (!!result) return result;
+            if (!!result) return result;
+          }
+
+          throw new Error(
+            'No leaf found for ' +
+              `input ${inputText} and ` +
+              `context ${JSON.stringify(originalContext)}`
+          );
+        } catch ({ message: text }) {
+          return {
+            newContext: {
+              ...deepClone(originalContext),
+              activeBranch: ERROR_LEAF_ID
+            },
+            visualContents: [{ response: { text } }]
+          } as LeafSelector.Result<C>;
         }
+      })();
 
-        throw new Error(
-          'No leaf found for ' +
-            `input ${inputText} and ` +
-            `context ${JSON.stringify(originalContext)}`
-        );
-      } catch ({ message: text }) {
-        return {
-          currentLeafID: ERROR_LEAF_ID,
-          newContext: deepClone(originalContext),
-          visualContents: [{ response: { text } }]
-        } as LeafSelector.Result<C>;
-      }
+      return result;
     }
   };
 
