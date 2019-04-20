@@ -1,24 +1,26 @@
-import { deepClone } from '../common/utils';
+import { deepClone, getContextDAOCacheKey } from '../common/utils';
 import { ComposeFunc, Context, DefaultContext } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
-import { UnitMessenger } from '../type/messenger';
+import { SupportedPlatform, UnitMessenger } from '../type/messenger';
 
 /**
  * Save the context every time a message group is sent to a sender ID.
  * @template C The shape of the context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
+ * @param platform The platform identifier.
  * @return A compose function.
  */
 export function saveContextOnSend<C extends Context>(
-  contextDAO: Pick<ContextDAO<C>, 'setContext'>
+  contextDAO: Pick<ContextDAO<C>, 'setContext'>,
+  platform: SupportedPlatform
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
     sendPlatformResponse: async response => {
       const { senderID, newContext } = response;
       const result = await unitMessenger.sendPlatformResponse(response);
-      const cacheKey = unitMessenger.getContextDAOCacheKey(senderID);
+      const cacheKey = getContextDAOCacheKey(platform, senderID);
       await contextDAO.setContext(cacheKey, newContext);
       return result;
     }
@@ -30,18 +32,20 @@ export function saveContextOnSend<C extends Context>(
  * processed.
  * @template C The shape of the context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
+ * @param platform The platform identifier.
  * @return A compose function.
  */
 export function injectContextOnReceive<C extends Context>(
-  contextDAO: Pick<ContextDAO<C>, 'getContext'>
+  contextDAO: Pick<ContextDAO<C>, 'getContext'>,
+  platform: SupportedPlatform
 ): ComposeFunc<UnitMessenger<C>> {
-  return handler => ({
-    ...handler,
+  return unitMessenger => ({
+    ...unitMessenger,
     mapGenericRequest: async request => {
-      const cacheKey = handler.getContextDAOCacheKey(request.senderID);
+      const cacheKey = getContextDAOCacheKey(platform, request.senderID);
       let oldContext = await contextDAO.getContext(cacheKey);
       oldContext = deepClone({ ...request.oldContext, ...oldContext });
-      return handler.mapGenericRequest({ ...request, oldContext });
+      return unitMessenger.mapGenericRequest({ ...request, oldContext });
     }
   });
 }

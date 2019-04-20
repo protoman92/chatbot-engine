@@ -34,10 +34,8 @@ export interface GenericResponse<C extends Context> {
   readonly visualContents: LeafSelector.Result<C>['visualContents'];
 }
 
-/** Configurations for a messenger instance. */
-export interface MessengerConfigs {
-  readonly platform: 'FACEBOOK';
-}
+/** Represents all supported platform identifiers. */
+export type SupportedPlatform = 'FACEBOOK';
 
 /**
  * Represents a messenger that can process incoming request (including parsing,
@@ -50,14 +48,6 @@ export interface MessengerConfigs {
  * @template C The shape of the context used by the current chatbot.
  */
 export interface UnitMessenger<C extends Context> {
-  /**
-   * Get the cache key that will be used by a context DAO to perform CRUD for
-   * a context object.
-   * @param senderID The sender's ID.
-   * @return The cache key.
-   */
-  getContextDAOCacheKey(senderID: string): string;
-
   /**
    * Map an incoming generic request to an outgoing generic response.
    * @param req A request object.
@@ -79,5 +69,10 @@ export interface UnitMessenger<C extends Context> {
  * have a generic unit messenger that handles requests one-by-one.
  */
 export interface Messenger {
+  /**
+   * Process a platform request from end-to-end.
+   * @param req A platform request instance.
+   * @return A Promise of some response.
+   */
   processPlatformRequest(req: PlatformRequest): Promise<unknown>;
 }

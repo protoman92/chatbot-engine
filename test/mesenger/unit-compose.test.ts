@@ -13,18 +13,18 @@ import {
   setTypingIndicator,
   UnitMessenger
 } from '../../src';
+import { getContextDAOCacheKey } from '../../src/common/utils';
 
 interface TestContext extends Context {}
 
 const senderID = 'sender-id';
-const cacheKey = `cache-${senderID}`;
+const cacheKey = getContextDAOCacheKey('FACEBOOK', senderID);
 let messenger: UnitMessenger<TestContext>;
 let communicator: ServiceCommunicator;
 let contextDAO: ContextDAO<TestContext>;
 
 beforeEach(async () => {
   messenger = spy<UnitMessenger<TestContext>>({
-    getContextDAOCacheKey: () => cacheKey,
     mapGenericRequest: () => Promise.reject(''),
     sendPlatformResponse: () => Promise.reject('')
   });
@@ -51,7 +51,7 @@ describe('Save context on send', () => {
 
     const composed = compose(
       instance(messenger),
-      saveContextOnSend(instance(contextDAO))
+      saveContextOnSend(instance(contextDAO), 'FACEBOOK')
     );
 
     const platformResponse: PlatformResponse<TestContext> = {
@@ -84,7 +84,7 @@ describe('Inject context on receive', () => {
 
     const composed = compose(
       instance(messenger),
-      injectContextOnReceive(instance(contextDAO))
+      injectContextOnReceive(instance(contextDAO), 'FACEBOOK')
     );
 
     const genericRequest: GenericRequest<TestContext> = {

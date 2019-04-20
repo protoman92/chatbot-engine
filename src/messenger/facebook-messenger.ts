@@ -11,7 +11,6 @@ import {
   GenericRequest,
   GenericResponse,
   Messenger,
-  MessengerConfigs,
   PlatformResponse,
   UnitMessenger
 } from '../type/messenger';
@@ -284,8 +283,7 @@ export function createUnitFacebookMessenger<C extends Context>(
   configurations: FacebookConfigs
 ): UnitMessenger<C> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
-  const configs: MessengerConfigs = { platform: 'FACEBOOK' };
-  return createGenericUnitMessenger(leafSelector, comm, configs);
+  return createGenericUnitMessenger(leafSelector, comm);
 }
 
 /**
