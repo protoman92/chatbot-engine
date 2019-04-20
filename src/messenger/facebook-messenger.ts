@@ -292,7 +292,7 @@ export function createFacebookUnitMessenger<C extends Context>(
 
   return {
     ...unitMessenger,
-    resolveHubChallenge: async ({
+    resolveVerifyChallenge: async ({
       'hub.mode': mode = '',
       'hub.challenge': challenge = -1,
       'hub.verify_token': token = ''

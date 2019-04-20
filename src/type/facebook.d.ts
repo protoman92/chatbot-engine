@@ -73,7 +73,7 @@ export interface FacebookUnitMessenger<C extends Context>
    * @param requestQuery The query parameters of the request.
    * @return The hub challenge code.
    */
-  resolveHubChallenge(
+  resolveVerifyChallenge(
     requestQuery: Readonly<{
       'hub.mode'?: string;
       'hub.challenge'?: number;
