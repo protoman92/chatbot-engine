@@ -2,7 +2,9 @@
   "name": "chatbot-engine",
   "version": "1.0.0",
   "description": "Experimental chatbot engine.",
-  "main": "src/index.js",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "typings": "dist/src/index.d.ts",
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.test.ts"
   },

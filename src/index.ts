@@ -19,6 +19,7 @@ export * from './type/facebook';
 export * from './type/leaf';
 export * from './type/leaf-pipeline';
 export * from './type/leaf-selector';
+export { LeafCombinationTesterParam } from './type/leaf-selector-tester';
 export * from './type/messenger';
 export * from './type/quick-reply';
 export * from './type/response';
