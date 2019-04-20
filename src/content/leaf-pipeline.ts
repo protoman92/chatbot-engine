@@ -78,22 +78,28 @@ export function createLeafPipeline<C extends Context>() {
      * branch, so that we do not have conflicting state as we progress through
      * the branch.
      * @param param0 The pipeline input.
-     * @param oldContext The old context.
+     * @param originalContext The old context.
      * @return An updated context object.
      */
     prepareIncomingContext: async (
       {
+        currentLeaf,
+        currentLeafID,
         parentBranch,
-        currentLeaf
-      }: Pick<LeafPipeline.Input<C>, 'parentBranch' | 'currentLeaf'>,
-      oldContext: C
+        prefixLeafPaths
+      }: LeafPipeline.Input<C>,
+      originalContext: C
     ) => {
+      let oldContext = originalContext;
+
       if (
         !!currentLeaf.isStartOfBranch &&
         (await currentLeaf.isStartOfBranch()) &&
         !!parentBranch.contextKeys
       ) {
         parentBranch.contextKeys.forEach(key => delete oldContext[key]);
+        const activeBranch = joinPaths(...prefixLeafPaths, currentLeafID);
+        oldContext = { ...oldContext, activeBranch };
       }
 
       return oldContext;

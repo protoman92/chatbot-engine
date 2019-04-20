@@ -11,7 +11,10 @@ import {
   LeafPipeline,
   VisualContent
 } from '../../src';
-import { enumerateLeafPipelineInputs } from '../../src/content/leaf-pipeline';
+import {
+  enumerateLeafPipelineInputs,
+  joinPaths
+} from '../../src/content/leaf-pipeline';
 
 type Pipeline = ReturnType<
   typeof import('../../src/content/leaf-pipeline')['createLeafPipeline']
@@ -29,26 +32,30 @@ describe('Supporting pipeline methods', () => {
     }
 
     const pipeline = createLeafPipeline<TestContext>();
+    const currentLeafID = 'current-leaf-id';
+    const prefixLeafPaths = ['a', 'b', 'c'];
     let oldContext: TestContext = { senderID, a: 1, b: '2' };
 
     // When
     oldContext = await pipeline.prepareIncomingContext(
       {
-        parentBranch: {
-          contextKeys: ['a', 'b']
-        },
+        currentLeafID,
+        prefixLeafPaths,
         currentLeaf: {
           isStartOfBranch: async () => true,
           checkTextConditions: () => Promise.reject(''),
           checkContextConditions: () => Promise.reject(''),
           produceVisualContent: () => Promise.reject('')
-        }
+        },
+        parentBranch: { contextKeys: ['a', 'b'] }
       },
       oldContext
     );
 
     // Then
+    const activeBranch = joinPaths(...prefixLeafPaths, currentLeafID);
     expectJs(oldContext).not.to.have.key('a', 'b');
+    expectJs(oldContext.activeBranch).to.equal(activeBranch);
   });
 
   it('Should update context when preparing outgoing context', async () => {
