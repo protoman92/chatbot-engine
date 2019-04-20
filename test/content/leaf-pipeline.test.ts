@@ -271,7 +271,7 @@ describe('Main leaf processing', () => {
   });
 });
 
-describe('Pipeline utilities utilities', () => {
+describe('Pipeline utilities', () => {
   it('Should enumerate pipeline inputs correctly', () => {
     /// Setup
     function mapContextKeys(prefix: string) {
