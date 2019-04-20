@@ -4,7 +4,7 @@ import { QuickReply } from './quick-reply';
 import { Response } from './response';
 
 /** Represents content that will go out to the user. */
-interface OutgoingContent {
+interface VisualContent {
   readonly quickReplies: readonly QuickReply[];
   readonly response: Response;
 }
@@ -61,10 +61,10 @@ export interface Leaf<C extends Context> {
    * @param leafInput The input for this leaf.
    * @return Contents that will be sent to the user.
    */
-  produceOutgoingContent(
+  produceVisualContent(
     leafInput: Omit<LeafContentInput<C>, 'newContext'>
   ): Promise<
-    Readonly<{ newContext: C; outgoingContents: readonly OutgoingContent[] }>
+    Readonly<{ newContext: C; visualContents: readonly VisualContent[] }>
   >;
 
   /**

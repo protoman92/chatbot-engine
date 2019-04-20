@@ -241,7 +241,7 @@ async function createFacebookResponse<C extends Context>(
     {
       response,
       quickReplies = []
-    }: LeafSelector.Result<C>['outgoingContents'][0],
+    }: LeafSelector.Result<C>['visualContents'][0],
     senderID: string
   ) {
     const facebookQuickReplies = quickReplies.map(({ text: title }) => ({
@@ -262,10 +262,10 @@ async function createFacebookResponse<C extends Context>(
     };
   }
 
-  return responses.map(({ senderID, newContext, outgoingContents }) => ({
+  return responses.map(({ senderID, newContext, visualContents }) => ({
     senderID,
     newContext,
-    outgoingData: outgoingContents.map(content =>
+    outgoingData: visualContents.map(content =>
       createPlatformResponse(content, senderID)
     )
   }));

@@ -31,7 +31,7 @@ export interface GenericRequest<C extends Context> {
 export interface GenericResponse<C extends Context> {
   readonly senderID: string;
   readonly newContext: C;
-  readonly outgoingContents: LeafSelector.Result<C>['outgoingContents'];
+  readonly visualContents: LeafSelector.Result<C>['visualContents'];
 }
 
 /** Configurations for a messenger instance. */

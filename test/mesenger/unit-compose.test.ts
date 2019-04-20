@@ -77,7 +77,7 @@ describe('Inject context on receive', () => {
     when(messenger.mapGenericRequest(anything())).thenResolve({
       senderID,
       newContext: expectedContext,
-      outgoingContents: []
+      visualContents: []
     });
 
     when(contextDAO.getContext(cacheKey)).thenResolve(expectedContext);
@@ -116,7 +116,7 @@ describe('Save user for sender ID', () => {
     when(messenger.mapGenericRequest(anything())).thenResolve({
       senderID,
       newContext: expectedContext,
-      outgoingContents: []
+      visualContents: []
     });
 
     when(communicator.getUser(senderID)).thenResolve(chatbotUser);
@@ -158,7 +158,7 @@ describe('Set typing indicator', () => {
     when(messenger.mapGenericRequest(anything())).thenResolve({
       senderID,
       newContext: oldContext,
-      outgoingContents: []
+      visualContents: []
     });
 
     when(messenger.sendPlatformResponse(anything())).thenResolve();

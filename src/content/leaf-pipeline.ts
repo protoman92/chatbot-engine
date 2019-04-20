@@ -175,12 +175,12 @@ export function createLeafPipeline<C extends Context>() {
         lastTextMatch
       };
 
-      const leafContent = await currentLeaf.produceOutgoingContent(leafInput);
+      const leafContent = await currentLeaf.produceVisualContent(leafInput);
       newContext = leafContent.newContext;
-      const { outgoingContents } = leafContent;
-      if (!outgoingContents.length) return null;
+      const { visualContents } = leafContent;
+      if (!visualContents.length) return null;
       newContext = await pipeline.prepareOutgoingContext(input, newContext);
-      return { currentLeafID, outgoingContents, newContext };
+      return { currentLeafID, newContext, visualContents };
     }
   };
 

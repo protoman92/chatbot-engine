@@ -7,7 +7,7 @@ import {
   IGNORED_TEXT_MATCH,
   Leaf,
   LeafPipeline,
-  OutgoingContent
+  VisualContent
 } from '../../src';
 
 type Pipeline = ReturnType<
@@ -38,7 +38,7 @@ describe('Supporting pipeline methods', () => {
           isStartOfBranch: async () => true,
           checkTextConditions: () => Promise.reject(''),
           checkContextConditions: () => Promise.reject(''),
-          produceOutgoingContent: () => Promise.reject('')
+          produceVisualContent: () => Promise.reject('')
         }
       },
       oldContext
@@ -67,7 +67,7 @@ describe('Supporting pipeline methods', () => {
         currentLeaf: {
           checkTextConditions: () => Promise.reject(''),
           checkContextConditions: () => Promise.reject(''),
-          produceOutgoingContent: () => Promise.reject(''),
+          produceVisualContent: () => Promise.reject(''),
           isEndOfBranch: async () => true
         }
       },
@@ -139,7 +139,7 @@ describe('Main leaf processing', () => {
       isStartOfBranch: () => Promise.reject(''),
       checkTextConditions: () => Promise.reject(''),
       checkContextConditions: () => Promise.reject(''),
-      produceOutgoingContent: () => Promise.reject(''),
+      produceVisualContent: () => Promise.reject(''),
       isEndOfBranch: () => Promise.reject(''),
       isIntermediate: () => Promise.reject('')
     });
@@ -212,9 +212,9 @@ describe('Main leaf processing', () => {
       lastTextMatch: 'last-text-match'
     });
 
-    when(currentLeaf.produceOutgoingContent(anything())).thenResolve({
+    when(currentLeaf.produceVisualContent(anything())).thenResolve({
       newContext: { senderID },
-      outgoingContents: []
+      visualContents: []
     });
 
     // When
@@ -245,13 +245,13 @@ describe('Main leaf processing', () => {
 
     const newContext: Context = { senderID, a: '1', b: '2' };
 
-    const outgoingContents: OutgoingContent[] = [
+    const visualContents: VisualContent[] = [
       { quickReplies: [{ text: 'quick-reply' }], response: { text: 'text' } }
     ];
 
-    when(currentLeaf.produceOutgoingContent(anything())).thenResolve({
+    when(currentLeaf.produceVisualContent(anything())).thenResolve({
       newContext,
-      outgoingContents
+      visualContents
     });
 
     when(pipeline.prepareOutgoingContext(anything(), anything())).thenResolve(
@@ -265,6 +265,6 @@ describe('Main leaf processing', () => {
     );
 
     // Then
-    expectJs(result).to.eql({ newContext, outgoingContents, currentLeafID });
+    expectJs(result).to.eql({ currentLeafID, newContext, visualContents });
   });
 });

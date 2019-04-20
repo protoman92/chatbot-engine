@@ -53,7 +53,7 @@ export function createGenericUnitMessenger<C extends Context>(
         senderID,
         ...outgoingData.reduce((acc, items) => ({
           newContext: Object.assign(acc.newContext, items.newContext),
-          outgoingContents: [...acc.outgoingContents, ...items.outgoingContents]
+          visualContents: [...acc.visualContents, ...items.visualContents]
         }))
       };
     },

@@ -1,5 +1,5 @@
 import { Context } from './common';
-import { OutgoingContent } from './leaf';
+import { VisualContent } from './leaf';
 
 declare namespace LeafSelector {
   /**
@@ -8,8 +8,8 @@ declare namespace LeafSelector {
    */
   export interface Result<C extends Context> {
     readonly currentLeafID: string;
-    readonly outgoingContents: readonly OutgoingContent[];
     readonly newContext: C;
+    readonly visualContents: readonly VisualContent[];
   }
 }
 
