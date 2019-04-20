@@ -1,10 +1,12 @@
 import { Omit } from 'ts-essentials';
 import { Context } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
+import { ContextDAO } from '../type/context-dao';
 import { LeafSelector } from '../type/leaf-selector';
 import {
   GenericRequest,
   GenericResponse,
+  ManualMessenger,
   Messenger,
   PlatformRequest,
   PlatformResponse,
@@ -24,7 +26,10 @@ export function createGenericUnitMessenger<C extends Context>(
   communicator: ServiceCommunicator,
   responseMapper: (res: GenericResponse<C>) => Promise<PlatformResponse<C>>
 ): UnitMessenger<C> {
-  async function processInputText(oldContext: C, inputText: string) {
+  async function processInputText(
+    oldContext: C,
+    inputText: string
+  ): Promise<LeafSelector.Result<C>> {
     return leafSelector.selectLeaf(oldContext, inputText);
   }
 
@@ -35,8 +40,7 @@ export function createGenericUnitMessenger<C extends Context>(
     const { text } = datum;
 
     if (text !== undefined && text !== null) {
-      const {} = await processInputText(oldContext, text);
-      throw new Error('Not implemented');
+      return processInputText(oldContext, text);
     }
 
     throw Error(`Cannot process data ${JSON.stringify(datum)}`);
@@ -63,6 +67,30 @@ export function createGenericUnitMessenger<C extends Context>(
   };
 
   return messenger;
+}
+
+/**
+ * Create a manual messenger to trigger handling of manual contents.
+ * @template C The context used by the current chatbot.
+ * @param contextDAO A context DAO object.
+ * @param unitMessenger A unit messenger object.
+ * @return A manual messenger instance.
+ */
+export function createManualMessenger<C extends Context>(
+  contextDAO: Pick<ContextDAO<C>, 'getContext'>,
+  unitMessenger: Pick<UnitMessenger<C>, 'sendResponse'>
+): ManualMessenger {
+  return {
+    sendManualContent: async (senderID, visualContents) => {
+      const newContext = await contextDAO.getContext(senderID);
+
+      return unitMessenger.sendResponse({
+        senderID,
+        newContext,
+        visualContents
+      });
+    }
+  };
 }
 
 /**
