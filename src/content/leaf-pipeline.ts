@@ -5,6 +5,9 @@ import { Leaf, LeafContentInput } from '../type/leaf';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 
+/** Represents an ignored text match. */
+export const IGNORED_TEXT_MATCH = '@//ignored-text-match//@';
+
 /**
  * Join the path components of a branch to produce the full path.
  * @param pathComponents An Array of path components.
@@ -76,6 +79,7 @@ export function createLeafPipeline<C extends Context>() {
      * the branch.
      * @param arg0 The pipeline input.
      * @param oldContext The old context.
+     * @return An updated context object.
      */
     prepareIncomingContext: async (
       {
@@ -99,6 +103,9 @@ export function createLeafPipeline<C extends Context>() {
      * When we end a pipeline, we may want to modify the outgoing context, e.g.
      * if the current leaf marks the end of a branch, we need to clear out the
      * activeBranch key.
+     * @param arg0 The pipeline input.
+     * @param newContext The new context.
+     * @return An updated context object.
      */
     prepareOutgoingContext: async (
       {
@@ -125,16 +132,17 @@ export function createLeafPipeline<C extends Context>() {
      * @param inputText The input text.
      * @return The relevant text matches.
      */
-    extractTextMatches: async (currentLeaf: Leaf<C>, inputText?: string) => {
+    extractTextMatches: async (
+      currentLeaf: Pick<Leaf<C>, 'checkTextConditions'>,
+      inputText?: string
+    ) => {
       const textMatches = !!inputText
         ? await currentLeaf.checkTextConditions(inputText)
-        : ['This should be ignored'];
+        : [IGNORED_TEXT_MATCH];
 
-      if (typeof textMatches === 'boolean') {
-        return { allTextMatches: [] };
-      }
-
-      const allTextMatches = toArray(textMatches);
+      let allTextMatches: readonly string[] = [];
+      if (typeof textMatches === 'boolean') return { allTextMatches };
+      allTextMatches = toArray(textMatches);
       const lastTextMatch = allTextMatches[allTextMatches.length - 1];
       return { allTextMatches, lastTextMatch };
     },
@@ -144,7 +152,7 @@ export function createLeafPipeline<C extends Context>() {
       {
         oldContext: originalContext,
         inputText
-      }: LeafPipeline.AdditionalParams<C>
+      }: Pick<LeafPipeline.AdditionalParams<C>, 'oldContext' | 'inputText'>
     ): Promise<LeafSelector.Result<C> | null> => {
       const { currentLeaf, currentLeafID } = input;
       let oldContext = deepClone(originalContext);

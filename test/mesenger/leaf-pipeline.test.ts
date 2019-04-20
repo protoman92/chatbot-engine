@@ -1,6 +1,9 @@
 import expectJs from 'expect.js';
 import { describe } from 'mocha';
-import { createLeafPipeline } from '../../src/content/leaf-pipeline';
+import {
+  createLeafPipeline,
+  IGNORED_TEXT_MATCH
+} from '../../src/content/leaf-pipeline';
 import { Context } from '../../src/type/common';
 
 export type Pipeline = ReturnType<
@@ -69,5 +72,52 @@ describe('Supporting pipeline methods', () => {
 
     // Then
     expectJs(oldContext).not.to.have.key('activeBranch', 'a', 'b');
+  });
+
+  it('Extracting text matches with valid input text', async () => {
+    // Setup
+    const pipeline = createLeafPipeline();
+    const textMatch = 'text-match';
+
+    // When
+    const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
+      { checkTextConditions: async () => textMatch },
+      'input-text'
+    );
+
+    // Then
+    expectJs(allTextMatches).to.eql([textMatch]);
+    expectJs(lastTextMatch).to.equal(textMatch);
+  });
+
+  it('Extracting text matches with invalid input text', async () => {
+    // Setup
+    const pipeline = createLeafPipeline();
+    const textMatch = 'text-match';
+
+    // When
+    const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
+      { checkTextConditions: async () => textMatch },
+      ''
+    );
+
+    // Then
+    expectJs(allTextMatches).to.eql([IGNORED_TEXT_MATCH]);
+    expectJs(lastTextMatch).to.equal(IGNORED_TEXT_MATCH);
+  });
+
+  it('Extracting text matches with boolean text matches', async () => {
+    // Setup
+    const pipeline = createLeafPipeline();
+
+    // When
+    const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
+      { checkTextConditions: async () => true },
+      'input-text'
+    );
+
+    // Then
+    expectJs(allTextMatches).to.eql([]);
+    expectJs(lastTextMatch).to.not.be.ok();
   });
 });
