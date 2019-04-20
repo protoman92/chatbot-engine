@@ -25,7 +25,7 @@ describe('Leaf selector', () => {
     currentLeaf = spy<Leaf<Context>>({
       checkTextConditions: () => Promise.reject(''),
       checkContextConditions: () => Promise.reject(''),
-      produceVisualContent: () => Promise.reject('')
+      produceVisualContents: () => Promise.reject('')
     });
 
     leafPipeline = spy<LeafPipeline<Context>>({

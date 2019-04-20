@@ -43,7 +43,7 @@ describe('Supporting pipeline methods', () => {
           isStartOfBranch: async () => true,
           checkTextConditions: () => Promise.reject(''),
           checkContextConditions: () => Promise.reject(''),
-          produceVisualContent: () => Promise.reject('')
+          produceVisualContents: () => Promise.reject('')
         },
         parentBranch: { contextKeys: ['a', 'b'] }
       },
@@ -75,7 +75,7 @@ describe('Supporting pipeline methods', () => {
         currentLeaf: {
           checkTextConditions: () => Promise.reject(''),
           checkContextConditions: () => Promise.reject(''),
-          produceVisualContent: () => Promise.reject(''),
+          produceVisualContents: () => Promise.reject(''),
           isEndOfBranch: async () => true
         }
       },
@@ -147,7 +147,7 @@ describe('Main leaf processing', () => {
       isStartOfBranch: () => Promise.reject(''),
       checkTextConditions: () => Promise.reject(''),
       checkContextConditions: () => Promise.reject(''),
-      produceVisualContent: () => Promise.reject(''),
+      produceVisualContents: () => Promise.reject(''),
       isEndOfBranch: () => Promise.reject(''),
       isIntermediate: () => Promise.reject('')
     });
@@ -219,7 +219,7 @@ describe('Main leaf processing', () => {
       lastTextMatch: 'last-text-match'
     });
 
-    when(currentLeaf.produceVisualContent(anything())).thenResolve({
+    when(currentLeaf.produceVisualContents(anything())).thenResolve({
       newContext: { senderID },
       visualContents: []
     });
@@ -256,7 +256,7 @@ describe('Main leaf processing', () => {
       { quickReplies: [{ text: 'quick-reply' }], response: { text: 'text' } }
     ];
 
-    when(currentLeaf.produceVisualContent(anything())).thenResolve({
+    when(currentLeaf.produceVisualContents(anything())).thenResolve({
       newContext,
       visualContents
     });
@@ -286,7 +286,7 @@ describe('Pipeline utilities', () => {
     const typicalLeaf: Leaf<Context> = {
       checkContextConditions: () => Promise.reject(''),
       checkTextConditions: () => Promise.reject(''),
-      produceVisualContent: () => Promise.reject('')
+      produceVisualContents: () => Promise.reject('')
     };
 
     const branches: KV<Branch<Context>> = {

@@ -61,7 +61,7 @@ export interface Leaf<C extends Context> {
    * @param leafInput The input for this leaf.
    * @return Contents that will be sent to the user.
    */
-  produceVisualContent(
+  produceVisualContents(
     leafInput: Omit<LeafContentInput<C>, 'newContext'>
   ): Promise<
     Readonly<{ newContext: C; visualContents: readonly VisualContent[] }>
