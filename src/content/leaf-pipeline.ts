@@ -77,7 +77,7 @@ export function createLeafPipeline<C extends Context>() {
      * clear out the relevant keys if the current leaf marks the start of a
      * branch, so that we do not have conflicting state as we progress through
      * the branch.
-     * @param arg0 The pipeline input.
+     * @param param0 The pipeline input.
      * @param oldContext The old context.
      * @return An updated context object.
      */
@@ -103,7 +103,7 @@ export function createLeafPipeline<C extends Context>() {
      * When we end a pipeline, we may want to modify the outgoing context, e.g.
      * if the current leaf marks the end of a branch, we need to clear out the
      * activeBranch key.
-     * @param arg0 The pipeline input.
+     * @param param0 The pipeline input.
      * @param newContext The new context.
      * @return An updated context object.
      */

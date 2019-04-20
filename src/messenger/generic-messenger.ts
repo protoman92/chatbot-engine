@@ -69,7 +69,7 @@ export function createGenericUnitMessenger<C extends Context>(
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
  * @template C The shape of the context used by the current chatbot.
- * @param arg0 Required dependencies to perform platform-specific work.
+ * @param param0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
 export function createGenericMessenger<C extends Context>({

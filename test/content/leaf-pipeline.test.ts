@@ -275,7 +275,7 @@ describe('Pipeline utilities', () => {
   it('Should enumerate pipeline inputs correctly', () => {
     /// Setup
     function mapContextKeys(prefix: string) {
-      return [1, 2, 3].map(val => `${prefix}.${val}`);
+      return [1, 2, 3].map(key => `${prefix}.${key}`);
     }
 
     const typicalLeaf: Leaf<Context> = {

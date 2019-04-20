@@ -41,9 +41,9 @@ export function mapWebhook<C extends Context>(
   function groupRequests(reqs: readonly FacebookRequest[]) {
     const requestMap: { [K: string]: FacebookRequest[] } = {};
 
-    reqs.forEach(args => {
-      const senderID = args.sender.id;
-      requestMap[senderID] = (requestMap[senderID] || []).concat([args]);
+    reqs.forEach(req => {
+      const senderID = req.sender.id;
+      requestMap[senderID] = (requestMap[senderID] || []).concat([req]);
     });
 
     return requestMap;
