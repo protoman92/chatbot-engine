@@ -6,7 +6,8 @@ import {
   createLeafPipeline,
   IGNORED_TEXT_MATCH,
   Leaf,
-  LeafPipeline
+  LeafPipeline,
+  OutgoingContent
 } from '../../src';
 
 type Pipeline = ReturnType<
@@ -173,5 +174,97 @@ describe('Main leaf processing', () => {
 
     // Then
     expectJs(result).not.to.be.ok();
+  });
+
+  it('Should fail if no text match found', async () => {
+    // Setup
+    when(currentLeaf.checkContextConditions(anything())).thenResolve(true);
+
+    when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
+      senderID
+    });
+
+    when(pipeline.extractTextMatches(anything(), anything())).thenResolve({
+      allTextMatches: [],
+      lastTextMatch: ''
+    });
+
+    // When
+    const result = await instance(pipeline).processLeaf(
+      instance(pipelineInput),
+      instance(additionalParams)
+    );
+
+    // Then
+    expectJs(result).not.to.be.ok();
+  });
+
+  it('Should fail if no outgoing contents found', async () => {
+    // Setup
+    when(currentLeaf.checkContextConditions(anything())).thenResolve(true);
+
+    when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
+      senderID
+    });
+
+    when(pipeline.extractTextMatches(anything(), anything())).thenResolve({
+      allTextMatches: [],
+      lastTextMatch: 'last-text-match'
+    });
+
+    when(currentLeaf.produceOutgoingContent(anything())).thenResolve({
+      newContext: { senderID },
+      outgoingContents: []
+    });
+
+    // When
+    const result = await instance(pipeline).processLeaf(
+      instance(pipelineInput),
+      instance(additionalParams)
+    );
+
+    // Then
+    expectJs(result).not.to.be.ok();
+  });
+
+  it('Should pass if all conditions satisfied', async () => {
+    // Setup
+    const currentLeafID = 'current-leaf-id';
+    when(pipelineInput.currentLeafID).thenReturn(currentLeafID);
+
+    when(currentLeaf.checkContextConditions(anything())).thenResolve(true);
+
+    when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
+      senderID
+    });
+
+    when(pipeline.extractTextMatches(anything(), anything())).thenResolve({
+      allTextMatches: [],
+      lastTextMatch: 'last-text-match'
+    });
+
+    const newContext: Context = { senderID, a: '1', b: '2' };
+
+    const outgoingContents: OutgoingContent[] = [
+      { quickReplies: [{ text: 'quick-reply' }], response: { text: 'text' } }
+    ];
+
+    when(currentLeaf.produceOutgoingContent(anything())).thenResolve({
+      newContext,
+      outgoingContents
+    });
+
+    when(pipeline.prepareOutgoingContext(anything(), anything())).thenResolve(
+      newContext
+    );
+
+    // When
+    const result = await instance(pipeline).processLeaf(
+      instance(pipelineInput),
+      instance(additionalParams)
+    );
+
+    // Then
+    expectJs(result).to.eql({ newContext, outgoingContents, currentLeafID });
   });
 });
