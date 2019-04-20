@@ -1,7 +1,13 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { Context, createLeafSelector, Leaf, LeafPipeline } from '../../src';
+import {
+  Context,
+  createLeafSelector,
+  ERROR_LEAF_ID,
+  Leaf,
+  LeafPipeline
+} from '../../src';
 
 type LeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
@@ -68,5 +74,33 @@ describe('Leaf selector', () => {
     verify(leafPipeline.processLeaf(anything(), anything())).times(
       expectedCallTimes
     );
+  });
+
+  it('Should return error leaf if no leaves pass conditions', async () => {
+    // Setup
+    const iteration = 1000;
+
+    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+      ...Array(iteration).keys()
+    ].map(i => ({
+      currentLeaf: instance(currentLeaf),
+      currentLeafID: `${i}`,
+      parentBranch: {},
+      prefixLeafPaths: []
+    }));
+
+    const error = new Error('');
+    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafPipeline.processLeaf(anything(), anything())).thenThrow(error);
+
+    // When
+    const { currentLeafID } = await instance(leafSelector).selectLeaf(
+      { senderID },
+      ''
+    );
+
+    // Then
+    expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
+    verify(leafPipeline.processLeaf(anything(), anything())).times(iteration);
   });
 });

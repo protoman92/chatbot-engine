@@ -3,7 +3,7 @@ export {
   createLeafPipeline,
   IGNORED_TEXT_MATCH
 } from './content/leaf-pipeline';
-export { createLeafSelector } from './content/leaf-selector';
+export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
 export * from './messenger/facebook-communicator';
 export {
   createFacebookMessenger,
