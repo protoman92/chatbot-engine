@@ -78,7 +78,10 @@ export function createLeafPipeline<C extends Context>() {
      * @param oldContext The old context.
      */
     prepareIncomingContext: async (
-      { parentBranch, prefixLeafPaths, currentLeaf }: LeafPipeline.Input<C>,
+      {
+        parentBranch,
+        currentLeaf
+      }: Pick<LeafPipeline.Input<C>, 'parentBranch' | 'currentLeaf'>,
       oldContext: C
     ) => {
       if (
