@@ -1,20 +1,18 @@
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import { compose } from '../../src/common/utils';
 import {
+  compose,
+  Context,
+  ContextDAO,
+  GenericRequest,
   injectContextOnReceive,
+  PlatformResponse,
   saveContextOnSend,
   saveUserForSenderID,
-  setTypingIndicator
-} from '../../src/messenger/unit-compose';
-import { Context } from '../../src/type/common';
-import { ServiceCommunicator } from '../../src/type/communicator';
-import { ContextDAO } from '../../src/type/context-dao';
-import {
-  GenericRequest,
-  PlatformResponse,
+  ServiceCommunicator,
+  setTypingIndicator,
   UnitMessenger
-} from '../../src/type/messenger';
+} from '../../src';
 
 interface TestContext extends Context {}
 

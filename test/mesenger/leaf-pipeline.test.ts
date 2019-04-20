@@ -2,12 +2,12 @@ import expectJs from 'expect.js';
 import { describe } from 'mocha';
 import { anything, instance, spy, when } from 'ts-mockito';
 import {
+  Context,
   createLeafPipeline,
-  IGNORED_TEXT_MATCH
-} from '../../src/content/leaf-pipeline';
-import { Context } from '../../src/type/common';
-import { Leaf } from '../../src/type/leaf';
-import { LeafPipeline } from '../../src/type/leaf-pipeline';
+  IGNORED_TEXT_MATCH,
+  Leaf,
+  LeafPipeline
+} from '../../src';
 
 type Pipeline = ReturnType<
   typeof import('../../src/content/leaf-pipeline')['createLeafPipeline']
