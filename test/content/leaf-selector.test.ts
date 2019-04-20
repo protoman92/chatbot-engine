@@ -8,7 +8,7 @@ import {
   Leaf,
   LeafPipeline
 } from '../../src';
-import { getCurrentLeafID } from '../../src/common/utils';
+import { getCurrentLeafID, joinPaths } from '../../src/common/utils';
 
 type LeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
@@ -35,6 +35,30 @@ describe('Leaf selector', () => {
     leafSelector = spy<LeafSelector>(
       createLeafSelector(instance(leafPipeline), {})
     );
+  });
+
+  it('Should clear prev branch if different from current branch', async () => {
+    // Setup
+    const previousLeafID = 'current-leaf-id';
+    const previousLeafPaths = ['a', 'b', 'c'];
+    const newContext: Context = { senderID, activeBranch: '1', d: 1, e: 2 };
+
+    // When
+    await instance(leafSelector).clearPreviouslyActiveBranch(
+      [
+        {
+          currentLeaf: instance(currentLeaf),
+          currentLeafID: previousLeafID,
+          parentBranch: { contextKeys: ['d', 'e'] },
+          prefixLeafPaths: previousLeafPaths
+        }
+      ],
+      newContext,
+      joinPaths(...previousLeafPaths, previousLeafID)
+    );
+
+    // Then
+    expectJs(newContext).not.to.have.keys(['d', 'e']);
   });
 
   it('Selecting leaf should select first leaf that passes', async () => {
