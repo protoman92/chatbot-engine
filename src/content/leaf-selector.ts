@@ -13,7 +13,7 @@ export const ERROR_LEAF_ID = formatSpecialKey('error');
 
 /**
  * Create a leaf selector.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param leafPipeline A leaf pipeline instance capable of processing leaves.
  * @param allBranches All available branches.
  * @return A leaf selector instance.

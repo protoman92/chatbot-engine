@@ -6,7 +6,7 @@ import { LeafSelector } from './leaf-selector';
 declare namespace LeafPipeline {
   /**
    * Represents input for a pipeline.
-   * @template C The shape of the context used by the current chatbot.
+   * @template C The context used by the current chatbot.
    */
   export interface Input<C extends Context> {
     readonly parentBranch: Branch<C>;
@@ -27,7 +27,7 @@ declare namespace LeafPipeline {
  * Represents a pipeline that processes a leaf to decide whether it has the
  * correct content to deliver to user. A pipeline may do many things, incl.
  * checking text/context conditions, modifying the context etc.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  */
 export interface LeafPipeline<C extends Context> {
   /**

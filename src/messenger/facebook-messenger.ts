@@ -23,7 +23,7 @@ import {
 
 /**
  * Map platform request to generic request for generic processing.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
@@ -119,7 +119,7 @@ export function mapWebhook<C extends Context>(
 
 /**
  * Create a Facebook response from multiple generic responses.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param response A generic responses.
  * @return A platform response instance.
  */
@@ -271,7 +271,7 @@ async function createFacebookResponse<C extends Context>({
 
 /**
  * Create a unit Facebook messenger.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param httpCommunicator A HTTP communicator instance.
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
@@ -290,7 +290,7 @@ export function createUnitFacebookMessenger<C extends Context>(
 
 /**
  * Create a Facebook mesenger.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param unitMessenger A unit messenger.
  * @return A generic messenger.
  */

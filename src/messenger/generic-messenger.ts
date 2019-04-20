@@ -13,7 +13,7 @@ import {
 
 /**
  * Create a generic unit messenger.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
  * @param communicator A service communicator instance.
  * @param responseMapper Function to map generic response to platform response.
@@ -68,7 +68,7 @@ export function createGenericUnitMessenger<C extends Context>(
 /**
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param param0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */

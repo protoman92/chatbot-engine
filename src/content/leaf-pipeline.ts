@@ -21,7 +21,7 @@ export function joinPaths(...pathComponents: readonly string[]) {
  * Enumerate a key-value branch object to produce the entire list of pipeline
  * inputs.  Each pipeline input will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param branches A key-value object of branches.
  * @return An Array of pipeline inputs.
  */
@@ -67,7 +67,7 @@ export function enumerateLeafPipelineInputs<C extends Context>(
 
 /**
  * Create a leaf pipeline.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @return A leaf pipeline instance.
  */
 export function createLeafPipeline<C extends Context>() {

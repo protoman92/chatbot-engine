@@ -6,7 +6,7 @@ import { SupportedPlatform, UnitMessenger } from '../type/messenger';
 
 /**
  * Save the context every time a message group is sent to a sender ID.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
  * @param platform The platform identifier.
  * @return A compose function.
@@ -30,7 +30,7 @@ export function saveContextOnSend<C extends Context>(
 /**
  * Inject the relevant context for a sender every time a message group is
  * processed.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
  * @param platform The platform identifier.
  * @return A compose function.
@@ -54,7 +54,7 @@ export function injectContextOnReceive<C extends Context>(
  * Save user in backend if there is no sender ID in context. This usually
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
  * @param communicator A service communicator instance.
@@ -89,7 +89,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
 /**
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param communicator A service communicator instance.
  * @return A compose function.
  */

@@ -11,7 +11,7 @@ interface VisualContent {
 
 /**
  * Input for creation of a leaf.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  */
 interface LeafContentInput<C extends Context> {
   readonly oldContext: C;
@@ -28,7 +28,7 @@ interface LeafContentInput<C extends Context> {
  * Subsequent messages are logic results of the ones before them.
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  */
 export interface Leaf<C extends Context> {
   /**

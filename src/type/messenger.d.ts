@@ -6,7 +6,7 @@ export type PlatformRequest = unknown;
 
 /**
  * A platform-specific response.
- * @template C The shape of the context used by the current chatbot.*
+ * @template C The context used by the current chatbot.*
  */
 export interface PlatformResponse<C extends Context> {
   readonly senderID: string;
@@ -16,7 +16,7 @@ export interface PlatformResponse<C extends Context> {
 
 /**
  * A generic incoming request.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  */
 export interface GenericRequest<C extends Context> {
   readonly senderID: string;
@@ -26,7 +26,7 @@ export interface GenericRequest<C extends Context> {
 
 /**
  * A generic outgoing response.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  */
 export interface GenericResponse<C extends Context> {
   readonly senderID: string;
@@ -45,7 +45,7 @@ export type SupportedPlatform = 'FACEBOOK';
  *
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  */
 export interface UnitMessenger<C extends Context> {
   /**

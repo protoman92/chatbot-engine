@@ -59,7 +59,7 @@ export function enumerateCombinations<T>(arrays: T[][]) {
 
 /**
  * Create a leaf selector tester to sequentially test leaf flows.
- * @template C The shape of the context used by the current chatbot.
+ * @template C The context used by the current chatbot.
  * @param compareEqual Function to check equality of two objects.
  * @param defaultContext The default context object.
  * @param param2 A leaf selector instance.
