@@ -1,4 +1,3 @@
-import { Omit } from 'ts-essentials';
 import { Context } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
@@ -28,45 +27,22 @@ export function createGenericUnitMessenger<C extends Context>(
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>
 ): UnitMessenger<C> {
-  async function processInputText(
-    oldContext: C,
-    inputText: string
-  ): Promise<LeafSelector.Result<C>> {
-    return leafSelector.selectLeaf(oldContext, inputText);
-  }
-
-  async function processInputDatum(
-    oldContext: C,
-    datum: GenericRequest<C>['data'][0]
-  ): Promise<Omit<GenericResponse<C>, 'senderID'>> {
-    const { text } = datum;
-
-    if (text !== undefined && text !== null) {
-      return processInputText(oldContext, text);
-    }
-
-    throw Error(`Cannot process data ${JSON.stringify(datum)}`);
-  }
-
   const messenger: UnitMessenger<C> = {
-    mapRequest: async ({ senderID, oldContext, data }) => {
-      const outgoingData = await Promise.all(
-        data.map(datum => processInputDatum(oldContext, datum))
+    receiveRequest: async ({ senderID, oldContext, data }) => {
+      data.forEach(({ text = '' }) =>
+        leafSelector.next({ senderID, oldContext, text })
       );
-
-      return {
-        senderID,
-        ...outgoingData.reduce((acc, items) => ({
-          newContext: Object.assign(acc.newContext, items.newContext),
-          visualContents: [...acc.visualContents, ...items.visualContents]
-        }))
-      };
     },
     sendResponse: async response => {
       const data = await responseMapper(response);
       return Promise.all(data.map(datum => communicator.sendResponse(datum)));
     }
   };
+
+  leafSelector.subscribe({
+    next: response => messenger.sendResponse(response),
+    complete: async () => {}
+  });
 
   return messenger;
 }
@@ -109,13 +85,7 @@ export function createGenericMessenger<C extends Context>(
   return {
     processPlatformRequest: platformRequest => {
       return requestMapper(platformRequest).then(requests =>
-        Promise.all(
-          requests.map(req =>
-            unitMessenger
-              .mapRequest(req)
-              .then(res => unitMessenger.sendResponse(res))
-          )
-        )
+        Promise.all(requests.map(req => unitMessenger.receiveRequest(req)))
       );
     }
   };

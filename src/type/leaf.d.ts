@@ -1,7 +1,9 @@
 import { Omit } from 'ts-essentials';
 import { Context } from './common';
+import { GenericResponse } from './messenger';
 import { QuickReply } from './quick-reply';
 import { Response } from './response';
+import { ContentObservable, NextContentObserver } from './stream';
 
 /** Represents content that will go out to the user. */
 interface VisualContent {
@@ -14,6 +16,7 @@ interface VisualContent {
  * @template C The context used by the current chatbot.
  */
 interface LeafContentInput<C extends Context> {
+  readonly senderID: string;
   readonly oldContext: C;
   readonly newContext: C;
   readonly inputText?: string;
@@ -22,14 +25,8 @@ interface LeafContentInput<C extends Context> {
   readonly lastTextMatch: string;
 }
 
-/**
- * Represents the contents producible by a leaf.
- * @template C The context used by the current chatbot.
- */
-export interface LeafContent<C extends Context> {
-  readonly newContext: C;
-  readonly visualContents: readonly VisualContent[];
-}
+/** Result of a text condition check. */
+type TextConditionResult = string | readonly string[] | null;
 
 /**
  * Represents a sequence of messenges that have some commonalities among each
@@ -39,7 +36,9 @@ export interface LeafContent<C extends Context> {
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  * @template C The context used by the current chatbot.
  */
-export interface Leaf<C extends Context> {
+export interface Leaf<C extends Context>
+  extends NextContentObserver<Omit<LeafContentInput<C>, 'newContext'>>,
+    ContentObservable<GenericResponse<C>> {
   /**
    * Check if this leaf marks the start of a branch.
    * @return A Promise of boolean.
@@ -53,9 +52,7 @@ export interface Leaf<C extends Context> {
    * @param text A string value.
    * @return A Promise of text-checking results.
    */
-  checkTextConditions(
-    text: string
-  ): Promise<(string | readonly string[]) | null>;
+  checkTextConditions(text: string): Promise<TextConditionResult>;
 
   /**
    * Check context conditions to see if this leaf can be navigated to.
@@ -63,27 +60,6 @@ export interface Leaf<C extends Context> {
    * @return A Promise of boolean.
    */
   checkContextConditions(oldContext: C): Promise<boolean>;
-
-  /**
-   * Produce content to be sent to the user. We may also modify the old context
-   * to create a new one (e,g, setting some flags to trigger the next leaf).
-   * @param leafInput The input for this leaf.
-   * @return Contents that will be sent to the user.
-   */
-  produceVisualContents(
-    leafInput: Omit<LeafContentInput<C>, 'newContext'>
-  ): Promise<LeafContent<C>>;
-
-  /**
-   * If these paths are specified, this leaf will be treated as an intermediate
-   * leaf. The paths will be joined and used to access the next leaf.
-   *
-   * For e.g, [branch1, subBranch1, leaf1] means the next leaf will be leaf1,
-   * under branch1 of subBranch1.
-   * @param newContext The new context object.
-   * @return A Promise of next leaf paths.
-   */
-  isIntermediate?(newContext: C): Promise<readonly string[]>;
 
   /**
    * Check if this leaf marks the end of a branch. We might do some cleanup

@@ -1,5 +1,4 @@
 import { Context } from './common';
-import { LeafSelector } from './leaf-selector';
 import { VisualContent } from './leaf';
 
 /** A platform-specific request. */
@@ -25,7 +24,7 @@ export interface GenericRequest<C extends Context> {
 export interface GenericResponse<C extends Context> {
   readonly senderID: string;
   readonly newContext: C;
-  readonly visualContents: LeafSelector.Result<C>['visualContents'];
+  readonly visualContents: readonly VisualContent[];
 }
 
 /** Represents all supported platform identifiers. */
@@ -61,11 +60,11 @@ export interface ManualMessenger {
  */
 export interface UnitMessenger<C extends Context> {
   /**
-   * Map an incoming generic request to an outgoing generic response.
+   * Receive an incoming generic request.
    * @param req A request object.
    * @return A Promise of some response.
    */
-  mapRequest(req: GenericRequest<C>): Promise<GenericResponse<C>>;
+  receiveRequest(req: GenericRequest<C>): Promise<unknown>;
 
   /**
    * Send an outgoing platform response.

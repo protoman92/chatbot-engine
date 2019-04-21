@@ -23,7 +23,7 @@ let contextDAO: ContextDAO<TestContext>;
 
 beforeEach(async () => {
   messenger = spy<UnitMessenger<TestContext>>({
-    mapRequest: () => Promise.reject(''),
+    receiveRequest: () => Promise.reject(''),
     sendResponse: () => Promise.reject('')
   });
 
@@ -72,7 +72,7 @@ describe('Inject context on receive', () => {
     // Setup
     const expectedContext: TestContext = { senderID };
 
-    when(messenger.mapRequest(anything())).thenResolve({
+    when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
       newContext: expectedContext,
       visualContents: []
@@ -92,13 +92,13 @@ describe('Inject context on receive', () => {
     };
 
     // When
-    await composed.mapRequest(genericRequest);
+    await composed.receiveRequest(genericRequest);
 
     // Then
     verify(contextDAO.getContext(senderID)).once();
 
     verify(
-      messenger.mapRequest(
+      messenger.receiveRequest(
         deepEqual({ ...genericRequest, oldContext: expectedContext })
       )
     ).once();
@@ -111,7 +111,7 @@ describe('Save user for sender ID', () => {
     const chatbotUser = { id: senderID };
     const expectedContext: TestContext = { senderID };
 
-    when(messenger.mapRequest(anything())).thenResolve({
+    when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
       newContext: expectedContext,
       visualContents: []
@@ -135,13 +135,13 @@ describe('Save user for sender ID', () => {
     };
 
     // When
-    await composed.mapRequest(genericRequest);
+    await composed.receiveRequest(genericRequest);
 
     // Then
     verify(communicator.getUser(senderID)).once();
 
     verify(
-      messenger.mapRequest(
+      messenger.receiveRequest(
         deepEqual({ ...genericRequest, oldContext: expectedContext })
       )
     ).once();
@@ -153,7 +153,7 @@ describe('Set typing indicator', () => {
     // Setup
     const oldContext: TestContext = { senderID };
 
-    when(messenger.mapRequest(anything())).thenResolve({
+    when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
       newContext: oldContext,
       visualContents: []
@@ -168,7 +168,7 @@ describe('Set typing indicator', () => {
     );
 
     // When
-    await composed.mapRequest({ senderID, oldContext, data: [] });
+    await composed.receiveRequest({ senderID, oldContext, data: [] });
 
     await composed.sendResponse({
       senderID,

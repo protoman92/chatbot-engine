@@ -36,10 +36,10 @@ export function injectContextOnReceive<C extends Context>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    mapRequest: async request => {
+    receiveRequest: async request => {
       let oldContext = await contextDAO.getContext(request.senderID);
       oldContext = deepClone({ ...request.oldContext, ...oldContext });
-      return unitMessenger.mapRequest({ ...request, oldContext });
+      return unitMessenger.receiveRequest({ ...request, oldContext });
     }
   });
 }
@@ -63,7 +63,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    mapRequest: async request => {
+    receiveRequest: async request => {
       let { oldContext } = request;
       const { senderID } = request;
 
@@ -75,7 +75,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
         oldContext = deepClone(Object.assign(oldContext, { [sidKey]: userID }));
       }
 
-      return unitMessenger.mapRequest({ ...request, oldContext });
+      return unitMessenger.receiveRequest({ ...request, oldContext });
     }
   });
 }
@@ -92,10 +92,10 @@ export function setTypingIndicator<C extends Context>(
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
-    mapRequest: async request => {
+    receiveRequest: async request => {
       const { senderID } = request;
       await communicator.setTypingIndicator(senderID, true);
-      return unitMessenger.mapRequest(request);
+      return unitMessenger.receiveRequest(request);
     },
     sendResponse: async response => {
       const result = await unitMessenger.sendResponse(response);

@@ -1,14 +1,16 @@
 import { Context } from './common';
-import { VisualContent } from './leaf';
+import { GenericResponse } from './messenger';
+import { ContentObservable, NextContentObserver } from './stream';
 
 declare namespace LeafSelector {
   /**
-   * The final result of a selection process.
+   * The input for a selection process.
    * @template C The context used by the current chatbot.
    */
-  export interface Result<C extends Context> {
-    readonly newContext: C;
-    readonly visualContents: readonly VisualContent[];
+  export interface Input<C extends Context> {
+    readonly senderID: string;
+    readonly oldContext: C;
+    readonly text: string;
   }
 }
 
@@ -18,6 +20,6 @@ declare namespace LeafSelector {
  * delivered to the user.
  * @template C The context used by the current chatbot.
  */
-export interface LeafSelector<C extends Context> {
-  selectLeaf(oldContext: C, text: string): Promise<LeafSelector.Result<C>>;
-}
+export interface LeafSelector<C extends Context>
+  extends NextContentObserver<LeafSelector.Input<C>>,
+    ContentObservable<GenericResponse<C>> {}

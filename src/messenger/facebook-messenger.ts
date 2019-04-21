@@ -240,7 +240,7 @@ async function createFacebookResponse<C extends Context>({
 
   function createPlatformResponse(
     senderID: string,
-    { response, quickReplies = [] }: LeafSelector.Result<C>['visualContents'][0]
+    { response, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
   ) {
     const facebookQuickReplies = quickReplies.map(({ text: title }) => ({
       title,

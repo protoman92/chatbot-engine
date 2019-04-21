@@ -1,7 +1,7 @@
 import { Branch } from './branch';
 import { Context } from './common';
 import { Leaf } from './leaf';
-import { LeafSelector } from './leaf-selector';
+import { NextContentObserver } from './stream';
 
 declare namespace LeafPipeline {
   /**
@@ -15,11 +15,24 @@ declare namespace LeafPipeline {
     readonly currentLeafID: string;
   }
 
-  /** Represents parameteters common to all pipelines. */
+  /**
+   * Represents parameteters common to all pipelines.
+   * @template C The context used by the current chatbot.
+   */
   export interface AdditionalParams<C extends Context> {
     readonly inputText?: string;
     readonly inputImageURL?: string;
     readonly oldContext: C;
+  }
+
+  /**
+   * Represents input for pipeline observer.
+   * @template C The context used by the current chatbot.
+   */
+  export interface ObserverInput<C extends Context> {
+    readonly senderID: string;
+    readonly pipelineInput: Input<C>;
+    readonly additionalParams: AdditionalParams<C>;
   }
 }
 
@@ -29,16 +42,5 @@ declare namespace LeafPipeline {
  * checking text/context conditions, modifying the context etc.
  * @template C The context used by the current chatbot.
  */
-export interface LeafPipeline<C extends Context> {
-  /**
-   * Process a single leaf and extract its contents. If there is no content,
-   * return null.
-   * @param pipelineInput The pipeline input.
-   * @param additionalParams Additional parameters from generic request.
-   * @return A Promise of leaf result.
-   */
-  processLeaf(
-    pipelineInput: LeafPipeline.Input<C>,
-    additionalParams: LeafPipeline.AdditionalParams<C>
-  ): Promise<LeafSelector.Result<C> | null>;
-}
+export interface LeafPipeline<C extends Context>
+  extends NextContentObserver<LeafPipeline.ObserverInput<C>> {}

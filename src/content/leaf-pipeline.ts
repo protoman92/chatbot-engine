@@ -6,9 +6,8 @@ import {
 } from '../common/utils';
 import { Branch } from '../type/branch';
 import { Context, DefaultContext, KV } from '../type/common';
-import { Leaf, LeafContentInput } from '../type/leaf';
+import { Leaf } from '../type/leaf';
 import { LeafPipeline } from '../type/leaf-pipeline';
-import { LeafSelector } from '../type/leaf-selector';
 
 /** Represents an ignored text match. */
 export const IGNORED_TEXT_MATCH = formatSpecialKey('ignored-text-match');
@@ -149,40 +148,30 @@ export function createLeafPipeline<C extends Context>() {
       return { allTextMatches, lastTextMatch };
     },
 
-    processLeaf: async (
-      input: LeafPipeline.Input<C>,
-      {
-        oldContext: originalContext,
-        inputText
-      }: Pick<LeafPipeline.AdditionalParams<C>, 'oldContext' | 'inputText'>
-    ): Promise<LeafSelector.Result<C> | null> => {
+    next: async ({
+      senderID,
+      pipelineInput: input,
+      additionalParams: { oldContext: originalContext, inputText }
+    }: LeafPipeline.ObserverInput<C>) => {
       const { currentLeaf } = input;
       let oldContext = deepClone(originalContext);
       oldContext = await pipeline.prepareIncomingContext(input, oldContext);
-      if (!(await currentLeaf.checkContextConditions(oldContext))) return null;
+      if (!(await currentLeaf.checkContextConditions(oldContext))) return;
 
       const {
         allTextMatches,
         lastTextMatch
       } = await pipeline.extractTextMatches(currentLeaf, inputText);
 
-      if (!lastTextMatch) return null;
-      let newContext = deepClone(oldContext);
+      if (!lastTextMatch) return;
 
-      const leafInput: LeafContentInput<C> = {
+      await currentLeaf.next({
+        senderID,
         oldContext,
-        newContext,
         inputText,
         allTextMatches,
         lastTextMatch
-      };
-
-      const leafContent = await currentLeaf.produceVisualContents(leafInput);
-      newContext = leafContent.newContext;
-      const { visualContents } = leafContent;
-      if (!visualContents.length) return null;
-      newContext = await pipeline.prepareOutgoingContext(input, newContext);
-      return { newContext, visualContents };
+      });
     }
   };
 
