@@ -2,6 +2,7 @@ import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { createContentSubject } from '../../src';
 import { mergeObservables } from '../../src/stream/stream';
+import { mapSeries } from '../../src/common/utils';
 
 describe('Content stream and subject', () => {
   it('Should receive updates on subscription', async () => {
@@ -66,9 +67,9 @@ describe('Content stream and subject', () => {
       complete: async () => (completedCount += 1)
     });
 
-    await Promise.all(subjects.map((subject, i) => subject.next(i)));
+    await mapSeries(subjects, (subject, i) => subject.next(i));
     await subscription.unsubscribe();
-    await Promise.all(subjects.map((subject, i) => subject.next(i)));
+    await mapSeries(subjects, (subject, i) => subject.next(i));
 
     // Then
     expectJs(receivedValues).to.eql([...Array(subjectCount).keys()]);

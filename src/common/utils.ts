@@ -95,12 +95,12 @@ export function getCurrentLeafID(activeBranch?: string): string | null {
  */
 export async function mapSeries<T1, T2>(
   data: readonly T1[],
-  fn: (datum: T1) => Promise<T2>
+  fn: (datum: T1, index: number) => Promise<T2>
 ): Promise<readonly T2[]> {
   const mappedData: T2[] = [];
 
-  for (const datum of data) {
-    const mappedDatum = await fn(datum);
+  for (let i = 0; i < data.length; i += 1) {
+    const mappedDatum = await fn(data[i], i);
     mappedData.push(mappedDatum);
   }
 

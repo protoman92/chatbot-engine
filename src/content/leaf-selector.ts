@@ -1,4 +1,9 @@
-import { deepClone, formatSpecialKey, joinPaths } from '../common/utils';
+import {
+  deepClone,
+  formatSpecialKey,
+  joinPaths,
+  mapSeries
+} from '../common/utils';
 import { mergeObservables } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
@@ -87,11 +92,9 @@ export function createLeafSelector<C extends Context>(
     complete: async () => {
       const pipelineInputs = await selector.enumerateInputs();
 
-      return Promise.all(
-        pipelineInputs.map(async ({ currentLeaf }) => {
-          return !!currentLeaf.complete && currentLeaf.complete();
-        })
-      );
+      return mapSeries(pipelineInputs, async ({ currentLeaf }) => {
+        return !!currentLeaf.complete && currentLeaf.complete();
+      });
     },
     subscribe: async (observer: ContentObserver<GenericResponse<C>>) => {
       if (!outputObservable) {

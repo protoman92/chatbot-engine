@@ -4,6 +4,7 @@ import { LeafSelector } from '../type/leaf-selector';
 import { ManualMessenger, Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
+import { mapSeries } from '../common/utils';
 
 /**
  * Create a generic unit messenger.
@@ -22,15 +23,13 @@ export async function createGenericUnitMessenger<C extends Context>(
 ): Promise<UnitMessenger<C>> {
   const messenger: UnitMessenger<C> = {
     receiveRequest: async ({ senderID, oldContext, data }) => {
-      return Promise.all(
-        data.map(({ text = '' }) =>
-          leafSelector.next({ senderID, oldContext, text })
-        )
+      return mapSeries(data, ({ text = '' }) =>
+        leafSelector.next({ senderID, oldContext, text })
       );
     },
     sendResponse: async response => {
       const data = await responseMapper(response);
-      return Promise.all(data.map(datum => communicator.sendResponse(datum)));
+      return mapSeries(data, datum => communicator.sendResponse(datum));
     }
   };
 
@@ -72,9 +71,9 @@ export function createGenericMessenger<C extends Context>(
 ): Messenger {
   return {
     processPlatformRequest: platformRequest => {
-      return requestMapper(platformRequest).then(requests =>
-        Promise.all(requests.map(req => unitMessenger.receiveRequest(req)))
-      );
+      return requestMapper(platformRequest).then(requests => {
+        return mapSeries(requests, req => unitMessenger.receiveRequest(req));
+      });
     }
   };
 }

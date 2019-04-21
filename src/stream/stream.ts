@@ -1,3 +1,4 @@
+import { mapSeries } from '../common/utils';
 import {
   ContentObservable,
   ContentObserver,
@@ -35,7 +36,7 @@ export function createCompositeSubscription(
   ...subs: ContentSubscription[]
 ): ContentSubscription {
   return createSubscription(() => {
-    return Promise.all(subs.map(sub => sub.unsubscribe()));
+    return mapSeries(subs, sub => sub.unsubscribe());
   });
 }
 
@@ -63,17 +64,16 @@ export function createContentSubject<T>(): ContentSubject<T> {
     next: async contents => {
       if (isCompleted) return null;
 
-      return Promise.all(
-        Object.entries(observerMap).map(([id, obs]) => obs.next(contents))
-      );
+      return mapSeries(Object.entries(observerMap), ([id, obs]) => {
+        return obs.next(contents);
+      });
     },
     complete: async () => {
       if (isCompleted) return;
 
-      await Promise.all(
-        Object.entries(observerMap).map(
-          async ([id, obs]) => !!obs.complete && obs.complete()
-        )
+      await mapSeries(
+        Object.entries(observerMap),
+        async ([id, obs]) => !!obs.complete && obs.complete()
       );
 
       isCompleted = true;
@@ -92,9 +92,9 @@ export function mergeObservables<T>(
 ): ContentObservable<T> {
   return {
     subscribe: async observer => {
-      const subscriptions = await Promise.all(
-        observables.map(observable => observable.subscribe(observer))
-      );
+      const subscriptions = await mapSeries(observables, observable => {
+        return observable.subscribe(observer);
+      });
 
       return createCompositeSubscription(...subscriptions);
     }

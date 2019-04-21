@@ -2,7 +2,8 @@ import {
   deepClone,
   getCurrentLeafID,
   joinObjects,
-  joinPaths
+  joinPaths,
+  mapSeries
 } from '../common/utils';
 import { Context } from '../type/common';
 import { LeafSelector } from '../type/leaf-selector';
@@ -110,26 +111,25 @@ export function createLeafSelectorTester<C extends Context>(
       const textCombinations = enumerateCombinations(textInputs);
       if (beforeAllCombinations) await beforeAllCombinations();
 
-      const results = await Promise.all(
-        textCombinations.map(async combinations => {
-          if (beforeEachCombination) await beforeEachCombination();
-          let oldContext = defaultContext;
+      const results = await mapSeries(textCombinations, async combinations => {
+        if (beforeEachCombination) await beforeEachCombination();
+        let oldContext = defaultContext;
 
-          const result = await Promise.all(
-            combinations.map(async ({ index: inputIndex, value: text }, i) => {
-              const {
-                beforeStory,
-                afterStory,
-                leafKey,
-                checkExternals,
-                expectedContext
-              } = leaves[i];
+        const result = await mapSeries(
+          combinations,
+          async ({ index: inputIndex, value: text }, i) => {
+            const {
+              beforeStory,
+              afterStory,
+              leafKey,
+              checkExternals,
+              expectedContext
+            } = leaves[i];
 
-              if (beforeStory) await beforeStory();
+            if (beforeStory) await beforeStory();
 
-              const { additionalContext } = await new Promise<
-                GenericResponse<C>
-              >(async resolve => {
+            const { additionalContext } = await new Promise<GenericResponse<C>>(
+              async resolve => {
                 await selector.next({ senderID, oldContext, text });
                 let subscription: ContentSubscription;
 
@@ -142,48 +142,48 @@ export function createLeafSelectorTester<C extends Context>(
                 });
 
                 !!subscription && (await subscription.unsubscribe());
-              });
+              }
+            );
 
-              const { activeBranch, ...restContext } = joinObjects(
-                oldContext,
-                additionalContext
-              );
+            const { activeBranch, ...restContext } = joinObjects(
+              oldContext,
+              additionalContext
+            );
 
-              const newContext = { ...deepClone(restContext) } as C;
+            const newContext = { ...deepClone(restContext) } as C;
 
-              if (expectedContext) {
-                const incomingContext = deepClone(expectedContext(inputIndex));
+            if (expectedContext) {
+              const incomingContext = deepClone(expectedContext(inputIndex));
 
-                if (!(await compareEqual(incomingContext, newContext))) {
-                  throw Error(
-                    `Mismatched context:
+              if (!(await compareEqual(incomingContext, newContext))) {
+                throw Error(
+                  `Mismatched context:
                       - Exp: ${JSON.stringify(incomingContext)}\n\n
                       - Got: ${JSON.stringify(newContext)}.
                       FYI, input was ${text} for story ${leafKey}`
-                  );
-                }
-              }
-
-              if (checkExternals) await checkExternals(newContext);
-
-              if (joinPaths(...activeBranchPathsComponents) !== activeBranch) {
-                throw Error(
-                  `Mismatched active flow:
-                    - Exp: ${joinPaths(...activeBranchPathsComponents)}
-                    - Got: ${activeBranch}`
                 );
               }
+            }
 
-              oldContext = newContext;
-              if (afterStory) await afterStory();
-              return undefined;
-            })
-          );
+            if (checkExternals) await checkExternals(newContext);
 
-          if (afterEachCombination) await afterEachCombination();
-          return result;
-        })
-      );
+            if (joinPaths(...activeBranchPathsComponents) !== activeBranch) {
+              throw Error(
+                `Mismatched active flow:
+                    - Exp: ${joinPaths(...activeBranchPathsComponents)}
+                    - Got: ${activeBranch}`
+              );
+            }
+
+            oldContext = newContext;
+            if (afterStory) await afterStory();
+            return undefined;
+          }
+        );
+
+        if (afterEachCombination) await afterEachCombination();
+        return result;
+      });
 
       if (afterAllCombinations) await afterAllCombinations();
       return results;
@@ -197,39 +197,37 @@ export function createLeafSelectorTester<C extends Context>(
     ) => {
       let oldContext = defaultContext;
 
-      return Promise.all(
-        sequence.map(async ({ text, leafID }, i) => {
-          if (beforeEachIteration) await beforeEachIteration();
+      return mapSeries(sequence, async ({ text, leafID }, i) => {
+        if (beforeEachIteration) await beforeEachIteration();
 
-          const { additionalContext } = await new Promise<GenericResponse<C>>(
-            async resolve => {
-              await selector.next({ senderID, oldContext, text });
-              let subscription: ContentSubscription;
+        const { additionalContext } = await new Promise<GenericResponse<C>>(
+          async resolve => {
+            await selector.next({ senderID, oldContext, text });
+            let subscription: ContentSubscription;
 
-              subscription = await selector.subscribe({
-                next: async content => {
-                  resolve(content);
-                  !!subscription && (await subscription.unsubscribe());
-                  return {};
-                }
-              });
+            subscription = await selector.subscribe({
+              next: async content => {
+                resolve(content);
+                !!subscription && (await subscription.unsubscribe());
+                return {};
+              }
+            });
 
-              !!subscription && (await subscription.unsubscribe());
-            }
-          );
-
-          const newContext = joinObjects(oldContext, additionalContext);
-          const currentLeafID = getCurrentLeafID(newContext.activeBranch);
-
-          if (leafID !== currentLeafID) {
-            throw Error(`${i}: Expected ${currentLeafID}, got ${leafID}`);
+            !!subscription && (await subscription.unsubscribe());
           }
+        );
 
-          oldContext = newContext;
-          if (afterEachIteration) await afterEachIteration();
-          return undefined;
-        })
-      );
+        const newContext = joinObjects(oldContext, additionalContext);
+        const currentLeafID = getCurrentLeafID(newContext.activeBranch);
+
+        if (leafID !== currentLeafID) {
+          throw Error(`${i}: Expected ${currentLeafID}, got ${leafID}`);
+        }
+
+        oldContext = newContext;
+        if (afterEachIteration) await afterEachIteration();
+        return undefined;
+      });
     }
   };
 }
