@@ -143,7 +143,7 @@ export function createLeafPipeline<C extends Context>() {
         : [IGNORED_TEXT_MATCH];
 
       let allTextMatches: readonly string[] = [];
-      if (typeof textMatches === 'boolean') return { allTextMatches };
+      if (!textMatches) return { allTextMatches };
       allTextMatches = toArray(textMatches);
       const lastTextMatch = allTextMatches[allTextMatches.length - 1];
       return { allTextMatches, lastTextMatch };

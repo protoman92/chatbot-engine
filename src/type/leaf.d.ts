@@ -46,7 +46,7 @@ export interface Leaf<C extends Context> {
    */
   checkTextConditions(
     text: string
-  ): Promise<string | readonly string[] | boolean>;
+  ): Promise<(string | readonly string[]) | null>;
 
   /**
    * Check context conditions to see if this leaf can be navigated to.

@@ -118,13 +118,13 @@ describe('Supporting pipeline methods', () => {
     expectJs(lastTextMatch).to.equal(IGNORED_TEXT_MATCH);
   });
 
-  it('Extracting text matches with boolean text matches', async () => {
+  it('Extracting text matches with invalid text matches', async () => {
     // Setup
     const pipeline = createLeafPipeline();
 
     // When
     const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
-      { checkTextConditions: async () => true },
+      { checkTextConditions: async () => null },
       'input-text'
     );
 
