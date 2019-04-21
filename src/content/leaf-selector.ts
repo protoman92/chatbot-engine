@@ -86,7 +86,9 @@ export function createLeafSelector<C extends Context>(
       const pipelineInputs = await selector.enumerateInputs();
 
       return Promise.all(
-        pipelineInputs.map(({ currentLeaf }) => currentLeaf.complete())
+        pipelineInputs.map(async ({ currentLeaf }) => {
+          return !!currentLeaf.complete && currentLeaf.complete();
+        })
       );
     },
     subscribe: (observer: ContentObserver<GenericResponse<C>>) => {

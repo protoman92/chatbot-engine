@@ -10,13 +10,15 @@ import {
  * @param unsub Unsubscription logic.
  * @return A content subscription object.
  */
-export function createSubscription(unsub: () => unknown): ContentSubscription {
+export function createSubscription(
+  unsub: () => Promise<unknown>
+): ContentSubscription {
   let isUnsubscribed = false;
 
   return {
-    unsubscribe: () => {
+    unsubscribe: async () => {
       if (!isUnsubscribed) {
-        unsub();
+        await unsub();
         isUnsubscribed = true;
       }
     }
@@ -26,14 +28,14 @@ export function createSubscription(unsub: () => unknown): ContentSubscription {
 /**
  * Create a composite subscription to mass-unsubscribe from all internal
  * subscriptions.
- * @param subscriptions An Array of subscriptions.
+ * @param subs An Array of subscriptions.
  * @return A subscription instance.
  */
 export function createCompositeSubscription(
-  ...subscriptions: ContentSubscription[]
+  ...subs: ContentSubscription[]
 ): ContentSubscription {
   return createSubscription(() => {
-    subscriptions.forEach(subscription => subscription.unsubscribe());
+    return Promise.all(subs.map(sub => sub.unsubscribe()));
   });
 }
 
@@ -52,9 +54,9 @@ export function createContentSubject<T>(): ContentSubject<T> {
       currentID += 1;
       observerMap[observerID] = observer;
 
-      return createSubscription(() => {
+      return createSubscription(async () => {
         delete observerMap[observerID];
-        observer.complete();
+        return !!observer.complete && observer.complete();
       });
     },
     next: contents => {
@@ -64,7 +66,9 @@ export function createContentSubject<T>(): ContentSubject<T> {
     },
     complete: async () => {
       return Promise.all(
-        Object.entries(observerMap).map(([id, obs]) => obs.complete())
+        Object.entries(observerMap).map(
+          async ([id, obs]) => !!obs.complete && obs.complete()
+        )
       );
     }
   };

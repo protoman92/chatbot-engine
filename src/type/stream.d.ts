@@ -1,7 +1,7 @@
 /** Represents a subscription to some content stream. */
 export interface ContentSubscription {
   /** Unsubscribe from the underlying stream. */
-  unsubscribe(): unknown;
+  unsubscribe(): Promise<unknown>;
 }
 
 /**
@@ -10,7 +10,7 @@ export interface ContentSubscription {
  */
 export interface ContentObserver<T> {
   next(content: T): Promise<unknown>;
-  complete(): Promise<unknown>;
+  complete?(): Promise<unknown>;
 }
 
 /**
@@ -31,4 +31,4 @@ export interface ContentObservable<T> {
  */
 export interface ContentSubject<T>
   extends ContentObservable<T>,
-    ContentObserver<T> {}
+    Required<ContentObserver<T>> {}

@@ -23,7 +23,7 @@ export function createLeafWithSubject<C extends Context>(
   return {
     ...baseLeaf,
     complete: async () => {
-      await baseLeaf.complete();
+      !!baseLeaf.complete && (await baseLeaf.complete());
       await subject.complete();
     },
     subscribe: observer => subject.subscribe(observer)
