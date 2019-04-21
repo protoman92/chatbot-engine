@@ -1,9 +1,12 @@
+/** Represents an invalid next result. */
+export type InvalidNextResult = 'INVALID_NEXT_RESULT';
+
 /**
  * Represents the result of calling next on an observer. This is usually not
  * particularly useful, unless we want to detect the first successful next
  * operation.
  */
-export type NextResult = {} | null;
+export type NextResult = {} | InvalidNextResult;
 
 /** Represents a subscription to some content stream. */
 export interface ContentSubscription {

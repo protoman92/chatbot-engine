@@ -5,6 +5,7 @@ import {
   Context,
   createLeafSelector,
   createLeafWithSubject,
+  INVALID_NEXT_RESULT,
   Leaf,
   LeafPipeline
 } from '../../src';
@@ -86,7 +87,7 @@ describe('Leaf selector', () => {
           return {};
         }
 
-        return null;
+        return INVALID_NEXT_RESULT;
       }
     );
 

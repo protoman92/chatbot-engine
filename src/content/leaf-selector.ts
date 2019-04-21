@@ -4,7 +4,7 @@ import {
   joinPaths,
   mapSeries
 } from '../common/utils';
-import { mergeObservables } from '../stream/stream';
+import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
@@ -84,10 +84,10 @@ export function createLeafSelector<C extends Context>(
           additionalParams: { oldContext, inputText }
         });
 
-        if (nextResult !== null) return nextResult;
+        if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
       }
 
-      return null;
+      return STREAM_INVALID_NEXT_RESULT;
     },
     complete: async () => {
       const pipelineInputs = await selector.enumerateInputs();
