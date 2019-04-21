@@ -1,6 +1,5 @@
 import { Context } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
-import { ContextDAO } from '../type/context-dao';
 import { LeafSelector } from '../type/leaf-selector';
 import { ManualMessenger, Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
@@ -51,18 +50,11 @@ export async function createGenericUnitMessenger<C extends Context>(
  * @return A manual messenger instance.
  */
 export function createManualMessenger<C extends Context>(
-  contextDAO: Pick<ContextDAO<C>, 'getContext'>,
   unitMessenger: Pick<UnitMessenger<C>, 'sendResponse'>
 ): ManualMessenger {
   return {
     sendManualContent: async (senderID, visualContents) => {
-      const newContext = await contextDAO.getContext(senderID);
-
-      return unitMessenger.sendResponse({
-        senderID,
-        newContext,
-        visualContents
-      });
+      return unitMessenger.sendResponse({ senderID, visualContents });
     }
   };
 }

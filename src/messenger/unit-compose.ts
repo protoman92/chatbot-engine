@@ -1,4 +1,4 @@
-import { deepClone } from '../common/utils';
+import { deepClone, joinObjects } from '../common/utils';
 import { ComposeFunc, Context, DefaultContext } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
@@ -16,9 +16,14 @@ export function saveContextOnSend<C extends Context>(
   return unitMessenger => ({
     ...unitMessenger,
     sendResponse: async response => {
-      const { senderID, newContext } = response;
+      const { senderID, additionalContext } = response;
       const result = await unitMessenger.sendResponse(response);
-      !!newContext && (await contextDAO.setContext(senderID, newContext));
+
+      if (!!additionalContext) {
+        const newContext = joinObjects(additionalContext);
+        await contextDAO.setContext(senderID, newContext);
+      }
+
       return result;
     }
   });

@@ -52,7 +52,7 @@ describe('Save context on send', () => {
 
     const genericResponse: GenericResponse<Context> = {
       senderID,
-      newContext,
+      additionalContext: newContext,
       visualContents: []
     };
 
@@ -149,11 +149,9 @@ describe('Save user for sender ID', () => {
 describe('Set typing indicator', () => {
   it('Should set typing indicator on request and response', async () => {
     // Setup
-    const oldContext: Context = { senderID };
 
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
-      newContext: oldContext,
       visualContents: []
     });
 
@@ -166,13 +164,13 @@ describe('Set typing indicator', () => {
     );
 
     // When
-    await composed.receiveRequest({ senderID, oldContext, data: [] });
-
-    await composed.sendResponse({
+    await composed.receiveRequest({
       senderID,
-      newContext: oldContext,
-      visualContents: []
+      oldContext: { senderID },
+      data: []
     });
+
+    await composed.sendResponse({ senderID, visualContents: [] });
 
     // Then
     verify(communicator.setTypingIndicator(senderID, true)).calledBefore(

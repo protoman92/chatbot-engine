@@ -1,4 +1,9 @@
-import { deepClone, getCurrentLeafID, joinPaths } from '../common/utils';
+import {
+  deepClone,
+  getCurrentLeafID,
+  joinObjects,
+  joinPaths
+} from '../common/utils';
 import { Context } from '../type/common';
 import { LeafSelector } from '../type/leaf-selector';
 import {
@@ -122,25 +127,29 @@ export function createLeafSelectorTester<C extends Context>(
 
               if (beforeStory) await beforeStory();
 
-              let { newContext } = await new Promise<GenericResponse<C>>(
-                async resolve => {
-                  await selector.next({ senderID, oldContext, text });
-                  let subscription: ContentSubscription;
+              const { additionalContext } = await new Promise<
+                GenericResponse<C>
+              >(async resolve => {
+                await selector.next({ senderID, oldContext, text });
+                let subscription: ContentSubscription;
 
-                  subscription = await selector.subscribe({
-                    next: async content => {
-                      resolve(content);
-                      !!subscription && (await subscription.unsubscribe());
-                      return {};
-                    }
-                  });
+                subscription = await selector.subscribe({
+                  next: async content => {
+                    resolve(content);
+                    !!subscription && (await subscription.unsubscribe());
+                    return {};
+                  }
+                });
 
-                  !!subscription && (await subscription.unsubscribe());
-                }
+                !!subscription && (await subscription.unsubscribe());
+              });
+
+              const { activeBranch, ...restContext } = joinObjects(
+                oldContext,
+                additionalContext
               );
 
-              const { activeBranch, ...restContext } = newContext || oldContext;
-              newContext = { ...deepClone(restContext) } as C;
+              const newContext = { ...deepClone(restContext) } as C;
 
               if (expectedContext) {
                 const incomingContext = deepClone(expectedContext(inputIndex));
@@ -192,7 +201,7 @@ export function createLeafSelectorTester<C extends Context>(
         sequence.map(async ({ text, leafID }, i) => {
           if (beforeEachIteration) await beforeEachIteration();
 
-          let { newContext } = await new Promise<GenericResponse<C>>(
+          const { additionalContext } = await new Promise<GenericResponse<C>>(
             async resolve => {
               await selector.next({ senderID, oldContext, text });
               let subscription: ContentSubscription;
@@ -209,7 +218,7 @@ export function createLeafSelectorTester<C extends Context>(
             }
           );
 
-          newContext = newContext || oldContext;
+          const newContext = joinObjects(oldContext, additionalContext);
           const currentLeafID = getCurrentLeafID(newContext.activeBranch);
 
           if (leafID !== currentLeafID) {

@@ -55,6 +55,17 @@ export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
 }
 
 /**
+ * Join two objects to form a new object.
+ * @template T The type of object being joined.
+ * @param oldObject The old object.
+ * @param newObject The new object.
+ * @return A new object.
+ */
+export function joinObjects<T>(oldObject: T, newObject?: T): T {
+  return Object.assign({}, oldObject, newObject);
+}
+
+/**
  * Join the path components of a branch to produce the full path.
  * @param pathComponents An Array of path components.
  * @return The full path.
