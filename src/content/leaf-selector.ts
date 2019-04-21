@@ -94,7 +94,7 @@ export function createLeafSelector<C extends Context>(
       } catch ({ message }) {
         const errorLeaf = await selector.getErrorLeaf();
 
-        await leafPipeline.next({
+        return leafPipeline.next({
           senderID,
           pipelineInput: {
             currentLeaf: errorLeaf,

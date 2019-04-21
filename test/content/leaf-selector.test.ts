@@ -1,10 +1,11 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
-import { anything, instance, spy, verify, when } from 'ts-mockito';
+import { anything, capture, instance, spy, verify, when } from 'ts-mockito';
 import {
   Context,
   createLeafSelector,
   createLeafWithSubject,
+  ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
   Leaf,
   LeafPipeline
@@ -68,7 +69,7 @@ describe('Leaf selector', () => {
   it('Selecting leaf should stop at first leaf that passes', async () => {
     // Setup
     const iteration = 1000;
-    let validLeafID = 500;
+    const validLeafID = 500;
 
     const pipelineInputs: LeafPipeline.Input<Context>[] = [
       ...Array(iteration).keys()
@@ -145,5 +146,53 @@ describe('Leaf selector', () => {
 
     // Then
     verify(currentLeaf.subscribe(anything())).times(pipelineInputs.length);
+  });
+
+  it('Erroring from receiving input should trigger error leaf', async () => {
+    // Setup
+    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+      ...Array(1000).keys()
+    ].map(i => ({
+      currentLeaf: instance(currentLeaf),
+      currentLeafID: `${i}`,
+      parentBranch: {},
+      prefixLeafPaths: []
+    }));
+
+    const errorLeaf: Leaf<Context> = {
+      next: () => Promise.reject(''),
+      subscribe: () => Promise.reject('')
+    };
+
+    const error = new Error('Something happened!');
+
+    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafSelector.getErrorLeaf()).thenResolve(errorLeaf);
+
+    when(leafPipeline.next(anything())).thenCall(
+      async ({ pipelineInput: { currentLeafID } }) => {
+        if (currentLeafID === ERROR_LEAF_ID) return {};
+        throw error;
+      }
+    );
+
+    // When
+    const oldContext = { senderID };
+
+    const nextResult = await instance(leafSelector).next({
+      senderID,
+      oldContext,
+      text: ''
+    });
+
+    // Then
+    const {
+      pipelineInput: { currentLeafID },
+      additionalParams: { inputText }
+    } = capture(leafPipeline.next).byCallIndex(1)[0];
+
+    expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
+    expectJs(inputText).to.equal(error.message);
+    expectJs(nextResult).to.eql({});
   });
 });
