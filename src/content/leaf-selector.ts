@@ -5,7 +5,7 @@ import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/messenger';
-import { ContentObserver } from '../type/stream';
+import { ContentObserver, ContentObservable } from '../type/stream';
 import { enumerateLeafPipelineInputs } from './leaf-pipeline';
 
 /**
@@ -27,9 +27,7 @@ export function createLeafSelector<C extends Context>(
 ) {
   const pipelineInputs = enumerateLeafPipelineInputs(allBranches);
 
-  const outputObservable = mergeObservables(
-    ...pipelineInputs.map(({ currentLeaf }) => currentLeaf)
-  );
+  let outputObservable: ContentObservable<GenericResponse<C>>;
 
   const selector = {
     enumerateInputs: async () => pipelineInputs,
@@ -72,15 +70,17 @@ export function createLeafSelector<C extends Context>(
     }: LeafSelector.Input<C>) => {
       const pipelineInputs = await selector.enumerateInputs();
 
-      for (const pipelineInput of pipelineInputs) {
-        const oldContext = deepClone(originalContext);
+      return Promise.all(
+        pipelineInputs.map(pipelineInput => {
+          const oldContext = deepClone(originalContext);
 
-        await leafPipeline.next({
-          senderID,
-          pipelineInput,
-          additionalParams: { oldContext, inputText }
-        });
-      }
+          return leafPipeline.next({
+            senderID,
+            pipelineInput,
+            additionalParams: { oldContext, inputText }
+          });
+        })
+      );
     },
     complete: async () => {
       const pipelineInputs = await selector.enumerateInputs();
@@ -91,7 +91,15 @@ export function createLeafSelector<C extends Context>(
         })
       );
     },
-    subscribe: (observer: ContentObserver<GenericResponse<C>>) => {
+    subscribe: async (observer: ContentObserver<GenericResponse<C>>) => {
+      if (!outputObservable) {
+        const pipelineInputs = await selector.enumerateInputs();
+
+        outputObservable = mergeObservables(
+          ...pipelineInputs.map(({ currentLeaf }) => currentLeaf)
+        );
+      }
+
       return outputObservable.subscribe(observer);
     }
   };

@@ -1,169 +1,136 @@
-// import expectJs from 'expect.js';
-// import { beforeEach, describe } from 'mocha';
-// import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-// import {
-//   Context,
-//   createLeafSelector,
-//   ERROR_LEAF_ID,
-//   Leaf,
-//   LeafPipeline
-// } from '../../src';
-// import { getCurrentLeafID, joinPaths } from '../../src/common/utils';
+import expectJs from 'expect.js';
+import { beforeEach, describe } from 'mocha';
+import { anything, instance, spy, verify, when } from 'ts-mockito';
+import {
+  Context,
+  createLeafSelector,
+  createLeafWithSubject,
+  Leaf,
+  LeafPipeline
+} from '../../src';
+import { joinPaths } from '../../src/common/utils';
 
-// type LeafSelector = ReturnType<
-//   typeof import('../../src/content/leaf-selector')['createLeafSelector']
-// >;
+type LeafSelector = ReturnType<
+  typeof import('../../src/content/leaf-selector')['createLeafSelector']
+>;
 
-// const senderID = 'sender-id';
+const senderID = 'sender-id';
 
-// describe('Leaf selector', () => {
-//   let currentLeaf: Leaf<Context>;
-//   let leafPipeline: LeafPipeline<Context>;
-//   let leafSelector: LeafSelector;
+describe('Leaf selector', () => {
+  let currentLeaf: Leaf<Context>;
+  let leafPipeline: LeafPipeline<Context>;
+  let leafSelector: LeafSelector;
 
-//   beforeEach(() => {
-//     currentLeaf = spy<Leaf<Context>>({
-//       checkTextConditions: () => Promise.reject(''),
-//       checkContextConditions: () => Promise.reject(''),
-//       produceVisualContents: () => Promise.reject('')
-//     });
+  beforeEach(() => {
+    currentLeaf = spy<Leaf<Context>>(
+      createLeafWithSubject(() => ({
+        checkTextConditions: () => Promise.reject(''),
+        checkContextConditions: () => Promise.reject(''),
+        next: () => Promise.reject(''),
+        complete: () => Promise.reject('')
+      }))
+    );
 
-//     leafPipeline = spy<LeafPipeline<Context>>({
-//       processLeaf: () => Promise.reject('')
-//     });
+    leafPipeline = spy<LeafPipeline<Context>>({
+      next: () => Promise.reject('')
+    });
 
-//     leafSelector = spy<LeafSelector>(
-//       createLeafSelector(instance(leafPipeline), {})
-//     );
-//   });
+    leafSelector = spy<LeafSelector>(
+      createLeafSelector(instance(leafPipeline), {})
+    );
+  });
 
-//   it('Should clear prev branch if different from current branch', async () => {
-//     // Setup
-//     const previousLeafID = 'current-leaf-id';
-//     const previousLeafPaths = ['a', 'b', 'c'];
-//     const newContext: Context = { senderID, activeBranch: '1', d: 1, e: 2 };
+  it('Should clear prev branch if different from current branch', async () => {
+    // Setup
+    const previousLeafID = 'current-leaf-id';
+    const previousLeafPaths = ['a', 'b', 'c'];
+    const newContext: Context = { senderID, activeBranch: '1', d: 1, e: 2 };
 
-//     // When
-//     await instance(leafSelector).clearPreviouslyActiveBranch(
-//       [
-//         {
-//           currentLeaf: instance(currentLeaf),
-//           currentLeafID: previousLeafID,
-//           parentBranch: { contextKeys: ['d', 'e'] },
-//           prefixLeafPaths: previousLeafPaths
-//         }
-//       ],
-//       newContext,
-//       joinPaths(...previousLeafPaths, previousLeafID)
-//     );
+    // When
+    await instance(leafSelector).clearPreviouslyActiveBranch(
+      [
+        {
+          currentLeaf: instance(currentLeaf),
+          currentLeafID: previousLeafID,
+          parentBranch: { contextKeys: ['d', 'e'] },
+          prefixLeafPaths: previousLeafPaths
+        }
+      ],
+      newContext,
+      joinPaths(...previousLeafPaths, previousLeafID)
+    );
 
-//     // Then
-//     expectJs(newContext).not.to.have.keys(['d', 'e']);
-//   });
+    // Then
+    expectJs(newContext).not.to.have.keys(['d', 'e']);
+  });
 
-//   it('Selecting leaf should select first leaf that passes', async () => {
-//     // Setup
-//     const iteration = 1000;
-//     const validLeafID = 500;
+  it('Selecting leaf should trigger all input leaves', async () => {
+    // Setup
+    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+      ...Array(1000).keys()
+    ].map(i => ({
+      currentLeaf: instance(currentLeaf),
+      currentLeafID: `${i}`,
+      parentBranch: {},
+      prefixLeafPaths: []
+    }));
 
-//     const pipelineInputs: LeafPipeline.Input<Context>[] = [
-//       ...Array(iteration).keys()
-//     ].map(i => ({
-//       currentLeaf: instance(currentLeaf),
-//       currentLeafID: `${i}`,
-//       parentBranch: {},
-//       prefixLeafPaths: []
-//     }));
+    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafPipeline.next(anything())).thenResolve();
 
-//     when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    const oldContext: Context = { senderID };
 
-//     when(
-//       leafSelector.clearPreviouslyActiveBranch(
-//         deepEqual(pipelineInputs),
-//         anything(),
-//         anything()
-//       )
-//     ).thenCall(async (param0, param1) => param1);
+    // When
+    await instance(leafSelector).next({ senderID, oldContext, text: '' });
 
-//     when(leafPipeline.processLeaf(anything(), anything())).thenCall(
-//       async ({ currentLeafID }) => {
-//         if (currentLeafID === `${validLeafID}`) {
-//           return { newContext: { activeBranch: currentLeafID } };
-//         }
+    // Then
+    verify(leafPipeline.next(anything())).times(pipelineInputs.length);
+  });
 
-//         return null;
-//       }
-//     );
+  it('Completing stream should trigger complete from all leaves', async () => {
+    // Setup
+    let completedCount = 0;
 
-//     const oldContext: Context = { senderID };
+    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+      ...Array(1000).keys()
+    ].map(i => ({
+      currentLeaf: instance(currentLeaf),
+      currentLeafID: `${i}`,
+      parentBranch: {},
+      prefixLeafPaths: []
+    }));
 
-//     // When
-//     const { newContext } = await instance(leafSelector).selectLeaf(
-//       oldContext,
-//       ''
-//     );
+    !!currentLeaf.complete &&
+      when(currentLeaf.complete()).thenCall(async () => {
+        completedCount += 1;
+      });
 
-//     // Then
-//     const expectedCallTimes = validLeafID + 1;
-//     const activeBranch = newContext.activeBranch;
-//     const currentLeafID = getCurrentLeafID(activeBranch);
-//     expectJs(currentLeafID).to.equal(`${validLeafID}`);
+    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
 
-//     verify(leafPipeline.processLeaf(anything(), anything())).times(
-//       expectedCallTimes
-//     );
+    // When
+    await instance(leafSelector).complete();
 
-//     verify(
-//       leafSelector.clearPreviouslyActiveBranch(
-//         deepEqual(pipelineInputs),
-//         deepEqual(newContext),
-//         anything()
-//       )
-//     ).once();
-//   });
+    // Then
+    expectJs(completedCount).to.equal(pipelineInputs.length);
+  });
 
-//   it('Should return error leaf if no leaves pass conditions', async () => {
-//     // Setup
-//     const iteration = 1000;
+  it('Subscribing to response should merge leaf observables', async () => {
+    // Setup
+    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+      ...Array(1000).keys()
+    ].map(i => ({
+      currentLeaf: instance(currentLeaf),
+      currentLeafID: `${i}`,
+      parentBranch: {},
+      prefixLeafPaths: []
+    }));
 
-//     const pipelineInputs: LeafPipeline.Input<Context>[] = [
-//       ...Array(iteration).keys()
-//     ].map(i => ({
-//       currentLeaf: instance(currentLeaf),
-//       currentLeafID: `${i}`,
-//       parentBranch: {},
-//       prefixLeafPaths: []
-//     }));
+    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
 
-//     const error = new Error('');
-//     when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    // When
+    await instance(leafSelector).subscribe({ next: async () => {} });
 
-//     when(
-//       leafSelector.clearPreviouslyActiveBranch(
-//         deepEqual(pipelineInputs),
-//         anything(),
-//         anything()
-//       )
-//     ).thenCall(async (param0, param1) => param1);
-
-//     when(leafPipeline.processLeaf(anything(), anything())).thenThrow(error);
-
-//     // When
-//     const { newContext } = await instance(leafSelector).selectLeaf(
-//       { senderID },
-//       ''
-//     );
-
-//     // Then
-//     expectJs(newContext.activeBranch).to.equal(ERROR_LEAF_ID);
-//     verify(leafPipeline.processLeaf(anything(), anything())).times(1);
-
-//     verify(
-//       leafSelector.clearPreviouslyActiveBranch(
-//         deepEqual(pipelineInputs),
-//         deepEqual(newContext),
-//         anything()
-//       )
-//     ).once();
-//   });
-// });
+    // Then
+    verify(currentLeaf.subscribe(anything())).times(pipelineInputs.length);
+  });
+});
