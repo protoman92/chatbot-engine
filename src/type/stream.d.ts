@@ -1,3 +1,10 @@
+/**
+ * Represents the result of calling next on an observer. This is usually not
+ * particularly useful, unless we want to detect the first successful next
+ * operation.
+ */
+export type NextResult = {} | null;
+
 /** Represents a subscription to some content stream. */
 export interface ContentSubscription {
   /** Unsubscribe from the underlying stream. */
@@ -9,7 +16,7 @@ export interface ContentSubscription {
  * @template T The type of content being observed.
  */
 export interface ContentObserver<T> {
-  next(content: T): Promise<unknown>;
+  next(content: T): Promise<NextResult>;
   complete?(): Promise<unknown>;
 }
 

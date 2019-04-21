@@ -61,7 +61,7 @@ export function createContentSubject<T>(): ContentSubject<T> {
       });
     },
     next: async contents => {
-      if (isCompleted) return;
+      if (isCompleted) return null;
 
       return Promise.all(
         Object.entries(observerMap).map(([id, obs]) => obs.next(contents))

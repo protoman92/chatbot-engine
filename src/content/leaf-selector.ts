@@ -70,17 +70,17 @@ export function createLeafSelector<C extends Context>(
     }: LeafSelector.Input<C>) => {
       const pipelineInputs = await selector.enumerateInputs();
 
-      return Promise.all(
-        pipelineInputs.map(pipelineInput => {
-          const oldContext = deepClone(originalContext);
+      for (const pipelineInput of pipelineInputs) {
+        const oldContext = deepClone(originalContext);
 
-          return leafPipeline.next({
-            senderID,
-            pipelineInput,
-            additionalParams: { oldContext, inputText }
-          });
-        })
-      );
+        const nextResult = await leafPipeline.next({
+          senderID,
+          pipelineInput,
+          additionalParams: { oldContext, inputText }
+        });
+
+        if (nextResult != null) return;
+      }
     },
     complete: async () => {
       const pipelineInputs = await selector.enumerateInputs();

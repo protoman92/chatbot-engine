@@ -131,6 +131,7 @@ export function createLeafSelectorTester<C extends Context>(
                     next: async content => {
                       resolve(content);
                       !!subscription && (await subscription.unsubscribe());
+                      return {};
                     }
                   });
 
@@ -200,6 +201,7 @@ export function createLeafSelectorTester<C extends Context>(
                 next: async content => {
                   resolve(content);
                   !!subscription && (await subscription.unsubscribe());
+                  return {};
                 }
               });
 

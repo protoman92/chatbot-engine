@@ -29,8 +29,10 @@ export async function createGenericUnitMessenger<C extends Context>(
 ): Promise<UnitMessenger<C>> {
   const messenger: UnitMessenger<C> = {
     receiveRequest: async ({ senderID, oldContext, data }) => {
-      data.forEach(({ text = '' }) =>
-        leafSelector.next({ senderID, oldContext, text })
+      return Promise.all(
+        data.map(({ text = '' }) =>
+          leafSelector.next({ senderID, oldContext, text })
+        )
       );
     },
     sendResponse: async response => {

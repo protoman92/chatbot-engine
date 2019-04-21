@@ -128,7 +128,7 @@ describe('Leaf selector', () => {
     when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
 
     // When
-    await instance(leafSelector).subscribe({ next: async () => {} });
+    await instance(leafSelector).subscribe({ next: async () => ({}) });
 
     // Then
     verify(currentLeaf.subscribe(anything())).times(pipelineInputs.length);

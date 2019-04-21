@@ -8,6 +8,7 @@ import { Branch } from '../type/branch';
 import { Context, DefaultContext, KV } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { LeafPipeline } from '../type/leaf-pipeline';
+import { NextResult } from '../type/stream';
 
 /** Represents an ignored text match. */
 export const IGNORED_TEXT_MATCH = formatSpecialKey('ignored-text-match');
@@ -152,20 +153,20 @@ export function createLeafPipeline<C extends Context>() {
       senderID,
       pipelineInput: input,
       additionalParams: { oldContext: originalContext, inputText }
-    }: LeafPipeline.ObserverInput<C>) => {
+    }: LeafPipeline.ObserverInput<C>): Promise<NextResult> => {
       const { currentLeaf } = input;
       let oldContext = deepClone(originalContext);
       oldContext = await pipeline.prepareIncomingContext(input, oldContext);
-      if (!(await currentLeaf.checkContextConditions(oldContext))) return;
+      if (!(await currentLeaf.checkContextConditions(oldContext))) return null;
 
       const {
         allTextMatches,
         lastTextMatch
       } = await pipeline.extractTextMatches(currentLeaf, inputText);
 
-      if (!lastTextMatch) return;
+      if (!lastTextMatch) return null;
 
-      await currentLeaf.next({
+      return await currentLeaf.next({
         senderID,
         oldContext,
         inputText,
