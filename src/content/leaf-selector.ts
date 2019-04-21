@@ -4,8 +4,8 @@ import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
-import { GenericResponse } from '../type/messenger';
-import { ContentObserver, ContentObservable, NextResult } from '../type/stream';
+import { GenericResponse } from '../type/response';
+import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
 import { enumerateLeafPipelineInputs } from './leaf-pipeline';
 
 /**

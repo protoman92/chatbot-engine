@@ -1,15 +1,8 @@
 import { Omit } from 'ts-essentials';
 import { Context } from './common';
-import { GenericResponse } from './messenger';
-import { QuickReply } from './quick-reply';
-import { Response } from './response';
+import { Response } from './visual-content';
 import { ContentObservable, ContentObserver } from './stream';
-
-/** Represents content that will go out to the user. */
-interface VisualContent {
-  readonly quickReplies?: readonly QuickReply[];
-  readonly response: Response;
-}
+import { GenericResponse } from './response';
 
 /**
  * Input for creation of a leaf.

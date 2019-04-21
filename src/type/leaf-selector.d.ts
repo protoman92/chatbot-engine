@@ -1,5 +1,5 @@
 import { Context } from './common';
-import { GenericResponse } from './messenger';
+import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
 
 declare namespace LeafSelector {

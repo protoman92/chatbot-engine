@@ -8,14 +8,10 @@ import {
   FacebookWebhookRequest
 } from '../type/facebook';
 import { LeafSelector } from '../type/leaf-selector';
-import {
-  GenericRequest,
-  GenericResponse,
-  Messenger,
-  PlatformResponse,
-  UnitMessenger
-} from '../type/messenger';
-import { Action, Response } from '../type/response';
+import { Messenger, UnitMessenger } from '../type/messenger';
+import { GenericRequest } from '../type/request';
+import { GenericResponse, PlatformResponse } from '../type/response';
+import { Action, Response } from '../type/visual-content';
 import { createFacebookCommunicator } from './facebook-communicator';
 import {
   createGenericMessenger,

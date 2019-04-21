@@ -5,7 +5,7 @@ import {
   EnumeratedElement,
   LeafCombinationTesterParam
 } from '../type/leaf-selector-tester';
-import { GenericResponse } from '../type/messenger';
+import { GenericResponse } from '../type/response';
 import { ContentSubscription } from '../type/stream';
 
 /**

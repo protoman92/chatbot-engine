@@ -1,4 +1,4 @@
-import { PlatformResponse } from './messenger';
+import { PlatformResponse } from './response';
 
 /** Handle HTTP communication. */
 export interface HTTPCommunicator {

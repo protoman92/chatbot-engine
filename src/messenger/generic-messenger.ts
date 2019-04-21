@@ -2,15 +2,9 @@ import { Context } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import { LeafSelector } from '../type/leaf-selector';
-import {
-  GenericRequest,
-  GenericResponse,
-  ManualMessenger,
-  Messenger,
-  PlatformRequest,
-  PlatformResponse,
-  UnitMessenger
-} from '../type/messenger';
+import { ManualMessenger, Messenger, UnitMessenger } from '../type/messenger';
+import { GenericRequest, PlatformRequest } from '../type/request';
+import { GenericResponse, PlatformResponse } from '../type/response';
 
 /**
  * Create a generic unit messenger.
