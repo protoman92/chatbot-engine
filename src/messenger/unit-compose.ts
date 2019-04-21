@@ -15,21 +15,25 @@ import { UnitMessenger } from '../type/messenger';
 export function saveContextOnSend<C extends Context>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
 ): ComposeFunc<UnitMessenger<C>> {
-  return unitMessenger => ({
-    ...unitMessenger,
-    sendResponse: async response => {
-      const { senderID, additionalContext } = response;
-      const result = await unitMessenger.sendResponse(response);
+  return function saveContextOnSend(unitMessenger) {
+    return {
+      ...unitMessenger,
+      sendResponse: async response => {
+        console.log(response);
+        const { senderID, additionalContext } = response;
+        const result = await unitMessenger.sendResponse(response);
+        console.log(additionalContext);
 
-      if (!!additionalContext) {
-        const oldContext = await contextDAO.getContext(senderID);
-        const newContext = joinObjects(oldContext, additionalContext);
-        await contextDAO.setContext(senderID, newContext);
+        if (!!additionalContext) {
+          const oldContext = await contextDAO.getContext(senderID);
+          const newContext = joinObjects(oldContext, additionalContext);
+          await contextDAO.setContext(senderID, newContext);
+        }
+
+        return result;
       }
-
-      return result;
-    }
-  });
+    };
+  };
 }
 
 /**
@@ -42,14 +46,16 @@ export function saveContextOnSend<C extends Context>(
 export function injectContextOnReceive<C extends Context>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
 ): ComposeFunc<UnitMessenger<C>> {
-  return unitMessenger => ({
-    ...unitMessenger,
-    receiveRequest: async request => {
-      let oldContext = await contextDAO.getContext(request.senderID);
-      oldContext = deepClone({ ...request.oldContext, ...oldContext });
-      return unitMessenger.receiveRequest({ ...request, oldContext });
-    }
-  });
+  return function injectContextOnReceive(unitMessenger) {
+    return {
+      ...unitMessenger,
+      receiveRequest: async request => {
+        let oldContext = await contextDAO.getContext(request.senderID);
+        oldContext = deepClone({ ...request.oldContext, ...oldContext });
+        return unitMessenger.receiveRequest({ ...request, oldContext });
+      }
+    };
+  };
 }
 
 /**
@@ -69,23 +75,27 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
   saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
 ): ComposeFunc<UnitMessenger<C>> {
-  return unitMessenger => ({
-    ...unitMessenger,
-    receiveRequest: async request => {
-      let { oldContext } = request;
-      const { senderID } = request;
+  return function saveUserForSenderID(unitMessenger) {
+    return {
+      ...unitMessenger,
+      receiveRequest: async request => {
+        let { oldContext } = request;
+        const { senderID } = request;
 
-      if (!oldContext || !oldContext.senderID) {
-        const platformUser = await communicator.getUser<PUser>(senderID);
-        const newUser = await saveUser(platformUser);
-        const sidKey: keyof DefaultContext = 'senderID';
-        const userID = getUserID(newUser);
-        oldContext = deepClone(Object.assign(oldContext, { [sidKey]: userID }));
+        if (!oldContext || !oldContext.senderID) {
+          const platformUser = await communicator.getUser<PUser>(senderID);
+          const newUser = await saveUser(platformUser);
+          const sidKey: keyof DefaultContext = 'senderID';
+          const userID = getUserID(newUser);
+          oldContext = deepClone(
+            Object.assign(oldContext, { [sidKey]: userID })
+          );
+        }
+
+        return unitMessenger.receiveRequest({ ...request, oldContext });
       }
-
-      return unitMessenger.receiveRequest({ ...request, oldContext });
-    }
-  });
+    };
+  };
 }
 
 /**
@@ -98,18 +108,20 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
 export function setTypingIndicator<C extends Context>(
   communicator: ServiceCommunicator
 ): ComposeFunc<UnitMessenger<C>> {
-  return unitMessenger => ({
-    ...unitMessenger,
-    receiveRequest: async request => {
-      const { senderID } = request;
-      await communicator.setTypingIndicator(senderID, true);
-      return unitMessenger.receiveRequest(request);
-    },
-    sendResponse: async response => {
-      const result = await unitMessenger.sendResponse(response);
-      const { senderID } = response;
-      await communicator.setTypingIndicator(senderID, false);
-      return result;
-    }
-  });
+  return function setTypingIndicator(unitMessenger) {
+    return {
+      ...unitMessenger,
+      receiveRequest: async request => {
+        const { senderID } = request;
+        await communicator.setTypingIndicator(senderID, true);
+        return unitMessenger.receiveRequest(request);
+      },
+      sendResponse: async response => {
+        const result = await unitMessenger.sendResponse(response);
+        const { senderID } = response;
+        await communicator.setTypingIndicator(senderID, false);
+        return result;
+      }
+    };
+  };
 }
