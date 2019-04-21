@@ -117,7 +117,7 @@ export function createLeafSelectorTester<C extends Context>(
 
         const result = await mapSeries(
           combinations,
-          async ({ index: inputIndex, value: text }, i) => {
+          async ({ index: inputIndex, value: inputText }, i) => {
             const {
               beforeStory,
               afterStory,
@@ -130,7 +130,7 @@ export function createLeafSelectorTester<C extends Context>(
 
             const { additionalContext } = await new Promise<GenericResponse<C>>(
               async resolve => {
-                await selector.next({ senderID, oldContext, text });
+                await selector.next({ senderID, oldContext, inputText });
                 let subscription: ContentSubscription;
 
                 subscription = await selector.subscribe({
@@ -160,7 +160,7 @@ export function createLeafSelectorTester<C extends Context>(
                   `Mismatched context:
                       - Exp: ${JSON.stringify(incomingContext)}\n\n
                       - Got: ${JSON.stringify(newContext)}.
-                      FYI, input was ${text} for story ${leafKey}`
+                      FYI, input was ${inputText} for story ${leafKey}`
                 );
               }
             }
@@ -193,16 +193,16 @@ export function createLeafSelectorTester<C extends Context>(
         beforeEachIteration,
         afterEachIteration
       }: DefaultBranchSequenceDependency,
-      sequence: Readonly<{ text: string; leafID: keyof Leaves }>[]
+      sequence: Readonly<{ inputText: string; leafID: keyof Leaves }>[]
     ) => {
       let oldContext = defaultContext;
 
-      return mapSeries(sequence, async ({ text, leafID }, i) => {
+      return mapSeries(sequence, async ({ inputText, leafID }, i) => {
         if (beforeEachIteration) await beforeEachIteration();
 
         const { additionalContext } = await new Promise<GenericResponse<C>>(
           async resolve => {
-            await selector.next({ senderID, oldContext, text });
+            await selector.next({ senderID, oldContext, inputText });
             let subscription: ContentSubscription;
 
             subscription = await selector.subscribe({

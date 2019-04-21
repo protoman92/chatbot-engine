@@ -46,14 +46,14 @@ export function mapWebhook<C extends Context>(
 
   function processRequest(request: FacebookRequest): GenericRequest<C>['data'] {
     if (isType<FacebookRequest.Postback>(request, 'postback')) {
-      return [{ text: request.postback.payload }];
+      return [{ inputText: request.postback.payload }];
     }
 
     if (isType<FacebookRequest.Message>(request, 'message')) {
       const { message } = request;
 
       if (isType<FacebookRequest.Message.Text['message']>(message, 'text')) {
-        return [{ text: message.text }];
+        return [{ inputText: message.text }];
       }
 
       if (isType<FacebookRequest.Message.Attachment>(message, 'attachments')) {
@@ -66,7 +66,7 @@ export function mapWebhook<C extends Context>(
               FacebookRequest.Message.Attachment.Image['attachments'][0]['payload']
             >(payload, 'url')
           ) {
-            return { image_url: payload.url, text: payload.url };
+            return { inputText: payload.url, inputImageURL: payload.url };
           }
 
           throw Error(

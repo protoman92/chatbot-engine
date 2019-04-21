@@ -3,6 +3,14 @@ import { Context } from './common';
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
 
+declare namespace GenericRequest {
+  /** Input for a generic request. */
+  export interface Input {
+    readonly inputText?: string;
+    readonly inputImageURL?: string;
+  }
+}
+
 /**
  * A generic incoming request.
  * @template C The context used by the current chatbot.
@@ -10,5 +18,5 @@ export type PlatformRequest = unknown;
 export interface GenericRequest<C extends Context> {
   readonly senderID: string;
   readonly oldContext: C;
-  readonly data: readonly Readonly<{ text?: string; imageURL?: string }>[];
+  readonly data: readonly GenericRequest.Input[];
 }

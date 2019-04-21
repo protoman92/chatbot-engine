@@ -95,7 +95,7 @@ describe('Leaf selector', () => {
     const oldContext: Context = { senderID };
 
     // When
-    await instance(leafSelector).next({ senderID, oldContext, text: '' });
+    await instance(leafSelector).next({ senderID, oldContext, inputText: '' });
 
     // Then
     verify(leafPipeline.next(anything())).times(validLeafID + 1);
@@ -182,7 +182,7 @@ describe('Leaf selector', () => {
     const nextResult = await instance(leafSelector).next({
       senderID,
       oldContext,
-      text: ''
+      inputText: ''
     });
 
     // Then

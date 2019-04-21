@@ -10,7 +10,7 @@ declare namespace LeafSelector {
   export interface Input<C extends Context> {
     readonly senderID: string;
     readonly oldContext: C;
-    readonly text: string;
+    readonly inputText: string;
   }
 }
 

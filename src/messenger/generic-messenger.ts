@@ -26,8 +26,8 @@ export async function createGenericUnitMessenger<C extends Context>(
   const messenger: UnitMessenger<C> = compose(
     {
       receiveRequest: async ({ senderID, oldContext, data }) => {
-        return mapSeries(data, ({ text = '' }) =>
-          leafSelector.next({ senderID, oldContext, text })
+        return mapSeries(data, ({ inputText = '' }) =>
+          leafSelector.next({ senderID, oldContext, inputText })
         );
       },
       sendResponse: async response => {

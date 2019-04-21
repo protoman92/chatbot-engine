@@ -75,7 +75,7 @@ export function createLeafSelector<C extends Context>(
     next: async ({
       senderID,
       oldContext: originalContext,
-      text: inputText
+      inputText
     }: LeafSelector.Input<C>): Promise<NextResult> => {
       const pipelineInputs = await selector.enumerateInputs();
 
