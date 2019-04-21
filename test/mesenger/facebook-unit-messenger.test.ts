@@ -5,13 +5,13 @@ import {
   Context,
   createFacebookUnitMessenger,
   FacebookConfigs,
-  HTTPCommunicator,
-  LeafSelector
+  LeafSelector,
+  ServiceCommunicator
 } from '../../src';
 
 describe('Facebook unit messenger', () => {
   let leafSelector: LeafSelector<Context>;
-  let httpCommunicator: HTTPCommunicator;
+  let service: ServiceCommunicator;
   let configs: FacebookConfigs;
 
   beforeEach(async () => {
@@ -20,8 +20,10 @@ describe('Facebook unit messenger', () => {
       subscribe: () => Promise.reject('')
     });
 
-    httpCommunicator = spy<HTTPCommunicator>({
-      communicate: () => Promise.reject('')
+    service = spy<ServiceCommunicator>({
+      getUser: () => Promise.reject(''),
+      sendResponse: () => Promise.reject(''),
+      setTypingIndicator: () => Promise.reject('')
     });
 
     configs = spy<FacebookConfigs>({
@@ -40,7 +42,7 @@ describe('Facebook unit messenger', () => {
 
     const unitMessenger = await createFacebookUnitMessenger(
       instance(leafSelector),
-      instance(httpCommunicator),
+      instance(service),
       instance(configs)
     );
 
@@ -63,7 +65,7 @@ describe('Facebook unit messenger', () => {
 
     const unitMessenger = await createFacebookUnitMessenger(
       instance(leafSelector),
-      instance(httpCommunicator),
+      instance(service),
       instance(configs)
     );
 
@@ -86,7 +88,7 @@ describe('Facebook unit messenger', () => {
 
     const unitMessenger = await createFacebookUnitMessenger(
       instance(leafSelector),
-      instance(httpCommunicator),
+      instance(service),
       instance(configs)
     );
 
