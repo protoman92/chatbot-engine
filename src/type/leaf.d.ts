@@ -23,6 +23,15 @@ interface LeafContentInput<C extends Context> {
 }
 
 /**
+ * Represents the contents producible by a leaf.
+ * @template C The context used by the current chatbot.
+ */
+export interface LeafContent<C extends Context> {
+  readonly newContext: C;
+  readonly visualContents: readonly VisualContent[];
+}
+
+/**
  * Represents a sequence of messenges that have some commonalities among each
  * other. When the user replies to a trigger message, they enter a leaf.
  * Subsequent messages are logic results of the ones before them.
@@ -63,9 +72,7 @@ export interface Leaf<C extends Context> {
    */
   produceVisualContents(
     leafInput: Omit<LeafContentInput<C>, 'newContext'>
-  ): Promise<
-    Readonly<{ newContext: C; visualContents: readonly VisualContent[] }>
-  >;
+  ): Promise<LeafContent<C>>;
 
   /**
    * If these paths are specified, this leaf will be treated as an intermediate

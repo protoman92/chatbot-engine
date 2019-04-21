@@ -23,3 +23,4 @@ export { LeafCombinationTesterParam } from './type/leaf-selector-tester';
 export * from './type/messenger';
 export * from './type/quick-reply';
 export * from './type/response';
+export * from './type/stream';
