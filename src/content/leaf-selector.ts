@@ -7,10 +7,12 @@ import {
 import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
+import { Leaf } from '../type/leaf';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
 import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
+import { createDefaultErrorLeaf } from './leaf';
 import { enumerateLeafPipelineInputs } from './leaf-pipeline';
 
 /**
@@ -31,11 +33,12 @@ export function createLeafSelector<C extends Context>(
   allBranches: KV<Branch<C>>
 ) {
   const pipelineInputs = enumerateLeafPipelineInputs(allBranches);
-
+  const errorLeaf: Leaf<C> = createDefaultErrorLeaf();
   let outputObservable: ContentObservable<GenericResponse<C>>;
 
   const selector = {
     enumerateInputs: async () => pipelineInputs,
+    getErrorLeaf: async () => errorLeaf,
     /**
      * Clear previously active branch if current active branch differs.
      * @param pipelineInputs All available pipeline inputs.
@@ -68,6 +71,7 @@ export function createLeafSelector<C extends Context>(
 
       return newContext;
     },
+
     next: async ({
       senderID,
       oldContext: originalContext,
@@ -75,16 +79,34 @@ export function createLeafSelector<C extends Context>(
     }: LeafSelector.Input<C>): Promise<NextResult> => {
       const pipelineInputs = await selector.enumerateInputs();
 
-      for (const pipelineInput of pipelineInputs) {
-        const oldContext = deepClone(originalContext);
+      try {
+        for (const pipelineInput of pipelineInputs) {
+          const oldContext = deepClone(originalContext);
 
-        const nextResult = await leafPipeline.next({
+          const nextResult = await leafPipeline.next({
+            senderID,
+            pipelineInput,
+            additionalParams: { oldContext, inputText }
+          });
+
+          if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
+        }
+      } catch ({ message }) {
+        const errorLeaf = await selector.getErrorLeaf();
+
+        await leafPipeline.next({
           senderID,
-          pipelineInput,
-          additionalParams: { oldContext, inputText }
+          pipelineInput: {
+            currentLeaf: errorLeaf,
+            currentLeafID: ERROR_LEAF_ID,
+            parentBranch: {},
+            prefixLeafPaths: []
+          },
+          additionalParams: {
+            oldContext: deepClone(originalContext),
+            inputText: message || inputText
+          }
         });
-
-        if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
       }
 
       return STREAM_INVALID_NEXT_RESULT;
@@ -101,7 +123,8 @@ export function createLeafSelector<C extends Context>(
         const pipelineInputs = await selector.enumerateInputs();
 
         outputObservable = mergeObservables(
-          ...pipelineInputs.map(({ currentLeaf }) => currentLeaf)
+          ...pipelineInputs.map(({ currentLeaf }) => currentLeaf),
+          errorLeaf
         );
       }
 

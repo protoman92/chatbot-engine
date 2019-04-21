@@ -29,3 +29,22 @@ export function createLeafWithSubject<C extends Context>(
     subscribe: observer => subject.subscribe(observer)
   };
 }
+
+/**
+ * Create an error leaf that will be used to deliver error messages if no
+ * other leaf can handle the error.
+ * @template C The context used by the current chatbot.
+ * @return A leaf instance.
+ */
+export function createDefaultErrorLeaf<C extends Context>(): Leaf<C> {
+  return createLeafWithSubject(subject => ({
+    next: ({ senderID, inputText }) => {
+      return subject.next({
+        senderID,
+        visualContents: [
+          { response: { text: `Encountered an error: '${inputText}'` } }
+        ]
+      });
+    }
+  }));
+}
