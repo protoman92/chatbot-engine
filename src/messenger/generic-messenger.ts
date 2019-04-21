@@ -1,23 +1,23 @@
-import { Context, ComposeFunc } from '../type/common';
-import { ServiceCommunicator } from '../type/communicator';
+import { compose, mapSeries } from '../common/utils';
+import { ComposeFunc, Context } from '../type/common';
+import { PlatformCommunicator } from '../type/communicator';
 import { LeafSelector } from '../type/leaf-selector';
 import { ManualMessenger, Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
-import { mapSeries, compose } from '../common/utils';
 
 /**
  * Create a generic unit messenger.
  * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
- * @param communicator A service communicator instance.
+ * @param communicator A platform communicator instance.
  * @param responseMapper Function to map generic response to platform responses.
  * @param composeFuncs Array of compose functions to apply on base messenger.
  * @return A generic messenger.
  */
 export async function createGenericUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
-  communicator: ServiceCommunicator,
+  communicator: PlatformCommunicator,
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>,

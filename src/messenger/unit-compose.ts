@@ -1,6 +1,6 @@
 import { deepClone, joinObjects } from '../common/utils';
 import { ComposeFunc, Context, DefaultContext } from '../type/common';
-import { ServiceCommunicator } from '../type/communicator';
+import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import { UnitMessenger } from '../type/messenger';
 
@@ -63,13 +63,13 @@ export function injectContextOnReceive<C extends Context>(
  * @template C The context used by the current chatbot.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
- * @param communicator A service communicator instance.
+ * @param communicator A platform communicator instance.
  * @param saveUser Function to save platform user to some database.
  * @param getUserID Function to get user ID from the related chatbot user.
  * @return A compose function.
  */
 export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
-  communicator: ServiceCommunicator,
+  communicator: PlatformCommunicator,
   saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
 ): ComposeFunc<UnitMessenger<C>> {
@@ -100,11 +100,11 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
  * @template C The context used by the current chatbot.
- * @param communicator A service communicator instance.
+ * @param communicator A platform communicator instance.
  * @return A compose function.
  */
 export function setTypingIndicator<C extends Context>(
-  communicator: ServiceCommunicator
+  communicator: PlatformCommunicator
 ): ComposeFunc<UnitMessenger<C>> {
   return function setTypingIndicator(unitMessenger) {
     return {

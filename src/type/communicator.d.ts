@@ -26,10 +26,10 @@ export interface HTTPCommunicator {
 
 /**
  * Represents an object that handles the communicator to/from the relevant
- * service. For example, a Facebook service communicator should be able to
+ * platform. For example, a Facebook platform communicator should be able to
  * handle all methods specified here.
  */
-export interface ServiceCommunicator {
+export interface PlatformCommunicator {
   /**
    * Get the user associated with a sender ID.
    * @param senderID A string value.
@@ -38,7 +38,7 @@ export interface ServiceCommunicator {
   getUser<U>(senderID: string): Promise<U>;
 
   /**
-   * Send a response to the related service.
+   * Send a response to the related platform.
    * @param data Response payload.
    * @returns A Promise of some response.
    */

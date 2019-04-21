@@ -1,6 +1,6 @@
 import { formatFacebookError, isType } from '../common/utils';
 import { ComposeFunc, Context } from '../type/common';
-import { ServiceCommunicator } from '../type/communicator';
+import { PlatformCommunicator } from '../type/communicator';
 import {
   FacebookConfigs,
   FacebookRequest,
@@ -262,13 +262,13 @@ async function createFacebookResponse<C extends Context>({
  * Create a unit Facebook messenger.
  * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
- * @param communicator A service communicator instance.
+ * @param communicator A platform communicator instance.
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
 export async function createFacebookUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
-  communicator: ServiceCommunicator,
+  communicator: PlatformCommunicator,
   configurations: FacebookConfigs,
   ...composeFuncs: readonly ComposeFunc<UnitMessenger<C>>[]
 ): Promise<FacebookUnitMessenger<C>> {

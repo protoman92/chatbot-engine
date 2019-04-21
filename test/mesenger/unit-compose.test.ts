@@ -7,9 +7,9 @@ import {
   GenericRequest,
   GenericResponse,
   injectContextOnReceive,
+  PlatformCommunicator,
   saveContextOnSend,
   saveUserForSenderID,
-  ServiceCommunicator,
   setTypingIndicator,
   UnitMessenger
 } from '../../src';
@@ -17,7 +17,7 @@ import { joinObjects } from '../../src/common/utils';
 
 const senderID = 'sender-id';
 let messenger: UnitMessenger<Context>;
-let communicator: ServiceCommunicator;
+let communicator: PlatformCommunicator;
 let contextDAO: ContextDAO<Context>;
 
 beforeEach(async () => {
@@ -26,7 +26,7 @@ beforeEach(async () => {
     sendResponse: () => Promise.reject('')
   });
 
-  communicator = spy<ServiceCommunicator>({
+  communicator = spy<PlatformCommunicator>({
     getUser: () => Promise.reject(''),
     sendResponse: () => Promise.reject(''),
     setTypingIndicator: () => Promise.reject('')

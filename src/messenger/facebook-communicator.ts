@@ -1,16 +1,16 @@
-import { HTTPCommunicator, ServiceCommunicator } from '../type/communicator';
+import { HTTPCommunicator, PlatformCommunicator } from '../type/communicator';
 import { FacebookConfigs } from '../type/facebook';
 
 /**
- * Create a service communicator for Facebook.
+ * Create a platform communicator for Facebook.
  * @param communicator A HTTP communicator instance.
  * @param configurations Config variables.
- * @return A service communicator instance.
+ * @return A platform communicator instance.
  */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
   { apiVersion, pageToken }: Pick<FacebookConfigs, 'apiVersion' | 'pageToken'>
-): ServiceCommunicator {
+): PlatformCommunicator {
   function formatURL(...additionalPaths: string[]) {
     return `https://graph.facebook.com/v${apiVersion}/${additionalPaths.join(
       '/'
