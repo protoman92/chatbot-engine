@@ -1,10 +1,10 @@
-import { Context } from '../type/common';
+import { Context, ComposeFunc } from '../type/common';
 import { ServiceCommunicator } from '../type/communicator';
 import { LeafSelector } from '../type/leaf-selector';
 import { ManualMessenger, Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
-import { mapSeries } from '../common/utils';
+import { mapSeries, compose } from '../common/utils';
 
 /**
  * Create a generic unit messenger.
@@ -12,6 +12,7 @@ import { mapSeries } from '../common/utils';
  * @param leafSelector A leaf selector instance.
  * @param communicator A service communicator instance.
  * @param responseMapper Function to map generic response to platform responses.
+ * @param composeFuncs Array of compose functions to apply on base messenger.
  * @return A generic messenger.
  */
 export async function createGenericUnitMessenger<C extends Context>(
@@ -19,19 +20,23 @@ export async function createGenericUnitMessenger<C extends Context>(
   communicator: ServiceCommunicator,
   responseMapper: (
     res: GenericResponse<C>
-  ) => Promise<readonly PlatformResponse[]>
+  ) => Promise<readonly PlatformResponse[]>,
+  ...composeFuncs: readonly ComposeFunc<UnitMessenger<C>>[]
 ): Promise<UnitMessenger<C>> {
-  const messenger: UnitMessenger<C> = {
-    receiveRequest: async ({ senderID, oldContext, data }) => {
-      return mapSeries(data, ({ text = '' }) =>
-        leafSelector.next({ senderID, oldContext, text })
-      );
+  const messenger: UnitMessenger<C> = compose(
+    {
+      receiveRequest: async ({ senderID, oldContext, data }) => {
+        return mapSeries(data, ({ text = '' }) =>
+          leafSelector.next({ senderID, oldContext, text })
+        );
+      },
+      sendResponse: async response => {
+        const data = await responseMapper(response);
+        return mapSeries(data, datum => communicator.sendResponse(datum));
+      }
     },
-    sendResponse: async response => {
-      const data = await responseMapper(response);
-      return mapSeries(data, datum => communicator.sendResponse(datum));
-    }
-  };
+    ...composeFuncs
+  );
 
   await leafSelector.subscribe({
     next: response => messenger.sendResponse(response),
