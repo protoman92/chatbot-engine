@@ -20,13 +20,13 @@ import {
  * @param responseMapper Function to map generic response to platform responses.
  * @return A generic messenger.
  */
-export function createGenericUnitMessenger<C extends Context>(
+export async function createGenericUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
   communicator: ServiceCommunicator,
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>
-): UnitMessenger<C> {
+): Promise<UnitMessenger<C>> {
   const messenger: UnitMessenger<C> = {
     receiveRequest: async ({ senderID, oldContext, data }) => {
       data.forEach(({ text = '' }) =>
@@ -39,7 +39,7 @@ export function createGenericUnitMessenger<C extends Context>(
     }
   };
 
-  leafSelector.subscribe({
+  await leafSelector.subscribe({
     next: response => messenger.sendResponse(response),
     complete: async () => {}
   });

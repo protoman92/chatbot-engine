@@ -270,14 +270,14 @@ async function createFacebookResponse<C extends Context>({
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export function createFacebookUnitMessenger<C extends Context>(
+export async function createFacebookUnitMessenger<C extends Context>(
   leafSelector: LeafSelector<C>,
   httpCommunicator: HTTPCommunicator,
   configurations: FacebookConfigs
-): FacebookUnitMessenger<C> {
+): Promise<FacebookUnitMessenger<C>> {
   const comm = createFacebookCommunicator(httpCommunicator, configurations);
 
-  const unitMessenger = createGenericUnitMessenger(
+  const unitMessenger = await createGenericUnitMessenger(
     leafSelector,
     comm,
     response => createFacebookResponse(response)

@@ -49,7 +49,7 @@ export function createContentSubject<T>(): ContentSubject<T> {
   let currentID = 0;
 
   return {
-    subscribe: observer => {
+    subscribe: async observer => {
       const observerID = currentID;
       currentID += 1;
       observerMap[observerID] = observer;
@@ -84,9 +84,12 @@ export function mergeObservables<T>(
   ...observables: ContentObservable<T>[]
 ): ContentObservable<T> {
   return {
-    subscribe: observer =>
-      createCompositeSubscription(
-        ...observables.map(observable => observable.subscribe(observer))
-      )
+    subscribe: async observer => {
+      const subscriptions = await Promise.all(
+        observables.map(observable => observable.subscribe(observer))
+      );
+
+      return createCompositeSubscription(...subscriptions);
+    }
   };
 }

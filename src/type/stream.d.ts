@@ -21,8 +21,9 @@ export interface ContentObservable<T> {
   /**
    * Subscribe to this stream's contents.
    * @param observer A content observer object.
+   * @return A Promise of subscription.
    */
-  subscribe(observer: ContentObserver<T>): ContentSubscription;
+  subscribe(observer: ContentObserver<T>): Promise<ContentSubscription>;
 }
 
 /**
