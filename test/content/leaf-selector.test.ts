@@ -64,10 +64,13 @@ describe('Leaf selector', () => {
     expectJs(newContext).not.to.have.keys(['d', 'e']);
   });
 
-  it('Selecting leaf should trigger all input leaves', async () => {
+  it('Selecting leaf should stop at first leaf that passes', async () => {
     // Setup
+    const iteration = 1000;
+    let validLeafID = 500;
+
     const pipelineInputs: LeafPipeline.Input<Context>[] = [
-      ...Array(1000).keys()
+      ...Array(iteration).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
       currentLeafID: `${i}`,
@@ -76,7 +79,16 @@ describe('Leaf selector', () => {
     }));
 
     when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
-    when(leafPipeline.next(anything())).thenResolve();
+
+    when(leafPipeline.next(anything())).thenCall(
+      async ({ pipelineInput: { currentLeafID } }) => {
+        if (currentLeafID === `${validLeafID}`) {
+          return {};
+        }
+
+        return null;
+      }
+    );
 
     const oldContext: Context = { senderID };
 
@@ -84,7 +96,7 @@ describe('Leaf selector', () => {
     await instance(leafSelector).next({ senderID, oldContext, text: '' });
 
     // Then
-    verify(leafPipeline.next(anything())).times(pipelineInputs.length);
+    verify(leafPipeline.next(anything())).times(validLeafID + 1);
   });
 
   it('Completing stream should trigger complete from all leaves', async () => {
