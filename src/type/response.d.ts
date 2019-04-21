@@ -12,6 +12,6 @@ export type PlatformResponse = unknown;
  */
 export interface GenericResponse<C extends Context> {
   readonly senderID: string;
-  readonly additionalContext?: C;
+  readonly additionalContext?: Partial<C>;
   readonly visualContents: readonly VisualContent[];
 }

@@ -13,6 +13,7 @@ import {
   setTypingIndicator,
   UnitMessenger
 } from '../../src';
+import { joinObjects } from '../../src/common/utils';
 
 const senderID = 'sender-id';
 let messenger: UnitMessenger<Context>;
@@ -41,18 +42,21 @@ beforeEach(async () => {
 describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
-    when(messenger.sendResponse(anything())).thenResolve();
+    const oldContext: Context = { senderID };
+    when(contextDAO.getContext(senderID)).thenResolve(oldContext);
     when(contextDAO.setContext(senderID, anything())).thenResolve();
-    const newContext: Context = { senderID, a: 1, b: 2 };
+    when(messenger.sendResponse(anything())).thenResolve();
 
     const composed = compose(
       instance(messenger),
       saveContextOnSend(instance(contextDAO))
     );
 
+    const additionalContext: Partial<Context> = { a: 1, b: 2 };
+
     const genericResponse: GenericResponse<Context> = {
       senderID,
-      additionalContext: newContext,
+      additionalContext,
       visualContents: []
     };
 
@@ -60,6 +64,8 @@ describe('Save context on send', () => {
     await composed.sendResponse(genericResponse);
 
     // Then
+    const newContext = joinObjects(oldContext, additionalContext);
+    verify(contextDAO.getContext(senderID)).once();
     verify(contextDAO.setContext(senderID, deepEqual(newContext))).once();
     verify(messenger.sendResponse(deepEqual(genericResponse))).once();
   });

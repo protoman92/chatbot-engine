@@ -61,7 +61,7 @@ export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
  * @param newObject The new object.
  * @return A new object.
  */
-export function joinObjects<T>(oldObject: T, newObject?: T): T {
+export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
   return Object.assign({}, oldObject, newObject);
 }
 

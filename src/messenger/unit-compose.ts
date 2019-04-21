@@ -5,13 +5,15 @@ import { ContextDAO } from '../type/context-dao';
 import { UnitMessenger } from '../type/messenger';
 
 /**
- * Save the context every time a message group is sent to a sender ID.
+ * Save the context every time a message group is sent to a sender ID. If
+ * there is additional context to save, pull the latest context from storage,
+ * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
  * @return A compose function.
  */
 export function saveContextOnSend<C extends Context>(
-  contextDAO: Pick<ContextDAO<C>, 'setContext'>
+  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
 ): ComposeFunc<UnitMessenger<C>> {
   return unitMessenger => ({
     ...unitMessenger,
@@ -20,7 +22,8 @@ export function saveContextOnSend<C extends Context>(
       const result = await unitMessenger.sendResponse(response);
 
       if (!!additionalContext) {
-        const newContext = joinObjects(additionalContext);
+        const oldContext = await contextDAO.getContext(senderID);
+        const newContext = joinObjects(oldContext, additionalContext);
         await contextDAO.setContext(senderID, newContext);
       }
 
