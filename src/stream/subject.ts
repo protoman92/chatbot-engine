@@ -1,4 +1,5 @@
 import {
+  ContentObservable,
   ContentObserver,
   ContentSubject,
   ContentSubscription
@@ -20,6 +21,20 @@ export function createSubscription(unsub: () => unknown): ContentSubscription {
       }
     }
   };
+}
+
+/**
+ * Create a composite subscription to mass-unsubscribe from all internal
+ * subscriptions.
+ * @param subscriptions An Array of subscriptions.
+ * @return A subscription instance.
+ */
+export function createCompositeSubscription(
+  ...subscriptions: ContentSubscription[]
+): ContentSubscription {
+  return createSubscription(() => {
+    subscriptions.forEach(subscription => subscription.unsubscribe());
+  });
 }
 
 /**
@@ -52,5 +67,22 @@ export function createContentSubject<T>(): ContentSubject<T> {
         Object.entries(observerMap).map(([id, obs]) => obs.complete())
       );
     }
+  };
+}
+
+/**
+ * Merge the emissions of an Array of observables.
+ * @template T The type of content being observed.
+ * @param observables An Array of observables.
+ * @return An observable instance.
+ */
+export function mergeObservables<T>(
+  ...observables: ContentObservable<T>[]
+): ContentObservable<T> {
+  return {
+    subscribe: observer =>
+      createCompositeSubscription(
+        ...observables.map(observable => observable.subscribe(observer))
+      )
   };
 }

@@ -1,6 +1,3 @@
-import { Context } from './common';
-import { LeafContent } from './leaf';
-
 /** Represents a subscription to some content stream. */
 export interface ContentSubscription {
   /** Unsubscribe from the underlying stream. */
