@@ -5,6 +5,7 @@ export {
   IGNORED_TEXT_MATCH
 } from './content/leaf-pipeline';
 export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
+export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export * from './messenger/facebook-communicator';
 export {
   createFacebookMessenger,
