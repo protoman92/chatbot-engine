@@ -1,15 +1,27 @@
+import { KV } from './common';
 import { PlatformResponse } from './response';
+
+/** Represents a basic HTTP request. */
+interface HTTPRequest {
+  url: string;
+  headers?: Readonly<{ [K: string]: unknown }>;
+  query?: KV<unknown>;
+}
+
+declare namespace HTTPRequest {
+  export interface GET extends HTTPRequest {
+    readonly method: 'GET';
+  }
+
+  export interface POST extends HTTPRequest {
+    readonly method: 'POST';
+    readonly body: unknown;
+  }
+}
 
 /** Handle HTTP communication. */
 export interface HTTPCommunicator {
-  communicate<T>(
-    params: Readonly<{
-      url: string;
-      method: 'GET' | 'POST';
-      body?: unknown;
-      headers: Readonly<{ [K: string]: unknown }>;
-    }>
-  ): Promise<T>;
+  communicate<T>(request: HTTPRequest.GET | HTTPRequest.POST): Promise<T>;
 }
 
 /**

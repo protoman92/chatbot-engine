@@ -11,53 +11,48 @@ export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
   { apiVersion, pageToken }: Pick<FacebookConfigs, 'apiVersion' | 'pageToken'>
 ): ServiceCommunicator {
-  function communicate<T>({
-    method,
-    additionalPaths = [],
-    body
-  }: Readonly<{
-    method: 'GET' | 'POST';
-    additionalPaths?: readonly string[];
-    body?: unknown;
-  }>): Promise<T> {
+  function formatURL(...additionalPaths: string[]) {
+    return `https://graph.facebook.com/v${apiVersion}/${additionalPaths.join(
+      '/'
+    )}?access_token=${pageToken}`;
+  }
+
+  async function get<T>(...additionalPaths: string[]) {
     return communicator.communicate<T>({
-      method,
+      method: 'GET',
+      url: formatURL(...additionalPaths)
+    });
+  }
+
+  async function post<T>(body: unknown, ...additionalPaths: string[]) {
+    return communicator.communicate<T>({
       body,
-      url: `https://graph.facebook.com/v${apiVersion}/${additionalPaths.join(
-        '/'
-      )}?access_token=${pageToken}`,
+      method: 'POST',
+      url: formatURL(...additionalPaths),
       headers: { 'Content-Type': 'application/json' }
     });
   }
 
   return {
     getUser: async <U>(senderID: string) => {
-      const facebookUser = await communicate<U | undefined | null>({
-        method: 'GET',
-        additionalPaths: [senderID]
-      });
-
+      const facebookUser = await get<U | undefined | null>(senderID);
       if (!facebookUser) throw Error(`Unable to find user for id ${senderID}`);
       return facebookUser;
     },
 
     sendResponse: data => {
-      return communicate({
-        method: 'POST',
-        additionalPaths: ['me', 'messages'],
-        body: data
-      });
+      return post(data, 'me', 'messages');
     },
 
     setTypingIndicator: (senderID, enabled) => {
-      return communicate({
-        method: 'POST',
-        additionalPaths: ['me', 'messages'],
-        body: {
+      return post(
+        {
           recipient: { id: senderID },
           sender_action: enabled ? 'typing_on' : 'typing_off'
-        }
-      });
+        },
+        'me',
+        'messages'
+      );
     }
   };
 }
