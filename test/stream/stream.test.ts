@@ -1,8 +1,9 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { createContentSubject } from '../../src';
+import { mergeObservables } from '../../src/stream/subject';
 
-describe('Content subject', () => {
+describe('Content stream and subject', () => {
   it('Should receive updates on subscription', async () => {
     // Setup
     let nextCount = 0;
@@ -27,12 +28,13 @@ describe('Content subject', () => {
 
   it('Should complete all internal observers on complete', async () => {
     // Setup
+    let nextCount = 0;
     let completeCount = 0;
     const subject = createContentSubject();
 
     // When
     await subject.subscribe({
-      next: async () => {},
+      next: async () => (nextCount += 1),
       complete: async () => (completeCount += 1)
     });
 
@@ -40,8 +42,36 @@ describe('Content subject', () => {
     await subject.complete();
     await subject.complete();
     await subject.complete();
+    await subject.next(1);
 
     // Then
     expectJs(completeCount).to.equal(1);
+    expectJs(nextCount).not.to.be.ok();
+  });
+
+  it('Should merge all emissions when using merging observables', async () => {
+    // Setup
+    const subjectCount = 1000;
+
+    const subjects = [...Array(subjectCount).keys()].map(() => {
+      return createContentSubject<number>();
+    });
+
+    const receivedValues: number[] = [];
+    let completedCount = 0;
+
+    // When
+    const subscription = await mergeObservables(...subjects).subscribe({
+      next: async content => receivedValues.push(content),
+      complete: async () => (completedCount += 1)
+    });
+
+    await Promise.all(subjects.map((subject, i) => subject.next(i)));
+    await subscription.unsubscribe();
+    await Promise.all(subjects.map((subject, i) => subject.next(i)));
+
+    // Then
+    expectJs(receivedValues).to.eql([...Array(subjectCount).keys()]);
+    expectJs(completedCount).to.equal(subjectCount);
   });
 });

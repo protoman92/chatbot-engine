@@ -47,6 +47,7 @@ export function createCompositeSubscription(
 export function createContentSubject<T>(): ContentSubject<T> {
   const observerMap: { [K: number]: ContentObserver<T> } = {};
   let currentID = 0;
+  let isCompleted = false;
 
   return {
     subscribe: async observer => {
@@ -59,17 +60,23 @@ export function createContentSubject<T>(): ContentSubject<T> {
         return !!observer.complete && observer.complete();
       });
     },
-    next: contents => {
+    next: async contents => {
+      if (isCompleted) return;
+
       return Promise.all(
         Object.entries(observerMap).map(([id, obs]) => obs.next(contents))
       );
     },
     complete: async () => {
-      return Promise.all(
+      if (isCompleted) return;
+
+      await Promise.all(
         Object.entries(observerMap).map(
           async ([id, obs]) => !!obs.complete && obs.complete()
         )
       );
+
+      isCompleted = true;
     }
   };
 }
