@@ -23,7 +23,7 @@ export interface GenericRequest<C extends Context> {
  */
 export interface GenericResponse<C extends Context> {
   readonly senderID: string;
-  readonly newContext: C;
+  readonly newContext?: C;
   readonly visualContents: readonly VisualContent[];
 }
 

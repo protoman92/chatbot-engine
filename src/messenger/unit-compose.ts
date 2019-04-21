@@ -18,7 +18,7 @@ export function saveContextOnSend<C extends Context>(
     sendResponse: async response => {
       const { senderID, newContext } = response;
       const result = await unitMessenger.sendResponse(response);
-      await contextDAO.setContext(senderID, newContext);
+      !!newContext && (await contextDAO.setContext(senderID, newContext));
       return result;
     }
   });

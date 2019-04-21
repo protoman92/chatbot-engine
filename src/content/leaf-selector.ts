@@ -5,7 +5,7 @@ import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/messenger';
-import { ContentObserver, ContentObservable } from '../type/stream';
+import { ContentObserver, ContentObservable, NextResult } from '../type/stream';
 import { enumerateLeafPipelineInputs } from './leaf-pipeline';
 
 /**
@@ -67,7 +67,7 @@ export function createLeafSelector<C extends Context>(
       senderID,
       oldContext: originalContext,
       text: inputText
-    }: LeafSelector.Input<C>) => {
+    }: LeafSelector.Input<C>): Promise<NextResult> => {
       const pipelineInputs = await selector.enumerateInputs();
 
       for (const pipelineInput of pipelineInputs) {
@@ -79,8 +79,10 @@ export function createLeafSelector<C extends Context>(
           additionalParams: { oldContext, inputText }
         });
 
-        if (nextResult !== null) return;
+        if (nextResult !== null) return nextResult;
       }
+
+      return null;
     },
     complete: async () => {
       const pipelineInputs = await selector.enumerateInputs();

@@ -139,7 +139,7 @@ export function createLeafSelectorTester<C extends Context>(
                 }
               );
 
-              const { activeBranch, ...restContext } = newContext;
+              const { activeBranch, ...restContext } = newContext || oldContext;
               newContext = { ...deepClone(restContext) } as C;
 
               if (expectedContext) {
@@ -192,7 +192,7 @@ export function createLeafSelectorTester<C extends Context>(
         sequence.map(async ({ text, leafID }, i) => {
           if (beforeEachIteration) await beforeEachIteration();
 
-          const { newContext } = await new Promise<GenericResponse<C>>(
+          let { newContext } = await new Promise<GenericResponse<C>>(
             async resolve => {
               await selector.next({ senderID, oldContext, text });
               let subscription: ContentSubscription;
@@ -209,6 +209,7 @@ export function createLeafSelectorTester<C extends Context>(
             }
           );
 
+          newContext = newContext || oldContext;
           const currentLeafID = getCurrentLeafID(newContext.activeBranch);
 
           if (leafID !== currentLeafID) {
