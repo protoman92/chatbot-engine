@@ -11,8 +11,8 @@ describe('Content subject', () => {
 
     // When
     const subscription = subject.subscribe({
-      next: () => (nextCount += 1),
-      complete: () => (completeCount += 1)
+      next: async () => (nextCount += 1),
+      complete: async () => (completeCount += 1)
     });
 
     subject.next(1);
@@ -32,8 +32,8 @@ describe('Content subject', () => {
 
     // When
     subject.subscribe({
-      next: () => {},
-      complete: () => (completeCount += 1)
+      next: async () => {},
+      complete: async () => (completeCount += 1)
     });
 
     subject.complete();

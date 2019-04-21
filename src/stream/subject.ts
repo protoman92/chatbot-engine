@@ -43,13 +43,13 @@ export function createContentSubject<T>(): ContentSubject<T> {
       });
     },
     next: contents => {
-      Object.entries(observerMap).forEach(([id, observer]) =>
-        observer.next(contents)
+      return Promise.all(
+        Object.entries(observerMap).map(([id, obs]) => obs.next(contents))
       );
     },
-    complete: () => {
-      Object.entries(observerMap).forEach(([id, observer]) =>
-        observer.complete()
+    complete: async () => {
+      return Promise.all(
+        Object.entries(observerMap).map(([id, obs]) => obs.complete())
       );
     }
   };
