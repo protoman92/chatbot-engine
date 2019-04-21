@@ -1,6 +1,6 @@
 import { Context } from './common';
 import { GenericResponse } from './messenger';
-import { ContentObservable, NextContentObserver } from './stream';
+import { ContentObservable, ContentObserver } from './stream';
 
 declare namespace LeafSelector {
   /**
@@ -21,5 +21,5 @@ declare namespace LeafSelector {
  * @template C The context used by the current chatbot.
  */
 export interface LeafSelector<C extends Context>
-  extends NextContentObserver<LeafSelector.Input<C>>,
+  extends ContentObserver<LeafSelector.Input<C>>,
     ContentObservable<GenericResponse<C>> {}

@@ -1,7 +1,7 @@
 import { Branch } from './branch';
 import { Context } from './common';
 import { Leaf } from './leaf';
-import { NextContentObserver } from './stream';
+import { ContentObserver } from './stream';
 
 declare namespace LeafPipeline {
   /**
@@ -43,4 +43,4 @@ declare namespace LeafPipeline {
  * @template C The context used by the current chatbot.
  */
 export interface LeafPipeline<C extends Context>
-  extends NextContentObserver<LeafPipeline.ObserverInput<C>> {}
+  extends Pick<ContentObserver<LeafPipeline.ObserverInput<C>>, 'next'> {}

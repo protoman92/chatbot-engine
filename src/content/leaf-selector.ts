@@ -82,6 +82,13 @@ export function createLeafSelector<C extends Context>(
         });
       }
     },
+    complete: async () => {
+      const pipelineInputs = await selector.enumerateInputs();
+
+      return Promise.all(
+        pipelineInputs.map(({ currentLeaf }) => currentLeaf.complete())
+      );
+    },
     subscribe: (observer: ContentObserver<GenericResponse<C>>) => {
       return outputObservable.subscribe(observer);
     }

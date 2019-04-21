@@ -3,7 +3,7 @@ import { Context } from './common';
 import { GenericResponse } from './messenger';
 import { QuickReply } from './quick-reply';
 import { Response } from './response';
-import { ContentObservable, NextContentObserver } from './stream';
+import { ContentObservable, ContentObserver } from './stream';
 
 /** Represents content that will go out to the user. */
 interface VisualContent {
@@ -37,7 +37,7 @@ type TextConditionResult = string | readonly string[] | null;
  * @template C The context used by the current chatbot.
  */
 export interface Leaf<C extends Context>
-  extends NextContentObserver<Omit<LeafContentInput<C>, 'newContext'>>,
+  extends ContentObserver<Omit<LeafContentInput<C>, 'newContext'>>,
     ContentObservable<GenericResponse<C>> {
   /**
    * Check if this leaf marks the start of a branch.

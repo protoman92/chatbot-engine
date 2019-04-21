@@ -5,18 +5,11 @@ export interface ContentSubscription {
 }
 
 /**
- * Represents an observer that only knows how to accept content.
- * @template T The type of content being observed.
- */
-export interface NextContentObserver<T> {
-  next(content: T): Promise<unknown>;
-}
-
-/**
  * Represents an observer for contents of some type.
  * @template T The type of content being observed.
  */
-export interface ContentObserver<T> extends NextContentObserver<T> {
+export interface ContentObserver<T> {
+  next(content: T): Promise<unknown>;
   complete(): Promise<unknown>;
 }
 
