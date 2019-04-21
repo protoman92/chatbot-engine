@@ -34,25 +34,25 @@ declare namespace Response {
   export interface Carousel {
     readonly items: Readonly<{
       title: string;
-      description?: string;
-      media_url?: string;
-      actions?: readonly Action[];
+      description: string | null;
+      mediaURL: string | null;
+      actions: readonly Action[] | null;
     }>[];
 
     readonly type: 'carousel';
-    readonly actions?: readonly Action[];
+    readonly actions: readonly Action[] | null;
   }
 
   export interface List {
     readonly items: Readonly<{
       title: string;
-      description?: string;
-      size?: 'large' | 'small';
-      actions?: readonly Action[];
+      description: string | null;
+      size: 'large' | 'small';
+      actions: readonly Action[] | null;
     }>[];
 
     readonly type: 'list';
-    readonly actions?: readonly Action[];
+    readonly actions: readonly Action[] | null;
   }
 }
 

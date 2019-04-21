@@ -156,15 +156,16 @@ async function createFacebookResponse<C extends Context>({
                 title = '',
                 description: subtitle,
                 // tslint:disable-next-line:variable-name
-                media_url: image_url,
-                actions: buttons = []
+                mediaURL: image_url,
+                actions: buttons
               }) => ({
                 title,
                 subtitle,
                 image_url,
-                buttons: buttons.length
-                  ? buttons.map(action => createSingleAction(action))
-                  : undefined
+                buttons:
+                  !!buttons && buttons.length
+                    ? buttons.map(action => createSingleAction(action))
+                    : undefined
               })
             ),
           template_type: 'generic'
@@ -181,7 +182,11 @@ async function createFacebookResponse<C extends Context>({
      * to carousel if possible.
      */
     if (items.length <= 1) {
-      return createCarouselResponse({ ...response, type: 'carousel' });
+      return createCarouselResponse({
+        ...response,
+        items: items.map(item => ({ ...item, mediaURL: null })),
+        type: 'carousel'
+      });
     }
 
     return {
@@ -198,14 +203,15 @@ async function createFacebookResponse<C extends Context>({
               }) => ({
                 title,
                 subtitle,
-                buttons: itemButtons.length
-                  ? itemButtons.map(action => createSingleAction(action))
-                  : undefined
+                buttons:
+                  !!itemButtons && itemButtons.length
+                    ? itemButtons.map(action => createSingleAction(action))
+                    : undefined
               })
             ),
           template_type: 'list',
           top_element_style: 'compact',
-          buttons: listButtons.length ? listButtons : undefined
+          buttons: !!listButtons && listButtons.length ? listButtons : undefined
         }
       }
     };
