@@ -12,7 +12,7 @@ export {
 } from './messenger/facebook-messenger';
 export * from './messenger/generic-messenger';
 export * from './messenger/unit-compose';
-export { createContentSubject } from './stream/subject';
+export { createContentSubject } from './stream/stream';
 export * from './type/branch';
 export * from './type/common';
 export * from './type/communicator';

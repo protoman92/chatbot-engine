@@ -3,7 +3,7 @@ import { Leaf } from '../type/leaf';
 import { Omit } from 'ts-essentials';
 import { ContentSubject } from '../type/stream';
 import { GenericResponse } from '../type/messenger';
-import { createContentSubject } from '../stream/subject';
+import { createContentSubject } from '../stream/stream';
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting

@@ -1,5 +1,5 @@
 import { deepClone, formatSpecialKey, joinPaths } from '../common/utils';
-import { mergeObservables } from '../stream/subject';
+import { mergeObservables } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
@@ -79,7 +79,7 @@ export function createLeafSelector<C extends Context>(
           additionalParams: { oldContext, inputText }
         });
 
-        if (nextResult != null) return;
+        if (nextResult !== null) return;
       }
     },
     complete: async () => {
