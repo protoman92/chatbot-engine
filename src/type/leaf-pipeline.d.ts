@@ -20,7 +20,7 @@ declare namespace LeafPipeline {
    * @template C The context used by the current chatbot.
    */
   export interface AdditionalParams<C extends Context> {
-    readonly inputText?: string;
+    readonly inputText: string;
     readonly inputImageURL?: string;
     readonly oldContext: C;
   }

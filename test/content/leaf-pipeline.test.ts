@@ -6,7 +6,6 @@ import {
   Context,
   createLeafPipeline,
   createLeafWithSubject,
-  IGNORED_TEXT_MATCH,
   KV,
   Leaf,
   LeafContentInput,
@@ -20,7 +19,6 @@ export type Pipeline = ReturnType<
 >;
 
 const senderID = 'sender-id';
-const activeBranch = 'active-branch';
 
 describe('Supporting pipeline methods', () => {
   it('Should update context when preparing incoming context', async () => {
@@ -56,83 +54,6 @@ describe('Supporting pipeline methods', () => {
     expectJs(oldContext).not.to.have.key('a', 'b');
     expectJs(oldContext.activeBranch).to.equal(activeBranch);
   });
-
-  it('Should update context when preparing outgoing context', async () => {
-    // Setup
-    interface TestContext extends Context {
-      readonly a: number;
-      readonly b: string;
-    }
-
-    const pipeline = createLeafPipeline<TestContext>();
-    let oldContext: TestContext = { senderID, activeBranch, a: 1, b: '2' };
-
-    // When
-    oldContext = await pipeline.prepareOutgoingContext(
-      {
-        parentBranch: {
-          contextKeys: ['a', 'b']
-        },
-        currentLeaf: createLeafWithSubject(() => ({
-          checkTextConditions: () => Promise.reject(''),
-          checkContextConditions: () => Promise.reject(''),
-          isEndOfBranch: async () => true,
-          next: () => Promise.reject('')
-        }))
-      },
-      oldContext
-    );
-
-    // Then
-    expectJs(oldContext).not.to.have.key('activeBranch', 'a', 'b');
-  });
-
-  it('Extracting text matches with valid input text', async () => {
-    // Setup
-    const pipeline = createLeafPipeline();
-    const textMatch = 'text-match';
-
-    // When
-    const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
-      { checkTextConditions: async () => textMatch },
-      'input-text'
-    );
-
-    // Then
-    expectJs(allTextMatches).to.eql([textMatch]);
-    expectJs(lastTextMatch).to.equal(textMatch);
-  });
-
-  it('Extracting text matches with invalid input text', async () => {
-    // Setup
-    const pipeline = createLeafPipeline();
-    const textMatch = 'text-match';
-
-    // When
-    const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
-      { checkTextConditions: async () => textMatch },
-      ''
-    );
-
-    // Then
-    expectJs(allTextMatches).to.eql([IGNORED_TEXT_MATCH]);
-    expectJs(lastTextMatch).to.equal(IGNORED_TEXT_MATCH);
-  });
-
-  it('Extracting text matches with invalid text matches', async () => {
-    // Setup
-    const pipeline = createLeafPipeline();
-
-    // When
-    const { allTextMatches, lastTextMatch } = await pipeline.extractTextMatches(
-      { checkTextConditions: async () => null },
-      'input-text'
-    );
-
-    // Then
-    expectJs(allTextMatches).to.eql([]);
-    expectJs(lastTextMatch).to.not.be.ok();
-  });
 });
 
 describe('Main leaf processing', () => {
@@ -167,61 +88,6 @@ describe('Main leaf processing', () => {
     pipeline = spy(createLeafPipeline());
   });
 
-  it('Should fail if context checks fail', async () => {
-    // Setup
-    let leafInput: LeafContentInput<Context> | undefined = undefined;
-
-    when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
-      senderID
-    });
-
-    when(currentLeaf.checkContextConditions(anything())).thenResolve(false);
-
-    when(currentLeaf.next(anything())).thenCall(async content => {
-      leafInput = content;
-    });
-
-    // When
-    await instance(pipeline).next({
-      senderID,
-      pipelineInput: instance(pipelineInput),
-      additionalParams: instance(additionalParams)
-    });
-
-    // Then
-    expectJs(leafInput).to.equal(undefined);
-  });
-
-  it('Should fail if no text match found', async () => {
-    // Setup
-    let leafInput: LeafContentInput<Context> | undefined = undefined;
-
-    when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
-      senderID
-    });
-
-    when(pipeline.extractTextMatches(anything(), anything())).thenResolve({
-      allTextMatches: [],
-      lastTextMatch: ''
-    });
-
-    when(currentLeaf.checkContextConditions(anything())).thenResolve(true);
-
-    when(currentLeaf.next(anything())).thenCall(async content => {
-      leafInput = content;
-    });
-
-    // When
-    await instance(pipeline).next({
-      senderID,
-      pipelineInput: instance(pipelineInput),
-      additionalParams: instance(additionalParams)
-    });
-
-    // Then
-    expectJs(leafInput).to.equal(undefined);
-  });
-
   it('Should pass if all conditions satisfied', async () => {
     // Setup
     const currentLeafID = 'current-leaf-id';
@@ -231,13 +97,6 @@ describe('Main leaf processing', () => {
     when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
       senderID
     });
-
-    when(pipeline.extractTextMatches(anything(), anything())).thenResolve({
-      allTextMatches: [],
-      lastTextMatch: 'last-text-match'
-    });
-
-    when(currentLeaf.checkContextConditions(anything())).thenResolve(true);
 
     when(currentLeaf.next(anything())).thenCall(async content => {
       leafInput = content;

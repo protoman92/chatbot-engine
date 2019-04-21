@@ -1,12 +1,6 @@
-import {
-  deepClone,
-  formatSpecialKey,
-  joinPaths,
-  toArray
-} from '../common/utils';
+import { deepClone, formatSpecialKey, joinPaths } from '../common/utils';
 import { Branch } from '../type/branch';
-import { Context, DefaultContext, KV } from '../type/common';
-import { Leaf } from '../type/leaf';
+import { Context, KV } from '../type/common';
 import { LeafPipeline } from '../type/leaf-pipeline';
 import { NextResult } from '../type/stream';
 
@@ -101,54 +95,6 @@ export function createLeafPipeline<C extends Context>() {
       return oldContext;
     },
 
-    /**
-     * When we end a pipeline, we may want to modify the outgoing context, e.g.
-     * if the current leaf marks the end of a branch, we need to clear out the
-     * activeBranch key.
-     * @param param0 The pipeline input.
-     * @param newContext The new context.
-     * @return An updated context object.
-     */
-    prepareOutgoingContext: async (
-      {
-        parentBranch: { contextKeys },
-        currentLeaf
-      }: Pick<LeafPipeline.Input<C>, 'parentBranch' | 'currentLeaf'>,
-      newContext: C
-    ) => {
-      if (
-        !!currentLeaf.isEndOfBranch &&
-        (await currentLeaf.isEndOfBranch(newContext))
-      ) {
-        const activeBranchKey: keyof DefaultContext = 'activeBranch';
-        const clearableKeys = [activeBranchKey, ...(contextKeys || [])];
-        clearableKeys.forEach(key => delete newContext[key]);
-      }
-
-      return newContext;
-    },
-
-    /**
-     * Extract text matches from an input text.
-     * @param currentLeaf The leaf whose text conditions will be used to match.
-     * @param inputText The input text.
-     * @return The relevant text matches.
-     */
-    extractTextMatches: async (
-      currentLeaf: Pick<Leaf<C>, 'checkTextConditions'>,
-      inputText?: string
-    ) => {
-      const textMatches = !!inputText
-        ? await currentLeaf.checkTextConditions(inputText)
-        : [IGNORED_TEXT_MATCH];
-
-      let allTextMatches: readonly string[] = [];
-      if (!textMatches) return { allTextMatches };
-      allTextMatches = toArray(textMatches);
-      const lastTextMatch = allTextMatches[allTextMatches.length - 1];
-      return { allTextMatches, lastTextMatch };
-    },
-
     next: async ({
       senderID,
       pipelineInput: input,
@@ -157,22 +103,7 @@ export function createLeafPipeline<C extends Context>() {
       const { currentLeaf } = input;
       let oldContext = deepClone(originalContext);
       oldContext = await pipeline.prepareIncomingContext(input, oldContext);
-      if (!(await currentLeaf.checkContextConditions(oldContext))) return null;
-
-      const {
-        allTextMatches,
-        lastTextMatch
-      } = await pipeline.extractTextMatches(currentLeaf, inputText);
-
-      if (!lastTextMatch) return null;
-
-      return await currentLeaf.next({
-        senderID,
-        oldContext,
-        inputText,
-        allTextMatches,
-        lastTextMatch
-      });
+      return currentLeaf.next({ senderID, oldContext, inputText });
     }
   };
 

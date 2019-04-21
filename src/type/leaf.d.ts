@@ -11,11 +11,8 @@ import { GenericResponse } from './response';
 interface LeafContentInput<C extends Context> {
   readonly senderID: string;
   readonly oldContext: C;
-  readonly newContext: C;
-  readonly inputText?: string;
+  readonly inputText: string;
   readonly inputImageURL?: string;
-  readonly allTextMatches: readonly string[];
-  readonly lastTextMatch: string;
 }
 
 /** Result of a text condition check. */
@@ -30,35 +27,11 @@ type TextConditionResult = string | readonly string[] | null;
  * @template C The context used by the current chatbot.
  */
 export interface Leaf<C extends Context>
-  extends ContentObserver<Omit<LeafContentInput<C>, 'newContext'>>,
+  extends ContentObserver<LeafContentInput<C>>,
     ContentObservable<GenericResponse<C>> {
   /**
    * Check if this leaf marks the start of a branch.
    * @return A Promise of boolean.
    */
   isStartOfBranch?(): Promise<boolean>;
-
-  /**
-   * Check text conditions to see if this leaf can be navigated to. This is
-   * the first check that filter out falsy texts, but we will need other checks
-   * to present false positives.
-   * @param text A string value.
-   * @return A Promise of text-checking results.
-   */
-  checkTextConditions(text: string): Promise<TextConditionResult>;
-
-  /**
-   * Check context conditions to see if this leaf can be navigated to.
-   * @param oldContext The old context object.
-   * @return A Promise of boolean.
-   */
-  checkContextConditions(oldContext: C): Promise<boolean>;
-
-  /**
-   * Check if this leaf marks the end of a branch. We might do some cleanup
-   * after this.
-   * @param newContext The newly transformed context.
-   * @return A Promise of boolean.
-   */
-  isEndOfBranch?(newContext: C): Promise<boolean>;
 }
