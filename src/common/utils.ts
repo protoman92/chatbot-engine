@@ -86,6 +86,28 @@ export function getCurrentLeafID(activeBranch?: string): string | null {
 }
 
 /**
+ * Map a series of values to a series of promises, and maintain their order.
+ * @template T1 The original value type.
+ * @template T2 The resulting value type/
+ * @param data The array of original values.
+ * @param fn Function that maps original value to resulting value promise.
+ * @return A Promise of resulting value array.
+ */
+export async function mapSeries<T1, T2>(
+  data: readonly T1[],
+  fn: (datum: T1) => Promise<T2>
+): Promise<readonly T2[]> {
+  const mappedData: T2[] = [];
+
+  for (const datum of data) {
+    const mappedDatum = await fn(datum);
+    mappedData.push(mappedDatum);
+  }
+
+  return mappedData;
+}
+
+/**
  * Format a special key.
  * @param key A string value.
  * @return A string value.
