@@ -1,7 +1,6 @@
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import {
-  compose,
   Context,
   ContextDAO,
   GenericRequest,
@@ -13,7 +12,7 @@ import {
   setTypingIndicator,
   UnitMessenger
 } from '../../src';
-import { joinObjects } from '../../src/common/utils';
+import { compose, joinObjects } from '../../src/common/utils';
 
 const senderID = 'sender-id';
 let messenger: UnitMessenger<Context>;

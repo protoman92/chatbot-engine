@@ -1,4 +1,3 @@
-export { compose } from './common/utils';
 export { createLeafWithSubject } from './content/leaf';
 export {
   createLeafPipeline,

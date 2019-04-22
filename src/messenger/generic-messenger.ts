@@ -25,10 +25,10 @@ export async function createGenericUnitMessenger<C extends Context>(
 ): Promise<UnitMessenger<C>> {
   const messenger: UnitMessenger<C> = compose(
     {
-      receiveRequest: async ({ senderID, oldContext, data }) => {
-        return mapSeries(data, ({ inputText = '' }) =>
-          leafSelector.next({ senderID, oldContext, inputText })
-        );
+      receiveRequest: ({ senderID, oldContext, data }) => {
+        return mapSeries(data, ({ inputText = '' }) => {
+          return leafSelector.next({ senderID, oldContext, inputText });
+        });
       },
       sendResponse: async response => {
         const data = await responseMapper(response);
