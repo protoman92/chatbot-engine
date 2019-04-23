@@ -5,6 +5,7 @@ export {
 } from './content/leaf-pipeline';
 export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
+export * from './messenger/axios-communicator';
 export * from './messenger/facebook-communicator';
 export {
   createFacebookMessenger,
