@@ -77,9 +77,9 @@ export function createLeafSelector<C extends Context>(
       oldContext: originalContext,
       inputText
     }: LeafSelector.Input<C>): Promise<NextResult> => {
-      const pipelineInputs = await selector.enumerateInputs();
-
       try {
+        const pipelineInputs = await selector.enumerateInputs();
+
         for (const pipelineInput of pipelineInputs) {
           const oldContext = deepClone(originalContext);
 
@@ -91,6 +91,8 @@ export function createLeafSelector<C extends Context>(
 
           if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
         }
+
+        throw new Error('This bot has nothing to say');
       } catch ({ message }) {
         const errorLeaf = await selector.getErrorLeaf();
 

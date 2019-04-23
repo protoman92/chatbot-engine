@@ -177,11 +177,9 @@ describe('Leaf selector', () => {
     );
 
     // When
-    const oldContext = { senderID };
-
     const nextResult = await instance(leafSelector).next({
       senderID,
-      oldContext,
+      oldContext: { senderID },
       inputText: ''
     });
 
@@ -194,5 +192,31 @@ describe('Leaf selector', () => {
     expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
     expectJs(inputText).to.equal(error.message);
     expectJs(nextResult).to.eql({});
+  });
+
+  it('Should throw error if no pipeline inputs found', async () => {
+    // Setup
+    const errorLeaf: Leaf<Context> = {
+      next: () => Promise.reject(''),
+      subscribe: () => Promise.reject('')
+    };
+
+    when(leafSelector.enumerateInputs()).thenResolve([]);
+    when(leafSelector.getErrorLeaf()).thenResolve(errorLeaf);
+    when(leafPipeline.next(anything())).thenResolve({});
+
+    // When
+    await instance(leafSelector).next({
+      senderID,
+      oldContext: { senderID },
+      inputText: ''
+    });
+
+    // Then
+    const {
+      pipelineInput: { currentLeafID }
+    } = capture(leafPipeline.next).byCallIndex(0)[0];
+
+    expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
   });
 });
