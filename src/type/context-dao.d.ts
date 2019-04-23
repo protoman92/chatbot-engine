@@ -20,11 +20,12 @@ export interface ContextDAO<C extends Context> {
    * @param context The context object being saved.
    * @return A Promise of some response.
    */
-  setContext(senderID: string, context: C): Promise<unknown>;
+  setContext(senderID: string, context: C | null): Promise<unknown>;
 
   /**
    * Reset all context to factory.
+   * @param senderID The sender ID.
    * @return A Promise of some response.
    */
-  resetAll(): Promise<void>;
+  resetContext(senderID: string): Promise<unknown>;
 }

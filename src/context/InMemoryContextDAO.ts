@@ -26,7 +26,7 @@ export function createInMemoryContextDAO<C extends Context>(
       const cacheKey = getCacheKey(senderID);
       storage[cacheKey] = context;
     },
-    resetAll: async () => {
+    resetContext: async () => {
       const keys = Object.keys(storage);
       keys.forEach(key => delete storage[key]);
     }

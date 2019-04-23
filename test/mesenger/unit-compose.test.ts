@@ -34,7 +34,7 @@ beforeEach(async () => {
   contextDAO = spy<ContextDAO<Context>>({
     getContext: () => Promise.reject(''),
     setContext: () => Promise.reject(''),
-    resetAll: () => Promise.reject('')
+    resetContext: () => Promise.reject('')
   });
 });
 
