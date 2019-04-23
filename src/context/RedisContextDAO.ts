@@ -5,7 +5,7 @@ import { ContextDAO } from '../type/context-dao';
 import { SupportedPlatform } from '../type/messenger';
 
 export function createRedisContextDAO<C extends Context>(
-  redis: RedisClient,
+  redis: Pick<RedisClient, 'get' | 'set' | 'del'>,
   platform: SupportedPlatform
 ): ContextDAO<C> {
   function getCacheKey(senderID: string) {
