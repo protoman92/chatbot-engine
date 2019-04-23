@@ -108,6 +108,72 @@ export async function mapSeries<T1, T2>(
 }
 
 /**
+ * Promisify a callback-style function into one that supports promises.
+ * @template T The type of value being resolved.
+ * @param fn Function to be promisified.
+ * @return Promisified function.
+ */
+export function promisify<T>(
+  fn: (callback: (err: Error | null, value: T) => any) => void
+): () => Promise<T> {
+  return function() {
+    return new Promise((resolve, reject) => {
+      fn((err, val) => {
+        if (err !== undefined && err !== null) {
+          reject(err);
+        } else {
+          resolve(val);
+        }
+      });
+    });
+  };
+}
+
+/**
+ * Promisify, but for functions with one parameter.
+ * @template T The type of value being resolved.
+ * @template FN The type of function being promisified.
+ * @param fn Function to be promisified.
+ * @return Promisified function.
+ */
+export function promisify1<
+  FN extends (
+    param1: any,
+    callback: (err: Error | null, value: any) => void
+  ) => any
+>(
+  fn: FN
+): (param1: Parameters<FN>[0]) => Promise<Parameters<Parameters<FN>[1]>[1]> {
+  return function(this: any, param1) {
+    return promisify(fn.bind(this, param1))();
+  };
+}
+
+/**
+ * Promisify, but for functions with two parameters.
+ * @template T The type of value being resolved.
+ * @template FN The type of function being promisified.
+ * @param fn Function to be promisified.
+ * @return Promisified function.
+ */
+export function promisify2<
+  FN extends (
+    param1: any,
+    param2: any,
+    callback: (err: Error | null, value: any) => void
+  ) => any
+>(
+  fn: FN
+): (
+  p1: Parameters<FN>[0],
+  p2: Parameters<FN>[1]
+) => Promise<Parameters<Parameters<FN>[2]>[1]> {
+  return function(this: any, p1, p2) {
+    return promisify(fn.bind(this, p1, p2))();
+  };
+}
+
+/**
  * Format a special key.
  * @param key A string value.
  * @return A string value.
