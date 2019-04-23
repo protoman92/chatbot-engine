@@ -3,11 +3,11 @@ import { beforeEach, describe } from 'mocha';
 import { anything, instance, spy, when } from 'ts-mockito';
 import {
   Context,
-  createFacebookUnitMessenger,
   FacebookConfigs,
   LeafSelector,
   PlatformCommunicator
 } from '../../src';
+import { createFacebookUnitMessenger } from '../../src/messenger/facebook-messenger';
 
 describe('Facebook unit messenger', () => {
   let leafSelector: LeafSelector<Context>;

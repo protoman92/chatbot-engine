@@ -5,14 +5,16 @@ import {
   ContextDAO,
   GenericRequest,
   GenericResponse,
-  injectContextOnReceive,
   PlatformCommunicator,
-  saveContextOnSend,
   saveUserForSenderID,
-  setTypingIndicator,
   UnitMessenger
 } from '../../src';
 import { compose, joinObjects } from '../../src/common/utils';
+import {
+  injectContextOnReceive,
+  saveContextOnSend,
+  setTypingIndicator
+} from '../../src/messenger/unit-compose';
 
 const senderID = 'sender-id';
 let messenger: UnitMessenger<Context>;
