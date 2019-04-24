@@ -3,7 +3,7 @@ import { createContentSubject } from '../stream/stream';
 import { Context } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
-import { ContentSubject } from '../type/stream';
+import { ContentObserver } from '../type/stream';
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -12,9 +12,9 @@ import { ContentSubject } from '../type/stream';
  * @param fn Function to create a base leaf using the supplied subject.
  * @return A leaf instance.
  */
-export function createLeafWithSubject<C extends Context>(
+export function createLeafWithObserver<C extends Context>(
   fn: (
-    subject: ContentSubject<GenericResponse<C>>
+    observer: Pick<ContentObserver<GenericResponse<C>>, 'next'>
   ) => Omit<Leaf<C>, 'subscribe'>
 ): Leaf<C> {
   const subject = createContentSubject<GenericResponse<C>>();
@@ -37,7 +37,7 @@ export function createLeafWithSubject<C extends Context>(
  * @return A leaf instance.
  */
 export function createDefaultErrorLeaf<C extends Context>(): Leaf<C> {
-  return createLeafWithSubject(subject => ({
+  return createLeafWithObserver(subject => ({
     next: ({ senderID, inputText }) => {
       return subject.next({
         senderID,

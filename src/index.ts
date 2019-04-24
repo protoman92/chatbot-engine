@@ -1,4 +1,6 @@
-export { createLeafWithSubject } from './content/leaf';
+export {
+  createLeafWithObserver as createLeafWithSubject
+} from './content/leaf';
 export {
   createLeafPipeline,
   IGNORED_TEXT_MATCH
