@@ -1,20 +1,8 @@
-import { Branch } from './branch';
 import { Context } from './common';
-import { Leaf } from './leaf';
+import { LeafSelector } from './leaf-selector';
 import { ContentObserver } from './stream';
 
 declare namespace LeafPipeline {
-  /**
-   * Represents input for a pipeline.
-   * @template C The context used by the current chatbot.
-   */
-  export interface Input<C extends Context> {
-    readonly parentBranch: Branch<C>;
-    readonly prefixLeafPaths: readonly string[];
-    readonly currentLeaf: Leaf<C>;
-    readonly currentLeafID: string;
-  }
-
   /**
    * Represents parameteters common to all pipelines.
    * @template C The context used by the current chatbot.
@@ -31,7 +19,7 @@ declare namespace LeafPipeline {
    */
   export interface ObserverInput<C extends Context> {
     readonly senderID: string;
-    readonly pipelineInput: Input<C>;
+    readonly enumeratedLeaf: LeafSelector.EnumeratedLeaf<C>;
     readonly additionalParams: AdditionalParams<C>;
   }
 }

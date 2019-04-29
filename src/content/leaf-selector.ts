@@ -13,7 +13,54 @@ import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
 import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
 import { createDefaultErrorLeaf } from './leaf';
-import { enumerateLeafPipelineInputs } from './leaf-pipeline';
+
+/**
+ * Enumerate a key-value branch object to produce the entire list of enumerated
+ * leaves.  Each enumerated leaf will be run through a pipeline to check whether
+ * it contains valid content to deliver to the user.
+ * @template C The context used by the current chatbot.
+ * @param branches A key-value object of branches.
+ * @return An Array of enumerated leaves.
+ */
+export function enumerateLeaves<C extends Context>(
+  branches: KV<Branch<C>>
+): readonly LeafSelector.EnumeratedLeaf<C>[] {
+  function enumerate(
+    allBranches: KV<Branch<C>>,
+    prefixPaths?: readonly string[]
+  ): readonly LeafSelector.EnumeratedLeaf<C>[] {
+    let inputs: LeafSelector.EnumeratedLeaf<C>[] = [];
+    const branchEntries = Object.entries(allBranches);
+
+    for (const [branchID, parentBranch] of branchEntries) {
+      if (!parentBranch) continue;
+      const prefixLeafPaths = [...(prefixPaths || []), branchID];
+      const { subBranches, leaves } = parentBranch;
+
+      if (leaves !== undefined && leaves !== null) {
+        const leafEntries = Object.entries(leaves);
+
+        for (const [currentLeafID, currentLeaf] of leafEntries) {
+          if (!currentLeaf) continue;
+          inputs.push({
+            parentBranch,
+            currentLeaf,
+            currentLeafID,
+            prefixLeafPaths
+          });
+        }
+      }
+
+      if (subBranches !== undefined && subBranches !== null) {
+        inputs = inputs.concat(enumerate(subBranches, prefixLeafPaths));
+      }
+    }
+
+    return inputs;
+  }
+
+  return enumerate(branches);
+}
 
 /**
  * Represents the ID of the error leaf. This is used when the selector could
@@ -32,29 +79,29 @@ export function createLeafSelector<C extends Context>(
   leafPipeline: LeafPipeline<C>,
   allBranches: KV<Branch<C>>
 ) {
-  const pipelineInputs = enumerateLeafPipelineInputs(allBranches);
+  const enumeratedLeaves = enumerateLeaves(allBranches);
   const errorLeaf: Leaf<C> = createDefaultErrorLeaf();
   let outputObservable: ContentObservable<GenericResponse<C>>;
 
   const selector = {
-    enumerateInputs: async () => pipelineInputs,
+    enumerateLeaves: async () => enumeratedLeaves,
     getErrorLeaf: async () => errorLeaf,
     /**
      * Clear previously active branch if current active branch differs.
-     * @param pipelineInputs All available pipeline inputs.
+     * @param enumeratedLeaves All available enumerated leaves.
      * @param newContext The new context object.
      * @param previousActiveBranch The previously active branch.
      * @return A Promise of context object.
      */
     clearPreviouslyActiveBranch: async (
-      pipelineInputs: readonly LeafPipeline.Input<C>[],
+      enumeratedLeaves: readonly LeafSelector.EnumeratedLeaf<C>[],
       newContext: C,
       previousActiveBranch?: string
     ): Promise<C> => {
       const { activeBranch } = newContext;
 
       if (!!previousActiveBranch && activeBranch !== previousActiveBranch) {
-        const pipelineInput = pipelineInputs.find(
+        const enumeratedLeaf = enumeratedLeaves.find(
           ({ prefixLeafPaths, currentLeafID }) => {
             return (
               joinPaths(...prefixLeafPaths, currentLeafID) ===
@@ -63,8 +110,8 @@ export function createLeafSelector<C extends Context>(
           }
         );
 
-        if (!!pipelineInput && !!pipelineInput.parentBranch.contextKeys) {
-          const contextKeys = pipelineInput.parentBranch.contextKeys;
+        if (!!enumeratedLeaf && !!enumeratedLeaf.parentBranch.contextKeys) {
+          const contextKeys = enumeratedLeaf.parentBranch.contextKeys;
           contextKeys.forEach(key => delete newContext[key]);
         }
       }
@@ -78,14 +125,14 @@ export function createLeafSelector<C extends Context>(
       inputText
     }: LeafSelector.Input<C>): Promise<NextResult> => {
       try {
-        const pipelineInputs = await selector.enumerateInputs();
+        const enumeratedLeaves = await selector.enumerateLeaves();
 
-        for (const pipelineInput of pipelineInputs) {
+        for (const enumeratedLeaf of enumeratedLeaves) {
           const oldContext = deepClone(originalContext);
 
           const nextResult = await leafPipeline.next({
             senderID,
-            pipelineInput,
+            enumeratedLeaf,
             additionalParams: { oldContext, inputText }
           });
 
@@ -98,7 +145,7 @@ export function createLeafSelector<C extends Context>(
 
         return leafPipeline.next({
           senderID,
-          pipelineInput: {
+          enumeratedLeaf: {
             currentLeaf: errorLeaf,
             currentLeafID: ERROR_LEAF_ID,
             parentBranch: {},
@@ -114,18 +161,18 @@ export function createLeafSelector<C extends Context>(
       return STREAM_INVALID_NEXT_RESULT;
     },
     complete: async () => {
-      const pipelineInputs = await selector.enumerateInputs();
+      const enumeratedLeaves = await selector.enumerateLeaves();
 
-      return mapSeries(pipelineInputs, async ({ currentLeaf }) => {
+      return mapSeries(enumeratedLeaves, async ({ currentLeaf }) => {
         return !!currentLeaf.complete && currentLeaf.complete();
       });
     },
     subscribe: async (observer: ContentObserver<GenericResponse<C>>) => {
       if (!outputObservable) {
-        const pipelineInputs = await selector.enumerateInputs();
+        const enumeratedLeaves = await selector.enumerateLeaves();
 
         outputObservable = mergeObservables(
-          ...pipelineInputs.map(({ currentLeaf }) => currentLeaf),
+          ...enumeratedLeaves.map(({ currentLeaf }) => currentLeaf),
           errorLeaf
         );
       }

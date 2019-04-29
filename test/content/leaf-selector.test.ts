@@ -8,11 +8,12 @@ import {
   ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
   Leaf,
-  LeafPipeline
+  LeafPipeline,
+  LeafSelector
 } from '../../src';
 import { joinPaths } from '../../src/common/utils';
 
-type LeafSelector = ReturnType<
+type TestLeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
 >;
 
@@ -21,7 +22,7 @@ const senderID = 'sender-id';
 describe('Leaf selector', () => {
   let currentLeaf: Leaf<Context>;
   let leafPipeline: LeafPipeline<Context>;
-  let leafSelector: LeafSelector;
+  let leafSelector: TestLeafSelector;
 
   beforeEach(() => {
     currentLeaf = spy<Leaf<Context>>(
@@ -37,7 +38,7 @@ describe('Leaf selector', () => {
       next: () => Promise.reject('')
     });
 
-    leafSelector = spy<LeafSelector>(
+    leafSelector = spy<TestLeafSelector>(
       createLeafSelector(instance(leafPipeline), {})
     );
   });
@@ -71,7 +72,7 @@ describe('Leaf selector', () => {
     const iteration = 1000;
     const validLeafID = 500;
 
-    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
       ...Array(iteration).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -80,10 +81,10 @@ describe('Leaf selector', () => {
       prefixLeafPaths: []
     }));
 
-    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     when(leafPipeline.next(anything())).thenCall(
-      async ({ pipelineInput: { currentLeafID } }) => {
+      async ({ enumeratedLeaf: { currentLeafID } }) => {
         if (currentLeafID === `${validLeafID}`) {
           return {};
         }
@@ -105,7 +106,7 @@ describe('Leaf selector', () => {
     // Setup
     let completedCount = 0;
 
-    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
       ...Array(1000).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -119,18 +120,18 @@ describe('Leaf selector', () => {
         completedCount += 1;
       });
 
-    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     // When
     await instance(leafSelector).complete();
 
     // Then
-    expectJs(completedCount).to.equal(pipelineInputs.length);
+    expectJs(completedCount).to.equal(enumeratedLeaves.length);
   });
 
   it('Subscribing to response should merge leaf observables', async () => {
     // Setup
-    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
       ...Array(1000).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -139,18 +140,18 @@ describe('Leaf selector', () => {
       prefixLeafPaths: []
     }));
 
-    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     // When
     await instance(leafSelector).subscribe({ next: async () => ({}) });
 
     // Then
-    verify(currentLeaf.subscribe(anything())).times(pipelineInputs.length);
+    verify(currentLeaf.subscribe(anything())).times(enumeratedLeaves.length);
   });
 
   it('Erroring from receiving input should trigger error leaf', async () => {
     // Setup
-    const pipelineInputs: LeafPipeline.Input<Context>[] = [
+    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
       ...Array(1000).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -166,11 +167,11 @@ describe('Leaf selector', () => {
 
     const error = new Error('Something happened!');
 
-    when(leafSelector.enumerateInputs()).thenResolve(pipelineInputs);
+    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
     when(leafSelector.getErrorLeaf()).thenResolve(errorLeaf);
 
     when(leafPipeline.next(anything())).thenCall(
-      async ({ pipelineInput: { currentLeafID } }) => {
+      async ({ enumeratedLeaf: { currentLeafID } }) => {
         if (currentLeafID === ERROR_LEAF_ID) return {};
         throw error;
       }
@@ -185,7 +186,7 @@ describe('Leaf selector', () => {
 
     // Then
     const {
-      pipelineInput: { currentLeafID },
+      enumeratedLeaf: { currentLeafID },
       additionalParams: { inputText }
     } = capture(leafPipeline.next).byCallIndex(1)[0];
 
@@ -194,14 +195,14 @@ describe('Leaf selector', () => {
     expectJs(nextResult).to.eql({});
   });
 
-  it('Should throw error if no pipeline inputs found', async () => {
+  it('Should throw error if no enumerated leaves found', async () => {
     // Setup
     const errorLeaf: Leaf<Context> = {
       next: () => Promise.reject(''),
       subscribe: () => Promise.reject('')
     };
 
-    when(leafSelector.enumerateInputs()).thenResolve([]);
+    when(leafSelector.enumerateLeaves()).thenResolve([]);
     when(leafSelector.getErrorLeaf()).thenResolve(errorLeaf);
     when(leafPipeline.next(anything())).thenResolve({});
 
@@ -214,7 +215,7 @@ describe('Leaf selector', () => {
 
     // Then
     const {
-      pipelineInput: { currentLeafID }
+      enumeratedLeaf: { currentLeafID }
     } = capture(leafPipeline.next).byCallIndex(0)[0];
 
     expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);

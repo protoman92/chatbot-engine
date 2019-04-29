@@ -1,6 +1,8 @@
 import { Context } from './common';
 import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
+import { Branch } from './branch';
+import { Leaf } from './leaf';
 
 declare namespace LeafSelector {
   /**
@@ -11,6 +13,18 @@ declare namespace LeafSelector {
     readonly senderID: string;
     readonly oldContext: C;
     readonly inputText: string;
+  }
+
+  /**
+   * Represents a collection of leaf information that is derived from
+   * enumerating all possibilities in a key-value branch object.
+   * @template C The context used by the current chatbot.
+   */
+  export interface EnumeratedLeaf<C extends Context> {
+    readonly parentBranch: Branch<C>;
+    readonly prefixLeafPaths: readonly string[];
+    readonly currentLeaf: Leaf<C>;
+    readonly currentLeafID: string;
   }
 }
 

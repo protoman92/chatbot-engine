@@ -1,10 +1,7 @@
 export {
   createLeafWithObserver as createLeafWithSubject
 } from './content/leaf';
-export {
-  createLeafPipeline,
-  IGNORED_TEXT_MATCH
-} from './content/leaf-pipeline';
+export { createLeafPipeline } from './content/leaf-pipeline';
 export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export { createRedisContextDAO } from './context/RedisContextDAO';

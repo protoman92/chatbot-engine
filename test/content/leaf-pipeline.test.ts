@@ -9,10 +9,11 @@ import {
   KV,
   Leaf,
   LeafContentInput,
-  LeafPipeline
+  LeafPipeline,
+  LeafSelector
 } from '../../src';
 import { joinPaths } from '../../src/common/utils';
-import { enumerateLeafPipelineInputs } from '../../src/content/leaf-pipeline';
+import { enumerateLeaves } from '../../src/content/leaf-selector';
 
 export type Pipeline = ReturnType<
   typeof import('../../src/content/leaf-pipeline')['createLeafPipeline']
@@ -59,7 +60,7 @@ describe('Supporting pipeline methods', () => {
 describe('Main leaf processing', () => {
   let pipeline: Pipeline;
   let currentLeaf: Leaf<Context>;
-  let pipelineInput: LeafPipeline.Input<Context>;
+  let enumeratedLeaf: LeafSelector.EnumeratedLeaf<Context>;
   let additionalParams: LeafPipeline.AdditionalParams<Context>;
 
   beforeEach(() => {
@@ -73,7 +74,7 @@ describe('Main leaf processing', () => {
       }))
     );
 
-    pipelineInput = spy<LeafPipeline.Input<Context>>({
+    enumeratedLeaf = spy<LeafSelector.EnumeratedLeaf<Context>>({
       currentLeaf: instance(currentLeaf),
       currentLeafID: '',
       parentBranch: {},
@@ -92,7 +93,7 @@ describe('Main leaf processing', () => {
     // Setup
     const currentLeafID = 'current-leaf-id';
     let leafInput: LeafContentInput<Context> | undefined = undefined;
-    when(pipelineInput.currentLeafID).thenReturn(currentLeafID);
+    when(enumeratedLeaf.currentLeafID).thenReturn(currentLeafID);
 
     when(pipeline.prepareIncomingContext(anything(), anything())).thenResolve({
       senderID
@@ -105,7 +106,7 @@ describe('Main leaf processing', () => {
     // When
     await instance(pipeline).next({
       senderID,
-      pipelineInput: instance(pipelineInput),
+      enumeratedLeaf: instance(enumeratedLeaf),
       additionalParams: instance(additionalParams)
     });
 
@@ -115,7 +116,7 @@ describe('Main leaf processing', () => {
 });
 
 describe('Pipeline utilities', () => {
-  it('Should enumerate pipeline inputs correctly', () => {
+  it('Should enumerate leaves correctly', () => {
     /// Setup
     function mapContextKeys(prefix: string) {
       return [1, 2, 3].map(key => `${prefix}.${key}`);
@@ -154,7 +155,7 @@ describe('Pipeline utilities', () => {
     };
 
     /// When
-    const extractedStories = enumerateLeafPipelineInputs(branches);
+    const extractedStories = enumerateLeaves(branches);
 
     /// Then
     expectJs(extractedStories).to.eql([
