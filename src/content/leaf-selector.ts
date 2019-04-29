@@ -7,8 +7,7 @@ import {
 import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
-import { Leaf } from '../type/leaf';
-import { LeafPipeline } from '../type/leaf-pipeline';
+import { Leaf, LeafContentInput } from '../type/leaf';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
 import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
@@ -71,12 +70,10 @@ export const ERROR_LEAF_ID = formatSpecialKey('error');
 /**
  * Create a leaf selector.
  * @template C The context used by the current chatbot.
- * @param leafPipeline A leaf pipeline instance capable of processing leaves.
  * @param allBranches All available branches.
  * @return A leaf selector instance.
  */
 export function createLeafSelector<C extends Context>(
-  leafPipeline: LeafPipeline<C>,
   allBranches: KV<Branch<C>>
 ) {
   const enumeratedLeaves = enumerateLeaves(allBranches);
@@ -119,6 +116,20 @@ export function createLeafSelector<C extends Context>(
       return newContext;
     },
 
+    /**
+     * Trigger the production of content for a leaf, but does not guarantee
+     * its success.
+     * @param param0 An enumerated leaf instance.
+     * @param input A leaf input instance.
+     * @return A Promise of some response.
+     */
+    triggerLeafContent: (
+      { currentLeaf }: LeafSelector.EnumeratedLeaf<C>,
+      input: LeafContentInput<C>
+    ) => {
+      return currentLeaf.next(input);
+    },
+
     next: async ({
       senderID,
       oldContext: originalContext,
@@ -130,10 +141,10 @@ export function createLeafSelector<C extends Context>(
         for (const enumeratedLeaf of enumeratedLeaves) {
           const oldContext = deepClone(originalContext);
 
-          const nextResult = await leafPipeline.next({
+          const nextResult = await selector.triggerLeafContent(enumeratedLeaf, {
             senderID,
-            enumeratedLeaf,
-            additionalParams: { oldContext, inputText }
+            oldContext,
+            inputText
           });
 
           if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
@@ -143,22 +154,20 @@ export function createLeafSelector<C extends Context>(
       } catch ({ message }) {
         const errorLeaf = await selector.getErrorLeaf();
 
-        return leafPipeline.next({
-          senderID,
-          enumeratedLeaf: {
+        return selector.triggerLeafContent(
+          {
             currentLeaf: errorLeaf,
             currentLeafID: ERROR_LEAF_ID,
             parentBranch: {},
             prefixLeafPaths: []
           },
-          additionalParams: {
+          {
+            senderID,
             oldContext: deepClone(originalContext),
             inputText: message || inputText
           }
-        });
+        );
       }
-
-      return STREAM_INVALID_NEXT_RESULT;
     },
     complete: async () => {
       const enumeratedLeaves = await selector.enumerateLeaves();

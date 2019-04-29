@@ -8,7 +8,6 @@ import {
   ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
   Leaf,
-  LeafPipeline,
   LeafSelector
 } from '../../src';
 import { joinPaths } from '../../src/common/utils';
@@ -21,8 +20,7 @@ const senderID = 'sender-id';
 
 describe('Leaf selector', () => {
   let currentLeaf: Leaf<Context>;
-  let leafPipeline: LeafPipeline<Context>;
-  let leafSelector: TestLeafSelector;
+  let selector: TestLeafSelector;
 
   beforeEach(() => {
     currentLeaf = spy<Leaf<Context>>(
@@ -34,13 +32,7 @@ describe('Leaf selector', () => {
       }))
     );
 
-    leafPipeline = spy<LeafPipeline<Context>>({
-      next: () => Promise.reject('')
-    });
-
-    leafSelector = spy<TestLeafSelector>(
-      createLeafSelector(instance(leafPipeline), {})
-    );
+    selector = spy<TestLeafSelector>(createLeafSelector({}));
   });
 
   it('Should clear prev branch if different from current branch', async () => {
@@ -50,7 +42,7 @@ describe('Leaf selector', () => {
     const newContext: Context = { senderID, activeBranch: '1', d: 1, e: 2 };
 
     // When
-    await instance(leafSelector).clearPreviouslyActiveBranch(
+    await instance(selector).clearPreviouslyActiveBranch(
       [
         {
           currentLeaf: instance(currentLeaf),
@@ -81,10 +73,10 @@ describe('Leaf selector', () => {
       prefixLeafPaths: []
     }));
 
-    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
+    when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
-    when(leafPipeline.next(anything())).thenCall(
-      async ({ enumeratedLeaf: { currentLeafID } }) => {
+    when(selector.triggerLeafContent(anything(), anything())).thenCall(
+      async ({ currentLeafID }) => {
         if (currentLeafID === `${validLeafID}`) {
           return {};
         }
@@ -96,10 +88,12 @@ describe('Leaf selector', () => {
     const oldContext: Context = { senderID };
 
     // When
-    await instance(leafSelector).next({ senderID, oldContext, inputText: '' });
+    await instance(selector).next({ senderID, oldContext, inputText: '' });
 
     // Then
-    verify(leafPipeline.next(anything())).times(validLeafID + 1);
+    verify(selector.triggerLeafContent(anything(), anything())).times(
+      validLeafID + 1
+    );
   });
 
   it('Completing stream should trigger complete from all leaves', async () => {
@@ -120,10 +114,10 @@ describe('Leaf selector', () => {
         completedCount += 1;
       });
 
-    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
+    when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     // When
-    await instance(leafSelector).complete();
+    await instance(selector).complete();
 
     // Then
     expectJs(completedCount).to.equal(enumeratedLeaves.length);
@@ -140,10 +134,10 @@ describe('Leaf selector', () => {
       prefixLeafPaths: []
     }));
 
-    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
+    when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     // When
-    await instance(leafSelector).subscribe({ next: async () => ({}) });
+    await instance(selector).subscribe({ next: async () => ({}) });
 
     // Then
     verify(currentLeaf.subscribe(anything())).times(enumeratedLeaves.length);
@@ -167,28 +161,27 @@ describe('Leaf selector', () => {
 
     const error = new Error('Something happened!');
 
-    when(leafSelector.enumerateLeaves()).thenResolve(enumeratedLeaves);
-    when(leafSelector.getErrorLeaf()).thenResolve(errorLeaf);
+    when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
+    when(selector.getErrorLeaf()).thenResolve(errorLeaf);
 
-    when(leafPipeline.next(anything())).thenCall(
-      async ({ enumeratedLeaf: { currentLeafID } }) => {
+    when(selector.triggerLeafContent(anything(), anything())).thenCall(
+      async ({ currentLeafID }) => {
         if (currentLeafID === ERROR_LEAF_ID) return {};
         throw error;
       }
     );
 
     // When
-    const nextResult = await instance(leafSelector).next({
+    const nextResult = await instance(selector).next({
       senderID,
       oldContext: { senderID },
       inputText: ''
     });
 
     // Then
-    const {
-      enumeratedLeaf: { currentLeafID },
-      additionalParams: { inputText }
-    } = capture(leafPipeline.next).byCallIndex(1)[0];
+    const [{ currentLeafID }, { inputText }] = capture(
+      selector.triggerLeafContent
+    ).byCallIndex(1);
 
     expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
     expectJs(inputText).to.equal(error.message);
@@ -202,21 +195,21 @@ describe('Leaf selector', () => {
       subscribe: () => Promise.reject('')
     };
 
-    when(leafSelector.enumerateLeaves()).thenResolve([]);
-    when(leafSelector.getErrorLeaf()).thenResolve(errorLeaf);
-    when(leafPipeline.next(anything())).thenResolve({});
+    when(selector.enumerateLeaves()).thenResolve([]);
+    when(selector.getErrorLeaf()).thenResolve(errorLeaf);
+    when(selector.triggerLeafContent(anything(), anything())).thenResolve({});
 
     // When
-    await instance(leafSelector).next({
+    await instance(selector).next({
       senderID,
       oldContext: { senderID },
       inputText: ''
     });
 
     // Then
-    const {
-      enumeratedLeaf: { currentLeafID }
-    } = capture(leafPipeline.next).byCallIndex(0)[0];
+    const [{ currentLeafID }] = capture(
+      selector.triggerLeafContent
+    ).byCallIndex(0);
 
     expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
   });
