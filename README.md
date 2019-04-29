@@ -10,7 +10,7 @@ Request is received from a supported platform, and mapped to an `Array` of `Gene
 
 ### Feed generic request to leaf selector
 
-A `LeafSelector` scans through all leaves and picks out the one whose conditions match the request input. It does so by creating a `LeafPipeline` for each `Leaf` - each pipeline checks its associated `Leaf`'s conditions, mutating the input `Context` to an output `Context` and produce `Leaf` content.
+A `LeafSelector` scans through all leaves and picks out the one whose conditions match the request input.
 
 ### Map generic responses and send the resulting responses back
 

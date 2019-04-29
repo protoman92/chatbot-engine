@@ -7,24 +7,6 @@ import { VisualContent } from './visual-content';
 export type SupportedPlatform = 'FACEBOOK';
 
 /**
- * Represents a messenger that can manually trigger a response to the user,
- * instead of waiting for a user message. This is helpful in cases where we
- * want to do broadcasts, or programatically send some reminder about a task.
- */
-export interface ManualMessenger {
-  /**
-   * Process some content from end-to-end.
-   * @param senderID The sender ID.
-   * @param contents The contents to send to user.
-   * @return A Promise of some response.
-   */
-  sendManualContent(
-    senderID: string,
-    contents: VisualContent[]
-  ): Promise<unknown>;
-}
-
-/**
  * Represents a messenger that can process incoming request (including parsing,
  * validating and sending data). Note that this messenger only handles one
  * message at a time, so if there are multiple messenges coming in we need to

@@ -1,7 +1,4 @@
-export {
-  createLeafWithObserver as createLeafWithSubject
-} from './content/leaf';
-export { createLeafPipeline } from './content/leaf-pipeline';
+export { createLeafWithObserver } from './content/leaf';
 export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export { createRedisContextDAO } from './context/RedisContextDAO';
@@ -20,7 +17,6 @@ export * from './type/communicator';
 export * from './type/context-dao';
 export * from './type/facebook';
 export * from './type/leaf';
-export * from './type/leaf-pipeline';
 export * from './type/leaf-selector';
 export { LeafCombinationTesterParam } from './type/leaf-selector-tester';
 export * from './type/messenger';

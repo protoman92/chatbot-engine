@@ -37,9 +37,9 @@ export function createLeafWithObserver<C extends Context>(
  * @return A leaf instance.
  */
 export function createDefaultErrorLeaf<C extends Context>(): Leaf<C> {
-  return createLeafWithObserver(subject => ({
+  return createLeafWithObserver(observer => ({
     next: ({ senderID, inputText }) => {
-      return subject.next({
+      return observer.next({
         senderID,
         visualContents: [
           { response: { text: `Encountered an error: '${inputText}'` } }

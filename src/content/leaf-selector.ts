@@ -1,13 +1,8 @@
-import {
-  deepClone,
-  formatSpecialKey,
-  joinPaths,
-  mapSeries
-} from '../common/utils';
+import { deepClone, formatSpecialKey, mapSeries } from '../common/utils';
 import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { Context, KV } from '../type/common';
-import { Leaf, LeafContentInput } from '../type/leaf';
+import { Leaf } from '../type/leaf';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
 import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
@@ -83,38 +78,6 @@ export function createLeafSelector<C extends Context>(
   const selector = {
     enumerateLeaves: async () => enumeratedLeaves,
     getErrorLeaf: async () => errorLeaf,
-    /**
-     * Clear previously active branch if current active branch differs.
-     * @param enumeratedLeaves All available enumerated leaves.
-     * @param newContext The new context object.
-     * @param previousActiveBranch The previously active branch.
-     * @return A Promise of context object.
-     */
-    clearPreviouslyActiveBranch: async (
-      enumeratedLeaves: readonly LeafSelector.EnumeratedLeaf<C>[],
-      newContext: C,
-      previousActiveBranch?: string
-    ): Promise<C> => {
-      const { activeBranch } = newContext;
-
-      if (!!previousActiveBranch && activeBranch !== previousActiveBranch) {
-        const enumeratedLeaf = enumeratedLeaves.find(
-          ({ prefixLeafPaths, currentLeafID }) => {
-            return (
-              joinPaths(...prefixLeafPaths, currentLeafID) ===
-              previousActiveBranch
-            );
-          }
-        );
-
-        if (!!enumeratedLeaf && !!enumeratedLeaf.parentBranch.contextKeys) {
-          const contextKeys = enumeratedLeaf.parentBranch.contextKeys;
-          contextKeys.forEach(key => delete newContext[key]);
-        }
-      }
-
-      return newContext;
-    },
 
     /**
      * Trigger the production of content for a leaf, but does not guarantee
@@ -125,11 +88,10 @@ export function createLeafSelector<C extends Context>(
      */
     triggerLeafContent: (
       { currentLeaf }: LeafSelector.EnumeratedLeaf<C>,
-      input: LeafContentInput<C>
+      input: Leaf.Input<C>
     ) => {
       return currentLeaf.next(input);
     },
-
     next: async ({
       senderID,
       oldContext: originalContext,

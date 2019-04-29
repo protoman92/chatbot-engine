@@ -4,13 +4,12 @@ import { anything, capture, instance, spy, verify, when } from 'ts-mockito';
 import {
   Context,
   createLeafSelector,
-  createLeafWithSubject,
+  createLeafWithObserver,
   ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
   Leaf,
   LeafSelector
 } from '../../src';
-import { joinPaths } from '../../src/common/utils';
 
 type TestLeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
@@ -24,7 +23,7 @@ describe('Leaf selector', () => {
 
   beforeEach(() => {
     currentLeaf = spy<Leaf<Context>>(
-      createLeafWithSubject(() => ({
+      createLeafWithObserver(() => ({
         checkTextConditions: () => Promise.reject(''),
         checkContextConditions: () => Promise.reject(''),
         next: () => Promise.reject(''),
@@ -33,30 +32,6 @@ describe('Leaf selector', () => {
     );
 
     selector = spy<TestLeafSelector>(createLeafSelector({}));
-  });
-
-  it('Should clear prev branch if different from current branch', async () => {
-    // Setup
-    const previousLeafID = 'current-leaf-id';
-    const previousLeafPaths = ['a', 'b', 'c'];
-    const newContext: Context = { senderID, activeBranch: '1', d: 1, e: 2 };
-
-    // When
-    await instance(selector).clearPreviouslyActiveBranch(
-      [
-        {
-          currentLeaf: instance(currentLeaf),
-          currentLeafID: previousLeafID,
-          parentBranch: { contextKeys: ['d', 'e'] },
-          prefixLeafPaths: previousLeafPaths
-        }
-      ],
-      newContext,
-      joinPaths(...previousLeafPaths, previousLeafID)
-    );
-
-    // Then
-    expectJs(newContext).not.to.have.keys(['d', 'e']);
   });
 
   it('Selecting leaf should stop at first leaf that passes', async () => {

@@ -2,7 +2,7 @@ import { compose, mapSeries } from '../common/utils';
 import { ComposeFunc, Context } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { LeafSelector } from '../type/leaf-selector';
-import { ManualMessenger, Messenger, UnitMessenger } from '../type/messenger';
+import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
 
@@ -44,23 +44,6 @@ export async function createGenericUnitMessenger<C extends Context>(
   });
 
   return messenger;
-}
-
-/**
- * Create a manual messenger to trigger handling of manual contents.
- * @template C The context used by the current chatbot.
- * @param contextDAO A context DAO object.
- * @param unitMessenger A unit messenger object.
- * @return A manual messenger instance.
- */
-export function createManualMessenger<C extends Context>(
-  unitMessenger: Pick<UnitMessenger<C>, 'sendResponse'>
-): ManualMessenger {
-  return {
-    sendManualContent: async (senderID, visualContents) => {
-      return unitMessenger.sendResponse({ senderID, visualContents });
-    }
-  };
 }
 
 /**
