@@ -1,8 +1,6 @@
-import { Omit } from 'ts-essentials';
 import { Context } from './common';
-import { Response } from './visual-content';
-import { ContentObservable, ContentObserver } from './stream';
 import { GenericResponse } from './response';
+import { ContentObservable, ContentObserver } from './stream';
 
 /** Result of a text condition check. */
 type TextConditionResult = string | readonly string[] | null;
@@ -18,6 +16,16 @@ export namespace Leaf {
     readonly inputText: string;
     readonly inputImageURL?: string;
   }
+
+  /**
+   * Compose functions for leaves that support composition of higher-order
+   * functions.
+   * @template C1 The original context type.
+   * @template C2 The target context type.
+   */
+  type ComposeFunc<C1 extends Context, C2 extends Context> = (
+    leaf: Leaf<C1>
+  ) => Leaf<C2>;
 }
 
 /**

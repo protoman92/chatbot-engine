@@ -1,3 +1,4 @@
+export * from './content/higher-order';
 export { createLeafWithObserver } from './content/leaf';
 export { createLeafSelector, ERROR_LEAF_ID } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
