@@ -8,6 +8,7 @@ export { createFacebookMessenger } from './messenger/facebook-messenger';
 export * from './messenger/generic-messenger';
 export { saveUserForSenderID } from './messenger/unit-compose';
 export {
+  bridgeEmission,
   createContentSubject,
   STREAM_INVALID_NEXT_RESULT as INVALID_NEXT_RESULT
 } from './stream/stream';

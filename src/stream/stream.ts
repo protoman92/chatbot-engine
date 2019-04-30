@@ -104,3 +104,29 @@ export function mergeObservables<T>(
     }
   };
 }
+
+/**
+ * Bridge input-output to allow async-await. This returns a higher-order
+ * function that can accept multiple inputs.
+ * @template I The input type.
+ * @template O The output type.
+ * @param source The source observer/observable.
+ * @return A higher-order function of promises of output return.
+ */
+export function bridgeEmission<I, O>(
+  source: ContentObserver<I> & ContentObservable<O>
+): (input: I) => Promise<O> {
+  return input => {
+    return new Promise(async resolve => {
+      const subscription = await source.subscribe({
+        next: async content => {
+          resolve(content);
+          await subscription.unsubscribe();
+          return {};
+        }
+      });
+
+      source.next(input);
+    });
+  };
+}
