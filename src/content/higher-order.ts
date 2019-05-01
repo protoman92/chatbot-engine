@@ -52,7 +52,7 @@ export function compactMapLeafInput<C1, C2 extends C1>(
         return INVALID_NEXT_RESULT;
       }
 
-      return leaf.next(input);
+      return leaf.next(newInput);
     }
   });
 }

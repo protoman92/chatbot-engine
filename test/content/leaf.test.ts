@@ -155,17 +155,26 @@ describe('Higher order functions', () => {
 
     // When
     const resultLeaf = compactMapLeafContext<Context1, Context1>(
-      ({ a, ...restContext }) => (!!a ? { a, ...restContext } : null)
+      ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
-    const nextResult = await resultLeaf.next({
+    const nextResult1 = await resultLeaf.next({
       senderID,
       oldContext: { a: 0 },
       inputText: ''
     });
 
+    const {
+      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+    } = await bridgeEmission(resultLeaf)({
+      senderID,
+      oldContext: { a: 1 },
+      inputText: ''
+    });
+
     // Then
-    expectJs(nextResult).to.equal(INVALID_NEXT_RESULT);
+    expectJs(nextResult1).to.equal(INVALID_NEXT_RESULT);
+    expectJs(text).to.equal('100');
   });
 
   it('Compose chain should work', async () => {
