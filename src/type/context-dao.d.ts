@@ -1,12 +1,10 @@
-import { Context } from './common';
-
 /**
  * Represents a DAO object that performs CRUD operations for a chatbot's
  * context. We can usually use Redis for this purpose, but there is no required
  * persistence framework here.
  * @template C The context used by the current chatbot.
  */
-export interface ContextDAO<C extends Context> {
+export interface ContextDAO<C> {
   /**
    * Get the whole context in storage.
    * @param senderID The sender ID.

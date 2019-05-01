@@ -2,11 +2,13 @@ import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { RedisClient } from 'redis';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { Context, ContextDAO, createRedisContextDAO } from '../../src';
+import { ContextDAO, createRedisContextDAO, KV } from '../../src';
 
 const senderID = 'sender-id';
 
 describe('Redis context DAO', () => {
+  interface Context extends KV<unknown> {}
+
   let redis: Pick<RedisClient, 'get' | 'set' | 'del'>;
   let contextDAO: ContextDAO<Context>;
 
@@ -26,7 +28,7 @@ describe('Redis context DAO', () => {
 
   it('Should return context on get call', async () => {
     // Setup
-    const context: Context = { senderID, a: 1, b: 2 };
+    const context: Context = { a: 1, b: 2 };
 
     when(redis.get(anything(), anything())).thenCall((param1, param2) => {
       param2(null, JSON.stringify(context));
@@ -42,7 +44,7 @@ describe('Redis context DAO', () => {
 
   it('Should set context on set call', async () => {
     // Setup
-    const context: Context = { senderID, a: 1, b: 2 };
+    const context: Context = { a: 1, b: 2 };
 
     when(redis.set(anything(), anything(), anything())).thenCall(
       (param1, param2, param3) => param3(null, 'OK')

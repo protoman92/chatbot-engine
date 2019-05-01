@@ -5,7 +5,7 @@ import {
   joinPaths,
   mapSeries
 } from '../common/utils';
-import { Context } from '../type/common';
+import { DefaultContext } from '../type/common';
 import { LeafSelector } from '../type/leaf-selector';
 import {
   EnumeratedElement,
@@ -72,7 +72,7 @@ export function enumerateCombinations<T>(arrays: T[][]) {
  * @param senderID The sender ID.
  * @param compareEqual Function to check equality of two objects.
  */
-export function createLeafSelectorTester<C extends Context>(
+export function createLeafSelectorTester<C extends DefaultContext>(
   selector: LeafSelector<C>,
   defaultContext: C,
   senderID: string,

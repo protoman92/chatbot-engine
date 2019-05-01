@@ -1,10 +1,9 @@
 import { RedisClient } from 'redis';
 import { promisify1, promisify2 } from '../common/utils';
-import { Context } from '../type/common';
 import { ContextDAO } from '../type/context-dao';
 import { SupportedPlatform } from '../type/messenger';
 
-export function createRedisContextDAO<C extends Context>(
+export function createRedisContextDAO<C>(
   redis: Pick<RedisClient, 'get' | 'set' | 'del'>,
   platform: SupportedPlatform
 ): ContextDAO<C> {

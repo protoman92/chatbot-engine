@@ -1,4 +1,4 @@
-import { Context, KV } from './common';
+import { KV } from './common';
 import { Leaf } from './leaf';
 
 /**
@@ -8,7 +8,7 @@ import { Leaf } from './leaf';
  * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
  * @template C The context used by the current chatbot.
  */
-export interface Branch<C extends Context, Leaves = KV<Leaf<C>>> {
+export interface Branch<C, Leaves = KV<Leaf<C>>> {
   readonly subBranches?: KV<Branch<C, KV<Leaf<C>>>>;
   readonly leaves?: Leaves;
 }

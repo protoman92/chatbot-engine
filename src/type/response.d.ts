@@ -1,4 +1,3 @@
-import { Context } from './common';
 import { VisualContent } from './visual-content';
 
 /** A platform-specific response. */
@@ -10,7 +9,7 @@ export type PlatformResponse = unknown;
  * This is to prevent stale old context replacing latest one.
  * @template C The context used by the current chatbot.
  */
-export interface GenericResponse<C extends Context> {
+export interface GenericResponse<C> {
   readonly senderID: string;
   readonly additionalContext?: Partial<C>;
   readonly visualContents: readonly VisualContent[];

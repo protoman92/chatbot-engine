@@ -1,5 +1,5 @@
 import { formatFacebookError, isType } from '../common/utils';
-import { ComposeFunc, Context } from '../type/common';
+import { ComposeFunc } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import {
   FacebookConfigs,
@@ -23,7 +23,7 @@ import {
  * @param webhook Facebook webhook data.
  * @return An Array of generic request.
  */
-export function mapWebhook<C extends Context>(
+export function mapWebhook<C>(
   webhook: FacebookWebhookRequest
 ): readonly GenericRequest<C>[] {
   const { object, entry } = webhook;
@@ -119,7 +119,7 @@ export function mapWebhook<C extends Context>(
  * @param response A generic responses.
  * @return A platform response instance.
  */
-async function createFacebookResponse<C extends Context>({
+async function createFacebookResponse<C>({
   senderID,
   visualContents: contents
 }: GenericResponse<C>): Promise<readonly PlatformResponse[]> {
@@ -272,7 +272,7 @@ async function createFacebookResponse<C extends Context>({
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export async function createFacebookUnitMessenger<C extends Context>(
+export async function createFacebookUnitMessenger<C>(
   leafSelector: LeafSelector<C>,
   communicator: PlatformCommunicator,
   configurations: FacebookConfigs,
@@ -305,7 +305,7 @@ export async function createFacebookUnitMessenger<C extends Context>(
  * @param unitMessenger A unit messenger.
  * @return A generic messenger.
  */
-export function createFacebookMessenger<C extends Context>(
+export function createFacebookMessenger<C>(
   unitMessenger: UnitMessenger<C>
 ): Messenger {
   return createGenericMessenger(unitMessenger, async req => {

@@ -1,5 +1,4 @@
 import { DeepReadonly } from 'ts-essentials';
-import { Context } from './common';
 import { UnitMessenger } from './messenger';
 
 interface BaseFacebookRequest {
@@ -66,8 +65,7 @@ export interface FacebookConfigs {
  * Represents a Facebook-specific unit messenger.
  * @template C The context used by the current chatbot.
  */
-export interface FacebookUnitMessenger<C extends Context>
-  extends UnitMessenger<C> {
+export interface FacebookUnitMessenger<C> extends UnitMessenger<C> {
   /**
    * Resolve Facebook hub challenge to establish connection with chatbot.
    * @param requestQuery The query parameters of the request.

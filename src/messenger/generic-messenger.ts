@@ -1,5 +1,5 @@
 import { compose, mapSeries } from '../common/utils';
-import { ComposeFunc, Context } from '../type/common';
+import { ComposeFunc } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { LeafSelector } from '../type/leaf-selector';
 import { Messenger, UnitMessenger } from '../type/messenger';
@@ -15,7 +15,7 @@ import { GenericResponse, PlatformResponse } from '../type/response';
  * @param composeFuncs Array of compose functions to apply on base messenger.
  * @return A generic messenger.
  */
-export async function createGenericUnitMessenger<C extends Context>(
+export async function createGenericUnitMessenger<C>(
   leafSelector: LeafSelector<C>,
   communicator: PlatformCommunicator,
   responseMapper: (
@@ -53,7 +53,7 @@ export async function createGenericUnitMessenger<C extends Context>(
  * @param param0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
-export function createGenericMessenger<C extends Context>(
+export function createGenericMessenger<C>(
   unitMessenger: UnitMessenger<C>,
   requestMapper: (req: PlatformRequest) => Promise<readonly GenericRequest<C>[]>
 ): Messenger {

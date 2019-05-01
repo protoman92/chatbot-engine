@@ -1,5 +1,5 @@
 import { deepClone, joinObjects } from '../common/utils';
-import { ComposeFunc, Context, DefaultContext } from '../type/common';
+import { ComposeFunc, DefaultContext } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import { UnitMessenger } from '../type/messenger';
@@ -12,7 +12,7 @@ import { UnitMessenger } from '../type/messenger';
  * @param contextDAO The context DAO being used to perform CRUD.
  * @return A compose function.
  */
-export function saveContextOnSend<C extends Context>(
+export function saveContextOnSend<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
 ): ComposeFunc<UnitMessenger<C>> {
   return function saveContextOnSend(unitMessenger) {
@@ -41,7 +41,7 @@ export function saveContextOnSend<C extends Context>(
  * @param contextDAO The context DAO being used to perform CRUD.
  * @return A compose function.
  */
-export function injectContextOnReceive<C extends Context>(
+export function injectContextOnReceive<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
 ): ComposeFunc<UnitMessenger<C>> {
   return function injectContextOnReceive(unitMessenger) {
@@ -103,7 +103,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
  * @param communicator A platform communicator instance.
  * @return A compose function.
  */
-export function setTypingIndicator<C extends Context>(
+export function setTypingIndicator<C>(
   communicator: PlatformCommunicator
 ): ComposeFunc<UnitMessenger<C>> {
   return function setTypingIndicator(unitMessenger) {

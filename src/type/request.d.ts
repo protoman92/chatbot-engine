@@ -1,5 +1,3 @@
-import { Context } from './common';
-
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
 
@@ -15,7 +13,7 @@ declare namespace GenericRequest {
  * A generic incoming request.
  * @template C The context used by the current chatbot.
  */
-export interface GenericRequest<C extends Context> {
+export interface GenericRequest<C> {
   readonly senderID: string;
   readonly oldContext: C;
   readonly data: readonly GenericRequest.Input[];

@@ -3,8 +3,8 @@ import { describe, it } from 'mocha';
 import {
   bridgeEmission,
   ContentSubscription,
-  Context,
   GenericResponse,
+  KV,
   Leaf,
   mapContext,
   requireContextKeys,
@@ -19,6 +19,8 @@ import {
 const senderID = 'sender-id';
 
 describe('Default error leaf', () => {
+  interface Context extends KV<unknown> {}
+
   it('Should work correctly', async () => {
     // Setup
     const errorLeaf = createDefaultErrorLeaf();
@@ -40,7 +42,7 @@ describe('Default error leaf', () => {
         }
       });
 
-      errorLeaf.next({ senderID, inputText, oldContext: { senderID } });
+      errorLeaf.next({ senderID, inputText, oldContext: {} });
       receivedNext && !!subscription && (await subscription.unsubscribe());
     });
 
@@ -60,11 +62,11 @@ describe('Default error leaf', () => {
 describe('Higher order functions', () => {
   it('Map context should work correctly', async () => {
     // Setup
-    interface Context1 extends Context {
+    interface Context1 {
       readonly a?: number;
     }
 
-    interface Context2 extends Context {
+    interface Context2 {
       readonly a: number;
     }
 
@@ -91,7 +93,7 @@ describe('Higher order functions', () => {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = await bridgeEmission(resultLeaf)({
       senderID,
-      oldContext: { senderID, a: 1000 },
+      oldContext: { a: 1000 },
       inputText: ''
     });
 
@@ -101,7 +103,7 @@ describe('Higher order functions', () => {
 
   it('Require context keys should work correctly', async () => {
     // Setup
-    interface Context1 extends Context {
+    interface Context1 {
       a?: number | undefined | null;
     }
 
@@ -123,7 +125,7 @@ describe('Higher order functions', () => {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = await bridgeEmission(resultLeaf)({
       senderID,
-      oldContext: { senderID, a: 1 },
+      oldContext: { a: 1 },
       inputText: ''
     });
 

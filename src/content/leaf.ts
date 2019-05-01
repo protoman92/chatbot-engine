@@ -1,6 +1,5 @@
 import { Omit } from 'ts-essentials';
 import { createContentSubject } from '../stream/stream';
-import { Context } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
 import { ContentObserver } from '../type/stream';
@@ -12,7 +11,7 @@ import { ContentObserver } from '../type/stream';
  * @param fn Function to create a base leaf using the supplied subject.
  * @return A leaf instance.
  */
-export function createLeafWithObserver<C extends Context>(
+export function createLeafWithObserver<C>(
   fn: (
     observer: Pick<ContentObserver<GenericResponse<C>>, 'next'>
   ) => Omit<Leaf<C>, 'subscribe'>
@@ -36,7 +35,7 @@ export function createLeafWithObserver<C extends Context>(
  * @template C The context used by the current chatbot.
  * @return A leaf instance.
  */
-export function createDefaultErrorLeaf<C extends Context>(): Leaf<C> {
+export function createDefaultErrorLeaf<C>(): Leaf<C> {
   return createLeafWithObserver(observer => ({
     next: ({ senderID, inputText }) => {
       return observer.next({

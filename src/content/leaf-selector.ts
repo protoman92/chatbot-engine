@@ -1,7 +1,7 @@
 import { deepClone, formatSpecialKey, mapSeries } from '../common/utils';
 import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
-import { Context, KV } from '../type/common';
+import { KV } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
@@ -16,7 +16,7 @@ import { createDefaultErrorLeaf } from './leaf';
  * @param branches A key-value object of branches.
  * @return An Array of enumerated leaves.
  */
-export function enumerateLeaves<C extends Context>(
+export function enumerateLeaves<C>(
   branches: KV<Branch<C>>
 ): readonly LeafSelector.EnumeratedLeaf<C>[] {
   function enumerate(
@@ -68,9 +68,7 @@ export const ERROR_LEAF_ID = formatSpecialKey('error');
  * @param allBranches All available branches.
  * @return A leaf selector instance.
  */
-export function createLeafSelector<C extends Context>(
-  allBranches: KV<Branch<C>>
-) {
+export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
   const enumeratedLeaves = enumerateLeaves(allBranches);
   const errorLeaf: Leaf<C> = createDefaultErrorLeaf();
   let outputObservable: ContentObservable<GenericResponse<C>>;

@@ -10,10 +10,10 @@ import {
   when
 } from 'ts-mockito';
 import {
-  Context,
   createGenericUnitMessenger,
   GenericRequest,
   GenericResponse,
+  KV,
   LeafSelector,
   PlatformCommunicator
 } from '../../src';
@@ -21,6 +21,8 @@ import {
 const senderID = 'sender-id';
 
 describe('Generic unit messenger', () => {
+  interface Context extends KV<unknown> {}
+
   let leafSelector: LeafSelector<Context>;
   let communicator: PlatformCommunicator;
 
@@ -79,7 +81,7 @@ describe('Generic unit messenger', () => {
     when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
 
-    const oldContext: Context = { senderID, a: 1, b: 2 };
+    const oldContext: Context = { a: 1, b: 2 };
 
     const data: readonly GenericRequest.Input[] = [
       { inputText: 'text-1' },

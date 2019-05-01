@@ -1,4 +1,3 @@
-import { Context } from '../type/common';
 import { ContextDAO } from '../type/context-dao';
 import { SupportedPlatform } from '../type/messenger';
 
@@ -8,7 +7,7 @@ import { SupportedPlatform } from '../type/messenger';
  * @param platform The platform being used.
  * @return A context DAO instance.
  */
-export function createInMemoryContextDAO<C extends Context>(
+export function createInMemoryContextDAO<C>(
   platform: SupportedPlatform
 ): ContextDAO<C> {
   const storage: { [K: string]: C } = {};
@@ -20,7 +19,7 @@ export function createInMemoryContextDAO<C extends Context>(
   return {
     getContext: async senderID => {
       const cacheKey = getCacheKey(senderID);
-      return storage[cacheKey] || {};
+      return storage[cacheKey] || ({} as C);
     },
     setContext: async (senderID, context) => {
       const cacheKey = getCacheKey(senderID);

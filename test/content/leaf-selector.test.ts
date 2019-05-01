@@ -2,11 +2,11 @@ import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, capture, instance, spy, verify, when } from 'ts-mockito';
 import {
-  Context,
   createLeafSelector,
   createLeafWithObserver,
   ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
+  KV,
   Leaf,
   LeafSelector
 } from '../../src';
@@ -18,6 +18,8 @@ type TestLeafSelector = ReturnType<
 const senderID = 'sender-id';
 
 describe('Leaf selector', () => {
+  interface Context extends KV<unknown> {}
+
   let currentLeaf: Leaf<Context>;
   let selector: TestLeafSelector;
 
@@ -60,10 +62,8 @@ describe('Leaf selector', () => {
       }
     );
 
-    const oldContext: Context = { senderID };
-
     // When
-    await instance(selector).next({ senderID, oldContext, inputText: '' });
+    await instance(selector).next({ senderID, oldContext: {}, inputText: '' });
 
     // Then
     verify(selector.triggerLeafContent(anything(), anything())).times(
@@ -149,7 +149,7 @@ describe('Leaf selector', () => {
     // When
     const nextResult = await instance(selector).next({
       senderID,
-      oldContext: { senderID },
+      oldContext: {},
       inputText: ''
     });
 
@@ -177,7 +177,7 @@ describe('Leaf selector', () => {
     // When
     await instance(selector).next({
       senderID,
-      oldContext: { senderID },
+      oldContext: {},
       inputText: ''
     });
 

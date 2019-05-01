@@ -1,4 +1,3 @@
-import { Context } from './common';
 import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
 
@@ -10,7 +9,7 @@ export namespace Leaf {
    * Input for creation of a leaf.
    * @template C The context used by the current chatbot.
    */
-  interface Input<C extends Context> {
+  interface Input<C> {
     readonly senderID: string;
     readonly oldContext: C;
     readonly inputText: string;
@@ -23,9 +22,7 @@ export namespace Leaf {
    * @template C1 The original context type.
    * @template C2 The target context type.
    */
-  type ComposeFunc<C1 extends Context, C2 extends Context> = (
-    leaf: Leaf<C1>
-  ) => Leaf<C2>;
+  type ComposeFunc<C1, C2> = (leaf: Leaf<C1>) => Leaf<C2>;
 }
 
 /**
@@ -36,6 +33,6 @@ export namespace Leaf {
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  * @template C The context used by the current chatbot.
  */
-export interface Leaf<C extends Context>
+export interface Leaf<C>
   extends ContentObserver<Leaf.Input<C>>,
     ContentObservable<GenericResponse<C>> {}

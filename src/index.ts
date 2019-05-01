@@ -33,7 +33,7 @@ import {
   saveContextOnSend,
   setTypingIndicator
 } from './messenger/unit-compose';
-import { ComposeFunc, Context } from './type/common';
+import { ComposeFunc } from './type/common';
 import { PlatformCommunicator } from './type/communicator';
 import { ContextDAO } from './type/context-dao';
 import { FacebookConfigs } from './type/facebook';
@@ -49,7 +49,7 @@ import { UnitMessenger } from './type/messenger';
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export function createFacebookUnitMessenger<C extends Context>(
+export function createFacebookUnitMessenger<C>(
   leafSelector: LeafSelector<C>,
   contextDAO: ContextDAO<C>,
   communicator: PlatformCommunicator,

@@ -5,5 +5,4 @@ export interface DefaultContext {
   readonly senderID: unknown;
 }
 
-export interface Context extends KV<unknown>, DefaultContext {}
 export type ComposeFunc<T> = (original: T) => T;

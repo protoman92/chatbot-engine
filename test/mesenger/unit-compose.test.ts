@@ -1,13 +1,14 @@
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import {
-  Context,
   ContextDAO,
   GenericRequest,
   GenericResponse,
+  KV,
   PlatformCommunicator,
   saveUserForSenderID,
-  UnitMessenger
+  UnitMessenger,
+  DefaultContext
 } from '../../src';
 import { compose, joinObjects } from '../../src/common/utils';
 import {
@@ -15,6 +16,8 @@ import {
   saveContextOnSend,
   setTypingIndicator
 } from '../../src/messenger/unit-compose';
+
+interface Context extends KV<unknown> {}
 
 const senderID = 'sender-id';
 let messenger: UnitMessenger<Context>;
@@ -43,7 +46,7 @@ beforeEach(async () => {
 describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
-    const oldContext: Context = { senderID };
+    const oldContext: Context = { a: 1, b: 2 };
     when(contextDAO.getContext(senderID)).thenResolve(oldContext);
     when(contextDAO.setContext(senderID, anything())).thenResolve();
     when(messenger.sendResponse(anything())).thenResolve();
@@ -75,7 +78,7 @@ describe('Save context on send', () => {
 describe('Inject context on receive', () => {
   it('Should inject context on send', async () => {
     // Setup
-    const expectedContext: Context = { senderID };
+    const expectedContext: Context = { a: 1, b: 2 };
 
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
@@ -92,7 +95,7 @@ describe('Inject context on receive', () => {
 
     const genericRequest: GenericRequest<Context> = {
       senderID,
-      oldContext: { senderID: '' },
+      oldContext: {},
       data: []
     };
 
@@ -114,7 +117,7 @@ describe('Save user for sender ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
     const chatbotUser = { id: senderID };
-    const expectedContext: Context = { senderID };
+    const expectedContext: DefaultContext & Context = { senderID };
 
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
@@ -133,7 +136,7 @@ describe('Save user for sender ID', () => {
       )
     );
 
-    const genericRequest: GenericRequest<Context> = {
+    const genericRequest: GenericRequest<DefaultContext & Context> = {
       senderID,
       oldContext: { senderID: '' },
       data: []
@@ -173,7 +176,7 @@ describe('Set typing indicator', () => {
     // When
     await composed.receiveRequest({
       senderID,
-      oldContext: { senderID },
+      oldContext: {},
       data: []
     });
 
