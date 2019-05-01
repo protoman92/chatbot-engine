@@ -1,6 +1,6 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
-import { mapSeries } from '../../src/common/utils';
+import { mapSeries, requireKeys } from '../../src/common/utils';
 
 describe('Common utilities', () => {
   it('Map series should maintain order', async function() {
@@ -23,5 +23,24 @@ describe('Common utilities', () => {
 
     // Then
     expectJs(mappedData).to.eql(data);
+  });
+
+  it('Require keys should work', () => {
+    // Setup
+    interface A {
+      readonly a?: number | undefined;
+      readonly b: number | undefined;
+      readonly c?: number | null;
+      readonly d: number;
+    }
+
+    const a: A = {
+      b: undefined,
+      c: null,
+      d: 0
+    };
+
+    // When
+    expectJs(() => requireKeys(a, 'a', 'b', 'c')).to.throwError();
   });
 });

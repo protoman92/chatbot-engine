@@ -174,6 +174,28 @@ export function promisify2<
 }
 
 /**
+ * Require some keys for an object. This makes sure the specified keys do not
+ * point to undefined or null values.
+ * @template T The object type to receive key requirements.
+ * @template K The keys to be required.
+ * @param object The object to receive key requirements.
+ * @param keys The keys to be required.
+ * @return The object with required keys.
+ */
+export function requireKeys<T, K extends keyof T>(
+  object: T,
+  ...keys: K[]
+): T & Required<{ [K1 in K]: NonNullable<T[K1]> }> {
+  keys.forEach(key => {
+    if (object[key] === undefined || object[key] === null) {
+      throw new Error(`Key ${key} is invalid`);
+    }
+  });
+
+  return object as any;
+}
+
+/**
  * Format a special key.
  * @param key A string value.
  * @return A string value.

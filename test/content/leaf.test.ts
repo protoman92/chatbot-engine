@@ -7,6 +7,7 @@ import {
   GenericResponse,
   Leaf,
   mapContext,
+  requireContextKeys,
   Response
 } from '../../src';
 import { isType } from '../../src/common/utils';
@@ -96,5 +97,37 @@ describe('Higher order functions', () => {
 
     // Then
     expectJs(text).to.equal('2');
+  });
+
+  it('Require context keys should work correctly', async () => {
+    // Setup
+    interface Context1 extends Context {
+      a?: number | undefined | null;
+    }
+
+    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
+      next: ({ senderID, oldContext: { a } }) => {
+        return observer.next({
+          senderID,
+          visualContents: [
+            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+          ]
+        });
+      }
+    }));
+
+    // When
+    const resultLeaf = requireContextKeys<Context1, 'a'>('a')(originalLeaf);
+
+    const {
+      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+    } = await bridgeEmission(resultLeaf)({
+      senderID,
+      oldContext: { senderID, a: 1 },
+      inputText: ''
+    });
+
+    // Then
+    expectJs(text).to.equal('1');
   });
 });
