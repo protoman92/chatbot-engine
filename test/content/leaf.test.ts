@@ -2,9 +2,11 @@ import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import {
   bridgeEmission,
+  compactMapContext,
   ContentSubscription,
   createLeafComposeChain,
   GenericResponse,
+  INVALID_NEXT_RESULT,
   KV,
   Leaf,
   mapContext,
@@ -132,6 +134,38 @@ describe('Higher order functions', () => {
 
     // Then
     expectJs(text).to.equal('1');
+  });
+
+  it('Compact map context should work', async () => {
+    // Setup
+    interface Context1 {
+      a: number;
+    }
+
+    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
+      next: ({ senderID, oldContext: { a } }) => {
+        return observer.next({
+          senderID,
+          visualContents: [
+            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+          ]
+        });
+      }
+    }));
+
+    // When
+    const resultLeaf = compactMapContext<Context1, Context1>(
+      ({ a, ...restContext }) => (!!a ? { a, ...restContext } : null)
+    )(originalLeaf);
+
+    const nextResult = await resultLeaf.next({
+      senderID,
+      oldContext: { a: 0 },
+      inputText: ''
+    });
+
+    // Then
+    expectJs(nextResult).to.equal(INVALID_NEXT_RESULT);
   });
 
   it('Compose chain should work', async () => {

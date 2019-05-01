@@ -1,10 +1,11 @@
 import { compose, requireKeys } from '../common/utils';
 import { Leaf } from '../type/leaf';
+import { INVALID_NEXT_RESULT } from '..';
 
 /**
  * Map one context type to another.
- * @param C1 The original context type.
- * @param C2 The target context type.
+ * @template C1 The original context type.
+ * @template C2 The target context type.
  * @param fn The context mapper function.
  * @return A leaf compose function.
  */
@@ -15,6 +16,31 @@ export function mapContext<C1, C2 extends C1>(
     ...leaf,
     next: async ({ oldContext, ...restInput }) => {
       return leaf.next({ ...restInput, oldContext: fn(oldContext) });
+    }
+  });
+}
+
+/**
+ * Map one context type to another, but returns invalid if the resulting context
+ * object is null or undefined.
+ * @template C1 The original context type.
+ * @template C2 The target context type.
+ * @param fn The context mapper function.
+ * @return A leaf compose function.
+ */
+export function compactMapContext<C1, C2 extends C1>(
+  fn: (oldContext: C2) => C1 | undefined | null
+): Leaf.ComposeFunc<C1, C2> {
+  return leaf => ({
+    ...leaf,
+    next: async ({ oldContext: originalContext, ...restInput }) => {
+      const oldContext = fn(originalContext);
+
+      if (oldContext === undefined || oldContext === null) {
+        return INVALID_NEXT_RESULT;
+      }
+
+      return leaf.next({ ...restInput, oldContext });
     }
   });
 }
