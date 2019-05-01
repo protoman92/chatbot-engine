@@ -1,6 +1,22 @@
+import { INVALID_NEXT_RESULT } from '..';
 import { compose, requireKeys } from '../common/utils';
 import { Leaf } from '../type/leaf';
-import { INVALID_NEXT_RESULT } from '..';
+
+/**
+ * Map input type to another.
+ * @template C1 The original context type.
+ * @template C2 The target context type.
+ * @param fn The input mapper function.
+ * @return A leaf compose function.
+ */
+export function mapLeafInput<C1, C2 extends C1>(
+  fn: (input: Leaf.Input<C2>) => Leaf.Input<C1>
+): Leaf.ComposeFunc<C1, C2> {
+  return leaf => ({
+    ...leaf,
+    next: input => leaf.next(fn(input))
+  });
+}
 
 /**
  * Map one context type to another.
@@ -9,13 +25,34 @@ import { INVALID_NEXT_RESULT } from '..';
  * @param fn The context mapper function.
  * @return A leaf compose function.
  */
-export function mapContext<C1, C2 extends C1>(
-  fn: (oldContext: C2) => C1
+export function mapLeafContext<C1, C2 extends C1>(fn: (context: C2) => C1) {
+  return mapLeafInput<C1, C2>(({ oldContext, ...restInput }) => ({
+    ...restInput,
+    oldContext: fn(oldContext)
+  }));
+}
+
+/**
+ * Map one input type to another, but returns invalid if the resulting input
+ * object is null or undefined.
+ * @template C1 The original context type.
+ * @template C2 The target context type.
+ * @param fn The input mapper function.
+ * @return A leaf compose function.
+ */
+export function compactMapLeafInput<C1, C2 extends C1>(
+  fn: (input: Leaf.Input<C2>) => Leaf.Input<C1> | undefined | null
 ): Leaf.ComposeFunc<C1, C2> {
   return leaf => ({
     ...leaf,
-    next: async ({ oldContext, ...restInput }) => {
-      return leaf.next({ ...restInput, oldContext: fn(oldContext) });
+    next: async input => {
+      const newInput = fn(input);
+
+      if (newInput === undefined || newInput === null) {
+        return INVALID_NEXT_RESULT;
+      }
+
+      return leaf.next(input);
     }
   });
 }
@@ -28,21 +65,18 @@ export function mapContext<C1, C2 extends C1>(
  * @param fn The context mapper function.
  * @return A leaf compose function.
  */
-export function compactMapContext<C1, C2 extends C1>(
-  fn: (oldContext: C2) => C1 | undefined | null
-): Leaf.ComposeFunc<C1, C2> {
-  return leaf => ({
-    ...leaf,
-    next: async ({ oldContext: originalContext, ...restInput }) => {
+export function compactMapLeafContext<C1, C2 extends C1>(
+  fn: (context: C2) => C1 | undefined | null
+) {
+  return compactMapLeafInput<C1, C2>(
+    ({ oldContext: originalContext, ...restInput }) => {
       const oldContext = fn(originalContext);
 
-      if (oldContext === undefined || oldContext === null) {
-        return INVALID_NEXT_RESULT;
-      }
-
-      return leaf.next({ ...restInput, oldContext });
+      return oldContext !== undefined && oldContext !== null
+        ? { ...restInput, oldContext }
+        : null;
     }
-  });
+  );
 }
 
 /**
@@ -54,7 +88,10 @@ export function compactMapContext<C1, C2 extends C1>(
 export function requireContextKeys<C, K extends keyof C>(
   ...keys: K[]
 ): Leaf.ComposeFunc<C, C & Required<{ [K1 in K]: NonNullable<C[K1]> }>> {
-  return mapContext(oldContext => requireKeys(oldContext, ...keys));
+  return mapLeafInput(({ oldContext, ...restInput }) => ({
+    ...restInput,
+    oldContext: requireKeys(oldContext, ...keys)
+  }));
 }
 
 /**

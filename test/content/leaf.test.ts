@@ -2,14 +2,14 @@ import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import {
   bridgeEmission,
-  compactMapContext,
+  compactMapLeafContext,
   ContentSubscription,
   createLeafComposeChain,
   GenericResponse,
   INVALID_NEXT_RESULT,
   KV,
   Leaf,
-  mapContext,
+  mapLeafContext,
   requireContextKeys,
   Response
 } from '../../src';
@@ -85,7 +85,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = mapContext<Context1, Context2>(
+    const resultLeaf = mapLeafContext<Context1, Context2>(
       ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
@@ -154,7 +154,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = compactMapContext<Context1, Context1>(
+    const resultLeaf = compactMapLeafContext<Context1, Context1>(
       ({ a, ...restContext }) => (!!a ? { a, ...restContext } : null)
     )(originalLeaf);
 
@@ -192,7 +192,7 @@ describe('Higher order functions', () => {
     // When
     const resultLeaf = createLeafComposeChain()
       .forContextOfType<Context2>()
-      .compose(mapContext(({ b, ...rest }) => ({ a: b || 100, ...rest })))
+      .compose(mapLeafContext(({ b, ...rest }) => ({ a: b || 100, ...rest })))
       .enhance(originalLeaf);
 
     const {
