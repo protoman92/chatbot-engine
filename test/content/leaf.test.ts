@@ -3,6 +3,7 @@ import { describe, it } from 'mocha';
 import {
   bridgeEmission,
   ContentSubscription,
+  createLeafComposeChain,
   GenericResponse,
   KV,
   Leaf,
@@ -131,5 +132,44 @@ describe('Higher order functions', () => {
 
     // Then
     expectJs(text).to.equal('1');
+  });
+
+  it('Compose chain should work', async () => {
+    // Setup
+    interface Context1 {
+      a: number;
+    }
+
+    interface Context2 {
+      b: number | undefined | null;
+    }
+
+    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
+      next: ({ senderID, oldContext: { a } }) => {
+        return observer.next({
+          senderID,
+          visualContents: [
+            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+          ]
+        });
+      }
+    }));
+
+    // When
+    const resultLeaf = createLeafComposeChain()
+      .forContextOfType<Context2>()
+      .compose(mapContext(({ b, ...rest }) => ({ a: b || 100, ...rest })))
+      .enhance(originalLeaf);
+
+    const {
+      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+    } = await bridgeEmission(resultLeaf)({
+      senderID,
+      oldContext: { b: null },
+      inputText: ''
+    });
+
+    // Then
+    expectJs(text).to.equal('100');
   });
 });
