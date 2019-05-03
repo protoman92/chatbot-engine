@@ -12,29 +12,43 @@ declare namespace FacebookRequest {
     readonly postback: Readonly<{ payload: string; title: string }>;
   }
 
-  export interface Message extends BaseFacebookRequest {
+  namespace Attachment {
+    export interface Image {
+      readonly type: 'image';
+      readonly payload: Readonly<{ url: string }>;
+    }
+
+    export interface Location {
+      readonly type: 'location';
+      readonly title: string;
+      readonly url: string;
+      readonly payload: DeepReadonly<{
+        coordinates: { lat: number; lng: number };
+      }>;
+    }
+  }
+
+  interface BaseMessage extends BaseFacebookRequest {
     readonly message: Readonly<{ mid: string; seq: number }>;
   }
 
-  export namespace Message {
-    export type Text = Message & DeepReadonly<{ message: { text: string } }>;
+  export type Attachment = Attachment.Image | Attachment.Location;
 
-    export type Attachment = Message &
-      DeepReadonly<{ attachments: { type: 'image'; payload: unknown }[] }>;
+  namespace Message {
+    export type Text = BaseMessage &
+      DeepReadonly<{ message: { text: string } }>;
 
-    export namespace Attachment {
-      export type Image = Attachment &
-        DeepReadonly<{
-          attachments: { type: 'image'; payload: { url: string } }[];
-        }>;
-    }
+    export type Attachment = BaseMessage &
+      DeepReadonly<{ message: { attachments: FacebookRequest.Attachment[] } }>;
   }
+
+  export type Message = Message.Text | Message.Attachment;
 }
 
 /** Represents possible combinations of Facebook requests. */
 export type FacebookRequest =
   | FacebookRequest.Message.Text
-  | FacebookRequest.Message.Attachment.Image
+  | FacebookRequest.Message.Attachment
   | FacebookRequest.Postback;
 
 /** Represents a webhook request. */

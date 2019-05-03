@@ -3,7 +3,7 @@ import { ComposeFunc } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import {
   FacebookConfigs,
-  FacebookRequest,
+  FacebookRequest as FBR,
   FacebookUnitMessenger,
   FacebookWebhookRequest
 } from '../type/facebook';
@@ -11,7 +11,7 @@ import { LeafSelector } from '../type/leaf-selector';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
-import { Action, Response } from '../type/visual-content';
+import { Action, QuickReply, Response } from '../type/visual-content';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
@@ -33,8 +33,8 @@ export function mapWebhook<C>(
    * @param reqs A request Array.
    * @return A map of requests.
    */
-  function groupRequests(reqs: readonly FacebookRequest[]) {
-    const requestMap: { [K: string]: FacebookRequest[] } = {};
+  function groupRequests(reqs: readonly FBR[]) {
+    const requestMap: { [K: string]: FBR[] } = {};
 
     reqs.forEach(req => {
       const senderID = req.sender.id;
@@ -44,34 +44,31 @@ export function mapWebhook<C>(
     return requestMap;
   }
 
-  function processRequest(request: FacebookRequest): GenericRequest<C>['data'] {
-    if (isType<FacebookRequest.Postback>(request, 'postback')) {
+  function processRequest(request: FBR): GenericRequest<C>['data'] {
+    if (isType<FBR.Postback>(request, 'postback')) {
       return [{ inputText: request.postback.payload }];
     }
 
-    if (isType<FacebookRequest.Message>(request, 'message')) {
+    if (isType<FBR.Message>(request, 'message')) {
       const { message } = request;
 
-      if (isType<FacebookRequest.Message.Text['message']>(message, 'text')) {
+      if (isType<FBR.Message.Text['message']>(message, 'text')) {
         return [{ inputText: message.text }];
       }
 
-      if (isType<FacebookRequest.Message.Attachment>(message, 'attachments')) {
+      if (isType<FBR.Message.Attachment['message']>(message, 'attachments')) {
         const { attachments } = message;
 
-        return attachments.map(({ type, payload }) => {
-          if (
-            type === 'image' &&
-            isType<
-              FacebookRequest.Message.Attachment.Image['attachments'][0]['payload']
-            >(payload, 'url')
-          ) {
-            return { inputText: payload.url, inputImageURL: payload.url };
-          }
+        return attachments.map(attachment => {
+          switch (attachment.type) {
+            case 'image':
+              const url = attachment.payload.url;
+              return { inputText: url, inputImageURL: url };
 
-          throw Error(
-            formatFacebookError(`Invalid payload: ${JSON.stringify(payload)}`)
-          );
+            case 'location':
+              const coordinates = attachment.payload.coordinates;
+              return { inputText: JSON.stringify(coordinates) };
+          }
         });
       }
     }
@@ -92,7 +89,7 @@ export function mapWebhook<C>(
         const groupedRequests = groupRequests(allRequests);
 
         return Object.entries(groupedRequests).map(
-          ([senderID, requests]: [string, FacebookRequest[]]) => ({
+          ([senderID, requests]: [string, FBR[]]) => ({
             senderID,
             oldContext: {} as any,
             data: requests
@@ -239,13 +236,27 @@ async function createFacebookResponse<C>({
     throw Error(`FB: Unable to parse response ${JSON.stringify(response)}`);
   }
 
+  /**
+   * Map generic quick reply type to Facebook-specific type.
+   * @param type The generic quick reply type.
+   * @return A Facebook quick reply type.
+   */
+  function mapQuickReplyType(type: QuickReply['type']): string {
+    switch (type) {
+      case 'location':
+        return 'location';
+    }
+
+    return 'text';
+  }
+
   function createPlatformResponse(
     senderID: string,
     { response, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
   ) {
-    const facebookQuickReplies = quickReplies.map(({ text: title }) => ({
+    const facebookQuickReplies = quickReplies.map(({ text: title, type }) => ({
       title,
-      content_type: 'text',
+      content_type: mapQuickReplyType(type),
       payload: title
     }));
 

@@ -1,11 +1,23 @@
+interface BaseQuickReply {
+  readonly text: string;
+}
+
+export namespace QuickReply {
+  export interface Location extends BaseQuickReply {
+    readonly type: 'location';
+  }
+
+  export interface SimpleText extends BaseQuickReply {
+    readonly type?: 'text';
+  }
+}
+
 /**
  * Represents a bubble of text that supports quick decision-making. This
  * concept is available only on certain platforms (Facebook/Telegram) but is
  * an important one nonetheless.
  */
-export interface QuickReply {
-  readonly text: string;
-}
+export type QuickReply = QuickReply.Location | QuickReply.SimpleText;
 
 interface BaseAction {
   readonly text: string;
