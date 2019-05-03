@@ -63,7 +63,13 @@ describe('Leaf selector', () => {
     );
 
     // When
-    await instance(selector).next({ senderID, oldContext: {}, inputText: '' });
+    await instance(selector).next({
+      senderID,
+      oldContext: {},
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
+    });
 
     // Then
     verify(selector.triggerLeafContent(anything(), anything())).times(
@@ -150,7 +156,9 @@ describe('Leaf selector', () => {
     const nextResult = await instance(selector).next({
       senderID,
       oldContext: {},
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     // Then
@@ -178,7 +186,9 @@ describe('Leaf selector', () => {
     await instance(selector).next({
       senderID,
       oldContext: {},
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     // Then

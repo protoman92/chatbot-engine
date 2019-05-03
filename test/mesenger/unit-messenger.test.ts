@@ -43,14 +43,7 @@ describe('Generic unit messenger', () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(communicator.sendResponse(anything())).thenResolve();
-    const platformResponses = [
-      {
-        a: 1
-      },
-      {
-        b: 2
-      }
-    ];
+    const platformResponses = [{ a: 1 }, { b: 2 }];
 
     // When
     const unitMessenger = spy(
@@ -63,10 +56,8 @@ describe('Generic unit messenger', () => {
 
     // Then
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
-    const response: GenericResponse<Context> = {
-      senderID,
-      visualContents: []
-    };
+    const response: GenericResponse<Context> = { senderID, visualContents: [] };
+
     await next(response);
     expectJs(complete).to.be.ok();
     verify(unitMessenger.sendResponse(deepEqual(response))).once();
@@ -84,8 +75,16 @@ describe('Generic unit messenger', () => {
     const oldContext: Context = { a: 1, b: 2 };
 
     const data: readonly GenericRequest.Input[] = [
-      { inputText: 'text-1' },
-      { inputText: 'text-2' }
+      {
+        inputText: 'text-1',
+        inputImageURL: 'image-1',
+        inputCoordinates: { latitude: 0, longitude: 0 }
+      },
+      {
+        inputText: 'text-2',
+        inputImageURL: 'image-2',
+        inputCoordinates: { latitude: 1, longitude: 1 }
+      }
     ];
 
     // When

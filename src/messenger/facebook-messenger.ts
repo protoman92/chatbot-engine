@@ -46,14 +46,26 @@ export function mapWebhook<C>(
 
   function processRequest(request: FBR): GenericRequest<C>['data'] {
     if (isType<FBR.Postback>(request, 'postback')) {
-      return [{ inputText: request.postback.payload }];
+      return [
+        {
+          inputText: request.postback.payload,
+          inputImageURL: undefined,
+          inputCoordinates: undefined
+        }
+      ];
     }
 
     if (isType<FBR.Message>(request, 'message')) {
       const { message } = request;
 
       if (isType<FBR.Message.Text['message']>(message, 'text')) {
-        return [{ inputText: message.text }];
+        return [
+          {
+            inputText: message.text,
+            inputImageURL: undefined,
+            inputCoordinates: undefined
+          }
+        ];
       }
 
       if (isType<FBR.Message.Attachment['message']>(message, 'attachments')) {
@@ -62,12 +74,21 @@ export function mapWebhook<C>(
         return attachments.map(attachment => {
           switch (attachment.type) {
             case 'image':
-              const url = attachment.payload.url;
-              return { inputText: url, inputImageURL: url };
+              return {
+                inputText: attachment.payload.url,
+                inputImageURL: attachment.payload.url,
+                inputCoordinates: undefined
+              };
 
             case 'location':
-              const coordinates = attachment.payload.coordinates;
-              return { inputText: JSON.stringify(coordinates) };
+              const { lat, long } = attachment.payload.coordinates;
+              const coordinates = { latitude: lat, longitude: long };
+
+              return {
+                inputText: JSON.stringify(coordinates),
+                inputImageURL: undefined,
+                inputCoordinates: coordinates
+              };
           }
         });
       }

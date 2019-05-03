@@ -5,16 +5,6 @@ import { ContentObservable, ContentObserver } from './stream';
 
 declare namespace LeafSelector {
   /**
-   * The input for a selection process.
-   * @template C The context used by the current chatbot.
-   */
-  export interface Input<C> {
-    readonly senderID: string;
-    readonly oldContext: C;
-    readonly inputText: string;
-  }
-
-  /**
    * Represents a collection of leaf information that is derived from
    * enumerating all possibilities in a key-value branch object.
    * @template C The context used by the current chatbot.
@@ -34,5 +24,5 @@ declare namespace LeafSelector {
  * @template C The context used by the current chatbot.
  */
 export interface LeafSelector<C>
-  extends ContentObserver<LeafSelector.Input<C>>,
+  extends ContentObserver<Leaf.Input<C>>,
     ContentObservable<GenericResponse<C>> {}

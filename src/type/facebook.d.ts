@@ -23,7 +23,7 @@ declare namespace FacebookRequest {
       readonly title: string;
       readonly url: string;
       readonly payload: DeepReadonly<{
-        coordinates: { lat: number; lng: number };
+        coordinates: { lat: number; long: number };
       }>;
     }
   }

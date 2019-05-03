@@ -45,7 +45,14 @@ describe('Default error leaf', () => {
         }
       });
 
-      errorLeaf.next({ senderID, inputText, oldContext: {} });
+      errorLeaf.next({
+        senderID,
+        inputText,
+        oldContext: {},
+        inputImageURL: undefined,
+        inputCoordinates: undefined
+      });
+
       receivedNext && !!subscription && (await subscription.unsubscribe());
     });
 
@@ -97,7 +104,9 @@ describe('Higher order functions', () => {
     } = await bridgeEmission(resultLeaf)({
       senderID,
       oldContext: { a: 1000 },
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     // Then
@@ -129,7 +138,9 @@ describe('Higher order functions', () => {
     } = await bridgeEmission(resultLeaf)({
       senderID,
       oldContext: { a: 1 },
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     // Then
@@ -161,7 +172,9 @@ describe('Higher order functions', () => {
     const nextResult1 = await resultLeaf.next({
       senderID,
       oldContext: { a: 0 },
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     const {
@@ -169,7 +182,9 @@ describe('Higher order functions', () => {
     } = await bridgeEmission(resultLeaf)({
       senderID,
       oldContext: { a: 1 },
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     // Then
@@ -209,7 +224,9 @@ describe('Higher order functions', () => {
     } = await bridgeEmission(resultLeaf)({
       senderID,
       oldContext: { b: null },
-      inputText: ''
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinates: undefined
     });
 
     // Then

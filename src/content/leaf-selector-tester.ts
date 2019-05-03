@@ -130,7 +130,14 @@ export function createLeafSelectorTester<C extends DefaultContext>(
 
             const { additionalContext } = await new Promise<GenericResponse<C>>(
               async resolve => {
-                await selector.next({ senderID, oldContext, inputText });
+                await selector.next({
+                  senderID,
+                  oldContext,
+                  inputText,
+                  inputImageURL: undefined,
+                  inputCoordinates: undefined
+                });
+
                 let subscription: ContentSubscription;
 
                 subscription = await selector.subscribe({
@@ -202,7 +209,14 @@ export function createLeafSelectorTester<C extends DefaultContext>(
 
         const { additionalContext } = await new Promise<GenericResponse<C>>(
           async resolve => {
-            await selector.next({ senderID, oldContext, inputText });
+            await selector.next({
+              senderID,
+              oldContext,
+              inputText,
+              inputImageURL: undefined,
+              inputCoordinates: undefined
+            });
+
             let subscription: ContentSubscription;
 
             subscription = await selector.subscribe({

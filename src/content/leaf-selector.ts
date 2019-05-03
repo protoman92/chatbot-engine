@@ -93,8 +93,8 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
     next: async ({
       senderID,
       oldContext: originalContext,
-      inputText
-    }: LeafSelector.Input<C>): Promise<NextResult> => {
+      ...restInput
+    }: Leaf.Input<C>): Promise<NextResult> => {
       try {
         const enumeratedLeaves = await selector.enumerateLeaves();
 
@@ -102,9 +102,9 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
           const oldContext = deepClone(originalContext);
 
           const nextResult = await selector.triggerLeafContent(enumeratedLeaf, {
+            ...restInput,
             senderID,
-            oldContext,
-            inputText
+            oldContext
           });
 
           if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
@@ -124,7 +124,9 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
           {
             senderID,
             oldContext: deepClone(originalContext),
-            inputText: message || inputText
+            inputText: message || restInput.inputText,
+            inputImageURL: undefined,
+            inputCoordinates: undefined
           }
         );
       }
