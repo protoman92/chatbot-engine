@@ -145,17 +145,28 @@ async function createFacebookResponse<C>({
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(action: Action) {
-    const { text: title, type } = action;
-    const buttonPayload = { title, type };
+    const { text: title } = action;
 
-    if (isType<Action.Postback>(action, 'payload')) {
-      const { payload } = action;
-      return { ...buttonPayload, payload };
+    switch (action.type) {
+      case 'postback':
+        return { title, type: 'postback', payload: action.payload };
+
+      case 'url':
+        return { title, type: 'web_url', url: action.url };
     }
+  }
 
-    throw Error(
-      formatFacebookError(`Unrecognized action ${JSON.stringify(action)}`)
-    );
+  function createButtonResponse(buttonResponse: Response.Button) {
+    return {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'button',
+          text: buttonResponse.text,
+          buttons: buttonResponse.actions.map(a => createSingleAction(a))
+        }
+      }
+    };
   }
 
   function createCarouselResponse({ items }: Response.Carousel) {
@@ -182,7 +193,7 @@ async function createFacebookResponse<C>({
                 image_url,
                 buttons:
                   !!buttons && buttons.length
-                    ? buttons.map(action => createSingleAction(action))
+                    ? buttons.map(a => createSingleAction(a))
                     : undefined
               })
             ),
@@ -223,7 +234,7 @@ async function createFacebookResponse<C>({
                 subtitle,
                 buttons:
                   !!itemButtons && itemButtons.length
-                    ? itemButtons.map(action => createSingleAction(action))
+                    ? itemButtons.map(a => createSingleAction(a))
                     : undefined
               })
             ),
@@ -237,12 +248,16 @@ async function createFacebookResponse<C>({
 
   function createResponse(response: Response) {
     switch (response.type) {
+      case 'button':
+        return createButtonResponse(response);
+
       case 'carousel':
         return createCarouselResponse(response);
 
       case 'list':
         return createListResponse(response);
 
+      case 'text':
       default:
         return { text: response.text };
     }

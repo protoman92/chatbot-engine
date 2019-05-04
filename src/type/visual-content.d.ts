@@ -39,9 +39,10 @@ declare namespace Action {
 export type Action = Action.Postback | Action.URL;
 
 declare namespace Response {
-  export interface Text {
+  export interface Button {
+    readonly actions: readonly Action[];
     readonly text: string;
-    readonly type?: 'text';
+    readonly type: 'button';
   }
 
   export interface Carousel {
@@ -69,10 +70,19 @@ declare namespace Response {
 
     readonly type: 'list';
   }
+
+  export interface Text {
+    readonly text: string;
+    readonly type?: 'text';
+  }
 }
 
 /** Represents something the user receives after they send a message. */
-export type Response = Response.Text | Response.Carousel | Response.List;
+export type Response =
+  | Response.Button
+  | Response.Carousel
+  | Response.List
+  | Response.Text;
 
 /** Represents content that will go out to the user. */
 export interface VisualContent {
