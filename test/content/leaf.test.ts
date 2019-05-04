@@ -166,7 +166,7 @@ describe('Higher order functions', () => {
 
     // When
     const resultLeaf = compactMapLeafContext<Context1, Context1>(
-      ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
+      async ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
     const nextResult1 = await resultLeaf.next({

@@ -10,11 +10,11 @@ import { Leaf } from '../type/leaf';
  * @return A leaf compose function.
  */
 export function mapLeafInput<C1, C2 extends C1>(
-  fn: (input: Leaf.Input<C2>) => Leaf.Input<C1>
+  fn: (input: Leaf.Input<C2>) => Promise<Leaf.Input<C1>>
 ): Leaf.ComposeFunc<C1, C2> {
   return leaf => ({
     ...leaf,
-    next: input => leaf.next(fn(input))
+    next: async input => leaf.next(await fn(input))
   });
 }
 
@@ -26,7 +26,7 @@ export function mapLeafInput<C1, C2 extends C1>(
  * @return A leaf compose function.
  */
 export function mapLeafContext<C1, C2 extends C1>(fn: (context: C2) => C1) {
-  return mapLeafInput<C1, C2>(({ oldContext, ...restInput }) => ({
+  return mapLeafInput<C1, C2>(async ({ oldContext, ...restInput }) => ({
     ...restInput,
     oldContext: fn(oldContext)
   }));
@@ -41,12 +41,12 @@ export function mapLeafContext<C1, C2 extends C1>(fn: (context: C2) => C1) {
  * @return A leaf compose function.
  */
 export function compactMapLeafInput<C1, C2 extends C1>(
-  fn: (input: Leaf.Input<C2>) => Leaf.Input<C1> | undefined | null
+  fn: (input: Leaf.Input<C2>) => Promise<Leaf.Input<C1> | undefined | null>
 ): Leaf.ComposeFunc<C1, C2> {
   return leaf => ({
     ...leaf,
     next: async input => {
-      const newInput = fn(input);
+      const newInput = await fn(input);
 
       if (newInput === undefined || newInput === null) {
         return INVALID_NEXT_RESULT;
@@ -66,11 +66,11 @@ export function compactMapLeafInput<C1, C2 extends C1>(
  * @return A leaf compose function.
  */
 export function compactMapLeafContext<C1, C2 extends C1>(
-  fn: (context: C2) => C1 | undefined | null
+  fn: (context: C2) => Promise<C1 | undefined | null>
 ) {
   return compactMapLeafInput<C1, C2>(
-    ({ oldContext: originalContext, ...restInput }) => {
-      const oldContext = fn(originalContext);
+    async ({ oldContext: originalContext, ...restInput }) => {
+      const oldContext = await fn(originalContext);
 
       return oldContext !== undefined && oldContext !== null
         ? { ...restInput, oldContext }
@@ -88,7 +88,7 @@ export function compactMapLeafContext<C1, C2 extends C1>(
 export function requireContextKeys<C, K extends keyof C>(
   ...keys: K[]
 ): Leaf.ComposeFunc<C, C & Required<{ [K1 in K]: NonNullable<C[K1]> }>> {
-  return mapLeafInput(({ oldContext, ...restInput }) => ({
+  return mapLeafInput(async ({ oldContext, ...restInput }) => ({
     ...restInput,
     oldContext: requireKeys(oldContext, ...keys)
   }));
