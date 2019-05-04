@@ -236,25 +236,16 @@ async function createFacebookResponse<C>({
   }
 
   function createResponse(response: Response) {
-    if (isType<Response.Text>(response, 'text')) {
-      return { text: response.text };
-    }
+    switch (response.type) {
+      case 'carousel':
+        return createCarouselResponse(response);
 
-    if (
-      isType<Response.Carousel>(response, 'items', 'type') &&
-      response.type === 'carousel'
-    ) {
-      return createCarouselResponse(response);
-    }
+      case 'list':
+        return createListResponse(response);
 
-    if (
-      isType<Response.List>(response, 'items', 'type') &&
-      response.type === 'list'
-    ) {
-      return createListResponse(response);
+      default:
+        return { text: response.text };
     }
-
-    throw Error(`FB: Unable to parse response ${JSON.stringify(response)}`);
   }
 
   /**

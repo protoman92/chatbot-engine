@@ -41,9 +41,12 @@ export type Action = Action.Postback | Action.URL;
 declare namespace Response {
   export interface Text {
     readonly text: string;
+    readonly type?: 'text';
   }
 
   export interface Carousel {
+    readonly actions: readonly Action[] | null;
+
     readonly items: Readonly<{
       title: string;
       description: string | null;
@@ -52,10 +55,11 @@ declare namespace Response {
     }>[];
 
     readonly type: 'carousel';
-    readonly actions: readonly Action[] | null;
   }
 
   export interface List {
+    readonly actions: readonly Action[] | null;
+
     readonly items: Readonly<{
       title: string;
       description: string | null;
@@ -64,7 +68,6 @@ declare namespace Response {
     }>[];
 
     readonly type: 'list';
-    readonly actions: readonly Action[] | null;
   }
 }
 
