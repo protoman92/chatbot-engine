@@ -1,8 +1,8 @@
 export type KV<V> = Readonly<{ [K: string]: V }>;
 
 export interface Coordinates {
-  readonly latitude: number;
-  readonly longitude: number;
+  readonly lat: number;
+  readonly lng: number;
 }
 
 export interface DefaultContext {

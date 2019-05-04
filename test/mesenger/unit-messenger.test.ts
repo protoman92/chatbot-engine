@@ -78,12 +78,12 @@ describe('Generic unit messenger', () => {
       {
         inputText: 'text-1',
         inputImageURL: 'image-1',
-        inputCoordinates: { latitude: 0, longitude: 0 }
+        inputCoordinates: { lat: 0, lng: 0 }
       },
       {
         inputText: 'text-2',
         inputImageURL: 'image-2',
-        inputCoordinates: { latitude: 1, longitude: 1 }
+        inputCoordinates: { lat: 1, lng: 1 }
       }
     ];
 

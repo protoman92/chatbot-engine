@@ -82,7 +82,7 @@ export function mapWebhook<C>(
 
             case 'location':
               const { lat, long } = attachment.payload.coordinates;
-              const coordinates = { latitude: lat, longitude: long };
+              const coordinates = { lat, lng: long };
 
               return {
                 inputText: JSON.stringify(coordinates),
