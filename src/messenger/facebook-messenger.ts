@@ -141,7 +141,7 @@ async function createFacebookResponse<C>({
   senderID,
   visualContents: contents
 }: GenericResponse<C>): Promise<readonly PlatformResponse[]> {
-  const MAX_GENERIC_ELEMENT_COUNT = 11;
+  const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(action: Action) {
