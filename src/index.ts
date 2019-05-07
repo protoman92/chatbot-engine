@@ -20,7 +20,6 @@ export * from './type/context-dao';
 export * from './type/facebook';
 export * from './type/leaf';
 export * from './type/leaf-selector';
-export { LeafCombinationTesterParam } from './type/leaf-selector-tester';
 export * from './type/messenger';
 export * from './type/request';
 export * from './type/response';
