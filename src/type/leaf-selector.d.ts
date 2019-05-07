@@ -1,7 +1,5 @@
 import { Branch } from './branch';
 import { Leaf } from './leaf';
-import { GenericResponse } from './response';
-import { ContentObservable, ContentObserver } from './stream';
 
 declare namespace LeafSelector {
   /**
@@ -21,8 +19,9 @@ declare namespace LeafSelector {
  * Represents a selector that chooses the most appropriate leaf out of all
  * available leaves, based on the user's input. Said leaf's content will be
  * delivered to the user.
+ *
+ * A leaf selector follows the same interface as a leaf - it is basically a
+ * leaf that handles contents for many different leaves.
  * @template C The context used by the current chatbot.
  */
-export interface LeafSelector<C>
-  extends ContentObserver<Leaf.Input<C>>,
-    ContentObservable<GenericResponse<C>> {}
+export interface LeafSelector<C> extends Leaf<C> {}
