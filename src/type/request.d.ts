@@ -1,4 +1,5 @@
-import { Coordinates } from './common';
+import { Omit } from 'ts-essentials';
+import { Coordinates, DefaultContext } from './common';
 
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
@@ -7,8 +8,8 @@ declare namespace GenericRequest {
   /** Input for a generic request. */
   export interface Input {
     readonly inputText: string;
-    readonly inputImageURL: string | undefined;
-    readonly inputCoordinates: Coordinates | undefined;
+    readonly inputImageURL: string | null | undefined;
+    readonly inputCoordinate: Coordinates | null | undefined;
   }
 }
 

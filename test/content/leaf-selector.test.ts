@@ -6,7 +6,6 @@ import {
   createLeafWithObserver,
   ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
-  KV,
   Leaf,
   LeafSelector
 } from '../../src';
@@ -18,7 +17,7 @@ type TestLeafSelector = ReturnType<
 const senderID = 'sender-id';
 
 describe('Leaf selector', () => {
-  interface Context extends KV<unknown> {}
+  interface Context {}
 
   let currentLeaf: Leaf<Context>;
   let selector: TestLeafSelector;
@@ -65,10 +64,9 @@ describe('Leaf selector', () => {
     // When
     await instance(selector).next({
       senderID,
-      oldContext: {},
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then
@@ -155,10 +153,9 @@ describe('Leaf selector', () => {
     // When
     const nextResult = await instance(selector).next({
       senderID,
-      oldContext: {},
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then
@@ -185,10 +182,9 @@ describe('Leaf selector', () => {
     // When
     await instance(selector).next({
       senderID,
-      oldContext: {},
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then

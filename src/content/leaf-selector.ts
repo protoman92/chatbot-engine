@@ -1,7 +1,7 @@
 import { deepClone, formatSpecialKey, mapSeries } from '../common/utils';
 import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
-import { KV } from '../type/common';
+import { DefaultContext, KV } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
@@ -86,32 +86,28 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
      */
     triggerLeafContent: (
       { currentLeaf }: LeafSelector.EnumeratedLeaf<C>,
-      input: Leaf.Input<C>
+      input: C & DefaultContext
     ) => {
       return currentLeaf.next(input);
     },
-    next: async ({
-      senderID,
-      oldContext: originalContext,
-      ...restInput
-    }: Leaf.Input<C>): Promise<NextResult> => {
+    next: async (input: C & DefaultContext): Promise<NextResult> => {
       try {
         const enumeratedLeaves = await selector.enumerateLeaves();
 
         for (const enumeratedLeaf of enumeratedLeaves) {
-          const oldContext = deepClone(originalContext);
+          const clonedInput = deepClone(input);
 
-          const nextResult = await selector.triggerLeafContent(enumeratedLeaf, {
-            ...restInput,
-            senderID,
-            oldContext
-          });
+          const nextResult = await selector.triggerLeafContent(
+            enumeratedLeaf,
+            clonedInput
+          );
 
           if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
         }
 
         throw new Error('This bot has nothing to say');
       } catch ({ message }) {
+        const clonedInput = deepClone(input);
         const errorLeaf = await selector.getErrorLeaf();
 
         return selector.triggerLeafContent(
@@ -122,9 +118,8 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
             prefixLeafPaths: []
           },
           {
-            senderID,
-            oldContext: deepClone(originalContext),
-            inputText: message || restInput.inputText,
+            ...clonedInput,
+            inputText: message || clonedInput.inputText,
             inputImageURL: undefined,
             inputCoordinates: undefined
           }

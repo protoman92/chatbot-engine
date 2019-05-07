@@ -27,7 +27,7 @@ export async function createGenericUnitMessenger<C>(
     {
       receiveRequest: ({ senderID, oldContext, data }) => {
         return mapSeries(data, datum => {
-          return leafSelector.next({ ...datum, senderID, oldContext });
+          return leafSelector.next({ ...datum, ...oldContext, senderID });
         });
       },
       sendResponse: async response => {

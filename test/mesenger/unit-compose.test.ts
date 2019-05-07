@@ -2,13 +2,13 @@ import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import {
   ContextDAO,
+  DefaultContext,
   GenericRequest,
   GenericResponse,
   KV,
   PlatformCommunicator,
   saveUserForSenderID,
-  UnitMessenger,
-  DefaultContext
+  UnitMessenger
 } from '../../src';
 import { compose, joinObjects } from '../../src/common/utils';
 import {
@@ -76,9 +76,9 @@ describe('Save context on send', () => {
 });
 
 describe('Inject context on receive', () => {
-  it('Should inject context on send', async () => {
+  it('Should inject context on receive', async () => {
     // Setup
-    const expectedContext: Context = { a: 1, b: 2 };
+    const expectedContext = { a: 1, b: 2 };
 
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
@@ -117,11 +117,9 @@ describe('Save user for sender ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
     const chatbotUser = { id: senderID };
-    const expectedContext: DefaultContext & Context = { senderID };
 
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
-      newContext: expectedContext,
       visualContents: []
     });
 
@@ -136,7 +134,9 @@ describe('Save user for sender ID', () => {
       )
     );
 
-    const genericRequest: GenericRequest<DefaultContext & Context> = {
+    const genericRequest: GenericRequest<
+      Context & Pick<DefaultContext, 'senderID'>
+    > = {
       senderID,
       oldContext: { senderID: '' },
       data: []
@@ -150,7 +150,7 @@ describe('Save user for sender ID', () => {
 
     verify(
       messenger.receiveRequest(
-        deepEqual({ ...genericRequest, oldContext: expectedContext })
+        deepEqual({ ...genericRequest, oldContext: { senderID } })
       )
     ).once();
   });
@@ -159,7 +159,6 @@ describe('Save user for sender ID', () => {
 describe('Set typing indicator', () => {
   it('Should set typing indicator on request and response', async () => {
     // Setup
-
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
       visualContents: []

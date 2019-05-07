@@ -1,4 +1,5 @@
 import { Branch } from './branch';
+import { DefaultContext } from './common';
 import { Leaf } from './leaf';
 
 declare namespace LeafSelector {

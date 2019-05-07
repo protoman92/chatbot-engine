@@ -71,19 +71,18 @@ describe('Generic unit messenger', () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
-
-    const oldContext: Context = { a: 1, b: 2 };
+    const oldContext = { a: 1, b: 2 };
 
     const data: readonly GenericRequest.Input[] = [
       {
         inputText: 'text-1',
         inputImageURL: 'image-1',
-        inputCoordinates: { lat: 0, lng: 0 }
+        inputCoordinate: { lat: 0, lng: 0 }
       },
       {
         inputText: 'text-2',
         inputImageURL: 'image-2',
-        inputCoordinates: { lat: 1, lng: 1 }
+        inputCoordinate: { lat: 1, lng: 1 }
       }
     ];
 
@@ -99,7 +98,7 @@ describe('Generic unit messenger', () => {
     // Then
     data.forEach(datum =>
       verify(
-        leafSelector.next(deepEqual({ ...datum, senderID, oldContext }))
+        leafSelector.next(deepEqual({ ...datum, ...oldContext, senderID }))
       ).once()
     );
   });

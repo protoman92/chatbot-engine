@@ -7,7 +7,10 @@ export interface Coordinates {
 
 export interface DefaultContext {
   readonly activeBranch?: string;
-  readonly senderID: unknown;
+  readonly senderID: string;
+  readonly inputText: string;
+  readonly inputImageURL: string | undefined | null;
+  readonly inputCoordinate: Coordinates | undefined | null;
 }
 
 export type ComposeFunc<T> = (original: T) => T;

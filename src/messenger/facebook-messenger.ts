@@ -50,7 +50,7 @@ export function mapWebhook<C>(
         {
           inputText: request.postback.payload,
           inputImageURL: undefined,
-          inputCoordinates: undefined
+          inputCoordinate: undefined
         }
       ];
     }
@@ -63,7 +63,7 @@ export function mapWebhook<C>(
           {
             inputText: message.text,
             inputImageURL: undefined,
-            inputCoordinates: undefined
+            inputCoordinate: undefined
           }
         ];
       }
@@ -77,7 +77,7 @@ export function mapWebhook<C>(
               return {
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
-                inputCoordinates: undefined
+                inputCoordinate: undefined
               };
 
             case 'location':
@@ -87,7 +87,7 @@ export function mapWebhook<C>(
               return {
                 inputText: JSON.stringify(coordinates),
                 inputImageURL: undefined,
-                inputCoordinates: coordinates
+                inputCoordinate: coordinates
               };
           }
         });

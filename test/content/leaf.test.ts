@@ -48,9 +48,8 @@ describe('Default error leaf', () => {
       errorLeaf.next({
         senderID,
         inputText,
-        oldContext: {},
         inputImageURL: undefined,
-        inputCoordinates: undefined
+        inputCoordinate: undefined
       });
 
       receivedNext && !!subscription && (await subscription.unsubscribe());
@@ -81,7 +80,7 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: async ({ senderID, oldContext: { a } }) => {
+      next: async ({ senderID, a }) => {
         return observer.next({
           senderID,
           visualContents: [
@@ -93,7 +92,7 @@ describe('Higher order functions', () => {
 
     // When
     const resultLeaf = mapLeafContext<Context1, Context2>(
-      ({ a, ...restContext }) => ({
+      async ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
       })
@@ -103,10 +102,10 @@ describe('Higher order functions', () => {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = await bridgeEmission(resultLeaf)({
       senderID,
-      oldContext: { a: 1000 },
+      a: 1000,
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then
@@ -120,7 +119,7 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ senderID, oldContext: { a } }) => {
+      next: ({ senderID, a }) => {
         return observer.next({
           senderID,
           visualContents: [
@@ -137,10 +136,10 @@ describe('Higher order functions', () => {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = await bridgeEmission(resultLeaf)({
       senderID,
-      oldContext: { a: 1 },
+      a: 1,
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then
@@ -154,7 +153,7 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ senderID, oldContext: { a } }) => {
+      next: ({ senderID, a }) => {
         return observer.next({
           senderID,
           visualContents: [
@@ -171,20 +170,20 @@ describe('Higher order functions', () => {
 
     const nextResult1 = await resultLeaf.next({
       senderID,
-      oldContext: { a: 0 },
+      a: 0,
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = await bridgeEmission(resultLeaf)({
       senderID,
-      oldContext: { a: 1 },
+      a: 1,
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then
@@ -203,7 +202,7 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ senderID, oldContext: { a } }) => {
+      next: ({ senderID, a }) => {
         return observer.next({
           senderID,
           visualContents: [
@@ -216,17 +215,19 @@ describe('Higher order functions', () => {
     // When
     const resultLeaf = createLeafComposeChain()
       .forContextOfType<Context2>()
-      .compose(mapLeafContext(({ b, ...rest }) => ({ a: b || 100, ...rest })))
+      .compose(
+        mapLeafContext(async ({ b, ...rest }) => ({ a: b || 100, ...rest }))
+      )
       .enhance(originalLeaf);
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = await bridgeEmission(resultLeaf)({
       senderID,
-      oldContext: { b: null },
+      b: null,
       inputText: '',
       inputImageURL: undefined,
-      inputCoordinates: undefined
+      inputCoordinate: undefined
     });
 
     // Then

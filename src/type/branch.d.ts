@@ -1,4 +1,4 @@
-import { KV } from './common';
+import { DefaultContext, KV } from './common';
 import { Leaf } from './leaf';
 
 /**

@@ -68,11 +68,11 @@ export function injectContextOnReceive<C>(
  * @param getUserID Function to get user ID from the related chatbot user.
  * @return A compose function.
  */
-export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
+export function saveUserForSenderID<C, PUser, CUser>(
   communicator: PlatformCommunicator,
   saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
-): ComposeFunc<UnitMessenger<C>> {
+): ComposeFunc<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
   return function saveUserForSenderID(unitMessenger) {
     return {
       ...unitMessenger,
@@ -85,6 +85,7 @@ export function saveUserForSenderID<C extends DefaultContext, PUser, CUser>(
           const newUser = await saveUser(platformUser);
           const sidKey: keyof DefaultContext = 'senderID';
           const userID = getUserID(newUser);
+
           oldContext = deepClone(
             Object.assign(oldContext, { [sidKey]: userID })
           );
