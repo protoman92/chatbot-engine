@@ -13,4 +13,4 @@ export interface DefaultContext {
   readonly inputCoordinate: Coordinates | undefined | null;
 }
 
-export type ComposeFunc<T> = (original: T) => T;
+export type Transformer<T> = (original: T) => T;

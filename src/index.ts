@@ -7,7 +7,7 @@ export * from './messenger/axios-communicator';
 export * from './messenger/facebook-communicator';
 export { createFacebookMessenger } from './messenger/facebook-messenger';
 export * from './messenger/generic-messenger';
-export { saveUserForSenderID } from './messenger/unit-compose';
+export { saveUserForSenderID } from './messenger/unit-transform';
 export {
   bridgeEmission,
   createContentSubject,
@@ -31,8 +31,8 @@ import {
   injectContextOnReceive,
   saveContextOnSend,
   setTypingIndicator
-} from './messenger/unit-compose';
-import { ComposeFunc } from './type/common';
+} from './messenger/unit-transform';
+import { Transformer } from './type/common';
 import { PlatformCommunicator } from './type/communicator';
 import { ContextDAO } from './type/context-dao';
 import { FacebookConfigs } from './type/facebook';
@@ -40,7 +40,7 @@ import { LeafSelector } from './type/leaf-selector';
 import { UnitMessenger } from './type/messenger';
 
 /**
- * Force some default compose functions on the base unit messenger.
+ * Force some default transform functions on the base unit messenger.
  * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
  * @param contextDAO A context DAO instance.
@@ -53,7 +53,7 @@ export function createFacebookUnitMessenger<C>(
   contextDAO: ContextDAO<C>,
   communicator: PlatformCommunicator,
   configuration: FacebookConfigs,
-  ...composeFuncs: ComposeFunc<UnitMessenger<C>>[]
+  ...transformers: Transformer<UnitMessenger<C>>[]
 ) {
   return _createFacebookUnitMessenger(
     leafSelector,
@@ -62,6 +62,6 @@ export function createFacebookUnitMessenger<C>(
     injectContextOnReceive(contextDAO),
     saveContextOnSend(contextDAO),
     setTypingIndicator(communicator),
-    ...composeFuncs
+    ...transformers
   );
 }

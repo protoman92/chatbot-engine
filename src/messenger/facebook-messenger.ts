@@ -1,5 +1,5 @@
 import { formatFacebookError, isType } from '../common/utils';
-import { ComposeFunc } from '../type/common';
+import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import {
   FacebookConfigs,
@@ -314,13 +314,13 @@ export async function createFacebookUnitMessenger<C>(
   leafSelector: LeafSelector<C>,
   communicator: PlatformCommunicator,
   configurations: FacebookConfigs,
-  ...composeFuncs: readonly ComposeFunc<UnitMessenger<C>>[]
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ): Promise<FacebookUnitMessenger<C>> {
   const unitMessenger = await createGenericUnitMessenger(
     leafSelector,
     communicator,
     response => createFacebookResponse(response),
-    ...composeFuncs
+    ...transformers
   );
 
   return {

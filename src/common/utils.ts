@@ -1,4 +1,4 @@
-import { ComposeFunc } from '../type/common';
+import { Transformer } from '../type/common';
 
 /**
  * Check if an object is of a certain type.
@@ -37,21 +37,21 @@ export function deepClone<T>(object: T): T {
 }
 
 /**
- * Compose an object to compose functions to create a new wrapped object.
- * @template T The type of object to compose.
+ * Compose an object with transformers to create a new wrapped object.
+ * @template T The type of object to transform.
  * @param original The original object.
- * @param fs Array of compose functions.
+ * @param fs Array of transformers.
  * @return The wrapped object.
  */
-export function compose<T>(original: T, ...fs: readonly ComposeFunc<T>[]): T {
+export function compose<T>(original: T, ...fs: readonly Transformer<T>[]): T {
   const reversedFuncs = [...fs].reverse();
-  let newComposed = original;
+  let newTransformed = original;
 
   for (const func of reversedFuncs) {
-    newComposed = func(newComposed);
+    newTransformed = func(newTransformed);
   }
 
-  return newComposed;
+  return newTransformed;
 }
 
 /**

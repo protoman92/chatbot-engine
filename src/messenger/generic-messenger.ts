@@ -1,5 +1,5 @@
 import { compose, mapSeries } from '../common/utils';
-import { ComposeFunc } from '../type/common';
+import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { LeafSelector } from '../type/leaf-selector';
 import { Messenger, UnitMessenger } from '../type/messenger';
@@ -12,7 +12,7 @@ import { GenericResponse, PlatformResponse } from '../type/response';
  * @param leafSelector A leaf selector instance.
  * @param communicator A platform communicator instance.
  * @param responseMapper Function to map generic response to platform responses.
- * @param composeFuncs Array of compose functions to apply on base messenger.
+ * @param transformers Array of compose functions to apply on base messenger.
  * @return A generic messenger.
  */
 export async function createGenericUnitMessenger<C>(
@@ -21,7 +21,7 @@ export async function createGenericUnitMessenger<C>(
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>,
-  ...composeFuncs: readonly ComposeFunc<UnitMessenger<C>>[]
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ): Promise<UnitMessenger<C>> {
   const messenger: UnitMessenger<C> = compose(
     {
@@ -35,7 +35,7 @@ export async function createGenericUnitMessenger<C>(
         return mapSeries(data, datum => communicator.sendResponse(datum));
       }
     },
-    ...composeFuncs
+    ...transformers
   );
 
   await leafSelector.subscribe({

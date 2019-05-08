@@ -1,5 +1,5 @@
 import { deepClone, joinObjects } from '../common/utils';
-import { ComposeFunc, DefaultContext } from '../type/common';
+import { DefaultContext, Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import { UnitMessenger } from '../type/messenger';
@@ -10,11 +10,11 @@ import { UnitMessenger } from '../type/messenger';
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
- * @return A compose function.
+ * @return A transformer function.
  */
 export function saveContextOnSend<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
-): ComposeFunc<UnitMessenger<C>> {
+): Transformer<UnitMessenger<C>> {
   return function saveContextOnSend(unitMessenger) {
     return {
       ...unitMessenger,
@@ -39,11 +39,11 @@ export function saveContextOnSend<C>(
  * processed.
  * @template C The context used by the current chatbot.
  * @param contextDAO The context DAO being used to perform CRUD.
- * @return A compose function.
+ * @return A transformer function.
  */
 export function injectContextOnReceive<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
-): ComposeFunc<UnitMessenger<C>> {
+): Transformer<UnitMessenger<C>> {
   return function injectContextOnReceive(unitMessenger) {
     return {
       ...unitMessenger,
@@ -66,13 +66,13 @@ export function injectContextOnReceive<C>(
  * @param communicator A platform communicator instance.
  * @param saveUser Function to save platform user to some database.
  * @param getUserID Function to get user ID from the related chatbot user.
- * @return A compose function.
+ * @return A transformer function.
  */
 export function saveUserForSenderID<C, PUser, CUser>(
   communicator: PlatformCommunicator,
   saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
-): ComposeFunc<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
+): Transformer<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
   return function saveUserForSenderID(unitMessenger) {
     return {
       ...unitMessenger,
@@ -102,11 +102,11 @@ export function saveUserForSenderID<C, PUser, CUser>(
  * process.
  * @template C The context used by the current chatbot.
  * @param communicator A platform communicator instance.
- * @return A compose function.
+ * @return A transformer function.
  */
 export function setTypingIndicator<C>(
   communicator: PlatformCommunicator
-): ComposeFunc<UnitMessenger<C>> {
+): Transformer<UnitMessenger<C>> {
   return function setTypingIndicator(unitMessenger) {
     return {
       ...unitMessenger,

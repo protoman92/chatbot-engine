@@ -15,7 +15,7 @@ import {
   injectContextOnReceive,
   saveContextOnSend,
   setTypingIndicator
-} from '../../src/messenger/unit-compose';
+} from '../../src/messenger/unit-transform';
 
 interface Context extends KV<unknown> {}
 
@@ -51,7 +51,7 @@ describe('Save context on send', () => {
     when(contextDAO.setContext(senderID, anything())).thenResolve();
     when(messenger.sendResponse(anything())).thenResolve();
 
-    const composed = compose(
+    const transformed = compose(
       instance(messenger),
       saveContextOnSend(instance(contextDAO))
     );
@@ -65,7 +65,7 @@ describe('Save context on send', () => {
     };
 
     // When
-    await composed.sendResponse(genericResponse);
+    await transformed.sendResponse(genericResponse);
 
     // Then
     const newContext = joinObjects(oldContext, additionalContext);
@@ -88,7 +88,7 @@ describe('Inject context on receive', () => {
 
     when(contextDAO.getContext(senderID)).thenResolve(expectedContext);
 
-    const composed = compose(
+    const transformed = compose(
       instance(messenger),
       injectContextOnReceive(instance(contextDAO))
     );
@@ -100,7 +100,7 @@ describe('Inject context on receive', () => {
     };
 
     // When
-    await composed.receiveRequest(genericRequest);
+    await transformed.receiveRequest(genericRequest);
 
     // Then
     verify(contextDAO.getContext(senderID)).once();
@@ -125,7 +125,7 @@ describe('Save user for sender ID', () => {
 
     when(communicator.getUser(senderID)).thenResolve(chatbotUser);
 
-    const composed = compose(
+    const transformed = compose(
       instance(messenger),
       saveUserForSenderID(
         instance(communicator),
@@ -143,7 +143,7 @@ describe('Save user for sender ID', () => {
     };
 
     // When
-    await composed.receiveRequest(genericRequest);
+    await transformed.receiveRequest(genericRequest);
 
     // Then
     verify(communicator.getUser(senderID)).once();
@@ -167,19 +167,19 @@ describe('Set typing indicator', () => {
     when(messenger.sendResponse(anything())).thenResolve();
     when(communicator.setTypingIndicator(senderID, anything())).thenResolve();
 
-    const composed = compose(
+    const transformed = compose(
       instance(messenger),
       setTypingIndicator(instance(communicator))
     );
 
     // When
-    await composed.receiveRequest({
+    await transformed.receiveRequest({
       senderID,
       oldContext: {},
       data: []
     });
 
-    await composed.sendResponse({ senderID, visualContents: [] });
+    await transformed.sendResponse({ senderID, visualContents: [] });
 
     // Then
     verify(communicator.setTypingIndicator(senderID, true)).calledBefore(

@@ -9,26 +9,26 @@ export namespace Leaf {
    * @template C1 The original context type.
    * @template C2 The target context type.
    */
-  interface ComposeFunc<C1, C2> {
+  interface Transformer<C1, C2> {
     (leaf: Leaf<C1>): Leaf<C2>;
   }
 
   /**
-   * Represents a chain of composing higher-order functions that enhances a
+   * Represents a chain of transformer higher-order functions that enhances a
    * leaf instance declaratively.
-   * @template CI The input context type.
-   * @template CO The output context text.
+   * @template I The input context type.
+   * @template O The output context text.
    */
-  export interface ComposeChain<CI, CO> {
-    readonly enhance: ComposeFunc<CI, CO>;
+  export interface TransformChain<I, O> {
+    readonly enhance: Transformer<I, O>;
 
-    compose<CI1>(fn: ComposeFunc<CI1, CI>): ComposeChain<CI1, CO>;
-
-    /** This is only used for debugging, and serves no production purposes. */
-    forContextOfType<C>(ctx?: C): ComposeChain<C, C>;
+    compose<I1>(fn: Transformer<I1, I>): TransformChain<I1, O>;
 
     /** This is only used for debugging, and serves no production purposes. */
-    checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;
+    forContextOfType<C>(ctx?: C): TransformChain<C, C>;
+
+    /** This is only used for debugging, and serves no production purposes. */
+    checkThis(test?: (inContext: I, outContext: O) => unknown): this;
   }
 }
 

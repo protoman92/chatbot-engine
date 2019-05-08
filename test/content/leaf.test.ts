@@ -4,7 +4,7 @@ import {
   bridgeEmission,
   compactMapLeafContext,
   ContentSubscription,
-  createLeafComposeChain,
+  createLeafTransformChain,
   GenericResponse,
   INVALID_NEXT_RESULT,
   KV,
@@ -191,7 +191,7 @@ describe('Higher order functions', () => {
     expectJs(text).to.equal('100');
   });
 
-  it('Compose chain should work', async () => {
+  it('Transform chain should work', async () => {
     // Setup
     interface Context1 {
       a: number;
@@ -213,7 +213,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = createLeafComposeChain()
+    const resultLeaf = createLeafTransformChain()
       .forContextOfType<Context2>()
       .compose(
         mapLeafContext(async ({ b, ...rest }) => ({ a: b || 100, ...rest }))
