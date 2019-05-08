@@ -1,5 +1,4 @@
-import { Omit } from 'ts-essentials';
-import { Coordinates, DefaultContext } from './common';
+import { Coordinates } from './common';
 
 /** A platform-specific request. */
 export type PlatformRequest = unknown;

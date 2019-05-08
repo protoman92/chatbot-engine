@@ -13,4 +13,8 @@ export interface DefaultContext {
   readonly inputCoordinate: Coordinates | undefined | null;
 }
 
+export interface ContextWithError {
+  readonly error: Error;
+}
+
 export type Transformer<T> = (original: T) => T;

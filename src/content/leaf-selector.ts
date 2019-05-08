@@ -1,11 +1,10 @@
-import { deepClone, formatSpecialKey, mapSeries } from '../common/utils';
+import { deepClone, mapSeries } from '../common/utils';
 import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { DefaultContext, KV } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
 import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
-import { createDefaultErrorLeaf } from './leaf';
 
 /**
  * Enumerate a key-value branch object to produce the entire list of enumerated
@@ -56,12 +55,6 @@ export function enumerateLeaves<C>(
 }
 
 /**
- * Represents the ID of the error leaf. This is used when the selector could
- * not determine which leaf to select.
- */
-export const ERROR_LEAF_ID = formatSpecialKey('error');
-
-/**
  * Create a leaf selector. A leaf selector is a leaf that chooses the most
  * appropriate leaf out of all available leaves, based on the user's input.
  * Said leaf's content will be delivered to the user.
@@ -71,12 +64,10 @@ export const ERROR_LEAF_ID = formatSpecialKey('error');
  */
 export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
   const enumeratedLeaves = enumerateLeaves(allBranches);
-  const errorLeaf: Leaf<C> = createDefaultErrorLeaf();
   let outputObservable: ContentObservable<GenericResponse<C>>;
 
   const selector = {
     enumerateLeaves: async () => enumeratedLeaves,
-    getErrorLeaf: async () => errorLeaf,
 
     /**
      * Trigger the production of content for a leaf, but does not guarantee
@@ -92,40 +83,20 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
       return currentLeaf.next(input);
     },
     next: async (input: C & DefaultContext): Promise<NextResult> => {
-      try {
-        const enumeratedLeaves = await selector.enumerateLeaves();
+      const enumeratedLeaves = await selector.enumerateLeaves();
 
-        for (const enumeratedLeaf of enumeratedLeaves) {
-          const clonedInput = deepClone(input);
-
-          const nextResult = await selector.triggerLeafContent(
-            enumeratedLeaf,
-            clonedInput
-          );
-
-          if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
-        }
-
-        throw new Error('This bot has nothing to say');
-      } catch ({ message }) {
+      for (const enumeratedLeaf of enumeratedLeaves) {
         const clonedInput = deepClone(input);
-        const errorLeaf = await selector.getErrorLeaf();
 
-        return selector.triggerLeafContent(
-          {
-            currentLeaf: errorLeaf,
-            currentLeafID: ERROR_LEAF_ID,
-            parentBranch: {},
-            prefixLeafPaths: []
-          },
-          {
-            ...clonedInput,
-            inputText: message || clonedInput.inputText,
-            inputImageURL: undefined,
-            inputCoordinates: undefined
-          }
+        const nextResult = await selector.triggerLeafContent(
+          enumeratedLeaf,
+          clonedInput
         );
+
+        if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
       }
+
+      throw new Error('This bot has nothing to say');
     },
     complete: async () => {
       const enumeratedLeaves = await selector.enumerateLeaves();
@@ -139,8 +110,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
         const enumeratedLeaves = await selector.enumerateLeaves();
 
         outputObservable = mergeObservables(
-          ...enumeratedLeaves.map(({ currentLeaf }) => currentLeaf),
-          errorLeaf
+          ...enumeratedLeaves.map(({ currentLeaf }) => currentLeaf)
         );
       }
 

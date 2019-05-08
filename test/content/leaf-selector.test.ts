@@ -1,11 +1,8 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
-import { anything, capture, instance, spy, verify, when } from 'ts-mockito';
+import { anything, instance, spy, verify, when } from 'ts-mockito';
 import { createLeafWithObserver } from '../../src/content/leaf';
-import {
-  createLeafSelector,
-  ERROR_LEAF_ID
-} from '../../src/content/leaf-selector';
+import { createLeafSelector } from '../../src/content/leaf-selector';
 import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
 
@@ -121,76 +118,22 @@ describe('Leaf selector', () => {
     verify(currentLeaf.subscribe(anything())).times(enumeratedLeaves.length);
   });
 
-  it('Erroring from receiving input should trigger error leaf', async () => {
-    // Setup
-    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
-      ...Array(1000).keys()
-    ].map(i => ({
-      currentLeaf: instance(currentLeaf),
-      currentLeafID: `${i}`,
-      parentBranch: {},
-      prefixLeafPaths: []
-    }));
-
-    const errorLeaf: Leaf<Context> = {
-      next: () => Promise.reject(''),
-      subscribe: () => Promise.reject('')
-    };
-
-    const error = new Error('Something happened!');
-
-    when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
-    when(selector.getErrorLeaf()).thenResolve(errorLeaf);
-
-    when(selector.triggerLeafContent(anything(), anything())).thenCall(
-      async ({ currentLeafID }) => {
-        if (currentLeafID === ERROR_LEAF_ID) return {};
-        throw error;
-      }
-    );
-
-    // When
-    const nextResult = await instance(selector).next({
-      senderID,
-      inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
-    });
-
-    // Then
-    const [{ currentLeafID }, { inputText }] = capture(
-      selector.triggerLeafContent
-    ).byCallIndex(1);
-
-    expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
-    expectJs(inputText).to.equal(error.message);
-    expectJs(nextResult).to.eql({});
-  });
-
   it('Should throw error if no enumerated leaves found', async () => {
     // Setup
-    const errorLeaf: Leaf<Context> = {
-      next: () => Promise.reject(''),
-      subscribe: () => Promise.reject('')
-    };
-
     when(selector.enumerateLeaves()).thenResolve([]);
-    when(selector.getErrorLeaf()).thenResolve(errorLeaf);
     when(selector.triggerLeafContent(anything(), anything())).thenResolve({});
 
     // When
-    await instance(selector).next({
-      senderID,
-      inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
-    });
+    try {
+      await instance(selector).next({
+        senderID,
+        inputText: '',
+        inputImageURL: undefined,
+        inputCoordinate: undefined
+      });
 
-    // Then
-    const [{ currentLeafID }] = capture(
-      selector.triggerLeafContent
-    ).byCallIndex(0);
-
-    expectJs(currentLeafID).to.equal(ERROR_LEAF_ID);
+      // Then
+      throw new Error('Never should have come here');
+    } catch {}
   });
 });

@@ -7,7 +7,7 @@ import { Leaf } from '../../type/leaf';
  * @template O The output context type.
  * @return A leaf transform chain.
  */
-export function createLeafTransformChain<I, O>(): Leaf.TransformChain<I, O> {
+export function createTransformChain<I, O>(): Leaf.TransformChain<I, O> {
   function composeLeaf(
     originalLeaf: Leaf<any>,
     ...transformers: readonly Leaf.Transformer<any, any>[]

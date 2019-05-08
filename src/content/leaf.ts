@@ -1,5 +1,6 @@
 import { Omit } from 'ts-essentials';
 import { createContentSubject } from '../stream/stream';
+import { ContextWithError } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
 import { ContentObserver } from '../type/stream';
@@ -35,13 +36,13 @@ export function createLeafWithObserver<C>(
  * @template C The context used by the current chatbot.
  * @return A leaf instance.
  */
-export function createDefaultErrorLeaf<C>(): Leaf<C> {
+export function createDefaultErrorLeaf<C>(): Leaf<C & ContextWithError> {
   return createLeafWithObserver(observer => ({
-    next: ({ senderID, inputText }) => {
+    next: ({ senderID, error: { message } }) => {
       return observer.next({
         senderID,
         visualContents: [
-          { response: { text: `Encountered an error: '${inputText}'` } }
+          { response: { text: `Encountered an error: '${message}'` } }
         ]
       });
     }
