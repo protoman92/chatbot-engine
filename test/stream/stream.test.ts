@@ -1,8 +1,10 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
-import { createContentSubject } from '../../src';
-import { mergeObservables } from '../../src/stream/stream';
 import { mapSeries } from '../../src/common/utils';
+import {
+  createContentSubject,
+  mergeObservables
+} from '../../src/stream/stream';
 
 describe('Content stream and subject', () => {
   it('Should receive updates on subscription', async () => {

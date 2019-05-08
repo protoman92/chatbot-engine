@@ -2,7 +2,9 @@ import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { RedisClient } from 'redis';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { ContextDAO, createRedisContextDAO, KV } from '../../src';
+import { createRedisContextDAO } from '../../src/context/RedisContextDAO';
+import { KV } from '../../src/type/common';
+import { ContextDAO } from '../../src/type/context-dao';
 
 const senderID = 'sender-id';
 

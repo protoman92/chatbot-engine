@@ -1,6 +1,7 @@
 import { formatFacebookError, isType } from '../common/utils';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
+import { ContextDAO } from '../type/context-dao';
 import {
   FacebookConfigs,
   FacebookRequest as FBR,
@@ -16,6 +17,11 @@ import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
+import {
+  injectContextOnReceive,
+  saveContextOnSend,
+  setTypingIndicator
+} from './unit-transform';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -303,14 +309,14 @@ async function createFacebookResponse<C>({
 }
 
 /**
- * Create a unit Facebook messenger.
+ * Create a unit Facebook messenger that does not have any default transformers.
  * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
  * @param communicator A platform communicator instance.
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export async function createFacebookUnitMessenger<C>(
+export async function createBaseFacebookUnitMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator,
   configurations: FacebookConfigs,
@@ -335,6 +341,33 @@ export async function createFacebookUnitMessenger<C>(
       throw new Error(formatFacebookError('Invalid mode or verify token'));
     }
   };
+}
+
+/**
+ * Force some default transform functions on the base unit messenger.
+ * @template C The context used by the current chatbot.
+ * @param leafSelector A leaf selector instance.
+ * @param contextDAO A context DAO instance.
+ * @param communicator A platform communicator instance.
+ * @param configurations Facebook configurations.
+ * @return A generic unit messenger.
+ */
+export function createFacebookUnitMessenger<C>(
+  leafSelector: Leaf<C>,
+  contextDAO: ContextDAO<C>,
+  communicator: PlatformCommunicator,
+  configuration: FacebookConfigs,
+  ...transformers: Transformer<UnitMessenger<C>>[]
+) {
+  return createBaseFacebookUnitMessenger(
+    leafSelector,
+    communicator,
+    configuration,
+    injectContextOnReceive(contextDAO),
+    saveContextOnSend(contextDAO),
+    setTypingIndicator(communicator),
+    ...transformers
+  );
 }
 
 /**

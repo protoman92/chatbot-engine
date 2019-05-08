@@ -1,21 +1,18 @@
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import {
-  ContextDAO,
-  DefaultContext,
-  GenericRequest,
-  GenericResponse,
-  KV,
-  PlatformCommunicator,
-  saveUserForSenderID,
-  UnitMessenger
-} from '../../src';
 import { compose, joinObjects } from '../../src/common/utils';
 import {
   injectContextOnReceive,
   saveContextOnSend,
+  saveUserForSenderID,
   setTypingIndicator
 } from '../../src/messenger/unit-transform';
+import { DefaultContext, KV } from '../../src/type/common';
+import { PlatformCommunicator } from '../../src/type/communicator';
+import { ContextDAO } from '../../src/type/context-dao';
+import { UnitMessenger } from '../../src/type/messenger';
+import { GenericRequest } from '../../src/type/request';
+import { GenericResponse } from '../../src/type/response';
 
 interface Context extends KV<unknown> {}
 

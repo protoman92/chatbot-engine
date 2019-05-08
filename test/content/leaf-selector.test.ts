@@ -1,13 +1,13 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, capture, instance, spy, verify, when } from 'ts-mockito';
+import { createLeafWithObserver } from '../../src/content/leaf';
 import {
   createLeafSelector,
-  createLeafWithObserver,
-  ERROR_LEAF_ID,
-  INVALID_NEXT_RESULT,
-  Leaf
-} from '../../src';
+  ERROR_LEAF_ID
+} from '../../src/content/leaf-selector';
+import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
+import { Leaf } from '../../src/type/leaf';
 
 type TestLeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
@@ -56,7 +56,7 @@ describe('Leaf selector', () => {
           return {};
         }
 
-        return INVALID_NEXT_RESULT;
+        return STREAM_INVALID_NEXT_RESULT;
       }
     );
 

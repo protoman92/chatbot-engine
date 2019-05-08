@@ -1,23 +1,23 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
-import {
-  bridgeEmission,
-  compactMapLeafContext,
-  ContentSubscription,
-  createLeafTransformChain,
-  GenericResponse,
-  INVALID_NEXT_RESULT,
-  KV,
-  Leaf,
-  mapLeafContext,
-  requireContextKeys,
-  Response
-} from '../../src';
 import { isType } from '../../src/common/utils';
+import { compactMapContext } from '../../src/content/higher-order/compact-map-context';
+import { mapContext } from '../../src/content/higher-order/map-context';
+import { requireContextKeys } from '../../src/content/higher-order/require-context-keys';
+import { createLeafTransformChain } from '../../src/content/higher-order/transform-chain';
 import {
   createDefaultErrorLeaf,
   createLeafWithObserver
 } from '../../src/content/leaf';
+import {
+  bridgeEmission,
+  STREAM_INVALID_NEXT_RESULT
+} from '../../src/stream/stream';
+import { KV } from '../../src/type/common';
+import { Leaf } from '../../src/type/leaf';
+import { GenericResponse } from '../../src/type/response';
+import { ContentSubscription } from '../../src/type/stream';
+import { Response } from '../../src/type/visual-content';
 
 const senderID = 'sender-id';
 
@@ -91,7 +91,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = mapLeafContext<Context1, Context2>(
+    const resultLeaf = mapContext<Context1, Context2>(
       async ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
@@ -164,7 +164,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = compactMapLeafContext<Context1, Context1>(
+    const resultLeaf = compactMapContext<Context1, Context1>(
       async ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
@@ -187,7 +187,7 @@ describe('Higher order functions', () => {
     });
 
     // Then
-    expectJs(nextResult1).to.equal(INVALID_NEXT_RESULT);
+    expectJs(nextResult1).to.equal(STREAM_INVALID_NEXT_RESULT);
     expectJs(text).to.equal('100');
   });
 
@@ -215,9 +215,7 @@ describe('Higher order functions', () => {
     // When
     const resultLeaf = createLeafTransformChain()
       .forContextOfType<Context2>()
-      .compose(
-        mapLeafContext(async ({ b, ...rest }) => ({ a: b || 100, ...rest }))
-      )
+      .compose(mapContext(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
       .enhance(originalLeaf);
 
     const {

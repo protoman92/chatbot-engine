@@ -9,14 +9,12 @@ import {
   verify,
   when
 } from 'ts-mockito';
-import {
-  createGenericUnitMessenger,
-  GenericRequest,
-  GenericResponse,
-  KV,
-  Leaf,
-  PlatformCommunicator
-} from '../../src';
+import { createGenericUnitMessenger } from '../../src/messenger/generic-messenger';
+import { KV } from '../../src/type/common';
+import { PlatformCommunicator } from '../../src/type/communicator';
+import { Leaf } from '../../src/type/leaf';
+import { GenericRequest } from '../../src/type/request';
+import { GenericResponse } from '../../src/type/response';
 
 const senderID = 'sender-id';
 
