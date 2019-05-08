@@ -3,7 +3,6 @@ import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { DefaultContext, KV } from '../type/common';
 import { Leaf } from '../type/leaf';
-import { LeafSelector } from '../type/leaf-selector';
 import { GenericResponse } from '../type/response';
 import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
 import { createDefaultErrorLeaf } from './leaf';
@@ -18,12 +17,12 @@ import { createDefaultErrorLeaf } from './leaf';
  */
 export function enumerateLeaves<C>(
   branches: KV<Branch<C>>
-): readonly LeafSelector.EnumeratedLeaf<C>[] {
+): readonly Leaf.Enumerated<C>[] {
   function enumerate(
     allBranches: KV<Branch<C>>,
     prefixPaths?: readonly string[]
-  ): readonly LeafSelector.EnumeratedLeaf<C>[] {
-    let inputs: LeafSelector.EnumeratedLeaf<C>[] = [];
+  ): readonly Leaf.Enumerated<C>[] {
+    let inputs: Leaf.Enumerated<C>[] = [];
     const branchEntries = Object.entries(allBranches);
 
     for (const [branchID, parentBranch] of branchEntries) {
@@ -63,7 +62,9 @@ export function enumerateLeaves<C>(
 export const ERROR_LEAF_ID = formatSpecialKey('error');
 
 /**
- * Create a leaf selector.
+ * Create a leaf selector. A leaf selector is a leaf that chooses the most
+ * appropriate leaf out of all available leaves, based on the user's input.
+ * Said leaf's content will be delivered to the user.
  * @template C The context used by the current chatbot.
  * @param allBranches All available branches.
  * @return A leaf selector instance.
@@ -85,7 +86,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
      * @return A Promise of some response.
      */
     triggerLeafContent: (
-      { currentLeaf }: LeafSelector.EnumeratedLeaf<C>,
+      { currentLeaf }: Leaf.Enumerated<C>,
       input: C & DefaultContext
     ) => {
       return currentLeaf.next(input);

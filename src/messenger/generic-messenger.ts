@@ -1,7 +1,7 @@
 import { compose, mapSeries } from '../common/utils';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
-import { LeafSelector } from '../type/leaf-selector';
+import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
@@ -16,7 +16,7 @@ import { GenericResponse, PlatformResponse } from '../type/response';
  * @return A generic messenger.
  */
 export async function createGenericUnitMessenger<C>(
-  leafSelector: LeafSelector<C>,
+  leafSelector: Leaf<C>,
   communicator: PlatformCommunicator,
   responseMapper: (
     res: GenericResponse<C>

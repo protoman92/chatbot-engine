@@ -7,7 +7,7 @@ import {
   FacebookUnitMessenger,
   FacebookWebhookRequest
 } from '../type/facebook';
-import { LeafSelector } from '../type/leaf-selector';
+import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
@@ -311,7 +311,7 @@ async function createFacebookResponse<C>({
  * @return A generic unit messenger.
  */
 export async function createFacebookUnitMessenger<C>(
-  leafSelector: LeafSelector<C>,
+  leafSelector: Leaf<C>,
   communicator: PlatformCommunicator,
   configurations: FacebookConfigs,
   ...transformers: readonly Transformer<UnitMessenger<C>>[]

@@ -14,7 +14,7 @@ import {
   GenericRequest,
   GenericResponse,
   KV,
-  LeafSelector,
+  Leaf,
   PlatformCommunicator
 } from '../../src';
 
@@ -23,11 +23,11 @@ const senderID = 'sender-id';
 describe('Generic unit messenger', () => {
   interface Context extends KV<unknown> {}
 
-  let leafSelector: LeafSelector<Context>;
+  let leafSelector: Leaf<Context>;
   let communicator: PlatformCommunicator;
 
   beforeEach(async () => {
-    leafSelector = spy<LeafSelector<Context>>({
+    leafSelector = spy<Leaf<Context>>({
       next: () => Promise.reject(''),
       subscribe: () => Promise.reject('')
     });

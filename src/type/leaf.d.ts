@@ -1,8 +1,21 @@
+import { Branch } from './branch';
 import { DefaultContext } from './common';
 import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
 
 export namespace Leaf {
+  /**
+   * Represents a collection of leaf information that is derived from
+   * enumerating all possibilities in a key-value branch object.
+   * @template C The context used by the current chatbot.
+   */
+  export interface Enumerated<C> {
+    readonly parentBranch: Branch<C>;
+    readonly prefixLeafPaths: readonly string[];
+    readonly currentLeaf: Leaf<C>;
+    readonly currentLeafID: string;
+  }
+
   /**
    * Compose functions for leaves that support composition of higher-order
    * functions.

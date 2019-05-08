@@ -1,18 +1,18 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, instance, spy, when } from 'ts-mockito';
-import { FacebookConfigs, LeafSelector, PlatformCommunicator } from '../../src';
+import { FacebookConfigs, Leaf, PlatformCommunicator } from '../../src';
 import { createFacebookUnitMessenger } from '../../src/messenger/facebook-messenger';
 
 describe('Facebook unit messenger', () => {
   interface Context {}
 
-  let leafSelector: LeafSelector<Context>;
+  let leafSelector: Leaf<Context>;
   let communicator: PlatformCommunicator;
   let configs: FacebookConfigs;
 
   beforeEach(async () => {
-    leafSelector = spy<LeafSelector<Context>>({
+    leafSelector = spy<Leaf<Context>>({
       next: () => Promise.reject(''),
       subscribe: () => Promise.reject('')
     });

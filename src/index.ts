@@ -19,7 +19,6 @@ export * from './type/communicator';
 export * from './type/context-dao';
 export * from './type/facebook';
 export * from './type/leaf';
-export * from './type/leaf-selector';
 export * from './type/messenger';
 export * from './type/request';
 export * from './type/response';
@@ -36,7 +35,7 @@ import { Transformer } from './type/common';
 import { PlatformCommunicator } from './type/communicator';
 import { ContextDAO } from './type/context-dao';
 import { FacebookConfigs } from './type/facebook';
-import { LeafSelector } from './type/leaf-selector';
+import { Leaf } from './type/leaf';
 import { UnitMessenger } from './type/messenger';
 
 /**
@@ -49,7 +48,7 @@ import { UnitMessenger } from './type/messenger';
  * @return A generic unit messenger.
  */
 export function createFacebookUnitMessenger<C>(
-  leafSelector: LeafSelector<C>,
+  leafSelector: Leaf<C>,
   contextDAO: ContextDAO<C>,
   communicator: PlatformCommunicator,
   configuration: FacebookConfigs,

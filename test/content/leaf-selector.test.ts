@@ -6,8 +6,7 @@ import {
   createLeafWithObserver,
   ERROR_LEAF_ID,
   INVALID_NEXT_RESULT,
-  Leaf,
-  LeafSelector
+  Leaf
 } from '../../src';
 
 type TestLeafSelector = ReturnType<
@@ -40,7 +39,7 @@ describe('Leaf selector', () => {
     const iteration = 1000;
     const validLeafID = 500;
 
-    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
+    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
       ...Array(iteration).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -79,7 +78,7 @@ describe('Leaf selector', () => {
     // Setup
     let completedCount = 0;
 
-    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
+    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
       ...Array(1000).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -104,7 +103,7 @@ describe('Leaf selector', () => {
 
   it('Subscribing to response should merge leaf observables', async () => {
     // Setup
-    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
+    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
       ...Array(1000).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
@@ -124,7 +123,7 @@ describe('Leaf selector', () => {
 
   it('Erroring from receiving input should trigger error leaf', async () => {
     // Setup
-    const enumeratedLeaves: LeafSelector.EnumeratedLeaf<Context>[] = [
+    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
       ...Array(1000).keys()
     ].map(i => ({
       currentLeaf: instance(currentLeaf),
