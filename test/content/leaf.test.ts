@@ -16,7 +16,7 @@ import {
   createSubscription,
   STREAM_INVALID_NEXT_RESULT
 } from '../../src/stream/stream';
-import { ContextWithError } from '../../src/type/common';
+import { ErrorContext } from '../../src/type/common';
 import { Leaf } from '../../src/type/leaf';
 import { Response } from '../../src/type/visual-content';
 
@@ -59,7 +59,7 @@ describe('Higher order functions', () => {
       subscribe: () => Promise.resolve(createSubscription(async () => {}))
     });
 
-    const fallbackLeaf = spy<Leaf<ContextWithError>>({
+    const fallbackLeaf = spy<Leaf<ErrorContext>>({
       next: () => Promise.resolve({}),
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {}))

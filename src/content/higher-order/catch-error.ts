@@ -1,5 +1,5 @@
 import { createCompositeSubscription } from '../../stream/stream';
-import { ContextWithError } from '../../type/common';
+import { ErrorContext } from '../../type/common';
 import { Leaf } from '../../type/leaf';
 
 /**
@@ -10,7 +10,7 @@ import { Leaf } from '../../type/leaf';
  * @return A leaf transformer.
  */
 export function catchErrorJustFallback<C>(
-  fallbackLeaf: Leaf<C & ContextWithError>
+  fallbackLeaf: Leaf<C & ErrorContext>
 ): Leaf.Transformer<C, C> {
   return leaf => ({
     next: async input => {

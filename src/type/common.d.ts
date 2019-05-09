@@ -13,7 +13,7 @@ export interface DefaultContext {
   readonly inputCoordinate: Coordinates | undefined | null;
 }
 
-export interface ContextWithError {
+export interface ErrorContext {
   readonly error: Error;
 }
 
