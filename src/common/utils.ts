@@ -44,10 +44,9 @@ export function deepClone<T>(object: T): T {
  * @return The wrapped object.
  */
 export function compose<T>(original: T, ...fs: readonly Transformer<T>[]): T {
-  const reversedFuncs = [...fs].reverse();
   let newTransformed = original;
 
-  for (const func of reversedFuncs) {
+  for (const func of fs) {
     newTransformed = func(newTransformed);
   }
 

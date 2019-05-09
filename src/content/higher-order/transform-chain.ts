@@ -8,7 +8,7 @@ import { Leaf } from '../../type/leaf';
  * @return A leaf transform chain.
  */
 export function createTransformChain<I, O>(): Leaf.TransformChain<I, O> {
-  function composeLeaf(
+  function cl(
     originalLeaf: Leaf<any>,
     ...transformers: readonly Leaf.Transformer<any, any>[]
   ): Leaf<any> {
@@ -18,14 +18,19 @@ export function createTransformChain<I, O>(): Leaf.TransformChain<I, O> {
     );
   }
 
-  const transformers: Leaf.Transformer<any, any>[] = [];
+  const composeTransformers: Leaf.Transformer<any, any>[] = [];
+  const pipeTransformers: Leaf.Transformer<any, any>[] = [];
 
   const transformChain: Leaf.TransformChain<I, O> = {
-    compose: <CI1>(fn: Leaf.Transformer<CI1, I>) => {
-      transformers.push(fn);
+    compose: <I1>(fn: Leaf.Transformer<I1, I>) => {
+      composeTransformers.unshift(fn);
       return transformChain as any;
     },
-    enhance: leaf => composeLeaf(leaf, ...transformers),
+    pipe: <O1>(fn: Leaf.Transformer<O, O1>): Leaf.TransformChain<I, O1> => {
+      pipeTransformers.push(fn);
+      return transformChain as any;
+    },
+    enhance: leaf => cl(cl(leaf, ...composeTransformers), ...pipeTransformers),
     forContextOfType: () => transformChain as any,
     checkThis: () => transformChain
   };

@@ -35,7 +35,21 @@ export namespace Leaf {
   export interface TransformChain<I, O> {
     readonly enhance: Transformer<I, O>;
 
+    /**
+     * Apply pre-transformers like wrapping layers on the base leaf.
+     * @template I1 Target input context type.
+     * @param fn A transformer function.
+     * @return A transform chain.
+     */
     compose<I1>(fn: Transformer<I1, I>): TransformChain<I1, O>;
+
+    /**
+     * Apply post-transformers to transform results.
+     * @template O1 Target output context type.
+     * @param fn A transformer function.
+     * @return A transform chain.
+     */
+    pipe<O1>(fn: Transformer<O, O1>): TransformChain<I, O1>;
 
     /** This is only used for debugging, and serves no production purposes. */
     forContextOfType<C>(ctx?: C): TransformChain<C, C>;
