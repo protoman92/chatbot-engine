@@ -2,10 +2,12 @@ import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
 import { isType } from '../../src/common/utils';
-import { catchErrorJustFallback } from '../../src/content/higher-order/catch-error';
-import { compactMapContext } from '../../src/content/higher-order/compact-map-context';
-import { mapContext } from '../../src/content/higher-order/map-context';
-import { requireContextKeys } from '../../src/content/higher-order/require-context-keys';
+import { catchError } from '../../src/content/higher-order/catch-error';
+import {
+  compactMapInput,
+  mapInput
+} from '../../src/content/higher-order/map-input';
+import { requireInputKeys } from '../../src/content/higher-order/require-keys';
 import { createTransformChain } from '../../src/content/higher-order/transform-chain';
 import {
   createDefaultErrorLeaf,
@@ -66,7 +68,7 @@ describe('Higher order functions', () => {
     });
 
     const transformed = createTransformChain()
-      .compose(catchErrorJustFallback(instance(fallbackLeaf)))
+      .compose(catchError(instance(fallbackLeaf)))
       .enhance(instance(errorLeaf));
 
     // When
@@ -114,7 +116,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = mapContext<Context1, Context2>(
+    const resultLeaf = mapInput<Context1, Context2>(
       async ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
@@ -153,7 +155,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = requireContextKeys<Context1, 'a'>('a')(originalLeaf);
+    const resultLeaf = requireInputKeys<Context1, 'a'>('a')(originalLeaf);
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
@@ -187,7 +189,7 @@ describe('Higher order functions', () => {
     }));
 
     // When
-    const resultLeaf = compactMapContext<Context1, Context1>(
+    const resultLeaf = compactMapInput<Context1, Context1>(
       async ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
@@ -238,7 +240,7 @@ describe('Higher order functions', () => {
     // When
     const resultLeaf = createTransformChain()
       .forContextOfType<Context2>()
-      .compose(mapContext(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
+      .compose(mapInput(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
       .enhance(originalLeaf);
 
     const {

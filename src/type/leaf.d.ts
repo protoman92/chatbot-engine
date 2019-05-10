@@ -19,43 +19,43 @@ export namespace Leaf {
   /**
    * Compose functions for leaves that support composition of higher-order
    * functions.
-   * @template C1 The original context type.
-   * @template C2 The target context type.
+   * @template CI The original context type.
+   * @template CO The target context type.
    */
-  interface Transformer<C1, C2> {
-    (leaf: Leaf<C1>): Leaf<C2>;
+  interface Transformer<CI, CO> {
+    (leaf: Leaf<CI>): Leaf<CO>;
   }
 
   /**
    * Represents a chain of transformer higher-order functions that enhances a
    * leaf instance declaratively.
-   * @template I The input context type.
-   * @template O The output context text.
+   * @template CI The original context type.
+   * @template CO The target context type.
    */
-  export interface TransformChain<I, O> {
-    readonly enhance: Transformer<I, O>;
+  export interface TransformChain<CI, CO> {
+    readonly enhance: Transformer<CI, CO>;
 
     /**
      * Apply pre-transformers like wrapping layers on the base leaf.
-     * @template I1 Target input context type.
+     * @template CI1 The target context type.
      * @param fn A transformer function.
      * @return A transform chain.
      */
-    compose<I1>(fn: Transformer<I1, I>): TransformChain<I1, O>;
+    compose<CI1>(fn: Transformer<CI1, CI>): TransformChain<CI1, CO>;
 
     /**
      * Apply post-transformers to transform results.
-     * @template O1 Target output context type.
+     * @template CO1 The target context type.
      * @param fn A transformer function.
      * @return A transform chain.
      */
-    pipe<O1>(fn: Transformer<O, O1>): TransformChain<I, O1>;
+    pipe<CO1>(fn: Transformer<CO, CO1>): TransformChain<CI, CO1>;
 
     /** This is only used for debugging, and serves no production purposes. */
     forContextOfType<C>(ctx?: C): TransformChain<C, C>;
 
     /** This is only used for debugging, and serves no production purposes. */
-    checkThis(test?: (inContext: I, outContext: O) => unknown): this;
+    checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;
   }
 }
 

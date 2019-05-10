@@ -4,9 +4,8 @@ import { WitCommunicator, WitContext } from '../../type/wit';
 /**
  * Retry a failing message with wit, by running the input text through wit
  * engine and injecting entities into leaf input.
- * @template C The context type used by the chatbot.
+ * @template C The original context type.
  * @param comm A HTTP communicator instance.
- * @param param1 The wit configurations.
  * @return A leaf transformer.
  */
 export function useWitEngine<C>(

@@ -5,11 +5,11 @@ import { Leaf } from '../../type/leaf';
 /**
  * If a leaf throws error while trying to produce content, switch to a fallback
  * leaf.
- * @template C The input context type/
+ * @template C The original context type/
  * @param fallbackLeaf The fallback leaf.
  * @return A leaf transformer.
  */
-export function catchErrorJustFallback<C>(
+export function catchError<C>(
   fallbackLeaf: Leaf<C & ErrorContext>
 ): Leaf.Transformer<C, C> {
   return leaf => ({

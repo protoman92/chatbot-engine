@@ -1,4 +1,4 @@
-export type KV<V> = Readonly<{ [K: string]: V }>;
+export type KV<V> = Readonly<{ [K: string]: V | null | undefined }>;
 
 export interface Coordinates {
   readonly lat: number;

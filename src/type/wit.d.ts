@@ -24,9 +24,13 @@ export interface WitCommunicator {
   validate(message: string): Promise<WitResponse>;
 }
 
+export interface WitEntity {
+  readonly confidence: number;
+  readonly value: string;
+  readonly type: 'value';
+}
+
 /** Use this context if we want to access wit validation results. */
 export interface WitContext {
-  readonly witEntities: DeepReadonly<
-    KV<readonly { confidence: number; value: string; type: 'value' }[]>
-  >;
+  readonly witEntities: Readonly<KV<readonly WitEntity[]>>;
 }

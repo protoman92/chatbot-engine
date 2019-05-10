@@ -3,11 +3,11 @@ import { Leaf } from '../../type/leaf';
 
 /**
  * Create a leaf transform chain to enhance a leaf declaratively.
- * @template I The input context type.
- * @template O The output context type.
+ * @template CI The original context type.
+ * @template CO The target context type.
  * @return A leaf transform chain.
  */
-export function createTransformChain<I, O>(): Leaf.TransformChain<I, O> {
+export function createTransformChain<CI, CO>(): Leaf.TransformChain<CI, CO> {
   function cl(
     originalLeaf: Leaf<any>,
     ...transformers: readonly Leaf.Transformer<any, any>[]
@@ -21,12 +21,12 @@ export function createTransformChain<I, O>(): Leaf.TransformChain<I, O> {
   const composeTransformers: Leaf.Transformer<any, any>[] = [];
   const pipeTransformers: Leaf.Transformer<any, any>[] = [];
 
-  const transformChain: Leaf.TransformChain<I, O> = {
-    compose: <I1>(fn: Leaf.Transformer<I1, I>) => {
+  const transformChain: Leaf.TransformChain<CI, CO> = {
+    compose: <I1>(fn: Leaf.Transformer<I1, CI>) => {
       composeTransformers.unshift(fn);
       return transformChain as any;
     },
-    pipe: <O1>(fn: Leaf.Transformer<O, O1>): Leaf.TransformChain<I, O1> => {
+    pipe: <O1>(fn: Leaf.Transformer<CO, O1>): Leaf.TransformChain<CI, O1> => {
       pipeTransformers.push(fn);
       return transformChain as any;
     },
