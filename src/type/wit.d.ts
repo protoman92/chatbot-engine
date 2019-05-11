@@ -5,13 +5,16 @@ export interface WitConfigs {
   readonly authorizationToken: string;
 }
 
-export interface WitResponse {
+export interface WitEntity {
+  readonly confidence: number;
+  readonly value: string;
+  readonly type: 'value';
+}
+
+export interface WitResponse<Entities extends string = string> {
   readonly _text: string;
   readonly msg_id: string;
-
-  readonly entities: DeepReadonly<
-    KV<readonly { confidence: number; value: string; type: 'value' }[]>
-  >;
+  readonly entities: { [K in Entities]?: readonly WitEntity[] };
 }
 
 /** Communicator to access wit APIs. */
@@ -21,16 +24,10 @@ export interface WitCommunicator {
    * @param message A string value.
    * @return Promise of wit response.
    */
-  validate(message: string): Promise<WitResponse>;
-}
-
-export interface WitEntity {
-  readonly confidence: number;
-  readonly value: string;
-  readonly type: 'value';
+  validate<E extends string>(message: string): Promise<WitResponse<E>>;
 }
 
 /** Use this context if we want to access wit validation results. */
-export interface WitContext {
-  readonly witEntities: Readonly<KV<readonly WitEntity[]>>;
+export interface WitContext<Entities extends string = string> {
+  readonly witEntities: Readonly<{ [K in Entities]?: readonly WitEntity[] }>;
 }
