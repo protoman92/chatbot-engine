@@ -3,6 +3,7 @@ import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
 import { isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
+import { firstValidResult } from '../../src/content/higher-order/first-valid';
 import {
   compactMapInput,
   mapInput
@@ -21,6 +22,7 @@ import {
 import { ErrorContext } from '../../src/type/common';
 import { Leaf } from '../../src/type/leaf';
 import { Response } from '../../src/type/visual-content';
+import { WitContext } from '../../src/type/wit';
 
 const senderID = 'sender-id';
 
@@ -214,6 +216,65 @@ describe('Higher order functions', () => {
     // Then
     expectJs(nextResult1).to.equal(STREAM_INVALID_NEXT_RESULT);
     expectJs(text).to.equal('100');
+  });
+
+  it('First successful should work', async () => {
+    // Setup
+    interface Context extends WitContext<'witKey'> {
+      readonly query?: string;
+    }
+
+    const transformedLeaf = createTransformChain()
+      .forContextOfType<Context>()
+      .compose(
+        firstValidResult<Context, Context>(
+          compactMapInput(async ({ inputText, ...restInput }) => {
+            if (!inputText) return null;
+            return { ...restInput, inputText, query: 'first_transformer' };
+          }),
+          compactMapInput(
+            async ({
+              witEntities: { witKey: [{ value }] = [{ value: '' }] },
+              ...restInput
+            }) => {
+              if (!value) return null;
+
+              return {
+                ...restInput,
+                witEntities: {},
+                query: 'second_transformer'
+              };
+            }
+          )
+        )
+      )
+      .enhance(
+        createLeafWithObserver(observer => ({
+          next: async ({ senderID, query }) => {
+            await observer.next({
+              senderID,
+              additionalContext: { query },
+              visualContents: []
+            });
+
+            return {};
+          }
+        }))
+      );
+
+    // When
+    const { additionalContext } = await bridgeEmission(transformedLeaf)({
+      senderID,
+      inputText: '',
+      inputImageURL: undefined,
+      inputCoordinate: undefined,
+      witEntities: {
+        witKey: [{ confidence: 1, value: 'witValue', type: 'value' }]
+      }
+    });
+
+    // Then
+    expectJs(additionalContext).to.eql({ query: 'second_transformer' });
   });
 
   it('Transform chain should work', async () => {

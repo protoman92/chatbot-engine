@@ -10,11 +10,11 @@ import { Leaf } from '../../type/leaf';
  * @return A leaf transformer.
  */
 export function mapInput<CI, CO extends CI>(
-  fn: (context: CO & DefaultContext) => Promise<CI & DefaultContext>
+  fn: (input: CO & DefaultContext) => Promise<CI & DefaultContext>
 ): Leaf.Transformer<CI, CO> {
   return leaf => ({
     ...leaf,
-    next: async context => leaf.next(await fn(context))
+    next: async input => leaf.next(await fn(input))
   });
 }
 
@@ -28,19 +28,19 @@ export function mapInput<CI, CO extends CI>(
  */
 export function compactMapInput<CI, CO extends CI>(
   fn: (
-    context: CO & DefaultContext
+    input: CO & DefaultContext
   ) => Promise<CI & DefaultContext | undefined | null>
 ): Leaf.Transformer<CI, CO> {
   return leaf => ({
     ...leaf,
-    next: async context => {
-      const newContext = await fn(context);
+    next: async input => {
+      const newInput = await fn(input);
 
-      if (newContext === undefined || newContext === null) {
+      if (newInput === undefined || newInput === null) {
         return STREAM_INVALID_NEXT_RESULT;
       }
 
-      return leaf.next(newContext);
+      return leaf.next(newInput);
     }
   });
 }
