@@ -78,10 +78,13 @@ export function joinPaths(...pathComponents: readonly string[]) {
  * @param activeBranch The current active branch.
  * @return The current leaf ID.
  */
-export function getCurrentLeafID(activeBranch?: string): string | null {
-  if (!activeBranch) return null;
+export function getCurrentLeafID(activeBranch?: string): string | undefined {
+  if (!activeBranch) return undefined;
   const branchPaths = activeBranch.split('.');
-  return branchPaths.length > 0 ? branchPaths[branchPaths.length - 1] : null;
+
+  return branchPaths.length > 0
+    ? branchPaths[branchPaths.length - 1]
+    : undefined;
 }
 
 /**
@@ -113,7 +116,7 @@ export async function mapSeries<T1, T2>(
  * @return Promisified function.
  */
 export function promisify<T>(
-  fn: (callback: (err: Error | null, value: T) => any) => void
+  fn: (callback: (err: Error | undefined | null, value: T) => any) => void
 ): () => Promise<T> {
   return function() {
     return new Promise((resolve, reject) => {
@@ -138,7 +141,7 @@ export function promisify<T>(
 export function promisify1<
   FN extends (
     param1: any,
-    callback: (err: Error | null, value: any) => void
+    callback: (err: Error | undefined | null, value: any) => void
   ) => any
 >(
   fn: FN

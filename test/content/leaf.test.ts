@@ -111,7 +111,10 @@ describe('Higher order functions', () => {
         return observer.next({
           senderID,
           visualContents: [
-            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+            {
+              quickReplies: [{ type: 'text', text: `${a}` }],
+              response: { type: 'text', text: '' }
+            }
           ]
         });
       }
@@ -150,7 +153,10 @@ describe('Higher order functions', () => {
         return observer.next({
           senderID,
           visualContents: [
-            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+            {
+              quickReplies: [{ type: 'text', text: `${a}` }],
+              response: { type: 'text', text: '' }
+            }
           ]
         });
       }
@@ -184,7 +190,10 @@ describe('Higher order functions', () => {
         return observer.next({
           senderID,
           visualContents: [
-            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+            {
+              quickReplies: [{ type: 'text', text: `${a}` }],
+              response: { type: 'text', text: '' }
+            }
           ]
         });
       }
@@ -292,7 +301,10 @@ describe('Higher order functions', () => {
         return observer.next({
           senderID,
           visualContents: [
-            { quickReplies: [{ text: `${a}` }], response: { text: '' } }
+            {
+              quickReplies: [{ type: 'text', text: `${a}` }],
+              response: { type: 'text', text: '' }
+            }
           ]
         });
       }

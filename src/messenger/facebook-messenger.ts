@@ -40,7 +40,7 @@ export function mapWebhook<C>(
    * @return A map of requests.
    */
   function groupRequests(reqs: readonly FBR[]) {
-    const requestMap: { [K: string]: FBR[] } = {};
+    const requestMap: { [K: string]: readonly FBR[] } = {};
 
     reqs.forEach(req => {
       const senderID = req.sender.id;
@@ -126,7 +126,7 @@ export function mapWebhook<C>(
         const groupedRequests = groupRequests(allRequests);
 
         return Object.entries(groupedRequests).map(
-          ([senderID, requests]: [string, FBR[]]) => ({
+          ([senderID, requests]: [string, readonly FBR[]]) => ({
             senderID,
             oldContext: {} as any,
             data: requests
@@ -135,11 +135,6 @@ export function mapWebhook<C>(
           })
         );
       }
-
-      break;
-
-    default:
-      break;
   }
 
   throw new Error(
@@ -229,7 +224,7 @@ async function createFacebookResponse<C>({
     if (items.length <= 1) {
       return createCarouselResponse({
         ...response,
-        items: items.map(item => ({ ...item, mediaURL: null })),
+        items: items.map(item => ({ ...item, mediaURL: undefined })),
         type: 'carousel'
       });
     }
@@ -274,7 +269,6 @@ async function createFacebookResponse<C>({
         return createListResponse(response);
 
       case 'text':
-      default:
         return { text: response.text };
     }
   }
@@ -303,7 +297,6 @@ async function createFacebookResponse<C>({
         };
 
       case 'text':
-      default:
         return {
           title: text,
           content_type: 'text',
@@ -382,7 +375,7 @@ export function createFacebookUnitMessenger<C>(
   contextDAO: ContextDAO<C>,
   communicator: PlatformCommunicator,
   configuration: FacebookConfigs,
-  ...transformers: Transformer<UnitMessenger<C>>[]
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ) {
   return createBaseFacebookUnitMessenger(
     leafSelector,

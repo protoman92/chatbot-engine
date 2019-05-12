@@ -42,7 +42,12 @@ export function createDefaultErrorLeaf<C>(): Leaf<C & ErrorContext> {
       return observer.next({
         senderID,
         visualContents: [
-          { response: { text: `Encountered an error: '${message}'` } }
+          {
+            response: {
+              type: 'text',
+              text: `Encountered an error: '${message}'`
+            }
+          }
         ]
       });
     }

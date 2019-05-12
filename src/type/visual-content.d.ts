@@ -13,7 +13,7 @@ export namespace QuickReply {
   }
 
   export interface SimpleText extends BaseQuickReply {
-    readonly type?: 'text';
+    readonly type: 'text';
   }
 }
 
@@ -54,26 +54,26 @@ declare namespace Response {
   }
 
   export interface Carousel {
-    readonly actions: readonly Action[] | null;
+    readonly actions: readonly Action[] | undefined | null;
 
     readonly items: Readonly<{
       title: string;
-      description: string | null;
-      mediaURL: string | null;
-      actions: readonly Action[] | null;
+      description: string | undefined | null;
+      mediaURL: string | undefined | null;
+      actions: readonly Action[] | undefined | null;
     }>[];
 
     readonly type: 'carousel';
   }
 
   export interface List {
-    readonly actions: readonly Action[] | null;
+    readonly actions: readonly Action[] | undefined | null;
 
     readonly items: Readonly<{
       title: string;
-      description: string | null;
+      description: string | undefined | null;
       size: 'large' | 'small';
-      actions: readonly Action[] | null;
+      actions: readonly Action[] | undefined | null;
     }>[];
 
     readonly type: 'list';
@@ -81,7 +81,7 @@ declare namespace Response {
 
   export interface Text {
     readonly text: string;
-    readonly type?: 'text';
+    readonly type: 'text';
   }
 }
 

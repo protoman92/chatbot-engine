@@ -7,8 +7,8 @@ declare namespace GenericRequest {
   /** Input for a generic request. */
   export interface Input {
     readonly inputText: string;
-    readonly inputImageURL: string | null | undefined;
-    readonly inputCoordinate: Coordinates | null | undefined;
+    readonly inputImageURL: string | undefined | null;
+    readonly inputCoordinate: Coordinates | undefined | null;
   }
 }
 
