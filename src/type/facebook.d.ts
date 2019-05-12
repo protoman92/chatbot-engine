@@ -35,14 +35,17 @@ declare namespace FacebookRequest {
   export type Attachment = Attachment.Image | Attachment.Location;
 
   namespace Message {
-    export type Text = BaseMessage &
-      DeepReadonly<{ message: { text: string } }>;
-
     export type Attachment = BaseMessage &
       DeepReadonly<{ message: { attachments: FacebookRequest.Attachment[] } }>;
+
+    export type QuickReply = BaseMessage &
+      DeepReadonly<{ quick_reply: { payload: string } }>;
+
+    export type Text = BaseMessage &
+      DeepReadonly<{ message: { text: string } }>;
   }
 
-  export type Message = Message.Text | Message.Attachment;
+  export type Message = Message.Attachment | Message.Text | Message.QuickReply;
 }
 
 /** Represents possible combinations of Facebook requests. */

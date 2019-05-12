@@ -64,6 +64,16 @@ export function mapWebhook<C>(
     if (isType<FBR.Message>(request, 'message')) {
       const { message } = request;
 
+      if (isType<FBR.Message.QuickReply>(message, 'quick_reply')) {
+        return [
+          {
+            inputText: message.quick_reply.payload,
+            inputImageURL: undefined,
+            inputCoordinate: undefined
+          }
+        ];
+      }
+
       if (isType<FBR.Message.Text['message']>(message, 'text')) {
         return [
           {
@@ -270,35 +280,50 @@ async function createFacebookResponse<C>({
   }
 
   /**
-   * Map generic quick reply type to Facebook-specific type.
-   * @param type The generic quick reply type.
-   * @return A Facebook quick reply type.
+   * Create a Facebook quick reply from a generic quick reply.
+   * @param quickReply The generic quick reply.
+   * @return A Facebook quick reply.
    */
-  function mapQuickReplyType(type: QuickReply['type']): string {
-    switch (type) {
-      case 'location':
-        return 'location';
-    }
+  function createQuickReply(quickReply: QuickReply) {
+    const { text } = quickReply;
 
-    return 'text';
+    switch (quickReply.type) {
+      case 'location':
+        return {
+          title: text,
+          content_type: 'location',
+          payload: text
+        };
+
+      case 'postback':
+        return {
+          title: text,
+          content_type: 'text',
+          payload: quickReply.payload
+        };
+
+      case 'text':
+      default:
+        return {
+          title: text,
+          content_type: 'text',
+          payload: text
+        };
+    }
   }
 
   function createPlatformResponse(
     senderID: string,
     { response, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
   ) {
-    const facebookQuickReplies = quickReplies.map(({ text: title, type }) => ({
-      title,
-      content_type: mapQuickReplyType(type),
-      payload: title
-    }));
+    const facebookQuickReplies = quickReplies.map(createQuickReply);
 
     return {
       messaging_type: 'RESPONSE',
       recipient: { id: senderID },
       message: {
         ...createResponse(response),
-        quick_replies: facebookQuickReplies.length
+        quick_replies: !!facebookQuickReplies.length
           ? facebookQuickReplies
           : undefined
       }

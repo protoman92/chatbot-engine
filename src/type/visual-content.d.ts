@@ -7,6 +7,11 @@ export namespace QuickReply {
     readonly type: 'location';
   }
 
+  export interface Postback extends BaseQuickReply {
+    readonly payload: string;
+    readonly type: 'postback';
+  }
+
   export interface SimpleText extends BaseQuickReply {
     readonly type?: 'text';
   }
@@ -17,7 +22,10 @@ export namespace QuickReply {
  * concept is available only on certain platforms (Facebook/Telegram) but is
  * an important one nonetheless.
  */
-export type QuickReply = QuickReply.Location | QuickReply.SimpleText;
+export type QuickReply =
+  | QuickReply.Location
+  | QuickReply.Postback
+  | QuickReply.SimpleText;
 
 interface BaseAction {
   readonly text: string;
