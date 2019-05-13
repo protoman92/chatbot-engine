@@ -1,4 +1,8 @@
-import { formatFacebookError, isType } from '../common/utils';
+import {
+  DEFAULT_COORDINATES,
+  formatFacebookError,
+  isType
+} from '../common/utils';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
@@ -55,8 +59,8 @@ export function mapWebhook<C>(
       return [
         {
           inputText: request.postback.payload,
-          inputImageURL: undefined,
-          inputCoordinate: undefined
+          inputImageURL: '',
+          inputCoordinate: DEFAULT_COORDINATES
         }
       ];
     }
@@ -68,8 +72,8 @@ export function mapWebhook<C>(
         return [
           {
             inputText: message.quick_reply.payload,
-            inputImageURL: undefined,
-            inputCoordinate: undefined
+            inputImageURL: '',
+            inputCoordinate: DEFAULT_COORDINATES
           }
         ];
       }
@@ -78,8 +82,8 @@ export function mapWebhook<C>(
         return [
           {
             inputText: message.text,
-            inputImageURL: undefined,
-            inputCoordinate: undefined
+            inputImageURL: '',
+            inputCoordinate: DEFAULT_COORDINATES
           }
         ];
       }
@@ -93,7 +97,7 @@ export function mapWebhook<C>(
               return {
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
-                inputCoordinate: undefined
+                inputCoordinate: DEFAULT_COORDINATES
               };
 
             case 'location':
@@ -102,7 +106,7 @@ export function mapWebhook<C>(
 
               return {
                 inputText: JSON.stringify(coordinates),
-                inputImageURL: undefined,
+                inputImageURL: '',
                 inputCoordinate: coordinates
               };
           }

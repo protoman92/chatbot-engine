@@ -1,3 +1,5 @@
+import { GenericRequest } from './request';
+
 export type KV<V> = Readonly<{ [K: string]: V | null | undefined }>;
 
 export interface Coordinates {
@@ -5,12 +7,9 @@ export interface Coordinates {
   readonly lng: number;
 }
 
-export interface DefaultContext {
+export interface DefaultContext extends GenericRequest.Input {
   readonly activeBranch?: string;
   readonly senderID: string;
-  readonly inputText: string;
-  readonly inputImageURL: string | undefined | null;
-  readonly inputCoordinate: Coordinates | undefined | null;
 }
 
 export interface ErrorContext {

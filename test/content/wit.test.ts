@@ -3,6 +3,7 @@ import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import { useWitEngine } from '../../src/content/higher-order/wit';
 import { Leaf } from '../../src/type/leaf';
 import { WitCommunicator, WitContext, WitResponse } from '../../src/type/wit';
+import { DEFAULT_COORDINATES } from '../../src/common/utils';
 
 const senderID = 'sender-id';
 
@@ -28,8 +29,8 @@ describe('Wit higher order function', () => {
     const input = {
       senderID,
       inputText: 'some-text',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     };
 
     await transformed.next(input);
@@ -66,8 +67,8 @@ describe('Wit higher order function', () => {
     const input = {
       senderID,
       inputText,
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     };
 
     await transformed.next(input);

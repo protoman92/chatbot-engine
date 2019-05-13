@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
-import { isType } from '../../src/common/utils';
+import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
 import {
@@ -37,8 +37,8 @@ describe('Default error leaf', () => {
       senderID,
       error,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
     // Then
     expectJs(visualContents).to.have.length(1);
@@ -77,8 +77,8 @@ describe('Higher order functions', () => {
     const input = {
       senderID,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined,
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
       a: 1,
       b: 2
     };
@@ -134,8 +134,8 @@ describe('Higher order functions', () => {
       senderID,
       a: 1000,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
 
     // Then
@@ -171,8 +171,8 @@ describe('Higher order functions', () => {
       senderID,
       a: 1,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
 
     // Then
@@ -208,8 +208,8 @@ describe('Higher order functions', () => {
       senderID,
       a: 0,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
 
     const {
@@ -218,8 +218,8 @@ describe('Higher order functions', () => {
       senderID,
       a: 1,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
 
     // Then
@@ -275,8 +275,8 @@ describe('Higher order functions', () => {
     const { additionalContext } = await bridgeEmission(transformedLeaf)({
       senderID,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined,
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
       witEntities: {
         witKey: [{ confidence: 1, value: 'witValue', type: 'value' }]
       }
@@ -322,8 +322,8 @@ describe('Higher order functions', () => {
       senderID,
       b: null,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
 
     // Then

@@ -1,4 +1,6 @@
-import { Transformer } from '../type/common';
+import { Transformer, Coordinates } from '../type/common';
+
+export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
 /**
  * Check if an object is of a certain type.

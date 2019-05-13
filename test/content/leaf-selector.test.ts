@@ -1,6 +1,7 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
+import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import { createLeafWithObserver } from '../../src/content/leaf';
 import { createLeafSelector } from '../../src/content/leaf-selector';
 import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
@@ -61,8 +62,8 @@ describe('Leaf selector', () => {
     await instance(selector).next({
       senderID,
       inputText: '',
-      inputImageURL: undefined,
-      inputCoordinate: undefined
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
     });
 
     // Then
@@ -128,8 +129,8 @@ describe('Leaf selector', () => {
       await instance(selector).next({
         senderID,
         inputText: '',
-        inputImageURL: undefined,
-        inputCoordinate: undefined
+        inputImageURL: '',
+        inputCoordinate: DEFAULT_COORDINATES
       });
 
       // Then
