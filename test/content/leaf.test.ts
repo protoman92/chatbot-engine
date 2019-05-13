@@ -71,7 +71,7 @@ describe('Higher order functions', () => {
 
     const transformed = createTransformChain()
       .compose(catchError(instance(fallbackLeaf)))
-      .enhance(instance(errorLeaf));
+      .transform(instance(errorLeaf));
 
     // When
     const input = {
@@ -257,7 +257,7 @@ describe('Higher order functions', () => {
           )
         )
       )
-      .enhance(
+      .transform(
         createLeafWithObserver(observer => ({
           next: async ({ senderID, query }) => {
             await observer.next({
@@ -314,7 +314,7 @@ describe('Higher order functions', () => {
     const resultLeaf = createTransformChain()
       .forContextOfType<Context2>()
       .compose(mapInput(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
-      .enhance(originalLeaf);
+      .transform(originalLeaf);
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]

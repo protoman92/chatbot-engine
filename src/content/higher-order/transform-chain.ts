@@ -2,7 +2,7 @@ import { compose } from '../../common/utils';
 import { Leaf } from '../../type/leaf';
 
 /**
- * Create a leaf transform chain to enhance a leaf declaratively.
+ * Create a leaf transform chain to transform a leaf declaratively.
  * @template CI The original context type.
  * @template CO The target context type.
  * @return A leaf transform chain.
@@ -30,7 +30,9 @@ export function createTransformChain<CI, CO>(): Leaf.TransformChain<CI, CO> {
       pipeTransformers.push(fn);
       return transformChain as any;
     },
-    enhance: leaf => cl(cl(leaf, ...composeTransformers), ...pipeTransformers),
+    transform: leaf => {
+      return cl(cl(leaf, ...composeTransformers), ...pipeTransformers);
+    },
     forContextOfType: () => transformChain as any,
     checkThis: () => transformChain
   };

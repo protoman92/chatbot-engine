@@ -27,13 +27,13 @@ export namespace Leaf {
   }
 
   /**
-   * Represents a chain of transformer higher-order functions that enhances a
+   * Represents a chain of transformer higher-order functions that transforms a
    * leaf instance declaratively.
    * @template CI The original context type.
    * @template CO The target context type.
    */
   export interface TransformChain<CI, CO> {
-    readonly enhance: Transformer<CI, CO>;
+    readonly transform: Transformer<CI, CO>;
 
     /**
      * Apply pre-transformers like wrapping layers on the base leaf.
