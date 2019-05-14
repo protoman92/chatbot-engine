@@ -2,10 +2,14 @@
   "name": "chatbot-engine",
   "version": "1.0.0",
   "description": "Experimental chatbot engine.",
-  "main": "dist",
-  "types": "dist",
-  "typings": "dist",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "rm -rf dist && rollup -c && cp -r src/type dist/type",
     "test": "mocha --require ts-node/register test/**/*.test.ts"
   },
   "repository": {
@@ -25,13 +29,19 @@
     "@types/expect.js": "^0.3.29",
     "@types/mocha": "^5.2.6",
     "@types/redis": "^2.8.12",
-    "axios": "^0.18.0",
     "bignumber.js": "^8.1.1",
     "expect.js": "^0.3.1",
     "mocha": "^6.1.4",
     "nodemon": "^1.18.11",
     "prettier": "^1.17.0",
-    "redis": "^2.8.0",
+    "rollup": "^1.11.3",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-javascript-obfuscator": "^1.0.4",
+    "rollup-plugin-node-resolve": "^4.2.4",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript2": "^0.21.0",
+    "rollup-plugin-uglify": "^6.0.2",
     "ts-essentials": "^2.0.4",
     "ts-mockito": "^2.3.1",
     "ts-node": "^8.1.0",
@@ -40,5 +50,8 @@
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.4.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "axios": "^0.18.0",
+    "redis": "^2.8.0"
+  }
 }

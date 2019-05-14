@@ -24,3 +24,4 @@ dist
 yarn-error.log
 .env*
 .nyc*/*
+.rpt2_cache
