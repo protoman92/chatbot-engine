@@ -9,6 +9,12 @@ declare namespace GenericRequest {
     readonly inputText: string;
     readonly inputImageURL: string;
     readonly inputCoordinate: Coordinates;
+
+    /**
+     * Note that this is not a completely reliable way of determining if a
+     * message contains a sticker attachment. Use with caution.
+     */
+    readonly hasStickerAttachment: boolean;
   }
 }
 

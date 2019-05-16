@@ -18,6 +18,10 @@ declare namespace FacebookRequest {
       readonly payload: Readonly<{ url: string }>;
     }
 
+    export interface StickerImage extends Image {
+      readonly sticker_id: number;
+    }
+
     export interface Location {
       readonly type: 'location';
       readonly title: string;
@@ -32,7 +36,10 @@ declare namespace FacebookRequest {
     readonly message: Readonly<{ mid: string; seq: number }>;
   }
 
-  export type Attachment = Attachment.Image | Attachment.Location;
+  export type Attachment =
+    | Attachment.Image
+    | Attachment.StickerImage
+    | Attachment.Location;
 
   namespace Message {
     export type Attachment = BaseMessage &

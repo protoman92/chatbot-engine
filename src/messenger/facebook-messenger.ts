@@ -60,7 +60,8 @@ export function mapWebhook<C>(
         {
           inputText: request.postback.payload,
           inputImageURL: '',
-          inputCoordinate: DEFAULT_COORDINATES
+          inputCoordinate: DEFAULT_COORDINATES,
+          hasStickerAttachment: false
         }
       ];
     }
@@ -73,7 +74,8 @@ export function mapWebhook<C>(
           {
             inputText: message.quick_reply.payload,
             inputImageURL: '',
-            inputCoordinate: DEFAULT_COORDINATES
+            inputCoordinate: DEFAULT_COORDINATES,
+            hasStickerAttachment: false
           }
         ];
       }
@@ -83,7 +85,8 @@ export function mapWebhook<C>(
           {
             inputText: message.text,
             inputImageURL: '',
-            inputCoordinate: DEFAULT_COORDINATES
+            inputCoordinate: DEFAULT_COORDINATES,
+            hasStickerAttachment: false
           }
         ];
       }
@@ -94,7 +97,13 @@ export function mapWebhook<C>(
         return attachments.map(attachment => {
           switch (attachment.type) {
             case 'image':
+              const hasStickerAttachment = isType<FBR.Attachment.StickerImage>(
+                attachment.payload,
+                'sticker_id'
+              );
+
               return {
+                hasStickerAttachment,
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
                 inputCoordinate: DEFAULT_COORDINATES
@@ -107,7 +116,8 @@ export function mapWebhook<C>(
               return {
                 inputText: JSON.stringify(coordinates),
                 inputImageURL: '',
-                inputCoordinate: coordinates
+                inputCoordinate: coordinates,
+                hasStickerAttachment: false
               };
           }
         });
