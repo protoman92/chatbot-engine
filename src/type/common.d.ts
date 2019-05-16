@@ -1,3 +1,4 @@
+import { SupportedPlatform } from './messenger';
 import { GenericRequest } from './request';
 
 export type KV<V> = Readonly<{ [K: string]: V | null | undefined }>;
@@ -10,6 +11,7 @@ export interface Coordinates {
 export interface DefaultContext extends GenericRequest.Input {
   readonly activeBranch?: string;
   readonly senderID: string;
+  readonly senderPlatform: SupportedPlatform;
 }
 
 export interface ErrorContext {

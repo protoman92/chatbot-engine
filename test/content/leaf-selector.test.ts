@@ -12,6 +12,7 @@ type TestLeafSelector = ReturnType<
 >;
 
 const senderID = 'sender-id';
+const senderPlatform = 'facebook';
 
 describe('Leaf selector', () => {
   interface Context {}
@@ -61,6 +62,7 @@ describe('Leaf selector', () => {
     // When
     await instance(selector).next({
       senderID,
+      senderPlatform,
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
@@ -129,6 +131,7 @@ describe('Leaf selector', () => {
     try {
       await instance(selector).next({
         senderID,
+        senderPlatform,
         inputText: '',
         inputImageURL: '',
         inputCoordinate: DEFAULT_COORDINATES,

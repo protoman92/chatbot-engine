@@ -2,7 +2,7 @@ import { compose, mapSeries } from '../common/utils';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
-import { Messenger, UnitMessenger } from '../type/messenger';
+import { Messenger, SupportedPlatform, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
 import { Response } from '../type/visual-content';
@@ -27,9 +27,14 @@ export async function createGenericUnitMessenger<C, R extends Response>(
 ): Promise<UnitMessenger<C, R>> {
   const messenger: UnitMessenger<C, R> = compose(
     {
-      receiveRequest: ({ senderID, oldContext, data }) => {
+      receiveRequest: ({ senderID, senderPlatform, oldContext, data }) => {
         return mapSeries(data, datum => {
-          return leafSelector.next({ ...datum, ...oldContext, senderID });
+          return leafSelector.next({
+            ...datum,
+            ...oldContext,
+            senderID,
+            senderPlatform
+          });
         });
       },
       sendResponse: async response => {
@@ -46,6 +51,27 @@ export async function createGenericUnitMessenger<C, R extends Response>(
   });
 
   return messenger;
+}
+
+export function createCrossPlatformUnitMessenger<C>(
+  messengers: Readonly<{ [K in SupportedPlatform]: UnitMessenger<C, Response> }>
+): UnitMessenger<C, Response> {
+  return {
+    receiveRequest: ({ senderPlatform, ...restInput }) => {
+      const messenger = messengers[senderPlatform];
+      return messenger.receiveRequest({
+        ...restInput,
+        senderPlatform
+      });
+    },
+    sendResponse: ({ senderPlatform, ...restInput }) => {
+      const messenger = messengers[senderPlatform];
+      return messenger.sendResponse({
+        ...restInput,
+        senderPlatform
+      });
+    }
+  };
 }
 
 /**

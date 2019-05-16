@@ -6,6 +6,7 @@ import { WitCommunicator, WitContext, WitResponse } from '../../src/type/wit';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 
 const senderID = 'sender-id';
+const senderPlatform = 'facebook' as const;
 
 describe('Wit higher order function', () => {
   let comm: WitCommunicator;
@@ -28,6 +29,7 @@ describe('Wit higher order function', () => {
     // When
     const input = {
       senderID,
+      senderPlatform,
       inputText: 'some-text',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
@@ -67,6 +69,7 @@ describe('Wit higher order function', () => {
     // When
     const input = {
       senderID,
+      senderPlatform,
       inputText,
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,

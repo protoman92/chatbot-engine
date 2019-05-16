@@ -41,11 +41,12 @@ export function createDefaultErrorLeaf<C>(
   fn?: (e: Error) => Promise<unknown>
 ): Leaf<C & ErrorContext> {
   return createLeafWithObserver(observer => ({
-    next: async ({ senderID, error }) => {
+    next: async ({ senderID, senderPlatform, error }) => {
       !!fn && (await fn(error));
 
       return observer.next({
         senderID,
+        senderPlatform,
         visualContents: [
           {
             response: {

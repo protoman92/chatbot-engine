@@ -1,3 +1,4 @@
+import { SupportedPlatform } from './messenger';
 import { VisualContent } from './visual-content';
 
 /** A platform-specific response. */
@@ -11,6 +12,7 @@ export type PlatformResponse = unknown;
  */
 export interface GenericResponse<C> {
   readonly senderID: string;
+  readonly senderPlatform: SupportedPlatform;
   readonly additionalContext?: Partial<C>;
   readonly visualContents: readonly VisualContent[];
 }

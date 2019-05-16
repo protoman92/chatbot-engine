@@ -143,6 +143,7 @@ export function mapWebhook<C>(
         return Object.entries(groupedRequests).map(
           ([senderID, requests]: [string, readonly FBR[]]) => ({
             senderID,
+            senderPlatform: 'facebook' as const,
             oldContext: {} as any,
             data: requests
               .map(req => processRequest(req))

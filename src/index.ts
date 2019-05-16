@@ -14,6 +14,9 @@ export {
   createFacebookMessenger,
   createFacebookUnitMessenger
 } from './messenger/facebook-messenger';
+export {
+  createCrossPlatformUnitMessenger
+} from './messenger/generic-messenger';
 export { saveUserForSenderID } from './messenger/unit-transform';
 export { createWitCommunicator } from './messenger/wit-communicator';
 export * from './type/branch';

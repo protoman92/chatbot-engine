@@ -1,4 +1,5 @@
 import { Coordinates } from './common';
+import { SupportedPlatform } from './messenger';
 
 /** A platform-specific request. */
 export type PlatformRequest = unknown;
@@ -24,6 +25,7 @@ declare namespace GenericRequest {
  */
 export interface GenericRequest<C> {
   readonly senderID: string;
+  readonly senderPlatform: SupportedPlatform;
   readonly oldContext: C;
   readonly data: readonly GenericRequest.Input[];
 }

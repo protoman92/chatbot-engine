@@ -18,6 +18,7 @@ import { Response } from '../../src/type/visual-content';
 interface Context extends KV<unknown> {}
 
 const senderID = 'sender-id';
+const senderPlatform = 'facebook';
 let messenger: UnitMessenger<Context, Response>;
 let communicator: PlatformCommunicator;
 let contextDAO: ContextDAO<Context>;
@@ -58,6 +59,7 @@ describe('Save context on send', () => {
 
     const genericResponse: GenericResponse<Context> = {
       senderID,
+      senderPlatform,
       additionalContext,
       visualContents: []
     };
@@ -93,6 +95,7 @@ describe('Inject context on receive', () => {
 
     const genericRequest: GenericRequest<Context> = {
       senderID,
+      senderPlatform,
       oldContext: {},
       data: []
     };
@@ -136,6 +139,7 @@ describe('Save user for sender ID', () => {
       Context & Pick<DefaultContext, 'senderID'>
     > = {
       senderID,
+      senderPlatform,
       oldContext: { senderID: '' },
       data: []
     };
@@ -173,11 +177,16 @@ describe('Set typing indicator', () => {
     // When
     await transformed.receiveRequest({
       senderID,
+      senderPlatform,
       oldContext: {},
       data: []
     });
 
-    await transformed.sendResponse({ senderID, visualContents: [] });
+    await transformed.sendResponse({
+      senderID,
+      senderPlatform,
+      visualContents: []
+    });
 
     // Then
     verify(communicator.setTypingIndicator(senderID, true)).calledBefore(
