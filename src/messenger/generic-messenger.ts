@@ -5,25 +5,27 @@ import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest, PlatformRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
+import { Response } from '../type/visual-content';
 
 /**
  * Create a generic unit messenger.
  * @template C The context used by the current chatbot.
+ * @template R The response type supported by this messenger.
  * @param leafSelector A leaf selector instance.
  * @param communicator A platform communicator instance.
  * @param responseMapper Function to map generic response to platform responses.
  * @param transformers Array of compose functions to apply on base messenger.
  * @return A generic messenger.
  */
-export async function createGenericUnitMessenger<C>(
+export async function createGenericUnitMessenger<C, R extends Response>(
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator,
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-): Promise<UnitMessenger<C>> {
-  const messenger: UnitMessenger<C> = compose(
+  ...transformers: readonly Transformer<UnitMessenger<C, R>>[]
+): Promise<UnitMessenger<C, R>> {
+  const messenger: UnitMessenger<C, R> = compose(
     {
       receiveRequest: ({ senderID, oldContext, data }) => {
         return mapSeries(data, datum => {
@@ -50,11 +52,12 @@ export async function createGenericUnitMessenger<C>(
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
  * @template C The context used by the current chatbot.
+ * @template R The response type supported by this messenger.
  * @param param0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
-export function createGenericMessenger<C>(
-  unitMessenger: UnitMessenger<C>,
+export function createGenericMessenger<C, R extends Response>(
+  unitMessenger: UnitMessenger<C, R>,
   requestMapper: (req: PlatformRequest) => Promise<readonly GenericRequest<C>[]>
 ): Messenger {
   return {

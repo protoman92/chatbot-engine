@@ -15,7 +15,7 @@ describe('Redis context DAO', () => {
   let contextDAO: ContextDAO<Context>;
 
   function getCacheKey(senderID: string) {
-    return `FACEBOOK-${senderID}`;
+    return `facebook-${senderID}`;
   }
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('Redis context DAO', () => {
       del: (...params: any[]) => false
     });
 
-    contextDAO = createRedisContextDAO(instance(redis), 'FACEBOOK');
+    contextDAO = createRedisContextDAO(instance(redis), 'facebook');
   });
 
   it('Should return context on get call', async () => {

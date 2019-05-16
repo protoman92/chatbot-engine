@@ -1,8 +1,9 @@
 import { GenericRequest, PlatformRequest } from './request';
 import { GenericResponse } from './response';
+import { Response } from './visual-content';
 
 /** Represents all supported platform identifiers. */
-export type SupportedPlatform = 'FACEBOOK';
+export type SupportedPlatform = 'facebook';
 
 /**
  * Represents a messenger that can process incoming request (including parsing,
@@ -13,8 +14,9 @@ export type SupportedPlatform = 'FACEBOOK';
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  * @template C The context used by the current chatbot.
+ * @template R The response type supported by this messenger.
  */
-export interface UnitMessenger<C> {
+export interface UnitMessenger<C, R extends Response> {
   /**
    * Receive an incoming generic request.
    * @param req A request object.

@@ -13,16 +13,17 @@ import { ContextDAO } from '../../src/type/context-dao';
 import { UnitMessenger } from '../../src/type/messenger';
 import { GenericRequest } from '../../src/type/request';
 import { GenericResponse } from '../../src/type/response';
+import { Response } from '../../src/type/visual-content';
 
 interface Context extends KV<unknown> {}
 
 const senderID = 'sender-id';
-let messenger: UnitMessenger<Context>;
+let messenger: UnitMessenger<Context, Response>;
 let communicator: PlatformCommunicator;
 let contextDAO: ContextDAO<Context>;
 
 beforeEach(async () => {
-  messenger = spy<UnitMessenger<Context>>({
+  messenger = spy<UnitMessenger<Context, Response>>({
     receiveRequest: () => Promise.reject(''),
     sendResponse: () => Promise.reject('')
   });

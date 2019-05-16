@@ -38,7 +38,8 @@ describe('Default error leaf', () => {
       error,
       inputText: '',
       inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false
     });
     // Then
     expectJs(visualContents).to.have.length(1);
@@ -79,6 +80,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false,
       a: 1,
       b: 2
     };
@@ -135,7 +137,8 @@ describe('Higher order functions', () => {
       a: 1000,
       inputText: '',
       inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false
     });
 
     // Then
@@ -172,7 +175,8 @@ describe('Higher order functions', () => {
       a: 1,
       inputText: '',
       inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false
     });
 
     // Then
@@ -209,7 +213,8 @@ describe('Higher order functions', () => {
       a: 0,
       inputText: '',
       inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false
     });
 
     const {
@@ -219,7 +224,8 @@ describe('Higher order functions', () => {
       a: 1,
       inputText: '',
       inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false
     });
 
     // Then
@@ -277,6 +283,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false,
       witEntities: {
         witKey: [{ confidence: 1, value: 'witValue', type: 'value' }]
       }
@@ -323,7 +330,8 @@ describe('Higher order functions', () => {
       b: null,
       inputText: '',
       inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      hasStickerAttachment: false
     });
 
     // Then
