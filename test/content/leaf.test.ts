@@ -41,7 +41,7 @@ describe('Default error leaf', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
     // Then
     expectJs(visualContents).to.have.length(1);
@@ -83,7 +83,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false,
+      stickerID: '',
       a: 1,
       b: 2
     };
@@ -143,7 +143,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
 
     // Then
@@ -183,7 +183,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
 
     // Then
@@ -223,7 +223,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
 
     const {
@@ -235,7 +235,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
 
     // Then
@@ -295,7 +295,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false,
+      stickerID: '',
       witEntities: {
         witKey: [{ confidence: 1, value: 'witValue', type: 'value' }]
       }
@@ -345,7 +345,7 @@ describe('Higher order functions', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
 
     // Then

@@ -62,7 +62,7 @@ export function mapWebhook<C>(
           inputText: request.postback.payload,
           inputImageURL: '',
           inputCoordinate: DEFAULT_COORDINATES,
-          hasStickerAttachment: false
+          stickerID: ''
         }
       ];
     }
@@ -76,7 +76,7 @@ export function mapWebhook<C>(
             inputText: message.quick_reply.payload,
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
-            hasStickerAttachment: false
+            stickerID: ''
           }
         ];
       }
@@ -87,7 +87,7 @@ export function mapWebhook<C>(
             inputText: message.text,
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
-            hasStickerAttachment: false
+            stickerID: ''
           }
         ];
       }
@@ -98,16 +98,22 @@ export function mapWebhook<C>(
         return attachments.map(attachment => {
           switch (attachment.type) {
             case 'image':
-              const hasStickerAttachment = isType<FBR.Attachment.StickerImage>(
-                attachment.payload,
-                'sticker_id'
-              );
-
               return {
-                hasStickerAttachment,
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
-                inputCoordinate: DEFAULT_COORDINATES
+                inputCoordinate: DEFAULT_COORDINATES,
+                stickerID: (() => {
+                  if (
+                    isType<FBR.Attachment.StickerImage>(
+                      attachment.payload,
+                      'sticker_id'
+                    )
+                  ) {
+                    return `${attachment.payload.sticker_id}`;
+                  }
+
+                  return '';
+                })()
               };
 
             case 'location':
@@ -118,7 +124,7 @@ export function mapWebhook<C>(
                 inputText: JSON.stringify(coordinates),
                 inputImageURL: '',
                 inputCoordinate: coordinates,
-                hasStickerAttachment: false
+                stickerID: ''
               };
           }
         });

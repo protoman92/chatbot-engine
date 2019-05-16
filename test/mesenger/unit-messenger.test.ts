@@ -87,13 +87,13 @@ describe('Generic unit messenger', () => {
         inputText: 'text-1',
         inputImageURL: 'image-1',
         inputCoordinate: { lat: 0, lng: 0 },
-        hasStickerAttachment: false
+        stickerID: ''
       },
       {
         inputText: 'text-2',
         inputImageURL: 'image-2',
         inputCoordinate: { lat: 1, lng: 1 },
-        hasStickerAttachment: false
+        stickerID: ''
       }
     ];
 
@@ -159,7 +159,7 @@ describe('Cross platform unit messenger', () => {
             inputText: '',
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
-            hasStickerAttachment: false
+            stickerID: ''
           }
         ]
       });

@@ -10,8 +10,8 @@ interface BaseGenericResponse<C> {
   readonly additionalContext?: Partial<C>;
 }
 
-export namespace GenericResponse {
-  export interface Facebook<C> extends BaseGenericResponse<C> {
+declare namespace GenericResponse {
+  interface Facebook<C> extends BaseGenericResponse<C> {
     readonly senderPlatform: 'facebook';
     readonly visualContents: readonly FacebookVisualContent[];
   }

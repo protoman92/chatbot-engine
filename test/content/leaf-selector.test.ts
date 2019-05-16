@@ -66,7 +66,7 @@ describe('Leaf selector', () => {
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     });
 
     // Then
@@ -135,7 +135,7 @@ describe('Leaf selector', () => {
         inputText: '',
         inputImageURL: '',
         inputCoordinate: DEFAULT_COORDINATES,
-        hasStickerAttachment: false
+        stickerID: ''
       });
 
       // Then

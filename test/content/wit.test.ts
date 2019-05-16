@@ -33,7 +33,7 @@ describe('Wit higher order function', () => {
       inputText: 'some-text',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     };
 
     await transformed.next(input);
@@ -73,7 +73,7 @@ describe('Wit higher order function', () => {
       inputText,
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
-      hasStickerAttachment: false
+      stickerID: ''
     };
 
     await transformed.next(input);
