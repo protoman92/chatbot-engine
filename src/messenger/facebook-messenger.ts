@@ -12,7 +12,6 @@ import {
   FacebookUnitMessenger,
   FacebookWebhookRequest
 } from '../type/facebook';
-import { FacebookResponse } from '../type/facebook-visual-content';
 import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
@@ -385,7 +384,7 @@ export async function createBaseFacebookUnitMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator,
   configurations: FacebookConfigs,
-  ...transformers: readonly Transformer<UnitMessenger<C, FacebookResponse>>[]
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ): Promise<FacebookUnitMessenger<C>> {
   const unitMessenger = await createGenericUnitMessenger(
     leafSelector,
@@ -422,7 +421,7 @@ export function createFacebookUnitMessenger<C>(
   contextDAO: ContextDAO<C>,
   communicator: PlatformCommunicator,
   configuration: FacebookConfigs,
-  ...transformers: readonly Transformer<UnitMessenger<C, FacebookResponse>>[]
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ) {
   return createBaseFacebookUnitMessenger(
     leafSelector,
@@ -442,7 +441,7 @@ export function createFacebookUnitMessenger<C>(
  * @return A generic messenger.
  */
 export function createFacebookMessenger<C>(
-  unitMessenger: UnitMessenger<C, FacebookResponse>
+  unitMessenger: UnitMessenger<C>
 ): Messenger {
   return createGenericMessenger(unitMessenger, async req => {
     if (isType<FacebookWebhookRequest>(req, 'object', 'entry')) {

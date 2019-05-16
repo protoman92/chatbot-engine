@@ -14,9 +14,8 @@ export type SupportedPlatform = 'facebook';
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  * @template C The context used by the current chatbot.
- * @template R The response type supported by this messenger.
  */
-export interface UnitMessenger<C, R extends Response> {
+export interface UnitMessenger<C> {
   /**
    * Receive an incoming generic request.
    * @param req A request object.

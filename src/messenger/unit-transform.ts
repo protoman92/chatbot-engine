@@ -3,20 +3,18 @@ import { DefaultContext, Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import { UnitMessenger } from '../type/messenger';
-import { Response } from '../type/visual-content';
 
 /**
  * Save the context every time a message group is sent to a sender ID. If
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
- * @template R The response type supported by this messenger.
  * @param contextDAO The context DAO being used to perform CRUD.
  * @return A transformer function.
  */
-export function saveContextOnSend<C, R extends Response>(
+export function saveContextOnSend<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
-): Transformer<UnitMessenger<C, R>> {
+): Transformer<UnitMessenger<C>> {
   return function saveContextOnSend(unitMessenger) {
     return {
       ...unitMessenger,
@@ -40,13 +38,12 @@ export function saveContextOnSend<C, R extends Response>(
  * Inject the relevant context for a sender every time a message group is
  * processed.
  * @template C The context used by the current chatbot.
- * @template R The response type supported by this messenger.
  * @param contextDAO The context DAO being used to perform CRUD.
  * @return A transformer function.
  */
-export function injectContextOnReceive<C, R extends Response>(
+export function injectContextOnReceive<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
-): Transformer<UnitMessenger<C, R>> {
+): Transformer<UnitMessenger<C>> {
   return function injectContextOnReceive(unitMessenger) {
     return {
       ...unitMessenger,
@@ -64,7 +61,6 @@ export function injectContextOnReceive<C, R extends Response>(
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  * @template C The context used by the current chatbot.
- * @template R The response type supported by this messenger.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
  * @param communicator A platform communicator instance.
@@ -72,11 +68,11 @@ export function injectContextOnReceive<C, R extends Response>(
  * @param getUserID Function to get user ID from the related chatbot user.
  * @return A transformer function.
  */
-export function saveUserForSenderID<C, R extends Response, PUser, CUser>(
+export function saveUserForSenderID<C, PUser, CUser>(
   communicator: PlatformCommunicator,
   saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
-): Transformer<UnitMessenger<C & Pick<DefaultContext, 'senderID'>, R>> {
+): Transformer<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
   return function saveUserForSenderID(unitMessenger) {
     return {
       ...unitMessenger,
@@ -105,13 +101,12 @@ export function saveUserForSenderID<C, R extends Response, PUser, CUser>(
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
  * @template C The context used by the current chatbot.
- * @template R The response type supported by this messenger.
  * @param communicator A platform communicator instance.
  * @return A transformer function.
  */
-export function setTypingIndicator<C, R extends Response>(
+export function setTypingIndicator<C>(
   communicator: PlatformCommunicator
-): Transformer<UnitMessenger<C, R>> {
+): Transformer<UnitMessenger<C>> {
   return function setTypingIndicator(unitMessenger) {
     return {
       ...unitMessenger,

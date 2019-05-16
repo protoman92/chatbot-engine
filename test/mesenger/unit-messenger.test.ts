@@ -9,7 +9,7 @@ import {
   verify,
   when
 } from 'ts-mockito';
-import { Response, SupportedPlatform, UnitMessenger } from '../../src';
+import { SupportedPlatform, UnitMessenger } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import {
   createCrossPlatformUnitMessenger,
@@ -123,14 +123,12 @@ describe('Generic unit messenger', () => {
 });
 
 describe('Cross platform unit messenger', () => {
-  let facebookMessenger: UnitMessenger<{}, Response>;
-  let messengers: Readonly<
-    { [K in SupportedPlatform]: UnitMessenger<{}, Response> }
-  >;
-  let crossMessenger: UnitMessenger<{}, Response>;
+  let facebookMessenger: UnitMessenger<{}>;
+  let messengers: Readonly<{ [K in SupportedPlatform]: UnitMessenger<{}> }>;
+  let crossMessenger: UnitMessenger<{}>;
 
   beforeEach(() => {
-    facebookMessenger = spy<UnitMessenger<{}, Response>>({
+    facebookMessenger = spy<UnitMessenger<{}>>({
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
