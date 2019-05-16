@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "Experimental chatbot engine.",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "typings": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
+  "typings": "dist/src/index.d.ts",
   "files": [
-    "dist"
+    "dist/src"
   ],
   "scripts": {
-    "build": "rm -rf dist && rollup -c && cp -r src/type dist/type",
+    "build": "rm -rf dist && rollup -c && cp -r src/type dist/src/type",
     "gulp": "gulp",
     "test": "mocha --require ts-node/register test/**/*.test.ts"
   },
