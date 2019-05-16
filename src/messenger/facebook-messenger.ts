@@ -16,7 +16,7 @@ import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
-import { Action, QuickReply, Response } from '../type/visual-content';
+import { QuickReply, Response, ResponseContent } from '../type/visual-content';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
@@ -159,7 +159,7 @@ async function createFacebookResponse<C>({
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
-  function createSingleAction(action: Action) {
+  function createSingleAction(action: ResponseContent.Action) {
     const { text: title } = action;
 
     switch (action.type) {
@@ -261,19 +261,53 @@ async function createFacebookResponse<C>({
     };
   }
 
-  function createResponse(response: Response) {
+  function createMediaResponse({ media: { type, url } }: Response.Media) {
+    return {
+      attachment: {
+        type: (() => {
+          switch (type) {
+            case 'image':
+              return 'image';
+
+            case 'video':
+              return 'video';
+          }
+        })(),
+        payload: { url, is_reusable: true }
+      }
+    };
+  }
+
+  function createResponse(
+    response: Response
+  ): Readonly<{ messaging_type?: 'RESPONSE'; response: {} }> {
     switch (response.type) {
       case 'button':
-        return createButtonResponse(response);
+        return {
+          messaging_type: 'RESPONSE',
+          response: createButtonResponse(response)
+        };
 
       case 'carousel':
-        return createCarouselResponse(response);
+        return {
+          messaging_type: 'RESPONSE',
+          response: createCarouselResponse(response)
+        };
 
       case 'list':
-        return createListResponse(response);
+        return {
+          messaging_type: 'RESPONSE',
+          response: createListResponse(response)
+        };
+
+      case 'media':
+        return { response: createMediaResponse(response) };
 
       case 'text':
-        return { text: response.text };
+        return {
+          messaging_type: 'RESPONSE',
+          response: { text: response.text }
+        };
     }
   }
 
@@ -287,11 +321,7 @@ async function createFacebookResponse<C>({
 
     switch (quickReply.type) {
       case 'location':
-        return {
-          title: text,
-          content_type: 'location',
-          payload: text
-        };
+        return { title: text, content_type: 'location', payload: text };
 
       case 'postback':
         return {
@@ -301,11 +331,7 @@ async function createFacebookResponse<C>({
         };
 
       case 'text':
-        return {
-          title: text,
-          content_type: 'text',
-          payload: text
-        };
+        return { title: text, content_type: 'text', payload: text };
     }
   }
 
@@ -313,16 +339,15 @@ async function createFacebookResponse<C>({
     senderID: string,
     { response, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
   ) {
-    const facebookQuickReplies = quickReplies.map(createQuickReply);
+    const fbQuickReplies = quickReplies.map(createQuickReply);
+    const { messaging_type, response: fbResponse } = createResponse(response);
 
     return {
-      messaging_type: 'RESPONSE',
+      messaging_type,
       recipient: { id: senderID },
       message: {
-        ...createResponse(response),
-        quick_replies: !!facebookQuickReplies.length
-          ? facebookQuickReplies
-          : undefined
+        ...fbResponse,
+        quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined
       }
     };
   }

@@ -34,18 +34,23 @@ export function createLeafWithObserver<C>(
  * Create an error leaf that will be used to deliver error messages if no
  * other leaf can handle the error.
  * @template C The context used by the current chatbot.
+ * @param fn A side effect function to catch errors.
  * @return A leaf instance.
  */
-export function createDefaultErrorLeaf<C>(): Leaf<C & ErrorContext> {
+export function createDefaultErrorLeaf<C>(
+  fn?: (e: Error) => Promise<unknown>
+): Leaf<C & ErrorContext> {
   return createLeafWithObserver(observer => ({
-    next: ({ senderID, error: { message } }) => {
+    next: async ({ senderID, error }) => {
+      !!fn && (await fn(error));
+
       return observer.next({
         senderID,
         visualContents: [
           {
             response: {
               type: 'text',
-              text: `Encountered an error: '${message}'`
+              text: `Encountered an error: '${error.message}'`
             }
           }
         ]
