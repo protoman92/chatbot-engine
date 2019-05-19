@@ -4,9 +4,9 @@ import {
   isType
 } from '../common/utils';
 import { Transformer } from '../type/common';
-import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import {
+  FacebookCommunicator,
   FacebookConfigs,
   FacebookRequest as FBR,
   FacebookUnitMessenger,
@@ -382,7 +382,7 @@ async function createFacebookResponse<C>({
  */
 export async function createBaseFacebookUnitMessenger<C>(
   leafSelector: Leaf<C>,
-  communicator: PlatformCommunicator,
+  communicator: FacebookCommunicator,
   configurations: FacebookConfigs,
   ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ): Promise<FacebookUnitMessenger<C>> {
@@ -419,7 +419,7 @@ export async function createBaseFacebookUnitMessenger<C>(
 export function createFacebookUnitMessenger<C>(
   leafSelector: Leaf<C>,
   contextDAO: ContextDAO<C>,
-  communicator: PlatformCommunicator,
+  communicator: FacebookCommunicator,
   configuration: FacebookConfigs,
   ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ) {

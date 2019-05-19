@@ -1,5 +1,5 @@
 import { DeepReadonly } from 'ts-essentials';
-import { FacebookResponse } from './facebook-visual-content';
+import { PlatformCommunicator } from './communicator';
 import { UnitMessenger } from './messenger';
 
 interface BaseFacebookRequest {
@@ -85,6 +85,9 @@ export interface FacebookConfigs {
   readonly pageToken: string;
   readonly verifyToken: string;
 }
+
+/** Represents a Facebook-specific communicator. */
+export interface FacebookCommunicator extends PlatformCommunicator {}
 
 /**
  * Represents a Facebook-specific unit messenger.

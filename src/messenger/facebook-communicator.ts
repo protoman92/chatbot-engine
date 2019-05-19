@@ -1,5 +1,5 @@
-import { HTTPCommunicator, PlatformCommunicator } from '../type/communicator';
-import { FacebookConfigs } from '../type/facebook';
+import { HTTPCommunicator } from '../type/communicator';
+import { FacebookCommunicator, FacebookConfigs } from '../type/facebook';
 
 /**
  * Create a platform communicator for Facebook.
@@ -10,7 +10,7 @@ import { FacebookConfigs } from '../type/facebook';
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
   { apiVersion, pageToken }: Pick<FacebookConfigs, 'apiVersion' | 'pageToken'>
-): PlatformCommunicator {
+): FacebookCommunicator {
   function formatURL(...additionalPaths: string[]) {
     return `https://graph.facebook.com/v${apiVersion}/${additionalPaths.join(
       '/'
@@ -39,11 +39,9 @@ export function createFacebookCommunicator(
       if (!facebookUser) throw Error(`Unable to find user for id ${senderID}`);
       return facebookUser;
     },
-
     sendResponse: data => {
       return post(data, 'me', 'messages');
     },
-
     setTypingIndicator: (senderID, enabled) => {
       return post(
         {
