@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
-import { GenericContent } from '../../src';
+import { VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
@@ -47,7 +47,7 @@ describe('Default error leaf', () => {
     expectJs(visualContents).to.have.length(1);
     const [{ content: response }] = visualContents;
 
-    if (isType<GenericContent.Text>(response, 'text')) {
+    if (isType<VisualContent.MainContent.Text>(response, 'text')) {
       expectJs(response.text).to.contain(error.message);
     } else {
       throw new Error('Never should have come here');

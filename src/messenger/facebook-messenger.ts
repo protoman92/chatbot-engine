@@ -12,12 +12,11 @@ import {
   FacebookResponse,
   FacebookUnitMessenger
 } from '../type/facebook';
-import { FacebookQuickReply } from '../type/facebook-visual-content';
 import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
-import { GenericContent, GenericSubContent } from '../type/visual-content';
+import { VisualContent } from '../type/visual-content';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
@@ -194,7 +193,7 @@ async function createFacebookResponse<C>({
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(
-    action: GenericSubContent.Action
+    action: VisualContent.SubContent.Action
   ): FacebookResponse.SubContent.Button {
     const { text: title } = action;
 
@@ -210,7 +209,7 @@ async function createFacebookResponse<C>({
   function createButtonResponse({
     text,
     actions
-  }: GenericContent.Button): FacebookResponse.Content.Button {
+  }: VisualContent.MainContent.Button): FacebookResponse.Content.Button {
     return {
       messaging_type: 'RESPONSE',
       message: {
@@ -228,7 +227,7 @@ async function createFacebookResponse<C>({
 
   function createCarouselResponse({
     items
-  }: GenericContent.Carousel): FacebookResponse.Content.Carousel {
+  }: VisualContent.MainContent.Carousel): FacebookResponse.Content.Carousel {
     if (!items.length) {
       throw Error(formatFacebookError('Not enough carousel items'));
     }
@@ -266,7 +265,7 @@ async function createFacebookResponse<C>({
   }
 
   function createListResponse(
-    content: GenericContent.List
+    content: VisualContent.MainContent.List
   ): FacebookResponse.Content.List {
     const { items, actions: listActions } = content;
 
@@ -314,7 +313,7 @@ async function createFacebookResponse<C>({
 
   function createMediaResponse({
     media: { type, url }
-  }: GenericContent.Media): FacebookResponse.Content.Media {
+  }: VisualContent.MainContent.Media): FacebookResponse.Content.Media {
     return {
       message: {
         attachment: {
@@ -333,7 +332,9 @@ async function createFacebookResponse<C>({
     };
   }
 
-  function createResponse(content: GenericContent): FacebookResponse.Output {
+  function createResponse(
+    content: VisualContent.MainContent
+  ): FacebookResponse.Output {
     switch (content.type) {
       case 'button':
         return createButtonResponse(content);
@@ -361,7 +362,7 @@ async function createFacebookResponse<C>({
    * @return A Facebook quick reply.
    */
   function createQuickReply(
-    quickReply: FacebookQuickReply
+    quickReply: VisualContent.QuickReply
   ): FacebookResponse.QuickReply {
     const { text } = quickReply;
 

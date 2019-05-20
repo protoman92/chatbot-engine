@@ -1,6 +1,12 @@
 import { DeepReadonly, Omit } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
 import { UnitMessenger } from './messenger';
+import { VisualContent } from './visual-content';
+
+export interface FacebookVisualContent extends VisualContent {
+  readonly quickReplies?: readonly VisualContent.QuickReply[];
+  readonly content: VisualContent.MainContent;
+}
 
 declare namespace FacebookRequest {
   namespace Input {

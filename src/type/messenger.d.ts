@@ -1,6 +1,5 @@
 import { GenericRequest } from './request';
 import { GenericResponse } from './response';
-import { GenericContent } from './visual-content';
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = 'facebook';

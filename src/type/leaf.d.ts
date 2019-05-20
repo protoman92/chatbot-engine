@@ -3,7 +3,7 @@ import { DefaultContext } from './common';
 import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
 
-export namespace Leaf {
+declare namespace Leaf {
   /**
    * Represents a collection of leaf information that is derived from
    * enumerating all possibilities in a key-value branch object.

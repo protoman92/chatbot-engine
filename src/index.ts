@@ -24,7 +24,6 @@ export * from './type/common';
 export * from './type/communicator';
 export * from './type/context-dao';
 export * from './type/facebook';
-export * from './type/facebook-visual-content';
 export * from './type/leaf';
 export * from './type/messenger';
 export * from './type/request';

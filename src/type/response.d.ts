@@ -1,6 +1,4 @@
-import { FacebookVisualContent } from './facebook-visual-content';
-import { SupportedPlatform } from './messenger';
-import { VisualContent } from './visual-content';
+import { FacebookVisualContent } from './facebook';
 
 declare namespace GenericResponse {
   interface Base<C> {
