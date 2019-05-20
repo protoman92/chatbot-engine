@@ -3,7 +3,7 @@ import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
 import { Messenger, SupportedPlatform, UnitMessenger } from '../type/messenger';
-import { GenericRequest, PlatformRequest } from '../type/request';
+import { GenericRequest } from '../type/request';
 import { GenericResponse, PlatformResponse } from '../type/response';
 
 /**
@@ -57,17 +57,11 @@ export function createCrossPlatformUnitMessenger<C>(
   return {
     receiveRequest: ({ senderPlatform, ...restInput }) => {
       const messenger = messengers[senderPlatform];
-      return messenger.receiveRequest({
-        ...restInput,
-        senderPlatform
-      });
+      return messenger.receiveRequest({ ...restInput, senderPlatform });
     },
     sendResponse: ({ senderPlatform, ...restInput }) => {
       const messenger = messengers[senderPlatform];
-      return messenger.sendResponse({
-        ...restInput,
-        senderPlatform
-      });
+      return messenger.sendResponse({ ...restInput, senderPlatform });
     }
   };
 }
@@ -76,13 +70,14 @@ export function createCrossPlatformUnitMessenger<C>(
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
  * @template C The context used by the current chatbot.
+ * @template PlatformRequest The platform-specific request.
  * @param param0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
-export function createGenericMessenger<C>(
+export function createGenericMessenger<C, PlatformRequest>(
   unitMessenger: UnitMessenger<C>,
   requestMapper: (req: PlatformRequest) => Promise<readonly GenericRequest<C>[]>
-): Messenger {
+): Messenger<PlatformRequest> {
   return {
     processPlatformRequest: platformRequest => {
       return requestMapper(platformRequest).then(requests => {

@@ -8,9 +8,8 @@ import { ContextDAO } from '../type/context-dao';
 import {
   FacebookCommunicator,
   FacebookConfigs,
-  FacebookRequest as FBR,
-  FacebookUnitMessenger,
-  FacebookWebhookRequest
+  FacebookRequest,
+  FacebookUnitMessenger
 } from '../type/facebook';
 import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
@@ -34,7 +33,7 @@ import {
  * @return An Array of generic request.
  */
 export function mapWebhook<C>(
-  webhook: FacebookWebhookRequest
+  webhook: FacebookRequest
 ): readonly GenericRequest<C>[] {
   const { object, entry } = webhook;
 
@@ -43,8 +42,10 @@ export function mapWebhook<C>(
    * @param reqs A request Array.
    * @return A map of requests.
    */
-  function groupRequests(reqs: readonly FBR[]) {
-    const requestMap: { [K: string]: readonly FBR[] } = {};
+  function groupRequests(reqs: readonly FacebookRequest.Input[]) {
+    const requestMap: {
+      [K: string]: readonly FacebookRequest.Input[];
+    } = {};
 
     reqs.forEach(req => {
       const senderID = req.sender.id;
@@ -54,8 +55,10 @@ export function mapWebhook<C>(
     return requestMap;
   }
 
-  function processRequest(request: FBR): GenericRequest<C>['data'] {
-    if (isType<FBR.Postback>(request, 'postback')) {
+  function processRequest(
+    request: FacebookRequest.Input
+  ): GenericRequest<C>['data'] {
+    if (isType<FacebookRequest.Input.Postback>(request, 'postback')) {
       return [
         {
           inputText: request.postback.payload,
@@ -66,10 +69,12 @@ export function mapWebhook<C>(
       ];
     }
 
-    if (isType<FBR.Message>(request, 'message')) {
+    if (isType<FacebookRequest.Input.Message>(request, 'message')) {
       const { message } = request;
 
-      if (isType<FBR.Message.QuickReply>(message, 'quick_reply')) {
+      if (
+        isType<FacebookRequest.Input.Message.QuickReply>(message, 'quick_reply')
+      ) {
         return [
           {
             inputText: message.quick_reply.payload,
@@ -80,7 +85,9 @@ export function mapWebhook<C>(
         ];
       }
 
-      if (isType<FBR.Message.Text['message']>(message, 'text')) {
+      if (
+        isType<FacebookRequest.Input.Message.Text['message']>(message, 'text')
+      ) {
         return [
           {
             inputText: message.text,
@@ -91,7 +98,12 @@ export function mapWebhook<C>(
         ];
       }
 
-      if (isType<FBR.Message.Attachment['message']>(message, 'attachments')) {
+      if (
+        isType<FacebookRequest.Input.Message.Attachment['message']>(
+          message,
+          'attachments'
+        )
+      ) {
         const { attachments } = message;
 
         return attachments.map(attachment => {
@@ -103,7 +115,7 @@ export function mapWebhook<C>(
                 inputCoordinate: DEFAULT_COORDINATES,
                 stickerID: (() => {
                   if (
-                    isType<FBR.Attachment.StickerImage>(
+                    isType<FacebookRequest.Input.Attachment.StickerImage>(
                       attachment.payload,
                       'sticker_id'
                     )
@@ -146,7 +158,10 @@ export function mapWebhook<C>(
         const groupedRequests = groupRequests(allRequests);
 
         return Object.entries(groupedRequests).map(
-          ([senderID, requests]: [string, readonly FBR[]]) => ({
+          ([senderID, requests]: [
+            string,
+            readonly FacebookRequest.Input[]
+          ]) => ({
             senderID,
             senderPlatform: 'facebook' as const,
             oldContext: {} as any,
@@ -442,9 +457,9 @@ export function createFacebookUnitMessenger<C>(
  */
 export function createFacebookMessenger<C>(
   unitMessenger: UnitMessenger<C>
-): Messenger {
+): Messenger<FacebookRequest> {
   return createGenericMessenger(unitMessenger, async req => {
-    if (isType<FacebookWebhookRequest>(req, 'object', 'entry')) {
+    if (isType<FacebookRequest>(req, 'object', 'entry')) {
       return mapWebhook(req);
     }
 

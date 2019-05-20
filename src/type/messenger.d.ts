@@ -1,4 +1,4 @@
-import { GenericRequest, PlatformRequest } from './request';
+import { GenericRequest } from './request';
 import { GenericResponse } from './response';
 import { Response } from './visual-content';
 
@@ -35,8 +35,9 @@ export interface UnitMessenger<C> {
  * Represents a messenger that deals with a platform request end-to-end, from
  * handling data to sending response. Note that each generic messenger should
  * have a generic unit messenger that handles requests one-by-one.
+ * @template PlatformRequest The platform-specific request.
  */
-export interface Messenger {
+export interface Messenger<PlatformRequest> {
   /**
    * Process a platform request from end-to-end.
    * @param req A platform request instance.

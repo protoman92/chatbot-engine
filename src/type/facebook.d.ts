@@ -2,71 +2,69 @@ import { DeepReadonly } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
 import { UnitMessenger } from './messenger';
 
-interface BaseFacebookRequest {
-  readonly sender: Readonly<{ id: string }>;
-  readonly recipient: Readonly<{ id: string }>;
-  readonly timestamp: number;
-}
-
 declare namespace FacebookRequest {
-  export interface Postback extends BaseFacebookRequest {
-    readonly postback: Readonly<{ payload: string; title: string }>;
+  interface BaseInput {
+    readonly sender: Readonly<{ id: string }>;
+    readonly recipient: Readonly<{ id: string }>;
+    readonly timestamp: number;
   }
 
-  namespace Attachment {
-    export interface Image {
-      readonly type: 'image';
-      readonly payload: Readonly<{ url: string }>;
+  namespace Input {
+    interface Postback extends BaseInput {
+      readonly postback: Readonly<{ payload: string; title: string }>;
     }
 
-    export interface StickerImage extends Image {
-      readonly sticker_id: number;
+    namespace Attachment {
+      interface Image {
+        readonly type: 'image';
+        readonly payload: Readonly<{ url: string }>;
+      }
+
+      interface StickerImage extends Image {
+        readonly sticker_id: number;
+      }
+
+      interface Location {
+        readonly type: 'location';
+        readonly title: string;
+        readonly url: string;
+        readonly payload: DeepReadonly<{
+          coordinates: { lat: number; long: number };
+        }>;
+      }
     }
 
-    export interface Location {
-      readonly type: 'location';
-      readonly title: string;
-      readonly url: string;
-      readonly payload: DeepReadonly<{
-        coordinates: { lat: number; long: number };
-      }>;
+    interface BaseMessage extends BaseInput {
+      readonly message: Readonly<{ mid: string; seq: number }>;
     }
+
+    type Attachment =
+      | Attachment.Image
+      | Attachment.StickerImage
+      | Attachment.Location;
+
+    namespace Message {
+      type Attachment = BaseMessage &
+        DeepReadonly<{ message: { attachments: Input.Attachment[] } }>;
+
+      type QuickReply = BaseMessage &
+        DeepReadonly<{ quick_reply: { payload: string } }>;
+
+      type Text = BaseMessage & DeepReadonly<{ message: { text: string } }>;
+    }
+
+    type Message = Message.Attachment | Message.Text | Message.QuickReply;
   }
 
-  interface BaseMessage extends BaseFacebookRequest {
-    readonly message: Readonly<{ mid: string; seq: number }>;
-  }
-
-  export type Attachment =
-    | Attachment.Image
-    | Attachment.StickerImage
-    | Attachment.Location;
-
-  namespace Message {
-    export type Attachment = BaseMessage &
-      DeepReadonly<{ message: { attachments: FacebookRequest.Attachment[] } }>;
-
-    export type QuickReply = BaseMessage &
-      DeepReadonly<{ quick_reply: { payload: string } }>;
-
-    export type Text = BaseMessage &
-      DeepReadonly<{ message: { text: string } }>;
-  }
-
-  export type Message = Message.Attachment | Message.Text | Message.QuickReply;
+  /** Represents possible combinations of Facebook requests. */
+  type Input = Input.Message.Text | Input.Message.Attachment | Input.Postback;
 }
-
-/** Represents possible combinations of Facebook requests. */
-export type FacebookRequest =
-  | FacebookRequest.Message.Text
-  | FacebookRequest.Message.Attachment
-  | FacebookRequest.Postback;
 
 /** Represents a webhook request. */
-export interface FacebookWebhookRequest {
+export interface FacebookRequest {
   readonly object: 'page';
   readonly entry:
-    | Readonly<{ messaging: readonly FacebookRequest[] }>[]
+    | Readonly<{ messaging: readonly FacebookRequest.Input[] }>[]
     | undefined
     | null;
 }
