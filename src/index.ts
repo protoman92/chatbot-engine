@@ -35,5 +35,6 @@ export * from './type/messenger';
 export * from './type/request';
 export * from './type/response';
 export * from './type/stream';
+export * from './type/telegram';
 export * from './type/visual-content';
 export * from './type/wit';

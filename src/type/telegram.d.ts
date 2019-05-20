@@ -1,7 +1,44 @@
+import { DeepReadonly } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
 import { Messenger } from './messenger';
+import { VisualContent } from './visual-content';
 
-export type TelegramRequest = unknown;
+export interface TelegramVisualContent extends VisualContent {
+  readonly quickReplies?: readonly VisualContent.QuickReply[];
+  readonly content: VisualContent.MainContent;
+}
+
+declare namespace TelegramRequest {
+  interface Base {
+    readonly update_id: number;
+
+    readonly message: DeepReadonly<{
+      message_id: number;
+      from: {
+        id: number;
+        is_bot: boolean;
+        first_name: string;
+        last_name: string;
+        username: string;
+        language_code: 'en';
+      };
+      chat: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        username: string;
+        type: 'private';
+      };
+      date: number;
+    }>;
+  }
+
+  interface Text extends Base {
+    readonly text: string;
+  }
+}
+
+export type TelegramRequest = TelegramRequest.Text;
 
 declare namespace TelegramResponse {
   interface SendMessage {

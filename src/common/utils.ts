@@ -191,3 +191,8 @@ export function formatSpecialKey(key: string) {
 export function formatFacebookError(error: string): string {
   return `FACEBOOK: ${error}`;
 }
+
+/** Format an error for Telegram. */
+export function formatTelegramError(error: string): string {
+  return `TELEGRAM: ${error}`;
+}

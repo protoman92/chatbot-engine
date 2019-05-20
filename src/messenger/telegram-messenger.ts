@@ -1,6 +1,13 @@
+import { Omit } from 'ts-essentials';
+import {
+  DEFAULT_COORDINATES,
+  formatTelegramError,
+  isType
+} from '../common/utils';
 import { Transformer } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { BatchMessenger, Messenger } from '../type/messenger';
+import { GenericRequest } from '../type/request';
 import {
   TelegramCommunicator,
   TelegramMessenger,
@@ -11,6 +18,48 @@ import {
   createBatchMessenger,
   createGenericMessenger
 } from './generic-messenger';
+
+/**
+ * Map platform request to generic request for generic processing.
+ * @template C The context used by the current chatbot.
+ */
+function createGenericRequest<C>(
+  webhook: TelegramRequest
+): readonly GenericRequest<C>[] {
+  const {
+    message: {
+      chat: { id }
+    }
+  } = webhook;
+
+  function processRequest(
+    request: Omit<TelegramRequest, keyof TelegramRequest.Base>
+  ): GenericRequest<C>['data'] {
+    if (isType<TelegramRequest.Text>(webhook, 'text')) {
+      return [
+        {
+          inputText: request.text,
+          inputImageURL: '',
+          inputCoordinate: DEFAULT_COORDINATES,
+          stickerID: ''
+        }
+      ];
+    }
+
+    throw Error(
+      formatTelegramError(`Invalid request ${JSON.stringify(request)}`)
+    );
+  }
+
+  return [
+    {
+      senderID: `${id}`,
+      senderPlatform: 'telegram',
+      oldContext: {} as C,
+      data: processRequest(webhook)
+    }
+  ];
+}
 
 /**
  * Create a Telegram messenger.
@@ -26,7 +75,7 @@ export async function createTelegramMessenger<C>(
   const messenger = await createGenericMessenger(
     leafSelector,
     communicator,
-    async () => [],
+    async response => [],
     ...transformers
   );
 
@@ -40,5 +89,7 @@ export async function createTelegramMessenger<C>(
 export function createTelegramBatchMessenger<C>(
   messenger: Messenger<C>
 ): BatchMessenger<TelegramRequest, TelegramResponse> {
-  return createBatchMessenger(messenger, async () => []);
+  return createBatchMessenger(messenger, async request =>
+    createGenericRequest(request)
+  );
 }
