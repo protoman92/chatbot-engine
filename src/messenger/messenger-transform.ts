@@ -120,7 +120,7 @@ export function setTypingIndicator<C, PlatformResponse>(
  * @template C The context used by the current chatbot.
  * @template PlatformResponse The platform-specific response.
  */
-export function transformUnitMessengersByDefault<C, PlatformResponse>(
+export function transformMessengersByDefault<C, PlatformResponse>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>,
   communicator: PlatformCommunicator<PlatformResponse>
 ): Transformer<Messenger<C>> {

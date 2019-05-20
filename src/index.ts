@@ -17,7 +17,7 @@ export {
 export { createCrossPlatformMessenger } from './messenger/generic-messenger';
 export {
   saveUserForSenderID,
-  transformUnitMessengersByDefault
+  transformMessengersByDefault
 } from './messenger/messenger-transform';
 export { createTelegramCommunicator } from './messenger/telegram-communicator';
 export {

@@ -214,13 +214,7 @@ export interface FacebookConfigs {
 
 /** Represents a Facebook-specific communicator. */
 export interface FacebookCommunicator
-  extends PlatformCommunicator<FacebookResponse> {}
-
-/**
- * Represents a Facebook-specific messenger.
- * @template C The context used by the current chatbot.
- */
-export interface FacebookMessenger<C> extends Messenger<C> {
+  extends PlatformCommunicator<FacebookResponse> {
   /** Resolve Facebook hub challenge to establish connection with chatbot. */
   resolveVerifyChallenge(
     requestQuery: Readonly<{
@@ -230,3 +224,9 @@ export interface FacebookMessenger<C> extends Messenger<C> {
     }>
   ): Promise<number>;
 }
+
+/**
+ * Represents a Facebook-specific messenger.
+ * @template C The context used by the current chatbot.
+ */
+export interface FacebookMessenger<C> extends Messenger<C> {}

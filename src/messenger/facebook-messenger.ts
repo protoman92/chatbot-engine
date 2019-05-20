@@ -6,7 +6,6 @@ import {
 import { Transformer } from '../type/common';
 import {
   FacebookCommunicator,
-  FacebookConfigs,
   FacebookMessenger,
   FacebookRequest,
   FacebookResponse
@@ -390,7 +389,6 @@ async function createFacebookResponse<C>({
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: FacebookCommunicator,
-  configurations: FacebookConfigs,
   ...transformers: readonly Transformer<Messenger<C>>[]
 ): Promise<FacebookMessenger<C>> {
   const messenger = await createGenericMessenger(
@@ -400,18 +398,7 @@ export async function createFacebookMessenger<C>(
     ...transformers
   );
 
-  return {
-    ...messenger,
-    resolveVerifyChallenge: async ({
-      'hub.mode': mode = '',
-      'hub.challenge': challenge = -1,
-      'hub.verify_token': token = ''
-    }) => {
-      const { verifyToken } = configurations;
-      if (mode === 'subscribe' && token === verifyToken) return challenge;
-      throw new Error(formatFacebookError('Invalid mode or verify token'));
-    }
-  };
+  return messenger;
 }
 
 /**

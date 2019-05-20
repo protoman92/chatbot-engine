@@ -1,15 +1,16 @@
+import { formatFacebookError } from '../common/utils';
 import { HTTPCommunicator } from '../type/communicator';
 import { FacebookCommunicator, FacebookConfigs } from '../type/facebook';
 
 /** Create a platform communicator for Facebook. */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  { apiVersion, pageToken }: Pick<FacebookConfigs, 'apiVersion' | 'pageToken'>
+  configs: FacebookConfigs
 ): FacebookCommunicator {
   function formatURL(...additionalPaths: string[]) {
-    return `https://graph.facebook.com/v${apiVersion}/${additionalPaths.join(
-      '/'
-    )}?access_token=${pageToken}`;
+    return `https://graph.facebook.com/v${
+      configs.apiVersion
+    }/${additionalPaths.join('/')}?access_token=${configs.pageToken}`;
   }
 
   async function get<T>(...additionalPaths: string[]) {
@@ -33,6 +34,17 @@ export function createFacebookCommunicator(
       const facebookUser = await get<U | undefined | null>(senderID);
       if (!facebookUser) throw Error(`Unable to find user for id ${senderID}`);
       return facebookUser;
+    },
+    resolveVerifyChallenge: async ({
+      'hub.mode': mode = '',
+      'hub.challenge': challenge = -1,
+      'hub.verify_token': token = ''
+    }) => {
+      if (mode === 'subscribe' && token === configs.verifyToken) {
+        return challenge;
+      }
+
+      throw new Error(formatFacebookError('Invalid mode or verify token'));
     },
     sendResponse: data => {
       return post(data, 'me', 'messages');
