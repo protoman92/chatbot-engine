@@ -6,11 +6,11 @@ import {
   saveContextOnSend,
   saveUserForSenderID,
   setTypingIndicator
-} from '../../src/messenger/unit-transform';
+} from '../../src/messenger/messenger-transform';
 import { DefaultContext, KV } from '../../src/type/common';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { ContextDAO } from '../../src/type/context-dao';
-import { UnitMessenger } from '../../src/type/messenger';
+import { Messenger } from '../../src/type/messenger';
 import { GenericRequest } from '../../src/type/request';
 import { GenericResponse } from '../../src/type/response';
 
@@ -18,12 +18,12 @@ interface Context extends KV<unknown> {}
 
 const senderID = 'sender-id';
 const senderPlatform = 'facebook';
-let messenger: UnitMessenger<Context>;
+let messenger: Messenger<Context>;
 let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<Context>;
 
 beforeEach(async () => {
-  messenger = spy<UnitMessenger<Context>>({
+  messenger = spy<Messenger<Context>>({
     receiveRequest: () => Promise.reject(''),
     sendResponse: () => Promise.reject('')
   });

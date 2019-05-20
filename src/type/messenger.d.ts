@@ -14,7 +14,7 @@ export type SupportedPlatform = 'facebook';
  * apply decorators more effectively.
  * @template C The context used by the current chatbot.
  */
-export interface UnitMessenger<C> {
+export interface Messenger<C> {
   /** Receive an incoming generic request. */
   receiveRequest(req: GenericRequest<C>): Promise<{}>;
 
@@ -25,11 +25,11 @@ export interface UnitMessenger<C> {
 /**
  * Represents a messenger that deals with a platform request end-to-end, from
  * handling data to sending response. Note that each generic messenger should
- * have a generic unit messenger that handles requests one-by-one.
+ * have a generic messenger that handles requests one-by-one.
  * @template PlatformRequest The platform-specific request.
  * @template PlatformResponse The platform-specific response.
  */
-export interface Messenger<PlatformRequest, PlatformResponse> {
+export interface BatchMessenger<PlatformRequest, PlatformResponse> {
   /** Process a platform request from end-to-end. */
   processPlatformRequest(req: PlatformRequest): Promise<unknown>;
 }

@@ -1,5 +1,5 @@
 import { PlatformCommunicator } from './communicator';
-import { UnitMessenger } from './messenger';
+import { Messenger } from './messenger';
 
 export type TelegramRequest = unknown;
 
@@ -27,7 +27,7 @@ export interface TelegramCommunicator
 }
 
 /**
- * Represents a Telegram-specific unit messenger.
+ * Represents a Telegram-specific messenger.
  * @template C The context used by the current chatbot.
  */
-export interface TelegramUnitMessenger<C> extends UnitMessenger<C> {}
+export interface TelegramMessenger<C> extends Messenger<C> {}

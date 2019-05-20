@@ -2,7 +2,7 @@ import { compose, deepClone, joinObjects } from '../common/utils';
 import { DefaultContext, Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
-import { UnitMessenger } from '../type/messenger';
+import { Messenger } from '../type/messenger';
 
 /**
  * Save the context every time a message group is sent to a sender ID. If
@@ -12,13 +12,13 @@ import { UnitMessenger } from '../type/messenger';
  */
 export function saveContextOnSend<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
-): Transformer<UnitMessenger<C>> {
-  return function saveContextOnSend(unitMessenger) {
+): Transformer<Messenger<C>> {
+  return function saveContextOnSend(messenger) {
     return {
-      ...unitMessenger,
+      ...messenger,
       sendResponse: async response => {
         const { senderID, additionalContext } = response;
-        const result = await unitMessenger.sendResponse(response);
+        const result = await messenger.sendResponse(response);
 
         if (!!additionalContext) {
           const oldContext = await contextDAO.getContext(senderID);
@@ -39,14 +39,14 @@ export function saveContextOnSend<C>(
  */
 export function injectContextOnReceive<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
-): Transformer<UnitMessenger<C>> {
-  return function injectContextOnReceive(unitMessenger) {
+): Transformer<Messenger<C>> {
+  return function injectContextOnReceive(messenger) {
     return {
-      ...unitMessenger,
+      ...messenger,
       receiveRequest: async request => {
         let oldContext = await contextDAO.getContext(request.senderID);
         oldContext = deepClone({ ...request.oldContext, ...oldContext });
-        return unitMessenger.receiveRequest({ ...request, oldContext });
+        return messenger.receiveRequest({ ...request, oldContext });
       }
     };
   };
@@ -64,10 +64,10 @@ export function injectContextOnReceive<C>(
 export function saveUserForSenderID<C, PlatformResponse, PUser>(
   communicator: PlatformCommunicator<PlatformResponse>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
-  return function saveUserForSenderID(unitMessenger) {
+): Transformer<Messenger<C & Pick<DefaultContext, 'senderID'>>> {
+  return function saveUserForSenderID(messenger) {
     return {
-      ...unitMessenger,
+      ...messenger,
       receiveRequest: async request => {
         let { oldContext } = request;
         const { senderID } = request;
@@ -82,7 +82,7 @@ export function saveUserForSenderID<C, PlatformResponse, PUser>(
           );
         }
 
-        return unitMessenger.receiveRequest({ ...request, oldContext });
+        return messenger.receiveRequest({ ...request, oldContext });
       }
     };
   };
@@ -96,17 +96,17 @@ export function saveUserForSenderID<C, PlatformResponse, PUser>(
  */
 export function setTypingIndicator<C, PlatformResponse>(
   communicator: PlatformCommunicator<PlatformResponse>
-): Transformer<UnitMessenger<C>> {
-  return function setTypingIndicator(unitMessenger) {
+): Transformer<Messenger<C>> {
+  return function setTypingIndicator(messenger) {
     return {
-      ...unitMessenger,
+      ...messenger,
       receiveRequest: async request => {
         const { senderID } = request;
         await communicator.setTypingIndicator(senderID, true);
-        return unitMessenger.receiveRequest(request);
+        return messenger.receiveRequest(request);
       },
       sendResponse: async response => {
-        const result = await unitMessenger.sendResponse(response);
+        const result = await messenger.sendResponse(response);
         const { senderID } = response;
         await communicator.setTypingIndicator(senderID, false);
         return result;
@@ -116,15 +116,14 @@ export function setTypingIndicator<C, PlatformResponse>(
 }
 
 /**
- * Create default unit messenger transformers that all unit messengers should
- * use.
+ * Create default messenger transformers that all messengers should use.
  * @template C The context used by the current chatbot.
  * @template PlatformResponse The platform-specific response.
  */
 export function transformUnitMessengersByDefault<C, PlatformResponse>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>,
   communicator: PlatformCommunicator<PlatformResponse>
-): Transformer<UnitMessenger<C>> {
+): Transformer<Messenger<C>> {
   return messenger =>
     compose(
       messenger,

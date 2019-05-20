@@ -4,23 +4,21 @@ import {
   isType
 } from '../common/utils';
 import { Transformer } from '../type/common';
-import { HTTPCommunicator } from '../type/communicator';
 import {
   FacebookCommunicator,
   FacebookConfigs,
+  FacebookMessenger,
   FacebookRequest,
-  FacebookResponse,
-  FacebookUnitMessenger
+  FacebookResponse
 } from '../type/facebook';
 import { Leaf } from '../type/leaf';
-import { Messenger, UnitMessenger } from '../type/messenger';
+import { BatchMessenger, Messenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
 import { VisualContent } from '../type/visual-content';
-import { createFacebookCommunicator } from './facebook-communicator';
 import {
-  createGenericMessenger,
-  createGenericUnitMessenger
+  createBatchMessenger,
+  createGenericMessenger
 } from './generic-messenger';
 
 /**
@@ -386,16 +384,16 @@ async function createFacebookResponse<C>({
 }
 
 /**
- * Create a unit Facebook messenger.
+ * Create a Facebook messenger.
  * @template C The context used by the current chatbot.
  */
-export async function createFacebookUnitMessenger<C>(
+export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: FacebookCommunicator,
   configurations: FacebookConfigs,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-): Promise<FacebookUnitMessenger<C>> {
-  const unitMessenger = await createGenericUnitMessenger(
+  ...transformers: readonly Transformer<Messenger<C>>[]
+): Promise<FacebookMessenger<C>> {
+  const messenger = await createGenericMessenger(
     leafSelector,
     communicator,
     response => createFacebookResponse(response),
@@ -403,7 +401,7 @@ export async function createFacebookUnitMessenger<C>(
   );
 
   return {
-    ...unitMessenger,
+    ...messenger,
     resolveVerifyChallenge: async ({
       'hub.mode': mode = '',
       'hub.challenge': challenge = -1,
@@ -420,22 +418,10 @@ export async function createFacebookUnitMessenger<C>(
  * Create a Facebook mesenger.
  * @template C The context used by the current chatbot.
  */
-export async function createFacebookMessenger<C>(
-  leafSelector: Leaf<C>,
-  communicator: HTTPCommunicator,
-  configs: FacebookConfigs,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-): Promise<Messenger<FacebookRequest, FacebookResponse>> {
-  const fbCommunicator = createFacebookCommunicator(communicator, configs);
-
-  const unitMessenger = await createFacebookUnitMessenger(
-    leafSelector,
-    fbCommunicator,
-    configs,
-    ...transformers
-  );
-
-  return createGenericMessenger(unitMessenger, async req => {
+export function createFacebookBatchMessenger<C>(
+  messenger: Messenger<C>
+): BatchMessenger<FacebookRequest, FacebookResponse> {
+  return createBatchMessenger(messenger, async req => {
     if (isType<FacebookRequest>(req, 'object', 'entry')) {
       return mapWebhook(req);
     }

@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, instance, spy, when } from 'ts-mockito';
-import { createFacebookUnitMessenger } from '../../src/messenger/facebook-messenger';
+import { createFacebookMessenger } from '../../src/messenger/facebook-messenger';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { FacebookConfigs } from '../../src/type/facebook';
 import { Leaf } from '../../src/type/leaf';
@@ -39,7 +39,7 @@ describe('Facebook unit messenger', () => {
     when(leafSelector.subscribe(anything())).thenResolve();
     when(configs.verifyToken).thenReturn(verifyToken);
 
-    const unitMessenger = await createFacebookUnitMessenger(
+    const unitMessenger = await createFacebookMessenger(
       instance(leafSelector),
       instance(communicator),
       instance(configs)
@@ -62,7 +62,7 @@ describe('Facebook unit messenger', () => {
     when(leafSelector.subscribe(anything())).thenResolve();
     when(configs.verifyToken).thenReturn(verifyToken);
 
-    const unitMessenger = await createFacebookUnitMessenger(
+    const unitMessenger = await createFacebookMessenger(
       instance(leafSelector),
       instance(communicator),
       instance(configs)
@@ -85,7 +85,7 @@ describe('Facebook unit messenger', () => {
     when(leafSelector.subscribe(anything())).thenResolve();
     when(configs.verifyToken).thenReturn('verify-token');
 
-    const unitMessenger = await createFacebookUnitMessenger(
+    const unitMessenger = await createFacebookMessenger(
       instance(leafSelector),
       instance(communicator),
       instance(configs)

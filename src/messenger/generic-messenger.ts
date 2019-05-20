@@ -2,24 +2,28 @@ import { compose, mapSeries } from '../common/utils';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
-import { Messenger, SupportedPlatform, UnitMessenger } from '../type/messenger';
+import {
+  BatchMessenger,
+  SupportedPlatform,
+  Messenger
+} from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
 
 /**
- * Create a generic unit messenger.
+ * Create a generic messenger.
  * @template C The context used by the current chatbot.
  * @template PlatformResponse The platform-specific response.
  */
-export async function createGenericUnitMessenger<C, PlatformResponse>(
+export async function createGenericMessenger<C, PlatformResponse>(
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator<PlatformResponse>,
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-): Promise<UnitMessenger<C>> {
-  const messenger: UnitMessenger<C> = compose(
+  ...transformers: readonly Transformer<Messenger<C>>[]
+): Promise<Messenger<C>> {
+  const messenger: Messenger<C> = compose(
     {
       receiveRequest: ({ senderID, senderPlatform, oldContext, data }) => {
         return mapSeries(data, datum => {
@@ -47,9 +51,9 @@ export async function createGenericUnitMessenger<C, PlatformResponse>(
   return messenger;
 }
 
-export function createCrossPlatformUnitMessenger<C>(
-  messengers: Readonly<{ [K in SupportedPlatform]: UnitMessenger<C> }>
-): UnitMessenger<C> {
+export function createCrossPlatformMessenger<C>(
+  messengers: Readonly<{ [K in SupportedPlatform]: Messenger<C> }>
+): Messenger<C> {
   return {
     receiveRequest: ({ senderPlatform, ...restInput }) => {
       const messenger = messengers[senderPlatform];
@@ -69,14 +73,14 @@ export function createCrossPlatformUnitMessenger<C>(
  * @template PlatformRequest The platform-specific request.
  * @template PlatformResponse The platform-specific response.
  */
-export function createGenericMessenger<C, PlatformRequest, PlatformResponse>(
-  unitMessenger: UnitMessenger<C>,
+export function createBatchMessenger<C, PlatformRequest, PlatformResponse>(
+  messenger: Messenger<C>,
   requestMapper: (req: PlatformRequest) => Promise<readonly GenericRequest<C>[]>
-): Messenger<PlatformRequest, PlatformResponse> {
+): BatchMessenger<PlatformRequest, PlatformResponse> {
   return {
     processPlatformRequest: platformRequest => {
       return requestMapper(platformRequest).then(requests => {
-        return mapSeries(requests, req => unitMessenger.receiveRequest(req));
+        return mapSeries(requests, req => messenger.receiveRequest(req));
       });
     }
   };

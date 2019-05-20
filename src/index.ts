@@ -9,15 +9,21 @@ export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export { createRedisContextDAO } from './context/RedisContextDAO';
 export { createAxiosCommunicator } from './messenger/axios-communicator';
-export { createFacebookMessenger } from './messenger/facebook-messenger';
+export { createFacebookCommunicator } from './messenger/facebook-communicator';
 export {
-  createCrossPlatformUnitMessenger
-} from './messenger/generic-messenger';
-export { createTelegramMessenger } from './messenger/telegram-messenger';
+  createFacebookBatchMessenger,
+  createFacebookMessenger
+} from './messenger/facebook-messenger';
+export { createCrossPlatformMessenger } from './messenger/generic-messenger';
 export {
   saveUserForSenderID,
   transformUnitMessengersByDefault
-} from './messenger/unit-transform';
+} from './messenger/messenger-transform';
+export { createTelegramCommunicator } from './messenger/telegram-communicator';
+export {
+  createTelegramBatchMessenger,
+  createTelegramMessenger
+} from './messenger/telegram-messenger';
 export { createWitCommunicator } from './messenger/wit-communicator';
 export * from './type/branch';
 export * from './type/common';

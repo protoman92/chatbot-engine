@@ -9,11 +9,11 @@ import {
   verify,
   when
 } from 'ts-mockito';
-import { SupportedPlatform, UnitMessenger } from '../../src';
+import { SupportedPlatform, Messenger } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import {
-  createCrossPlatformUnitMessenger,
-  createGenericUnitMessenger
+  createCrossPlatformMessenger,
+  createGenericMessenger
 } from '../../src/messenger/generic-messenger';
 import { KV } from '../../src/type/common';
 import { PlatformCommunicator } from '../../src/type/communicator';
@@ -51,7 +51,7 @@ describe('Generic unit messenger', () => {
 
     // When
     const unitMessenger = spy(
-      await createGenericUnitMessenger(
+      await createGenericMessenger(
         instance(leafSelector),
         instance(communicator),
         async () => platformResponses
@@ -98,7 +98,7 @@ describe('Generic unit messenger', () => {
     ];
 
     // When
-    const unitMessenger = await createGenericUnitMessenger(
+    const unitMessenger = await createGenericMessenger(
       instance(leafSelector),
       instance(communicator),
       async () => []
@@ -123,19 +123,19 @@ describe('Generic unit messenger', () => {
 });
 
 describe('Cross platform unit messenger', () => {
-  let facebookMessenger: UnitMessenger<{}>;
-  let messengers: Readonly<{ [K in SupportedPlatform]: UnitMessenger<{}> }>;
-  let crossMessenger: UnitMessenger<{}>;
+  let facebookMessenger: Messenger<{}>;
+  let messengers: Readonly<{ [K in SupportedPlatform]: Messenger<{}> }>;
+  let crossMessenger: Messenger<{}>;
 
   beforeEach(() => {
-    facebookMessenger = spy<UnitMessenger<{}>>({
+    facebookMessenger = spy<Messenger<{}>>({
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
     messengers = { facebook: facebookMessenger };
 
-    crossMessenger = createCrossPlatformUnitMessenger(Object.entries(messengers)
+    crossMessenger = createCrossPlatformMessenger(Object.entries(messengers)
       .map(([key, value]) => ({
         [key]: instance(value)
       }))

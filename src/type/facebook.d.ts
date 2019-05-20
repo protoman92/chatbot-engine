@@ -1,6 +1,6 @@
 import { DeepReadonly, Omit } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
-import { UnitMessenger } from './messenger';
+import { Messenger } from './messenger';
 import { VisualContent } from './visual-content';
 
 export interface FacebookVisualContent extends VisualContent {
@@ -217,10 +217,10 @@ export interface FacebookCommunicator
   extends PlatformCommunicator<FacebookResponse> {}
 
 /**
- * Represents a Facebook-specific unit messenger.
+ * Represents a Facebook-specific messenger.
  * @template C The context used by the current chatbot.
  */
-export interface FacebookUnitMessenger<C> extends UnitMessenger<C> {
+export interface FacebookMessenger<C> extends Messenger<C> {
   /** Resolve Facebook hub challenge to establish connection with chatbot. */
   resolveVerifyChallenge(
     requestQuery: Readonly<{

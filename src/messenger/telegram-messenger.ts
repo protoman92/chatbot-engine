@@ -1,58 +1,44 @@
 import { Transformer } from '../type/common';
-import { HTTPCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
-import { Messenger, UnitMessenger } from '../type/messenger';
+import { BatchMessenger, Messenger } from '../type/messenger';
 import {
   TelegramCommunicator,
-  TelegramConfigs,
+  TelegramMessenger,
   TelegramRequest,
-  TelegramResponse,
-  TelegramUnitMessenger
+  TelegramResponse
 } from '../type/telegram';
 import {
-  createGenericMessenger,
-  createGenericUnitMessenger
+  createBatchMessenger,
+  createGenericMessenger
 } from './generic-messenger';
-import { createTelegramCommunicator } from './telegram-communicator';
 
 /**
- * Create a unit Telegram messenger.
+ * Create a Telegram messenger.
  * @template C The context used by the current chatbot.
  */
-export async function createTelegramUnitMessenger<C>(
+export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: TelegramCommunicator,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-): Promise<TelegramUnitMessenger<C>> {
+  ...transformers: readonly Transformer<Messenger<C>>[]
+): Promise<TelegramMessenger<C>> {
   await communicator.setWebhook();
 
-  const unitMessenger = await createGenericUnitMessenger(
+  const messenger = await createGenericMessenger(
     leafSelector,
     communicator,
     async () => [],
     ...transformers
   );
 
-  return unitMessenger;
+  return messenger;
 }
 
 /**
  * Create a Telegram mesenger.
  * @template C The context used by the current chatbot.
  */
-export async function createTelegramMessenger<C>(
-  leafSelector: Leaf<C>,
-  communicator: HTTPCommunicator,
-  configs: TelegramConfigs,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-): Promise<Messenger<TelegramRequest, TelegramResponse>> {
-  const tlCommunicator = createTelegramCommunicator(communicator, configs);
-
-  const unitMessenger = await createTelegramUnitMessenger(
-    leafSelector,
-    tlCommunicator,
-    ...transformers
-  );
-
-  return createGenericMessenger(unitMessenger, async () => []);
+export function createTelegramBatchMessenger<C>(
+  messenger: Messenger<C>
+): BatchMessenger<TelegramRequest, TelegramResponse> {
+  return createBatchMessenger(messenger, async () => []);
 }
