@@ -1,4 +1,5 @@
 import { Transformer } from '../type/common';
+import { HTTPCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import {
@@ -12,6 +13,7 @@ import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
+import { createTelegramCommunicator } from './telegram-communicator';
 
 /**
  * Create a unit Telegram messenger.
@@ -24,7 +26,6 @@ import {
 export async function createTelegramUnitMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: TelegramCommunicator,
-  configurations: TelegramConfigs,
   ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ): Promise<TelegramUnitMessenger<C>> {
   const unitMessenger = await createGenericUnitMessenger(
@@ -34,19 +35,30 @@ export async function createTelegramUnitMessenger<C>(
     ...transformers
   );
 
-  return {
-    ...unitMessenger
-  };
+  return unitMessenger;
 }
 
 /**
  * Create a Telegram mesenger.
  * @template C The context used by the current chatbot.
- * @param unitMessenger A Telegram unit messenger.
+ * @param leafSelector A leaf selector instance.
+ * @param communicator A platform communicator instance.
+ * @param configs Telegram configurations.
  * @return A generic messenger.
  */
-export function createTelegramMessenger<C>(
-  unitMessenger: TelegramUnitMessenger<C>
-): Messenger<TelegramRequest, TelegramResponse> {
+export async function createTelegramMessenger<C>(
+  leafSelector: Leaf<C>,
+  communicator: HTTPCommunicator,
+  configs: TelegramConfigs,
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
+): Promise<Messenger<TelegramRequest, TelegramResponse>> {
+  const tlCommunicator = createTelegramCommunicator(communicator, configs);
+
+  const unitMessenger = await createTelegramUnitMessenger(
+    leafSelector,
+    tlCommunicator,
+    ...transformers
+  );
+
   return createGenericMessenger(unitMessenger, async () => []);
 }

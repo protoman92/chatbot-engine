@@ -4,6 +4,7 @@ import {
   isType
 } from '../common/utils';
 import { Transformer } from '../type/common';
+import { HTTPCommunicator } from '../type/communicator';
 import {
   FacebookCommunicator,
   FacebookConfigs,
@@ -16,6 +17,7 @@ import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
 import { VisualContent } from '../type/visual-content';
+import { createFacebookCommunicator } from './facebook-communicator';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
@@ -433,12 +435,26 @@ export async function createFacebookUnitMessenger<C>(
 /**
  * Create a Facebook mesenger.
  * @template C The context used by the current chatbot.
- * @param unitMessenger A Facebook unit messenger.
+ * @param leafSelector A leaf selector instance.
+ * @param communicator A HTTP communicator instance.
+ * @param configs Facebook configurations.
  * @return A generic messenger.
  */
-export function createFacebookMessenger<C>(
-  unitMessenger: FacebookUnitMessenger<C>
-): Messenger<FacebookRequest, FacebookResponse> {
+export async function createFacebookMessenger<C>(
+  leafSelector: Leaf<C>,
+  communicator: HTTPCommunicator,
+  configs: FacebookConfigs,
+  ...transformers: readonly Transformer<UnitMessenger<C>>[]
+): Promise<Messenger<FacebookRequest, FacebookResponse>> {
+  const fbCommunicator = createFacebookCommunicator(communicator, configs);
+
+  const unitMessenger = await createFacebookUnitMessenger(
+    leafSelector,
+    fbCommunicator,
+    configs,
+    ...transformers
+  );
+
   return createGenericMessenger(unitMessenger, async req => {
     if (isType<FacebookRequest>(req, 'object', 'entry')) {
       return mapWebhook(req);

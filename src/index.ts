@@ -9,18 +9,11 @@ export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export { createRedisContextDAO } from './context/RedisContextDAO';
 export { createAxiosCommunicator } from './messenger/axios-communicator';
-export { createFacebookCommunicator } from './messenger/facebook-communicator';
-export {
-  createFacebookMessenger,
-  createFacebookUnitMessenger
-} from './messenger/facebook-messenger';
+export { createFacebookMessenger } from './messenger/facebook-messenger';
 export {
   createCrossPlatformUnitMessenger
 } from './messenger/generic-messenger';
-export {
-  createTelegramMessenger,
-  createTelegramUnitMessenger
-} from './messenger/telegram-messenger';
+export { createTelegramMessenger } from './messenger/telegram-messenger';
 export {
   saveUserForSenderID,
   transformUnitMessengersByDefault
