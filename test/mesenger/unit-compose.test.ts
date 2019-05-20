@@ -127,11 +127,7 @@ describe('Save user for sender ID', () => {
 
     const transformed = compose(
       instance(messenger),
-      saveUserForSenderID(
-        instance(communicator),
-        async () => chatbotUser,
-        ({ id }) => id
-      )
+      saveUserForSenderID(instance(communicator), async () => chatbotUser)
     );
 
     const genericRequest: GenericRequest<

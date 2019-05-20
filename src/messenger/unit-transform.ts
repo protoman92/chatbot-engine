@@ -69,10 +69,9 @@ export function injectContextOnReceive<C>(
  * @param getUserID Function to get user ID from the related chatbot user.
  * @return A transformer function.
  */
-export function saveUserForSenderID<C, PlatformResponse, PUser, CUser>(
+export function saveUserForSenderID<C, PlatformResponse, PUser>(
   communicator: PlatformCommunicator<PlatformResponse>,
-  saveUser: (platformUser: PUser) => Promise<CUser>,
-  getUserID: (chatbotUser: CUser) => unknown
+  saveUser: (platformUser: PUser) => Promise<unknown>
 ): Transformer<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
   return function saveUserForSenderID(unitMessenger) {
     return {
@@ -83,12 +82,11 @@ export function saveUserForSenderID<C, PlatformResponse, PUser, CUser>(
 
         if (!oldContext || !oldContext.senderID) {
           const platformUser = await communicator.getUser<PUser>(senderID);
-          const newUser = await saveUser(platformUser);
+          await saveUser(platformUser);
           const sidKey: keyof DefaultContext = 'senderID';
-          const userID = getUserID(newUser);
 
           oldContext = deepClone(
-            Object.assign(oldContext, { [sidKey]: userID })
+            Object.assign(oldContext, { [sidKey]: senderID })
           );
         }
 
