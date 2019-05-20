@@ -30,25 +30,12 @@ export interface HTTPCommunicator {
  * @template PlatformResponse The platform-specific response.
  */
 export interface PlatformCommunicator<PlatformResponse> {
-  /**
-   * Get the user associated with a sender ID.
-   * @param senderID A string value.
-   * @return A Promise of an user object.
-   */
+  /** Get the user associated with a sender ID. */
   getUser<U>(senderID: string): Promise<U>;
 
-  /**
-   * Send a response to the related platform.
-   * @param data Response payload.
-   * @returns A Promise of some response.
-   */
+  /** Send a response to the related platform. */
   sendResponse(data: PlatformResponse): Promise<unknown>;
 
-  /**
-   * Toggle typing indicator.
-   * @param senderID A string value.
-   * @param enabled A boolean value.
-   * @return A Promise of some response.
-   */
+  /** Toggle typing indicator. */
   setTypingIndicator(senderID: string, enabled: boolean): Promise<unknown>;
 }

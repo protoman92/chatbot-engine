@@ -11,8 +11,6 @@ import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
  * leaves.  Each enumerated leaf will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
  * @template C The context used by the current chatbot.
- * @param branches A key-value object of branches.
- * @return An Array of enumerated leaves.
  */
 export function enumerateLeaves<C>(
   branches: KV<Branch<C>>
@@ -59,8 +57,6 @@ export function enumerateLeaves<C>(
  * appropriate leaf out of all available leaves, based on the user's input.
  * Said leaf's content will be delivered to the user.
  * @template C The context used by the current chatbot.
- * @param allBranches All available branches.
- * @return A leaf selector instance.
  */
 export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
   const enumeratedLeaves = enumerateLeaves(allBranches);
@@ -72,9 +68,6 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
     /**
      * Trigger the production of content for a leaf, but does not guarantee
      * its success.
-     * @param param0 An enumerated leaf instance.
-     * @param input A leaf input instance.
-     * @return A Promise of some response.
      */
     triggerLeafContent: (
       { currentLeaf }: Leaf.Enumerated<C>,

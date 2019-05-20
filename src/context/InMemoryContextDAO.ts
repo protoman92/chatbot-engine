@@ -4,8 +4,6 @@ import { SupportedPlatform } from '../type/messenger';
 /**
  * Create an in-memory context DAO store. This is useful for debugging.
  * @template C The context used by the current chatbot.
- * @param platform The platform being used.
- * @return A context DAO instance.
  */
 export function createInMemoryContextDAO<C>(
   platform: SupportedPlatform

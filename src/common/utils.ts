@@ -6,9 +6,6 @@ export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
  * Check if an object is of a certain type.
  * @template T The type of object to check for.
  * @template K The keys of the type to check for.
- * @param object Any object.
- * @param keys Possible object keys.
- * @return A boolean value.
  */
 export function isType<T, K extends keyof T = keyof T>(
   object: any,
@@ -22,9 +19,6 @@ export function isType<T, K extends keyof T = keyof T>(
  * Check if an object has certain keys.
  * @template K The keys to check for.
  * @template T The object type to check for.
- * @param object Any object.
- * @param keys Object keys.
- * @return A boolean value.
  */
 export function hasKeys<
   Keys extends string,
@@ -36,8 +30,6 @@ export function hasKeys<
 /**
  * Convert something that could either be a single value or an Array to Array.
  * @template T The type of value to be converted to an Array.
- * @param value The value in question.
- * @return An Array of values.
  */
 export function toArray<T>(value: T | readonly T[]): readonly T[] {
   return value instanceof Array ? value : [value];
@@ -46,8 +38,6 @@ export function toArray<T>(value: T | readonly T[]): readonly T[] {
 /**
  * Deep clone an object.
  * @template T The type of object to deep-clone.
- * @param object The object to be cloned.
- * @return The cloned object.
  */
 export function deepClone<T>(object: T): T {
   return JSON.parse(JSON.stringify(object));
@@ -56,9 +46,6 @@ export function deepClone<T>(object: T): T {
 /**
  * Compose an object with transformers to create a new wrapped object.
  * @template T The type of object to transform.
- * @param original The original object.
- * @param fs Array of transformers.
- * @return The wrapped object.
  */
 export function compose<T>(original: T, ...fs: readonly Transformer<T>[]): T {
   let newTransformed = original;
@@ -73,9 +60,6 @@ export function compose<T>(original: T, ...fs: readonly Transformer<T>[]): T {
 /**
  * Join two objects to form a new object.
  * @template T The type of object being joined.
- * @param oldObject The old object.
- * @param newObject The new object.
- * @return A new object.
  */
 export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
   return Object.assign({}, oldObject, newObject);
@@ -83,8 +67,6 @@ export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
 
 /**
  * Join the path components of a branch to produce the full path.
- * @param pathComponents An Array of path components.
- * @return The full path.
  */
 export function joinPaths(...pathComponents: readonly string[]) {
   return pathComponents.join('.');
@@ -92,8 +74,6 @@ export function joinPaths(...pathComponents: readonly string[]) {
 
 /**
  * Extract the current leaf ID from active branch.
- * @param activeBranch The current active branch.
- * @return The current leaf ID.
  */
 export function getCurrentLeafID(activeBranch?: string): string | undefined {
   if (!activeBranch) return undefined;
@@ -108,9 +88,6 @@ export function getCurrentLeafID(activeBranch?: string): string | undefined {
  * Map a series of values to a series of promises, and maintain their order.
  * @template T1 The original value type.
  * @template T2 The resulting value type/
- * @param data The array of original values.
- * @param fn Function that maps original value to resulting value promise.
- * @return A Promise of resulting value array.
  */
 export async function mapSeries<T1, T2>(
   data: readonly T1[],
@@ -129,8 +106,6 @@ export async function mapSeries<T1, T2>(
 /**
  * Promisify a callback-style function into one that supports promises.
  * @template T The type of value being resolved.
- * @param fn Function to be promisified.
- * @return Promisified function.
  */
 export function promisify<T>(
   fn: (callback: (err: Error | undefined | null, value: T) => any) => void
@@ -152,8 +127,6 @@ export function promisify<T>(
  * Promisify, but for functions with one parameter.
  * @template T The type of value being resolved.
  * @template FN The type of function being promisified.
- * @param fn Function to be promisified.
- * @return Promisified function.
  */
 export function promisify1<
   FN extends (
@@ -172,8 +145,6 @@ export function promisify1<
  * Promisify, but for functions with two parameters.
  * @template T The type of value being resolved.
  * @template FN The type of function being promisified.
- * @param fn Function to be promisified.
- * @return Promisified function.
  */
 export function promisify2<
   FN extends (
@@ -197,9 +168,6 @@ export function promisify2<
  * point to undefined or null values.
  * @template T The object type to receive key requirements.
  * @template K The keys to be required.
- * @param object The object to receive key requirements.
- * @param keys The keys to be required.
- * @return The object with required keys.
  */
 export function requireKeys<T, K extends keyof T>(
   object: T,
@@ -214,20 +182,12 @@ export function requireKeys<T, K extends keyof T>(
   return object as any;
 }
 
-/**
- * Format a special key.
- * @param key A string value.
- * @return A string value.
- */
+/** Format a special key. */
 export function formatSpecialKey(key: string) {
   return `@//${key}//@`;
 }
 
-/**
- * Format an error for Facebook.
- * @param error A string value.
- * @return A string value.
- */
+/** Format an error for Facebook. */
 export function formatFacebookError(error: string): string {
   return `FACEBOOK: ${error}`;
 }

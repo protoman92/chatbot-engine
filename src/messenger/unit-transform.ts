@@ -9,8 +9,6 @@ import { UnitMessenger } from '../type/messenger';
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
- * @param contextDAO The context DAO being used to perform CRUD.
- * @return A transformer function.
  */
 export function saveContextOnSend<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
@@ -38,8 +36,6 @@ export function saveContextOnSend<C>(
  * Inject the relevant context for a sender every time a message group is
  * processed.
  * @template C The context used by the current chatbot.
- * @param contextDAO The context DAO being used to perform CRUD.
- * @return A transformer function.
  */
 export function injectContextOnReceive<C>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
@@ -64,10 +60,6 @@ export function injectContextOnReceive<C>(
  * @template PlatformResponse The platform-specific response.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
- * @param communicator A platform communicator instance.
- * @param saveUser Function to save platform user to some database.
- * @param getUserID Function to get user ID from the related chatbot user.
- * @return A transformer function.
  */
 export function saveUserForSenderID<C, PlatformResponse, PUser>(
   communicator: PlatformCommunicator<PlatformResponse>,
@@ -101,8 +93,6 @@ export function saveUserForSenderID<C, PlatformResponse, PUser>(
  * process.
  * @template C The context used by the current chatbot.
  * @template PlatformResponse The platform-specific response.
- * @param communicator A platform communicator instance.
- * @return A transformer function.
  */
 export function setTypingIndicator<C, PlatformResponse>(
   communicator: PlatformCommunicator<PlatformResponse>
@@ -130,9 +120,6 @@ export function setTypingIndicator<C, PlatformResponse>(
  * use.
  * @template C The context used by the current chatbot.
  * @template PlatformResponse The platform-specific response.
- * @param contextDAO The context DAO being used to perform CRUD.
- * @param communicator A platform communicator instance.
- * @return A transformer function.
  */
 export function transformUnitMessengersByDefault<C, PlatformResponse>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>,

@@ -1,11 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { HTTPCommunicator } from '../type/communicator';
 
-/**
- * Create a default HTTP communicator using axios.
- * @param axiosInstance An axios instance.
- * @return A HTTP communicator instance.
- */
+/** Create a default HTTP communicator using axios. */
 export function createAxiosCommunicator(axiosInstance: AxiosInstance = axios) {
   const communicator: HTTPCommunicator = {
     communicate: async request => {

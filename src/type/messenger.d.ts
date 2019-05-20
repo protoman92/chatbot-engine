@@ -15,18 +15,10 @@ export type SupportedPlatform = 'facebook';
  * @template C The context used by the current chatbot.
  */
 export interface UnitMessenger<C> {
-  /**
-   * Receive an incoming generic request.
-   * @param req A request object.
-   * @return A Promise of some response.
-   */
+  /** Receive an incoming generic request. */
   receiveRequest(req: GenericRequest<C>): Promise<{}>;
 
-  /**
-   * Send an outgoing platform response.
-   * @param res A response object.
-   * @return A Promise of some response.
-   */
+  /** Send an outgoing platform response. */
   sendResponse(res: GenericResponse<C>): Promise<{}>;
 }
 
@@ -38,10 +30,6 @@ export interface UnitMessenger<C> {
  * @template PlatformResponse The platform-specific response.
  */
 export interface Messenger<PlatformRequest, PlatformResponse> {
-  /**
-   * Process a platform request from end-to-end.
-   * @param req A platform request instance.
-   * @return A Promise of some response.
-   */
+  /** Process a platform request from end-to-end. */
   processPlatformRequest(req: PlatformRequest): Promise<unknown>;
 }

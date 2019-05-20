@@ -38,16 +38,12 @@ declare namespace Leaf {
     /**
      * Apply pre-transformers like wrapping layers on the base leaf.
      * @template CI1 The target context type.
-     * @param fn A transformer function.
-     * @return A transform chain.
      */
     compose<CI1>(fn: Transformer<CI1, CI>): TransformChain<CI1, CO>;
 
     /**
      * Apply post-transformers to transform results.
      * @template CO1 The target context type.
-     * @param fn A transformer function.
-     * @return A transform chain.
      */
     pipe<CO1>(fn: Transformer<CO, CO1>): TransformChain<CI, CO1>;
 

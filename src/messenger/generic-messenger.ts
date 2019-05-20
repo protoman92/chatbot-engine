@@ -10,11 +10,6 @@ import { GenericResponse } from '../type/response';
  * Create a generic unit messenger.
  * @template C The context used by the current chatbot.
  * @template PlatformResponse The platform-specific response.
- * @param leafSelector A leaf selector instance.
- * @param communicator A platform communicator instance.
- * @param responseMapper Function to map generic response to platform responses.
- * @param transformers Array of compose functions to apply on base messenger.
- * @return A generic messenger.
  */
 export async function createGenericUnitMessenger<C, PlatformResponse>(
   leafSelector: Leaf<C>,
@@ -73,8 +68,6 @@ export function createCrossPlatformUnitMessenger<C>(
  * @template C The context used by the current chatbot.
  * @template PlatformRequest The platform-specific request.
  * @template PlatformResponse The platform-specific response.
- * @param param0 Required dependencies to perform platform-specific work.
- * @return A generic messenger instance.
  */
 export function createGenericMessenger<C, PlatformRequest, PlatformResponse>(
   unitMessenger: UnitMessenger<C>,

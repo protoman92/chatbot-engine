@@ -5,25 +5,12 @@
  * @template C The context used by the current chatbot.
  */
 export interface ContextDAO<C> {
-  /**
-   * Get the whole context in storage.
-   * @param senderID The sender ID.
-   * @return A Promise of context.
-   */
+  /** Get the whole context in storage. */
   getContext(senderID: string): Promise<C>;
 
-  /**
-   * Set the whole context in storage.
-   * @param senderID The sender ID.
-   * @param context The context object being saved.
-   * @return A Promise of some response.
-   */
+  /** Set the whole context in storage. */
   setContext(senderID: string, context: C): Promise<unknown>;
 
-  /**
-   * Reset all context to factory.
-   * @param senderID The sender ID.
-   * @return A Promise of some response.
-   */
+  /** Reset all context to factory. */
   resetContext(senderID: string): Promise<unknown>;
 }

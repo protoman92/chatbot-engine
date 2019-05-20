@@ -10,11 +10,7 @@ import {
 /** Use this to signify invalid next result. */
 export const STREAM_INVALID_NEXT_RESULT: INR = 'INVALID_NEXT_RESULT';
 
-/**
- * Create a subscription with custom unsubscribe logic.
- * @param unsub Unsubscription logic.
- * @return A content subscription object.
- */
+/** Create a subscription with custom unsubscribe logic. */
 export function createSubscription(
   unsub: () => Promise<unknown>
 ): ContentSubscription {
@@ -33,8 +29,6 @@ export function createSubscription(
 /**
  * Create a composite subscription to mass-unsubscribe from all internal
  * subscriptions.
- * @param subs An Array of subscriptions.
- * @return A subscription instance.
  */
 export function createCompositeSubscription(
   ...subs: ContentSubscription[]
@@ -88,8 +82,6 @@ export function createContentSubject<T>(): ContentSubject<T> {
 /**
  * Merge the emissions of an Array of observables.
  * @template T The type of content being observed.
- * @param observables An Array of observables.
- * @return An observable instance.
  */
 export function mergeObservables<T>(
   ...observables: ContentObservable<T>[]
@@ -110,8 +102,6 @@ export function mergeObservables<T>(
  * function that can accept multiple inputs.
  * @template I The input type.
  * @template O The output type.
- * @param source The source observer/observable.
- * @return A higher-order function of promises of output return.
  */
 export function bridgeEmission<I, O>(
   source: ContentObserver<I> & ContentObservable<O>

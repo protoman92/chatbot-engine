@@ -26,19 +26,13 @@ import {
 /**
  * Map platform request to generic request for generic processing.
  * @template C The context used by the current chatbot.
- * @param webhook Facebook webhook data.
- * @return An Array of generic request.
  */
 export function mapWebhook<C>(
   webhook: FacebookRequest
 ): readonly GenericRequest<C>[] {
   const { object, entry } = webhook;
 
-  /**
-   * Group requests based on sender ID.
-   * @param reqs A request Array.
-   * @return A map of requests.
-   */
+  /** Group requests based on sender ID. */
   function groupRequests(reqs: readonly FacebookRequest.Input[]) {
     const requestMap: {
       [K: string]: readonly FacebookRequest.Input[];
@@ -178,8 +172,6 @@ export function mapWebhook<C>(
 /**
  * Create a Facebook response from multiple generic responses.
  * @template C The context used by the current chatbot.
- * @param response A generic responses.
- * @return A platform response instance.
  */
 async function createFacebookResponse<C>({
   senderID,
@@ -352,11 +344,7 @@ async function createFacebookResponse<C>({
     }
   }
 
-  /**
-   * Create a Facebook quick reply from a generic quick reply.
-   * @param quickReply The generic quick reply.
-   * @return A Facebook quick reply.
-   */
+  /** Create a Facebook quick reply from a generic quick reply. */
   function createQuickReply(
     quickReply: VisualContent.QuickReply
   ): FacebookResponse.QuickReply {
@@ -400,10 +388,6 @@ async function createFacebookResponse<C>({
 /**
  * Create a unit Facebook messenger.
  * @template C The context used by the current chatbot.
- * @param leafSelector A leaf selector instance.
- * @param communicator A platform communicator instance.
- * @param configurations Facebook configurations.
- * @return A generic unit messenger.
  */
 export async function createFacebookUnitMessenger<C>(
   leafSelector: Leaf<C>,
@@ -435,10 +419,6 @@ export async function createFacebookUnitMessenger<C>(
 /**
  * Create a Facebook mesenger.
  * @template C The context used by the current chatbot.
- * @param leafSelector A leaf selector instance.
- * @param communicator A HTTP communicator instance.
- * @param configs Facebook configurations.
- * @return A generic messenger.
  */
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,

@@ -9,8 +9,6 @@ import { ContentObserver } from '../type/stream';
  * Create a leaf from a base leaf with a default subject for broadcasting
  * contents.
  * @template C The context used by the current chatbot.
- * @param fn Function to create a base leaf using the supplied subject.
- * @return A leaf instance.
  */
 export function createLeafWithObserver<C>(
   fn: (
@@ -34,8 +32,6 @@ export function createLeafWithObserver<C>(
  * Create an error leaf that will be used to deliver error messages if no
  * other leaf can handle the error.
  * @template C The context used by the current chatbot.
- * @param fn A side effect function to catch errors.
- * @return A leaf instance.
  */
 export function createDefaultErrorLeaf<C>(
   fn?: (e: Error) => Promise<unknown>

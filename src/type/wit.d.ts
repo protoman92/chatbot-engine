@@ -19,11 +19,7 @@ export interface WitResponse<Entities extends string = string> {
 
 /** Communicator to access wit APIs. */
 export interface WitCommunicator {
-  /**
-   * Validate a query with wit.
-   * @param message A string value.
-   * @return Promise of wit response.
-   */
+  /** Validate a query with wit. */
   validate<E extends string>(message: string): Promise<WitResponse<E>>;
 }
 

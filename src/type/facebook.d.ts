@@ -221,11 +221,7 @@ export interface FacebookCommunicator
  * @template C The context used by the current chatbot.
  */
 export interface FacebookUnitMessenger<C> extends UnitMessenger<C> {
-  /**
-   * Resolve Facebook hub challenge to establish connection with chatbot.
-   * @param requestQuery The query parameters of the request.
-   * @return The hub challenge code.
-   */
+  /** Resolve Facebook hub challenge to establish connection with chatbot. */
   resolveVerifyChallenge(
     requestQuery: Readonly<{
       'hub.mode'?: string;

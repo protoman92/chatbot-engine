@@ -28,11 +28,7 @@ export interface ContentObserver<T> {
  * @template T The type of content being observed.
  */
 export interface ContentObservable<T> {
-  /**
-   * Subscribe to this stream's contents.
-   * @param observer A content observer object.
-   * @return A Promise of subscription.
-   */
+  /** Subscribe to this stream's contents. */
   subscribe(observer: ContentObserver<T>): Promise<ContentSubscription>;
 }
 

@@ -18,10 +18,6 @@ import { createTelegramCommunicator } from './telegram-communicator';
 /**
  * Create a unit Telegram messenger.
  * @template C The context used by the current chatbot.
- * @param leafSelector A leaf selector instance.
- * @param communicator A platform communicator instance.
- * @param configurations Facebook configurations.
- * @return A generic unit messenger.
  */
 export async function createTelegramUnitMessenger<C>(
   leafSelector: Leaf<C>,
@@ -41,10 +37,6 @@ export async function createTelegramUnitMessenger<C>(
 /**
  * Create a Telegram mesenger.
  * @template C The context used by the current chatbot.
- * @param leafSelector A leaf selector instance.
- * @param communicator A platform communicator instance.
- * @param configs Telegram configurations.
- * @return A generic messenger.
  */
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,

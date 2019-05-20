@@ -1,12 +1,7 @@
 import { HTTPCommunicator } from '../type/communicator';
 import { FacebookCommunicator, FacebookConfigs } from '../type/facebook';
 
-/**
- * Create a platform communicator for Facebook.
- * @param communicator A HTTP communicator instance.
- * @param configurations Config variables.
- * @return A platform communicator instance.
- */
+/** Create a platform communicator for Facebook. */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
   { apiVersion, pageToken }: Pick<FacebookConfigs, 'apiVersion' | 'pageToken'>
