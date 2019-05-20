@@ -1,4 +1,7 @@
 import { PlatformCommunicator } from './communicator';
+import { UnitMessenger } from './messenger';
+
+export type TelegramRequest = unknown;
 
 declare namespace TelegramResponse {
   interface SendMessage {
@@ -18,3 +21,9 @@ export interface TelegramConfigs {
 /** A Telegram-specific communicator. */
 export interface TelegramCommunicator
   extends PlatformCommunicator<TelegramResponse> {}
+
+/**
+ * Represents a Telegram-specific unit messenger.
+ * @template C The context used by the current chatbot.
+ */
+export interface TelegramUnitMessenger<C> extends UnitMessenger<C> {}

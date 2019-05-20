@@ -396,7 +396,7 @@ async function createFacebookResponse<C>({
 }
 
 /**
- * Create a unit Facebook messenger that does not have any default transformers.
+ * Create a unit Facebook messenger.
  * @template C The context used by the current chatbot.
  * @param leafSelector A leaf selector instance.
  * @param communicator A platform communicator instance.
@@ -433,11 +433,11 @@ export async function createFacebookUnitMessenger<C>(
 /**
  * Create a Facebook mesenger.
  * @template C The context used by the current chatbot.
- * @param unitMessenger A unit messenger.
+ * @param unitMessenger A Facebook unit messenger.
  * @return A generic messenger.
  */
 export function createFacebookMessenger<C>(
-  unitMessenger: UnitMessenger<C>
+  unitMessenger: FacebookUnitMessenger<C>
 ): Messenger<FacebookRequest, FacebookResponse> {
   return createGenericMessenger(unitMessenger, async req => {
     if (isType<FacebookRequest>(req, 'object', 'entry')) {

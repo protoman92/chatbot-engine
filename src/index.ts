@@ -18,6 +18,10 @@ export {
   createCrossPlatformUnitMessenger
 } from './messenger/generic-messenger';
 export {
+  createTelegramMessenger,
+  createTelegramUnitMessenger
+} from './messenger/telegram-messenger';
+export {
   saveUserForSenderID,
   transformUnitMessengersByDefault
 } from './messenger/unit-transform';
