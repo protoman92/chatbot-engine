@@ -9,7 +9,7 @@ import {
   verify,
   when
 } from 'ts-mockito';
-import { SupportedPlatform, Messenger } from '../../src';
+import { Messenger, SupportedPlatform } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import {
   createCrossPlatformMessenger,
@@ -123,17 +123,23 @@ describe('Generic unit messenger', () => {
 });
 
 describe('Cross platform unit messenger', () => {
-  let facebookMessenger: Messenger<{}>;
+  let fbMessenger: Messenger<{}>;
+  let tlMessenger: Messenger<{}>;
   let messengers: Readonly<{ [K in SupportedPlatform]: Messenger<{}> }>;
   let crossMessenger: Messenger<{}>;
 
   beforeEach(() => {
-    facebookMessenger = spy<Messenger<{}>>({
+    fbMessenger = spy<Messenger<{}>>({
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    messengers = { facebook: facebookMessenger };
+    tlMessenger = spy<Messenger<{}>>({
+      receiveRequest: () => Promise.resolve({}),
+      sendResponse: () => Promise.resolve({})
+    });
+
+    messengers = { facebook: fbMessenger, telegram: tlMessenger };
 
     crossMessenger = createCrossPlatformMessenger(Object.entries(messengers)
       .map(([key, value]) => ({

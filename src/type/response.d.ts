@@ -1,4 +1,5 @@
 import { FacebookVisualContent } from './facebook';
+import { SupportedPlatform } from './messenger';
 
 declare namespace GenericResponse {
   interface Base<C> {
@@ -7,7 +8,7 @@ declare namespace GenericResponse {
   }
 
   interface Facebook<C> extends Base<C> {
-    readonly senderPlatform: 'facebook';
+    readonly senderPlatform: SupportedPlatform;
     readonly visualContents: readonly FacebookVisualContent[];
   }
 }

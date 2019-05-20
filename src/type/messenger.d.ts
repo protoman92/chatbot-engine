@@ -2,7 +2,7 @@ import { GenericRequest } from './request';
 import { GenericResponse } from './response';
 
 /** Represents all supported platform identifiers. */
-export type SupportedPlatform = 'facebook';
+export type SupportedPlatform = 'facebook' | 'telegram';
 
 /**
  * Represents a messenger that can process incoming request (including parsing,
