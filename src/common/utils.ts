@@ -19,6 +19,21 @@ export function isType<T, K extends keyof T = keyof T>(
 }
 
 /**
+ * Check if an object has certain keys.
+ * @template K The keys to check for.
+ * @template T The object type to check for.
+ * @param object Any object.
+ * @param keys Object keys.
+ * @return A boolean value.
+ */
+export function hasKeys<
+  Keys extends string,
+  T extends { [K in Keys]: unknown }
+>(object: any, ...keys: Keys[]): object is T {
+  return isType<T, Keys>(object, ...keys);
+}
+
+/**
  * Convert something that could either be a single value or an Array to Array.
  * @template T The type of value to be converted to an Array.
  * @param value The value in question.

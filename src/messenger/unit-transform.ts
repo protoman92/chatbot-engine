@@ -61,6 +61,7 @@ export function injectContextOnReceive<C>(
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  * @template C The context used by the current chatbot.
+ * @template PlatformResponse The platform-specific response.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
  * @param communicator A platform communicator instance.
@@ -68,8 +69,8 @@ export function injectContextOnReceive<C>(
  * @param getUserID Function to get user ID from the related chatbot user.
  * @return A transformer function.
  */
-export function saveUserForSenderID<C, PUser, CUser>(
-  communicator: PlatformCommunicator,
+export function saveUserForSenderID<C, PlatformResponse, PUser, CUser>(
+  communicator: PlatformCommunicator<PlatformResponse>,
   saveUser: (platformUser: PUser) => Promise<CUser>,
   getUserID: (chatbotUser: CUser) => unknown
 ): Transformer<UnitMessenger<C & Pick<DefaultContext, 'senderID'>>> {
@@ -101,11 +102,12 @@ export function saveUserForSenderID<C, PUser, CUser>(
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
  * @template C The context used by the current chatbot.
+ * @template PlatformResponse The platform-specific response.
  * @param communicator A platform communicator instance.
  * @return A transformer function.
  */
-export function setTypingIndicator<C>(
-  communicator: PlatformCommunicator
+export function setTypingIndicator<C, PlatformResponse>(
+  communicator: PlatformCommunicator<PlatformResponse>
 ): Transformer<UnitMessenger<C>> {
   return function setTypingIndicator(unitMessenger) {
     return {

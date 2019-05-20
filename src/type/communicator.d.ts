@@ -1,5 +1,4 @@
 import { KV } from './common';
-import { PlatformResponse } from './response';
 
 /** Represents a basic HTTP request. */
 interface HTTPRequest {
@@ -28,8 +27,9 @@ export interface HTTPCommunicator {
  * Represents an object that handles the communicator to/from the relevant
  * platform. For example, a Facebook platform communicator should be able to
  * handle all methods specified here.
+ * @template PlatformResponse The platform-specific response.
  */
-export interface PlatformCommunicator {
+export interface PlatformCommunicator<PlatformResponse> {
   /**
    * Get the user associated with a sender ID.
    * @param senderID A string value.

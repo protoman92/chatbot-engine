@@ -1,6 +1,6 @@
 import { GenericRequest } from './request';
 import { GenericResponse } from './response';
-import { Response } from './visual-content';
+import { GenericContent } from './visual-content';
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = 'facebook';
@@ -36,8 +36,9 @@ export interface UnitMessenger<C> {
  * handling data to sending response. Note that each generic messenger should
  * have a generic unit messenger that handles requests one-by-one.
  * @template PlatformRequest The platform-specific request.
+ * @template PlatformResponse The platform-specific response.
  */
-export interface Messenger<PlatformRequest> {
+export interface Messenger<PlatformRequest, PlatformResponse> {
   /**
    * Process a platform request from end-to-end.
    * @param req A platform request instance.

@@ -9,13 +9,15 @@ import {
   FacebookCommunicator,
   FacebookConfigs,
   FacebookRequest,
+  FacebookResponse,
   FacebookUnitMessenger
 } from '../type/facebook';
+import { FacebookQuickReply } from '../type/facebook-visual-content';
 import { Leaf } from '../type/leaf';
 import { Messenger, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
-import { GenericResponse, PlatformResponse } from '../type/response';
-import { QuickReply, Response, ResponseContent } from '../type/visual-content';
+import { GenericResponse } from '../type/response';
+import { GenericContent, GenericSubContent } from '../type/visual-content';
 import {
   createGenericMessenger,
   createGenericUnitMessenger
@@ -187,11 +189,13 @@ export function mapWebhook<C>(
 async function createFacebookResponse<C>({
   senderID,
   visualContents: contents
-}: GenericResponse<C>): Promise<readonly PlatformResponse[]> {
+}: GenericResponse<C>): Promise<readonly FacebookResponse[]> {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
-  function createSingleAction(action: ResponseContent.Action) {
+  function createSingleAction(
+    action: GenericSubContent.Action
+  ): FacebookResponse.SubContent.Button {
     const { text: title } = action;
 
     switch (action.type) {
@@ -203,55 +207,68 @@ async function createFacebookResponse<C>({
     }
   }
 
-  function createButtonResponse(buttonResponse: Response.Button) {
+  function createButtonResponse({
+    text,
+    actions
+  }: GenericContent.Button): FacebookResponse.Content.Button {
     return {
-      attachment: {
-        type: 'template',
-        payload: {
-          template_type: 'button',
-          text: buttonResponse.text,
-          buttons: buttonResponse.actions.map(a => createSingleAction(a))
+      messaging_type: 'RESPONSE',
+      message: {
+        attachment: {
+          type: 'template',
+          payload: {
+            text,
+            template_type: 'button',
+            buttons: actions.map(a => createSingleAction(a))
+          }
         }
       }
     };
   }
 
-  function createCarouselResponse({ items }: Response.Carousel) {
+  function createCarouselResponse({
+    items
+  }: GenericContent.Carousel): FacebookResponse.Content.Carousel {
     if (!items.length) {
       throw Error(formatFacebookError('Not enough carousel items'));
     }
 
     return {
-      attachment: {
-        type: 'template',
-        payload: {
-          elements: items
-            .slice(0, MAX_GENERIC_ELEMENT_COUNT)
-            .map(
-              ({
-                title = '',
-                description: subtitle,
-                // tslint:disable-next-line:variable-name
-                mediaURL: image_url,
-                actions: buttons
-              }) => ({
-                title,
-                subtitle,
-                image_url,
-                buttons:
-                  !!buttons && buttons.length
-                    ? buttons.map(a => createSingleAction(a))
-                    : undefined
-              })
-            ),
-          template_type: 'generic'
+      messaging_type: 'RESPONSE',
+      message: {
+        attachment: {
+          type: 'template',
+          payload: {
+            elements: items
+              .slice(0, MAX_GENERIC_ELEMENT_COUNT)
+              .map(
+                ({
+                  title = '',
+                  description,
+                  // tslint:disable-next-line:variable-name
+                  mediaURL,
+                  actions: buttons
+                }) => ({
+                  title,
+                  subtitle: description || undefined,
+                  image_url: mediaURL || undefined,
+                  buttons:
+                    !!buttons && buttons.length
+                      ? buttons.map(a => createSingleAction(a))
+                      : undefined
+                })
+              ),
+            template_type: 'generic'
+          }
         }
       }
     };
   }
 
-  function createListResponse(response: Response.List) {
-    const { items, actions: listButtons = [] } = response;
+  function createListResponse(
+    content: GenericContent.List
+  ): FacebookResponse.Content.List {
+    const { items, actions: listActions } = content;
 
     /**
      * If there is only 1 element, Facebook throws an error, so we switch back
@@ -259,86 +276,81 @@ async function createFacebookResponse<C>({
      */
     if (items.length <= 1) {
       return createCarouselResponse({
-        ...response,
+        ...content,
         items: items.map(item => ({ ...item, mediaURL: undefined })),
         type: 'carousel'
-      });
+      }) as any;
     }
 
     return {
-      attachment: {
-        type: 'template',
-        payload: {
-          elements: items
-            .slice(0, MAX_LIST_ELEMENT_COUNT)
-            .map(
-              ({
-                title = '',
-                description: subtitle,
-                actions: itemButtons = []
-              }) => ({
-                title,
-                subtitle,
-                buttons:
-                  !!itemButtons && itemButtons.length
-                    ? itemButtons.map(a => createSingleAction(a))
-                    : undefined
-              })
-            ),
-          template_type: 'list',
-          top_element_style: 'compact',
-          buttons: !!listButtons && listButtons.length ? listButtons : undefined
+      messaging_type: 'RESPONSE',
+      message: {
+        attachment: {
+          type: 'template',
+          payload: {
+            elements: items
+              .slice(0, MAX_LIST_ELEMENT_COUNT)
+              .map(
+                ({ title = '', description, actions: itemButtons = [] }) => ({
+                  title,
+                  subtitle: description || undefined,
+                  buttons:
+                    !!itemButtons && itemButtons.length
+                      ? itemButtons.map(a => createSingleAction(a))
+                      : undefined
+                })
+              ),
+            template_type: 'list',
+            top_element_style: 'compact',
+            buttons:
+              !!listActions && listActions.length
+                ? listActions.map(a => createSingleAction(a))
+                : undefined
+          }
         }
       }
     };
   }
 
-  function createMediaResponse({ media: { type, url } }: Response.Media) {
+  function createMediaResponse({
+    media: { type, url }
+  }: GenericContent.Media): FacebookResponse.Content.Media {
     return {
-      attachment: {
-        type: (() => {
-          switch (type) {
-            case 'image':
-              return 'image';
+      message: {
+        attachment: {
+          type: (() => {
+            switch (type) {
+              case 'image':
+                return 'image';
 
-            case 'video':
-              return 'video';
-          }
-        })(),
-        payload: { url, is_reusable: true }
+              case 'video':
+                return 'video';
+            }
+          })(),
+          payload: { url, is_reusable: true }
+        }
       }
     };
   }
 
-  function createResponse(
-    response: Response
-  ): Readonly<{ messaging_type?: 'RESPONSE'; response: {} }> {
-    switch (response.type) {
+  function createResponse(content: GenericContent): FacebookResponse.Output {
+    switch (content.type) {
       case 'button':
-        return {
-          messaging_type: 'RESPONSE',
-          response: createButtonResponse(response)
-        };
+        return createButtonResponse(content);
 
       case 'carousel':
-        return {
-          messaging_type: 'RESPONSE',
-          response: createCarouselResponse(response)
-        };
+        return createCarouselResponse(content);
 
       case 'list':
-        return {
-          messaging_type: 'RESPONSE',
-          response: createListResponse(response)
-        };
+        return createListResponse(content);
 
       case 'media':
-        return { response: createMediaResponse(response) };
+        return createMediaResponse(content);
 
       case 'text':
         return {
           messaging_type: 'RESPONSE',
-          response: { text: response.text }
+          message: { text: content.text }
         };
     }
   }
@@ -348,7 +360,9 @@ async function createFacebookResponse<C>({
    * @param quickReply The generic quick reply.
    * @return A Facebook quick reply.
    */
-  function createQuickReply(quickReply: QuickReply) {
+  function createQuickReply(
+    quickReply: FacebookQuickReply
+  ): FacebookResponse.QuickReply {
     const { text } = quickReply;
 
     switch (quickReply.type) {
@@ -369,19 +383,18 @@ async function createFacebookResponse<C>({
 
   function createPlatformResponse(
     senderID: string,
-    { response, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
-  ) {
-    const fbQuickReplies = quickReplies.map(createQuickReply);
-    const { messaging_type, response: fbResponse } = createResponse(response);
+    { content, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
+  ): FacebookResponse {
+    const fbQuickReplies = quickReplies.map(qr => createQuickReply(qr));
+    const fbResponse = createResponse(content);
+    const { message: baseMessage } = fbResponse;
 
-    return {
-      messaging_type,
-      recipient: { id: senderID },
-      message: {
-        ...fbResponse,
-        quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined
-      }
+    const message = {
+      ...baseMessage,
+      quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined
     };
+
+    return { ...fbResponse, message, recipient: { id: senderID } };
   }
 
   return contents.map(content => createPlatformResponse(senderID, content));
@@ -457,7 +470,7 @@ export function createFacebookUnitMessenger<C>(
  */
 export function createFacebookMessenger<C>(
   unitMessenger: UnitMessenger<C>
-): Messenger<FacebookRequest> {
+): Messenger<FacebookRequest, FacebookResponse> {
   return createGenericMessenger(unitMessenger, async req => {
     if (isType<FacebookRequest>(req, 'object', 'entry')) {
       return mapWebhook(req);

@@ -2,14 +2,14 @@ import { Coordinates } from './common';
 import { SupportedPlatform } from './messenger';
 
 declare namespace GenericRequest {
-  interface BaseInput {
-    readonly inputText: string;
-    readonly inputImageURL: string;
-    readonly inputCoordinate: Coordinates;
-  }
-
   namespace Input {
-    interface Facebook extends BaseInput {
+    interface Base {
+      readonly inputText: string;
+      readonly inputImageURL: string;
+      readonly inputCoordinate: Coordinates;
+    }
+
+    interface Facebook extends Base {
       readonly stickerID: string;
     }
   }

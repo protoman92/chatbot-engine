@@ -10,7 +10,7 @@ describe('Facebook unit messenger', () => {
   interface Context {}
 
   let leafSelector: Leaf<Context>;
-  let communicator: PlatformCommunicator;
+  let communicator: PlatformCommunicator<unknown>;
   let configs: FacebookConfigs;
 
   beforeEach(async () => {
@@ -19,7 +19,7 @@ describe('Facebook unit messenger', () => {
       subscribe: () => Promise.reject('')
     });
 
-    communicator = spy<PlatformCommunicator>({
+    communicator = spy<PlatformCommunicator<unknown>>({
       getUser: () => Promise.reject(''),
       sendResponse: () => Promise.reject(''),
       setTypingIndicator: () => Promise.reject('')

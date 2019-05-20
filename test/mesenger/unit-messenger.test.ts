@@ -28,7 +28,7 @@ describe('Generic unit messenger', () => {
   interface Context extends KV<unknown> {}
 
   let leafSelector: Leaf<Context>;
-  let communicator: PlatformCommunicator;
+  let communicator: PlatformCommunicator<unknown>;
 
   beforeEach(async () => {
     leafSelector = spy<Leaf<Context>>({
@@ -36,7 +36,7 @@ describe('Generic unit messenger', () => {
       subscribe: () => Promise.reject('')
     });
 
-    communicator = spy<PlatformCommunicator>({
+    communicator = spy<PlatformCommunicator<unknown>>({
       getUser: () => Promise.reject(''),
       sendResponse: () => Promise.reject(''),
       setTypingIndicator: () => Promise.reject('')

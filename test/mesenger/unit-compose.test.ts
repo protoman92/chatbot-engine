@@ -19,7 +19,7 @@ interface Context extends KV<unknown> {}
 const senderID = 'sender-id';
 const senderPlatform = 'facebook';
 let messenger: UnitMessenger<Context>;
-let communicator: PlatformCommunicator;
+let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<Context>;
 
 beforeEach(async () => {
@@ -28,7 +28,7 @@ beforeEach(async () => {
     sendResponse: () => Promise.reject('')
   });
 
-  communicator = spy<PlatformCommunicator>({
+  communicator = spy<PlatformCommunicator<unknown>>({
     getUser: () => Promise.reject(''),
     sendResponse: () => Promise.reject(''),
     setTypingIndicator: () => Promise.reject('')

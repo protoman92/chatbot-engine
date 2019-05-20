@@ -4,20 +4,21 @@ import { PlatformCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
 import { Messenger, SupportedPlatform, UnitMessenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
-import { GenericResponse, PlatformResponse } from '../type/response';
+import { GenericResponse } from '../type/response';
 
 /**
  * Create a generic unit messenger.
  * @template C The context used by the current chatbot.
+ * @template PlatformResponse The platform-specific response.
  * @param leafSelector A leaf selector instance.
  * @param communicator A platform communicator instance.
  * @param responseMapper Function to map generic response to platform responses.
  * @param transformers Array of compose functions to apply on base messenger.
  * @return A generic messenger.
  */
-export async function createGenericUnitMessenger<C>(
+export async function createGenericUnitMessenger<C, PlatformResponse>(
   leafSelector: Leaf<C>,
-  communicator: PlatformCommunicator,
+  communicator: PlatformCommunicator<PlatformResponse>,
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>,
@@ -71,13 +72,14 @@ export function createCrossPlatformUnitMessenger<C>(
  * generic requests, so it's safer to return an Array of generic requests.
  * @template C The context used by the current chatbot.
  * @template PlatformRequest The platform-specific request.
+ * @template PlatformResponse The platform-specific response.
  * @param param0 Required dependencies to perform platform-specific work.
  * @return A generic messenger instance.
  */
-export function createGenericMessenger<C, PlatformRequest>(
+export function createGenericMessenger<C, PlatformRequest, PlatformResponse>(
   unitMessenger: UnitMessenger<C>,
   requestMapper: (req: PlatformRequest) => Promise<readonly GenericRequest<C>[]>
-): Messenger<PlatformRequest> {
+): Messenger<PlatformRequest, PlatformResponse> {
   return {
     processPlatformRequest: platformRequest => {
       return requestMapper(platformRequest).then(requests => {

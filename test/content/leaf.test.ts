@@ -1,6 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
+import { GenericContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
@@ -21,7 +22,6 @@ import {
 } from '../../src/stream/stream';
 import { ErrorContext } from '../../src/type/common';
 import { Leaf } from '../../src/type/leaf';
-import { Response } from '../../src/type/visual-content';
 import { WitContext } from '../../src/type/wit';
 
 const senderID = 'sender-id';
@@ -45,9 +45,9 @@ describe('Default error leaf', () => {
     });
     // Then
     expectJs(visualContents).to.have.length(1);
-    const [{ response }] = visualContents;
+    const [{ content: response }] = visualContents;
 
-    if (isType<Response.Text>(response, 'text')) {
+    if (isType<GenericContent.Text>(response, 'text')) {
       expectJs(response.text).to.contain(error.message);
     } else {
       throw new Error('Never should have come here');
@@ -119,7 +119,7 @@ describe('Higher order functions', () => {
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
-              response: { type: 'text', text: '' }
+              content: { type: 'text', text: '' }
             }
           ]
         });
@@ -164,7 +164,7 @@ describe('Higher order functions', () => {
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
-              response: { type: 'text', text: '' }
+              content: { type: 'text', text: '' }
             }
           ]
         });
@@ -204,7 +204,7 @@ describe('Higher order functions', () => {
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
-              response: { type: 'text', text: '' }
+              content: { type: 'text', text: '' }
             }
           ]
         });
@@ -323,7 +323,7 @@ describe('Higher order functions', () => {
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
-              response: { type: 'text', text: '' }
+              content: { type: 'text', text: '' }
             }
           ]
         });

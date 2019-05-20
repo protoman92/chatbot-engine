@@ -1,18 +1,18 @@
-interface BaseQuickReply {
-  readonly text: string;
-}
+export namespace GenericQuickReply {
+  interface Base {
+    readonly text: string;
+  }
 
-export namespace QuickReply {
-  export interface Location extends BaseQuickReply {
+  export interface Location extends Base {
     readonly type: 'location';
   }
 
-  export interface Postback extends BaseQuickReply {
+  export interface Postback extends Base {
     readonly payload: string;
     readonly type: 'postback';
   }
 
-  export interface SimpleText extends BaseQuickReply {
+  export interface SimpleText extends Base {
     readonly type: 'text';
   }
 }
@@ -22,30 +22,30 @@ export namespace QuickReply {
  * concept is available only on certain platforms (Facebook/Telegram) but is
  * an important one nonetheless.
  */
-export type QuickReply =
-  | QuickReply.Location
-  | QuickReply.Postback
-  | QuickReply.SimpleText;
+export type GenericQuickReply =
+  | GenericQuickReply.Location
+  | GenericQuickReply.Postback
+  | GenericQuickReply.SimpleText;
 
-export namespace ResponseContent {
-  interface BaseAction {
-    readonly text: string;
-  }
-
+export namespace GenericSubContent {
   namespace Action {
-    export interface Postback extends BaseAction {
+    interface Base {
+      readonly text: string;
+    }
+
+    interface Postback extends Base {
       readonly payload: string;
       readonly type: 'postback';
     }
 
-    export interface URL extends BaseAction {
+    interface URL extends Base {
       readonly url: string;
       readonly type: 'url';
     }
   }
 
   /** Does something, like communicating with a remote service. */
-  export type Action = Action.Postback | Action.URL;
+  type Action = Action.Postback | Action.URL;
 
   interface Media {
     readonly type: 'image' | 'video';
@@ -53,60 +53,60 @@ export namespace ResponseContent {
   }
 }
 
-declare namespace Response {
+declare namespace GenericContent {
   export interface Button {
-    readonly actions: readonly ResponseContent.Action[];
+    readonly actions: readonly GenericSubContent.Action[];
     readonly text: string;
     readonly type: 'button';
   }
 
-  export interface Carousel {
-    readonly actions: readonly ResponseContent.Action[] | undefined | null;
+  interface Carousel {
+    readonly actions: readonly GenericSubContent.Action[] | undefined | null;
 
     readonly items: Readonly<{
       title: string;
       description: string | undefined | null;
       mediaURL: string | undefined | null;
-      actions: readonly ResponseContent.Action[] | undefined | null;
+      actions: readonly GenericSubContent.Action[] | undefined | null;
     }>[];
 
     readonly type: 'carousel';
   }
 
-  export interface List {
-    readonly actions: readonly ResponseContent.Action[] | undefined | null;
+  interface List {
+    readonly actions: readonly GenericSubContent.Action[] | undefined | null;
 
     readonly items: Readonly<{
       title: string;
       description: string | undefined | null;
       size: 'large' | 'small';
-      actions: readonly ResponseContent.Action[] | undefined | null;
+      actions: readonly GenericSubContent.Action[] | undefined | null;
     }>[];
 
     readonly type: 'list';
   }
 
-  export interface Media {
-    readonly media: ResponseContent.Media;
+  interface Media {
+    readonly media: GenericSubContent.Media;
     readonly type: 'media';
   }
 
-  export interface Text {
+  interface Text {
     readonly text: string;
     readonly type: 'text';
   }
 }
 
 /** Represents something the user receives after they send a message. */
-export type Response =
-  | Response.Button
-  | Response.Carousel
-  | Response.List
-  | Response.Media
-  | Response.Text;
+export type GenericContent =
+  | GenericContent.Button
+  | GenericContent.Carousel
+  | GenericContent.List
+  | GenericContent.Media
+  | GenericContent.Text;
 
 /** Represents content that will go out to the user. */
 export interface VisualContent {
-  readonly quickReplies?: readonly QuickReply[];
-  readonly response: Response;
+  readonly quickReplies?: readonly GenericQuickReply[];
+  readonly content: GenericContent;
 }

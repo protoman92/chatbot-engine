@@ -2,16 +2,13 @@ import { FacebookVisualContent } from './facebook-visual-content';
 import { SupportedPlatform } from './messenger';
 import { VisualContent } from './visual-content';
 
-/** A platform-specific response. */
-export type PlatformResponse = unknown;
-
-interface BaseGenericResponse<C> {
-  readonly senderID: string;
-  readonly additionalContext?: Partial<C>;
-}
-
 declare namespace GenericResponse {
-  interface Facebook<C> extends BaseGenericResponse<C> {
+  interface Base<C> {
+    readonly senderID: string;
+    readonly additionalContext?: Partial<C>;
+  }
+
+  interface Facebook<C> extends Base<C> {
     readonly senderPlatform: 'facebook';
     readonly visualContents: readonly FacebookVisualContent[];
   }

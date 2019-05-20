@@ -49,7 +49,7 @@ export function createDefaultErrorLeaf<C>(
         senderPlatform,
         visualContents: [
           {
-            response: {
+            content: {
               type: 'text',
               text: `Encountered an error: '${error.message}'`
             }
