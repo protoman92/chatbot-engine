@@ -17,7 +17,10 @@ export {
 export {
   createCrossPlatformUnitMessenger
 } from './messenger/generic-messenger';
-export { saveUserForSenderID } from './messenger/unit-transform';
+export {
+  saveUserForSenderID,
+  transformUnitMessengersByDefault
+} from './messenger/unit-transform';
 export { createWitCommunicator } from './messenger/wit-communicator';
 export * from './type/branch';
 export * from './type/common';

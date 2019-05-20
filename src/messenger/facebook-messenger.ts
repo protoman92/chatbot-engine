@@ -4,7 +4,6 @@ import {
   isType
 } from '../common/utils';
 import { Transformer } from '../type/common';
-import { ContextDAO } from '../type/context-dao';
 import {
   FacebookCommunicator,
   FacebookConfigs,
@@ -21,11 +20,6 @@ import {
   createGenericMessenger,
   createGenericUnitMessenger
 } from './generic-messenger';
-import {
-  injectContextOnReceive,
-  saveContextOnSend,
-  setTypingIndicator
-} from './unit-transform';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -409,7 +403,7 @@ async function createFacebookResponse<C>({
  * @param configurations Facebook configurations.
  * @return A generic unit messenger.
  */
-export async function createBaseFacebookUnitMessenger<C>(
+export async function createFacebookUnitMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: FacebookCommunicator,
   configurations: FacebookConfigs,
@@ -434,33 +428,6 @@ export async function createBaseFacebookUnitMessenger<C>(
       throw new Error(formatFacebookError('Invalid mode or verify token'));
     }
   };
-}
-
-/**
- * Force some default transform functions on the base unit messenger.
- * @template C The context used by the current chatbot.
- * @param leafSelector A leaf selector instance.
- * @param contextDAO A context DAO instance.
- * @param communicator A platform communicator instance.
- * @param configurations Facebook configurations.
- * @return A generic unit messenger.
- */
-export function createFacebookUnitMessenger<C>(
-  leafSelector: Leaf<C>,
-  contextDAO: ContextDAO<C>,
-  communicator: FacebookCommunicator,
-  configuration: FacebookConfigs,
-  ...transformers: readonly Transformer<UnitMessenger<C>>[]
-) {
-  return createBaseFacebookUnitMessenger(
-    leafSelector,
-    communicator,
-    configuration,
-    injectContextOnReceive(contextDAO),
-    saveContextOnSend(contextDAO),
-    setTypingIndicator(communicator),
-    ...transformers
-  );
 }
 
 /**

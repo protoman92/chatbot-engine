@@ -1,4 +1,4 @@
-import { deepClone, joinObjects } from '../common/utils';
+import { compose, deepClone, joinObjects } from '../common/utils';
 import { DefaultContext, Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
@@ -123,4 +123,26 @@ export function setTypingIndicator<C, PlatformResponse>(
       }
     };
   };
+}
+
+/**
+ * Create default unit messenger transformers that all unit messengers should
+ * use.
+ * @template C The context used by the current chatbot.
+ * @template PlatformResponse The platform-specific response.
+ * @param contextDAO The context DAO being used to perform CRUD.
+ * @param communicator A platform communicator instance.
+ * @return A transformer function.
+ */
+export function transformUnitMessengersByDefault<C, PlatformResponse>(
+  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>,
+  communicator: PlatformCommunicator<PlatformResponse>
+): Transformer<UnitMessenger<C>> {
+  return messenger =>
+    compose(
+      messenger,
+      injectContextOnReceive(contextDAO),
+      saveContextOnSend(contextDAO),
+      setTypingIndicator(communicator)
+    );
 }
