@@ -16,11 +16,15 @@ export type TelegramResponse = TelegramResponse.SendMessage;
 /** Represents Telegram configurations. */
 export interface TelegramConfigs {
   readonly authToken: string;
+  readonly webhookURL: string;
 }
 
 /** A Telegram-specific communicator. */
 export interface TelegramCommunicator
-  extends PlatformCommunicator<TelegramResponse> {}
+  extends PlatformCommunicator<TelegramResponse> {
+  /** Set webhook to start receiving message updates. */
+  setWebhook(): Promise<unknown>;
+}
 
 /**
  * Represents a Telegram-specific unit messenger.

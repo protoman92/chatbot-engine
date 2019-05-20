@@ -1,12 +1,14 @@
-import { HTTPCommunicator, PlatformCommunicator } from '../type/communicator';
-import { TelegramConfigs, TelegramResponse } from '../type/telegram';
+import { stringify } from 'querystring';
+import { HTTPCommunicator } from '../type/communicator';
+import { TelegramCommunicator, TelegramConfigs } from '../type/telegram';
 
 export function createTelegramCommunicator(
   communicator: HTTPCommunicator,
-  { authToken }: TelegramConfigs
-): PlatformCommunicator<TelegramResponse> {
-  function formatURL(action: string) {
-    return `https://api.telegram.org/bot${authToken}/${action}`;
+  { authToken, webhookURL }: TelegramConfigs
+): TelegramCommunicator {
+  function formatURL(action: string, query?: {}) {
+    const qs = stringify(query);
+    return `https://api.telegram.org/bot${authToken}/${action}?${qs}`;
   }
 
   return {
@@ -24,6 +26,13 @@ export function createTelegramCommunicator(
         url: formatURL('sendChatAction'),
         method: 'POST',
         body: { chat_id, action: 'typing' }
+      });
+    },
+    setWebhook: () => {
+      return communicator.communicate({
+        url: formatURL('setWebhook'),
+        method: 'GET',
+        query: { url: webhookURL }
       });
     }
   };

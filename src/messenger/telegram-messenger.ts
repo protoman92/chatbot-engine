@@ -24,6 +24,8 @@ export async function createTelegramUnitMessenger<C>(
   communicator: TelegramCommunicator,
   ...transformers: readonly Transformer<UnitMessenger<C>>[]
 ): Promise<TelegramUnitMessenger<C>> {
+  await communicator.setWebhook();
+
   const unitMessenger = await createGenericUnitMessenger(
     leafSelector,
     communicator,
