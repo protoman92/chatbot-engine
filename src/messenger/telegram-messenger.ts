@@ -21,7 +21,7 @@ import { createMessenger } from './generic-messenger';
  * Map platform request to generic request for generic processing.
  * @template C The context used by the current chatbot.
  */
-function createGenericRequest<C>(
+function createTelegramRequest<C>(
   webhook: TelegramRequest,
   senderPlatform: 'telegram'
 ): readonly GenericRequest<C>[] {
@@ -32,7 +32,8 @@ function createGenericRequest<C>(
   } = webhook;
 
   function processRequest(
-    request: TelegramRequest
+    request: TelegramRequest,
+    senderPlatform: 'telegram'
   ): GenericRequest.Telegram<C>['data'] {
     const { message } = request;
 
@@ -57,7 +58,7 @@ function createGenericRequest<C>(
       senderPlatform,
       senderID: `${id}`,
       oldContext: {} as C,
-      data: processRequest(webhook)
+      data: processRequest(webhook, senderPlatform)
     }
   ];
 }
@@ -68,10 +69,8 @@ function createGenericRequest<C>(
  */
 function createTelegramResponse<C>({
   senderID,
-  senderPlatform,
   visualContents
 }: GenericResponse.Telegram<C>): readonly TelegramResponse[] {
-  console.log('TELEGRAM', senderPlatform, visualContents);
   function createTextResponse(
     senderID: string,
     { text }: VisualContent.MainContent.Text
@@ -117,13 +116,11 @@ export async function createTelegramMessenger<C>(
 ): Promise<TelegramMessenger<C>> {
   await communicator.setWebhook();
 
-  const messenger = await createMessenger(
+  return createMessenger(
     leafSelector,
     communicator,
-    async req => createGenericRequest(req, 'telegram'),
+    async req => createTelegramRequest(req, 'telegram'),
     async res => createTelegramResponse(res as GenericResponse.Telegram<C>),
     ...transformers
   );
-
-  return messenger;
 }

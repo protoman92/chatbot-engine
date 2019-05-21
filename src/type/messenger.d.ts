@@ -30,12 +30,12 @@ export interface Messenger<C, PLRequest> {
  * Represents a messenger that deals with a platform request end-to-end, from
  * handling data to sending response. Note that each generic messenger should
  * have a generic messenger that handles requests one-by-one.
- * @template PlatformRequest The platform-specific request.
- * @template PlatformResponse The platform-specific response.
+ * @template PLRequest The platform-specific request.
+ * @template PLResponse The platform-specific response.
  */
-export interface BatchMessenger<PlatformRequest, PlatformResponse> {
+export interface BatchMessenger<PLRequest, PLResponse> {
   /** Process a platform request from end-to-end. */
-  processPlatformRequest(req: PlatformRequest): Promise<unknown>;
+  processPlatformRequest(req: PLRequest): Promise<unknown>;
 }
 
 /** Configuration for cross-platform batch messenger. */

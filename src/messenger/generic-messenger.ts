@@ -13,21 +13,19 @@ import { GenericResponse } from '../type/response';
 /**
  * Create a generic messenger.
  * @template C The context used by the current chatbot.
- * @template PlatformRequest The platform-specific request.
- * @template PlatformResponse The platform-specific response.
+ * @template PLRequest The platform-specific request.
+ * @template PLResponse The platform-specific response.
  */
-export async function createMessenger<C, PlatformRequest, PlatformResponse>(
+export async function createMessenger<C, PLRequest, PLResponse>(
   leafSelector: Leaf<C>,
-  communicator: PlatformCommunicator<PlatformResponse>,
-  requestMapper: Messenger<C, PlatformRequest>['generalizeRequest'],
-  responseMapper: (
-    res: GenericResponse<C>
-  ) => Promise<readonly PlatformResponse[]>,
-  ...transformers: readonly Transformer<Messenger<C, PlatformRequest>>[]
-): Promise<Messenger<C, PlatformRequest>> {
-  const messenger: Messenger<C, PlatformRequest> = compose(
+  communicator: PlatformCommunicator<PLResponse>,
+  requestMapper: Messenger<C, PLRequest>['generalizeRequest'],
+  responseMapper: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>,
+  ...transformers: readonly Transformer<Messenger<C, PLRequest>>[]
+): Promise<Messenger<C, PLRequest>> {
+  const messenger: Messenger<C, PLRequest> = compose(
     {
-      generalizeRequest: requestMapper,
+      generalizeRequest: platformReq => requestMapper(platformReq),
       receiveRequest: ({
         senderID,
         senderPlatform,
@@ -63,17 +61,16 @@ export async function createMessenger<C, PlatformRequest, PlatformResponse>(
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
  * @template C The context used by the current chatbot.
- * @template PlatformRequest The platform-specific request.
- * @template PlatformResponse The platform-specific response.
+ * @template PLRequest The platform-specific request.
+ * @template PLResponse The platform-specific response.
  */
-export function createBatchMessenger<C, PlatformRequest, PlatformResponse>(
-  messenger: Messenger<C, PlatformRequest>
-): BatchMessenger<PlatformRequest, PlatformResponse> {
+export function createBatchMessenger<C, PLRequest, PLResponse>(
+  messenger: Messenger<C, PLRequest>
+): BatchMessenger<PLRequest, PLResponse> {
   return {
-    processPlatformRequest: platformReq => {
-      return messenger.generalizeRequest(platformReq).then(requests => {
-        return mapSeries(requests, req => messenger.receiveRequest(req));
-      });
+    processPlatformRequest: async platformReq => {
+      const genericReq = await messenger.generalizeRequest(platformReq);
+      return mapSeries(genericReq, req => messenger.receiveRequest(req));
     }
   };
 }

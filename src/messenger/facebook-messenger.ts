@@ -21,7 +21,7 @@ import { createMessenger } from './generic-messenger';
  * Map platform request to generic request for generic processing.
  * @template C The context used by the current chatbot.
  */
-function createGenericRequest<C>(
+function createFacebookRequest<C>(
   webhook: FacebookRequest,
   senderPlatform: 'facebook'
 ): readonly GenericRequest.Facebook<C>[] {
@@ -398,12 +398,12 @@ export async function createFacebookMessenger<C>(
   communicator: FacebookCommunicator,
   ...transformers: readonly Transformer<Messenger<C, FacebookRequest>>[]
 ): Promise<FacebookMessenger<C>> {
-  const messenger = await createMessenger(
+  return createMessenger(
     leafSelector,
     communicator,
     async req => {
       if (isType<FacebookRequest>(req, 'object', 'entry')) {
-        return createGenericRequest(req, 'facebook');
+        return createFacebookRequest(req, 'facebook');
       }
 
       throw new Error(
@@ -413,6 +413,4 @@ export async function createFacebookMessenger<C>(
     async res => createFacebookResponse(res as GenericResponse.Facebook<C>),
     ...transformers
   );
-
-  return messenger;
 }
