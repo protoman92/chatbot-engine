@@ -399,6 +399,7 @@ export async function createFacebookMessenger<C>(
   ...transformers: readonly Transformer<Messenger<C, FacebookRequest>>[]
 ): Promise<FacebookMessenger<C>> {
   return createMessenger(
+    'facebook',
     leafSelector,
     communicator,
     async req => {

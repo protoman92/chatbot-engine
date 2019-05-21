@@ -18,6 +18,7 @@ import {
   createCrossPlatformBatchMessenger,
   createMessenger
 } from '../../src/messenger/generic-messenger';
+import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { Leaf } from '../../src/type/leaf';
 import { GenericRequest } from '../../src/type/request';
@@ -43,7 +44,7 @@ describe('Generic unit messenger', () => {
     });
   });
 
-  it('Should process input when receiving request', async () => {
+  it('Should trigger send with valid response', async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(communicator.sendResponse(anything())).thenResolve();
@@ -52,6 +53,7 @@ describe('Generic unit messenger', () => {
     // When
     const unitMessenger = spy(
       await createMessenger(
+        senderPlatform,
         instance(leafSelector),
         instance(communicator),
         async () => [],
@@ -59,7 +61,6 @@ describe('Generic unit messenger', () => {
       )
     );
 
-    // Then
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
     const response: GenericResponse<{}> = {
@@ -69,6 +70,8 @@ describe('Generic unit messenger', () => {
     };
 
     await next(response);
+
+    // Then
     expectJs(complete).to.be.ok();
     verify(unitMessenger.sendResponse(deepEqual(response))).once();
 
@@ -77,7 +80,38 @@ describe('Generic unit messenger', () => {
     });
   });
 
-  it('Should trigger send with valid response', async () => {
+  it('Should not trigger send without matching sender platform', async () => {
+    // Setup
+    when(leafSelector.subscribe(anything())).thenResolve();
+    when(communicator.sendResponse(anything())).thenResolve();
+    const platformResponses = [{ a: 1 }, { b: 2 }];
+
+    // When
+    const unitMessenger = spy(
+      await createMessenger(
+        'telegram',
+        instance(leafSelector),
+        instance(communicator),
+        async () => [],
+        async () => platformResponses
+      )
+    );
+
+    const { next, complete } = capture(leafSelector.subscribe).first()[0];
+
+    const nextResult = await next({
+      senderID,
+      senderPlatform,
+      visualContents: []
+    });
+
+    // Then
+    expectJs(nextResult).to.eql(STREAM_INVALID_NEXT_RESULT);
+    expectJs(complete).to.be.ok();
+    verify(unitMessenger.sendResponse(anything())).never();
+  });
+
+  it('Should process input when receiving request', async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
@@ -102,6 +136,7 @@ describe('Generic unit messenger', () => {
 
     // When
     const unitMessenger = await createMessenger(
+      senderPlatform,
       instance(leafSelector),
       instance(communicator),
       async () => [],

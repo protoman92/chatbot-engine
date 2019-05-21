@@ -117,6 +117,7 @@ export async function createTelegramMessenger<C>(
   await communicator.setWebhook();
 
   return createMessenger(
+    'telegram',
     leafSelector,
     communicator,
     async req => createTelegramRequest(req, 'telegram'),

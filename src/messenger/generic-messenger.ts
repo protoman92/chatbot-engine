@@ -9,6 +9,7 @@ import {
   SupportedPlatform
 } from '../type/messenger';
 import { GenericResponse } from '../type/response';
+import { STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 
 /**
  * Create a generic messenger.
@@ -17,6 +18,7 @@ import { GenericResponse } from '../type/response';
  * @template PLResponse The platform-specific response.
  */
 export async function createMessenger<C, PLRequest, PLResponse>(
+  senderPlatform: SupportedPlatform,
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator<PLResponse>,
   requestMapper: Messenger<C, PLRequest>['generalizeRequest'],
@@ -50,7 +52,13 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   );
 
   await leafSelector.subscribe({
-    next: response => messenger.sendResponse(response),
+    next: async ({ senderPlatform: pf, ...restInput }) => {
+      if (pf === senderPlatform) {
+        return messenger.sendResponse({ senderPlatform: pf, ...restInput });
+      }
+
+      return STREAM_INVALID_NEXT_RESULT;
+    },
     complete: async () => {}
   });
 
