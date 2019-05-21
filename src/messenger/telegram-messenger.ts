@@ -1,4 +1,3 @@
-import { Omit } from 'ts-essentials';
 import {
   DEFAULT_COORDINATES,
   formatTelegramError,
@@ -8,12 +7,14 @@ import { Transformer } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { BatchMessenger, Messenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
+import { GenericResponse } from '../type/response';
 import {
   TelegramCommunicator,
   TelegramMessenger,
   TelegramRequest,
   TelegramResponse
 } from '../type/telegram';
+import { VisualContent } from '../type/visual-content';
 import {
   createBatchMessenger,
   createGenericMessenger
@@ -34,13 +35,15 @@ function createGenericRequest<C>(
   } = webhook;
 
   function processRequest(
-    request: Omit<TelegramRequest, keyof TelegramRequest.Base>
+    request: TelegramRequest
   ): GenericRequest.Telegram<C>['data'] {
-    if (isType<TelegramRequest.Text>(webhook, 'text')) {
+    const { message } = request;
+
+    if (isType<TelegramRequest.Input.Text>(message, 'text')) {
       return [
         {
           senderPlatform,
-          inputText: request.text,
+          inputText: message.text,
           inputImageURL: '',
           inputCoordinate: DEFAULT_COORDINATES
         }
@@ -54,12 +57,54 @@ function createGenericRequest<C>(
 
   return [
     {
+      senderPlatform,
       senderID: `${id}`,
-      senderPlatform: 'telegram',
       oldContext: {} as C,
       data: processRequest(webhook)
     }
   ];
+}
+
+/**
+ * Create a Telegram response from multiple generic responses.
+ * @template C The context used by the current chatbot.
+ */
+function createTelegramResponse<C>({
+  senderID,
+  visualContents
+}: GenericResponse.Telegram<C>): readonly TelegramResponse[] {
+  function createTextResponse(
+    senderID: string,
+    { text }: VisualContent.MainContent.Text
+  ): TelegramResponse.SendMessage {
+    return { text, action: 'sendMessage', chat_id: senderID };
+  }
+
+  function createResponse(
+    senderID: string,
+    content: GenericResponse.Telegram<C>['visualContents'][number]['content']
+  ) {
+    switch (content.type) {
+      case 'text':
+        return createTextResponse(senderID, content);
+
+      default:
+        throw new Error(
+          formatTelegramError(`Unsupported content ${JSON.stringify(content)}`)
+        );
+    }
+  }
+
+  function createPlatformResponse(
+    senderID: string,
+    { content }: GenericResponse<C>['visualContents'][number]
+  ): TelegramResponse {
+    return createResponse(senderID, content);
+  }
+
+  return visualContents.map(visualContent => {
+    return createPlatformResponse(senderID, visualContent);
+  });
 }
 
 /**
@@ -76,7 +121,7 @@ export async function createTelegramMessenger<C>(
   const messenger = await createGenericMessenger(
     leafSelector,
     communicator,
-    async response => [],
+    async res => createTelegramResponse(res as GenericResponse.Telegram<C>),
     ...transformers
   );
 
@@ -90,7 +135,7 @@ export async function createTelegramMessenger<C>(
 export function createTelegramBatchMessenger<C>(
   messenger: Messenger<C>
 ): BatchMessenger<TelegramRequest, TelegramResponse> {
-  return createBatchMessenger(messenger, async request =>
-    createGenericRequest(request, 'telegram')
-  );
+  return createBatchMessenger(messenger, async request => {
+    return createGenericRequest(request, 'telegram');
+  });
 }

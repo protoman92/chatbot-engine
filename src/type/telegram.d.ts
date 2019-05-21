@@ -4,36 +4,40 @@ import { Messenger } from './messenger';
 import { VisualContent } from './visual-content';
 
 declare namespace TelegramRequest {
-  interface Base {
-    readonly update_id: number;
+  namespace Input {
+    interface Base {
+      readonly message_id: number;
 
-    readonly message: DeepReadonly<{
-      message_id: number;
-      from: {
+      readonly from: Readonly<{
         id: number;
         is_bot: boolean;
         first_name: string;
         last_name: string;
         username: string;
         language_code: 'en';
-      };
-      chat: {
+      }>;
+
+      readonly chat: Readonly<{
         id: number;
         first_name: string;
         last_name: string;
         username: string;
         type: 'private';
-      };
-      date: number;
-    }>;
+      }>;
+    }
+
+    interface Text extends Base {
+      readonly text: string;
+    }
   }
 
-  interface Text extends Base {
-    readonly text: string;
-  }
+  type Input = Input.Text;
 }
 
-export type TelegramRequest = TelegramRequest.Text;
+export interface TelegramRequest {
+  readonly update_id: number;
+  readonly message: TelegramRequest.Input;
+}
 
 declare namespace TelegramResponse {
   interface SendMessage {

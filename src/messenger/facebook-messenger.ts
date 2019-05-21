@@ -172,10 +172,10 @@ function createGenericRequest<C>(
  * Create a Facebook response from multiple generic responses.
  * @template C The context used by the current chatbot.
  */
-async function createFacebookResponse<C>({
+function createFacebookResponse<C>({
   senderID,
-  visualContents: contents
-}: GenericResponse.Facebook<C>): Promise<readonly FacebookResponse[]> {
+  visualContents
+}: GenericResponse.Facebook<C>): readonly FacebookResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
@@ -319,8 +319,14 @@ async function createFacebookResponse<C>({
     };
   }
 
+  function createTextResponse({
+    text
+  }: VisualContent.MainContent.Text): FacebookResponse.Content.Text {
+    return { messaging_type: 'RESPONSE', message: { text } };
+  }
+
   function createResponse(
-    content: VisualContent.MainContent
+    content: GenericResponse.Facebook<C>['visualContents'][number]['content']
   ): FacebookResponse.Output {
     switch (content.type) {
       case 'button':
@@ -336,10 +342,7 @@ async function createFacebookResponse<C>({
         return createMediaResponse(content);
 
       case 'text':
-        return {
-          messaging_type: 'RESPONSE',
-          message: { text: content.text }
-        };
+        return createTextResponse(content);
     }
   }
 
@@ -367,7 +370,10 @@ async function createFacebookResponse<C>({
 
   function createPlatformResponse(
     senderID: string,
-    { content, quickReplies = [] }: GenericResponse<C>['visualContents'][0]
+    {
+      content,
+      quickReplies = []
+    }: GenericResponse.Facebook<C>['visualContents'][number]
   ): FacebookResponse {
     const fbQuickReplies = quickReplies.map(qr => createQuickReply(qr));
     const fbResponse = createResponse(content);
@@ -381,7 +387,9 @@ async function createFacebookResponse<C>({
     return { ...fbResponse, message, recipient: { id: senderID } };
   }
 
-  return contents.map(content => createPlatformResponse(senderID, content));
+  return visualContents.map(visualContent => {
+    return createPlatformResponse(senderID, visualContent);
+  });
 }
 
 /**
@@ -396,17 +404,7 @@ export async function createFacebookMessenger<C>(
   const messenger = await createGenericMessenger(
     leafSelector,
     communicator,
-    res => {
-      switch (res.senderPlatform) {
-        case 'facebook':
-          return createFacebookResponse(res as GenericResponse.Facebook<C>);
-
-        default:
-          throw new Error(
-            formatFacebookError(`Invalid response ${JSON.stringify(res)}`)
-          );
-      }
-    },
+    async res => createFacebookResponse(res as GenericResponse.Facebook<C>),
     ...transformers
   );
 
