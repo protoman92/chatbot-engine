@@ -24,7 +24,8 @@ import {
  * @template C The context used by the current chatbot.
  */
 function createGenericRequest<C>(
-  webhook: TelegramRequest
+  webhook: TelegramRequest,
+  senderPlatform: 'telegram'
 ): readonly GenericRequest<C>[] {
   const {
     message: {
@@ -34,14 +35,14 @@ function createGenericRequest<C>(
 
   function processRequest(
     request: Omit<TelegramRequest, keyof TelegramRequest.Base>
-  ): GenericRequest<C>['data'] {
+  ): GenericRequest.Telegram<C>['data'] {
     if (isType<TelegramRequest.Text>(webhook, 'text')) {
       return [
         {
+          senderPlatform,
           inputText: request.text,
           inputImageURL: '',
-          inputCoordinate: DEFAULT_COORDINATES,
-          stickerID: ''
+          inputCoordinate: DEFAULT_COORDINATES
         }
       ];
     }
@@ -90,6 +91,6 @@ export function createTelegramBatchMessenger<C>(
   messenger: Messenger<C>
 ): BatchMessenger<TelegramRequest, TelegramResponse> {
   return createBatchMessenger(messenger, async request =>
-    createGenericRequest(request)
+    createGenericRequest(request, 'telegram')
   );
 }

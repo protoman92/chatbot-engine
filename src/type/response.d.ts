@@ -1,15 +1,22 @@
-import { FacebookVisualContent } from './facebook';
 import { SupportedPlatform } from './messenger';
+import { VisualContent } from './visual-content';
 
 declare namespace GenericResponse {
   interface Base<C> {
     readonly senderID: string;
+    readonly senderPlatform: SupportedPlatform;
     readonly additionalContext?: Partial<C>;
+    readonly visualContents: readonly VisualContent[];
   }
 
   interface Facebook<C> extends Base<C> {
-    readonly senderPlatform: SupportedPlatform;
-    readonly visualContents: readonly FacebookVisualContent[];
+    readonly senderPlatform: 'facebook';
+    readonly visualContents: readonly VisualContent.Facebook[];
+  }
+
+  interface Telegram<C> extends Base<C> {
+    readonly senderPlatform: 'telegram';
+    readonly visualContents: readonly VisualContent.Telegram[];
   }
 }
 
@@ -19,4 +26,7 @@ declare namespace GenericResponse {
  * This is to prevent stale old context replacing latest one.
  * @template C The context used by the current chatbot.
  */
-export type GenericResponse<C> = GenericResponse.Facebook<C>;
+export type GenericResponse<C> =
+  | GenericResponse.Base<C>
+  | GenericResponse.Facebook<C>
+  | GenericResponse.Telegram<C>;

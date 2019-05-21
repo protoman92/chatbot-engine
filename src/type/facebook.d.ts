@@ -3,11 +3,6 @@ import { PlatformCommunicator } from './communicator';
 import { Messenger } from './messenger';
 import { VisualContent } from './visual-content';
 
-export interface FacebookVisualContent extends VisualContent {
-  readonly quickReplies?: readonly VisualContent.QuickReply[];
-  readonly content: VisualContent.MainContent;
-}
-
 declare namespace FacebookRequest {
   namespace Input {
     interface Base {

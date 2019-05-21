@@ -82,14 +82,16 @@ describe('Generic unit messenger', () => {
     when(leafSelector.next(anything())).thenResolve();
     const oldContext = { a: 1, b: 2 };
 
-    const data: readonly GenericRequest.Input[] = [
+    const data: readonly GenericRequest.Data[] = [
       {
+        senderPlatform,
         inputText: 'text-1',
         inputImageURL: 'image-1',
         inputCoordinate: { lat: 0, lng: 0 },
         stickerID: ''
       },
       {
+        senderPlatform,
         inputText: 'text-2',
         inputImageURL: 'image-2',
         inputCoordinate: { lat: 1, lng: 1 },
@@ -154,19 +156,42 @@ describe('Cross platform unit messenger', () => {
 
     // When
     for (const senderPlatform of platforms) {
-      await crossMessenger.receiveRequest({
-        senderID,
-        senderPlatform,
-        oldContext: {},
-        data: [
-          {
-            inputText: '',
-            inputImageURL: '',
-            inputCoordinate: DEFAULT_COORDINATES,
-            stickerID: ''
-          }
-        ]
-      });
+      switch (senderPlatform) {
+        case 'facebook':
+          await crossMessenger.receiveRequest({
+            senderID,
+            senderPlatform,
+            oldContext: {},
+            data: [
+              {
+                senderPlatform,
+                inputText: '',
+                inputImageURL: '',
+                inputCoordinate: DEFAULT_COORDINATES,
+                stickerID: ''
+              }
+            ]
+          });
+
+          break;
+
+        case 'telegram':
+          await crossMessenger.receiveRequest({
+            senderID,
+            senderPlatform,
+            oldContext: {},
+            data: [
+              {
+                senderPlatform,
+                inputText: '',
+                inputImageURL: '',
+                inputCoordinate: DEFAULT_COORDINATES
+              }
+            ]
+          });
+
+          break;
+      }
 
       await crossMessenger.sendResponse({
         senderID,

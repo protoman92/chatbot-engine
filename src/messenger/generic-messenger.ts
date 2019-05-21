@@ -4,8 +4,8 @@ import { PlatformCommunicator } from '../type/communicator';
 import { Leaf } from '../type/leaf';
 import {
   BatchMessenger,
-  SupportedPlatform,
-  Messenger
+  Messenger,
+  SupportedPlatform
 } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
@@ -25,7 +25,12 @@ export async function createGenericMessenger<C, PlatformResponse>(
 ): Promise<Messenger<C>> {
   const messenger: Messenger<C> = compose(
     {
-      receiveRequest: ({ senderID, senderPlatform, oldContext, data }) => {
+      receiveRequest: ({
+        senderID,
+        senderPlatform,
+        oldContext,
+        data: data
+      }) => {
         return mapSeries(data, datum => {
           return leafSelector.next({
             ...datum,

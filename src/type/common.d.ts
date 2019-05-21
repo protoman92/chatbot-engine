@@ -8,11 +8,12 @@ export interface Coordinates {
   readonly lng: number;
 }
 
-export interface DefaultContext extends GenericRequest.Input {
-  readonly activeBranch?: string;
-  readonly senderID: string;
-  readonly senderPlatform: SupportedPlatform;
-}
+export type DefaultContext = GenericRequest.Data &
+  Readonly<{
+    readonly activeBranch?: string;
+    readonly senderID: string;
+    readonly senderPlatform: SupportedPlatform;
+  }>;
 
 export interface ErrorContext {
   readonly error: Error;

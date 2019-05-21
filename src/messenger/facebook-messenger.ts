@@ -24,9 +24,10 @@ import {
  * Map platform request to generic request for generic processing.
  * @template C The context used by the current chatbot.
  */
-export function mapWebhook<C>(
-  webhook: FacebookRequest
-): readonly GenericRequest<C>[] {
+function createGenericRequest<C>(
+  webhook: FacebookRequest,
+  senderPlatform: 'facebook'
+): readonly GenericRequest.Facebook<C>[] {
   const { object, entry } = webhook;
 
   /** Group requests based on sender ID. */
@@ -44,11 +45,13 @@ export function mapWebhook<C>(
   }
 
   function processRequest(
-    request: FacebookRequest.Input
-  ): GenericRequest<C>['data'] {
+    request: FacebookRequest.Input,
+    senderPlatform: 'facebook'
+  ): GenericRequest.Facebook<C>['data'] {
     if (isType<FacebookRequest.Input.Postback>(request, 'postback')) {
       return [
         {
+          senderPlatform,
           inputText: request.postback.payload,
           inputImageURL: '',
           inputCoordinate: DEFAULT_COORDINATES,
@@ -65,6 +68,7 @@ export function mapWebhook<C>(
       ) {
         return [
           {
+            senderPlatform,
             inputText: message.quick_reply.payload,
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
@@ -78,6 +82,7 @@ export function mapWebhook<C>(
       ) {
         return [
           {
+            senderPlatform,
             inputText: message.text,
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
@@ -98,6 +103,7 @@ export function mapWebhook<C>(
           switch (attachment.type) {
             case 'image':
               return {
+                senderPlatform,
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
                 inputCoordinate: DEFAULT_COORDINATES,
@@ -120,6 +126,7 @@ export function mapWebhook<C>(
               const coordinates = { lat, lng: long };
 
               return {
+                senderPlatform,
                 inputText: JSON.stringify(coordinates),
                 inputImageURL: '',
                 inputCoordinate: coordinates,
@@ -145,19 +152,14 @@ export function mapWebhook<C>(
 
         const groupedRequests = groupRequests(allRequests);
 
-        return Object.entries(groupedRequests).map(
-          ([senderID, requests]: [
-            string,
-            readonly FacebookRequest.Input[]
-          ]) => ({
-            senderID,
-            senderPlatform: 'facebook' as const,
-            oldContext: {} as any,
-            data: requests
-              .map(req => processRequest(req))
-              .reduce((acc, items) => acc.concat(items), [])
-          })
-        );
+        return Object.entries(groupedRequests).map(([senderID, requests]) => ({
+          senderID,
+          senderPlatform: 'facebook' as const,
+          oldContext: {} as any,
+          data: requests
+            .map(req => processRequest(req, senderPlatform))
+            .reduce((acc, items) => acc.concat(items), [])
+        }));
       }
   }
 
@@ -173,7 +175,7 @@ export function mapWebhook<C>(
 async function createFacebookResponse<C>({
   senderID,
   visualContents: contents
-}: GenericResponse<C>): Promise<readonly FacebookResponse[]> {
+}: GenericResponse.Facebook<C>): Promise<readonly FacebookResponse[]> {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
@@ -394,7 +396,17 @@ export async function createFacebookMessenger<C>(
   const messenger = await createGenericMessenger(
     leafSelector,
     communicator,
-    response => createFacebookResponse(response),
+    res => {
+      switch (res.senderPlatform) {
+        case 'facebook':
+          return createFacebookResponse(res as GenericResponse.Facebook<C>);
+
+        default:
+          throw new Error(
+            formatFacebookError(`Invalid response ${JSON.stringify(res)}`)
+          );
+      }
+    },
     ...transformers
   );
 
@@ -410,7 +422,7 @@ export function createFacebookBatchMessenger<C>(
 ): BatchMessenger<FacebookRequest, FacebookResponse> {
   return createBatchMessenger(messenger, async req => {
     if (isType<FacebookRequest>(req, 'object', 'entry')) {
-      return mapWebhook(req);
+      return createGenericRequest(req, 'facebook');
     }
 
     const errorMessage = `Invalid webhook: ${JSON.stringify(req)}`;

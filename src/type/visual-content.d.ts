@@ -105,10 +105,17 @@ declare namespace VisualContent {
     | MainContent.List
     | MainContent.Media
     | MainContent.Text;
+
+  interface Facebook {
+    readonly quickReplies?: readonly QuickReply[];
+    readonly content: MainContent;
+  }
+
+  interface Telegram {
+    readonly quickReplies?: readonly QuickReply[];
+    readonly content: MainContent;
+  }
 }
 
 /** Represents content that will go out to the user. */
-export interface VisualContent {
-  readonly quickReplies?: readonly VisualContent.QuickReply[];
-  readonly content: VisualContent.MainContent;
-}
+export type VisualContent = VisualContent.Facebook | VisualContent.Telegram;
