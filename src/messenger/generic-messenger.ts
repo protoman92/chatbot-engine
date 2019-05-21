@@ -1,34 +1,33 @@
-import { Omit } from 'ts-essentials';
 import { compose, getRequestPlatform, mapSeries } from '../common/utils';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
-import { FacebookRequest } from '../type/facebook';
 import { Leaf } from '../type/leaf';
 import {
   BatchMessenger,
-  CrossPlatformBatchMessengerConfigs,
+  CrossPlatformMessengerConfigs,
   Messenger,
   SupportedPlatform
 } from '../type/messenger';
-import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
-import { TelegramRequest } from '../type/telegram';
 
 /**
  * Create a generic messenger.
  * @template C The context used by the current chatbot.
+ * @template PlatformRequest The platform-specific request.
  * @template PlatformResponse The platform-specific response.
  */
-export async function createGenericMessenger<C, PlatformResponse>(
+export async function createMessenger<C, PlatformRequest, PlatformResponse>(
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator<PlatformResponse>,
+  requestMapper: Messenger<C, PlatformRequest>['generalizeRequest'],
   responseMapper: (
     res: GenericResponse<C>
   ) => Promise<readonly PlatformResponse[]>,
-  ...transformers: readonly Transformer<Messenger<C>>[]
-): Promise<Messenger<C>> {
-  const messenger: Messenger<C> = compose(
+  ...transformers: readonly Transformer<Messenger<C, PlatformRequest>>[]
+): Promise<Messenger<C, PlatformRequest>> {
+  const messenger: Messenger<C, PlatformRequest> = compose(
     {
+      generalizeRequest: requestMapper,
       receiveRequest: ({
         senderID,
         senderPlatform,
@@ -60,21 +59,6 @@ export async function createGenericMessenger<C, PlatformResponse>(
   return messenger;
 }
 
-export function createCrossPlatformMessenger<C>(
-  messengers: Readonly<{ [K in SupportedPlatform]: Messenger<C> }>
-): Messenger<C> {
-  return {
-    receiveRequest: ({ senderPlatform, ...restInput }) => {
-      const messenger = messengers[senderPlatform];
-      return messenger.receiveRequest({ ...restInput, senderPlatform });
-    },
-    sendResponse: ({ senderPlatform, ...restInput }) => {
-      const messenger = messengers[senderPlatform];
-      return messenger.sendResponse({ ...restInput, senderPlatform });
-    }
-  };
-}
-
 /**
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
@@ -83,14 +67,11 @@ export function createCrossPlatformMessenger<C>(
  * @template PlatformResponse The platform-specific response.
  */
 export function createBatchMessenger<C, PlatformRequest, PlatformResponse>(
-  senderPlatform: SupportedPlatform,
-  messenger: Messenger<C>,
-  requestMapper: (req: PlatformRequest) => Promise<readonly GenericRequest<C>[]>
+  messenger: Messenger<C, PlatformRequest>
 ): BatchMessenger<PlatformRequest, PlatformResponse> {
   return {
-    senderPlatform,
     processPlatformRequest: platformReq => {
-      return requestMapper(platformReq).then(requests => {
+      return messenger.generalizeRequest(platformReq).then(requests => {
         return mapSeries(requests, req => messenger.receiveRequest(req));
       });
     }
@@ -100,23 +81,28 @@ export function createBatchMessenger<C, PlatformRequest, PlatformResponse>(
 /**
  * Create a cross-platform batch messenger that delegates to the appropriate
  * platform-specific messenger when a request arrives.
+ * @template C The context used by the current chatbot.
  */
-export function createCrossPlatformBatchMessenger(
-  configs: CrossPlatformBatchMessengerConfigs
-): Omit<BatchMessenger<unknown, unknown>, 'senderPlatform'> {
-  return {
-    processPlatformRequest: platformReq => {
-      const senderPlatform = getRequestPlatform(platformReq);
-
-      switch (senderPlatform) {
-        case 'facebook':
-          const req = platformReq as FacebookRequest;
-          return configs.facebook.processPlatformRequest(req);
-
-        case 'telegram':
-          const res = platformReq as TelegramRequest;
-          return configs.telegram.processPlatformRequest(res);
-      }
+export function createCrossPlatformBatchMessenger<C>(
+  messengers: CrossPlatformMessengerConfigs<C>,
+  getPlatform: (platformReq: unknown) => SupportedPlatform = getRequestPlatform
+): BatchMessenger<unknown, unknown> {
+  return createBatchMessenger<C, unknown, unknown>({
+    generalizeRequest: async platformReq => {
+      const senderPlatform = getPlatform(platformReq);
+      return messengers[senderPlatform].generalizeRequest(platformReq);
+    },
+    receiveRequest: async ({ senderPlatform, ...restInput }) => {
+      return messengers[senderPlatform].receiveRequest({
+        ...restInput,
+        senderPlatform
+      });
+    },
+    sendResponse: async ({ senderPlatform, ...restInput }) => {
+      return messengers[senderPlatform].sendResponse({
+        ...restInput,
+        senderPlatform
+      });
     }
-  };
+  });
 }

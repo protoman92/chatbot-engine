@@ -11,14 +11,11 @@ import {
   FacebookResponse
 } from '../type/facebook';
 import { Leaf } from '../type/leaf';
-import { BatchMessenger, Messenger } from '../type/messenger';
+import { Messenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
 import { VisualContent } from '../type/visual-content';
-import {
-  createBatchMessenger,
-  createGenericMessenger
-} from './generic-messenger';
+import { createMessenger } from './generic-messenger';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -399,31 +396,23 @@ function createFacebookResponse<C>({
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: FacebookCommunicator,
-  ...transformers: readonly Transformer<Messenger<C>>[]
+  ...transformers: readonly Transformer<Messenger<C, FacebookRequest>>[]
 ): Promise<FacebookMessenger<C>> {
-  const messenger = await createGenericMessenger(
+  const messenger = await createMessenger(
     leafSelector,
     communicator,
+    async req => {
+      if (isType<FacebookRequest>(req, 'object', 'entry')) {
+        return createGenericRequest(req, 'facebook');
+      }
+
+      throw new Error(
+        formatFacebookError(`Invalid webhook ${JSON.stringify(req)}`)
+      );
+    },
     async res => createFacebookResponse(res as GenericResponse.Facebook<C>),
     ...transformers
   );
 
   return messenger;
-}
-
-/**
- * Create a Facebook mesenger.
- * @template C The context used by the current chatbot.
- */
-export function createFacebookBatchMessenger<C>(
-  messenger: FacebookMessenger<C>
-): BatchMessenger<FacebookRequest, FacebookResponse> {
-  return createBatchMessenger('facebook', messenger, async req => {
-    if (isType<FacebookRequest>(req, 'object', 'entry')) {
-      return createGenericRequest(req, 'facebook');
-    }
-
-    const errorMessage = `Invalid webhook: ${JSON.stringify(req)}`;
-    throw new Error(formatFacebookError(errorMessage));
-  });
 }

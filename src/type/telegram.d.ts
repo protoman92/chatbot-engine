@@ -64,8 +64,4 @@ export interface TelegramCommunicator
  * Represents a Telegram-specific messenger.
  * @template C The context used by the current chatbot.
  */
-export interface TelegramMessenger<C> extends Messenger<C> {}
-
-/** * Represents a Telegram-specific batch messenger. */
-export interface TelegramBatchMessenger
-  extends BatchMessenger<TelegramRequest, TelegramResponse> {}
+export interface TelegramMessenger<C> extends Messenger<C, TelegramRequest> {}

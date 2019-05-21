@@ -7,23 +7,21 @@ import {
   saveUserForSenderID,
   setTypingIndicator
 } from '../../src/messenger/messenger-transform';
-import { DefaultContext, KV } from '../../src/type/common';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { ContextDAO } from '../../src/type/context-dao';
 import { Messenger } from '../../src/type/messenger';
 import { GenericRequest } from '../../src/type/request';
 import { GenericResponse } from '../../src/type/response';
 
-interface Context extends KV<unknown> {}
-
 const senderID = 'sender-id';
 const senderPlatform = 'facebook';
-let messenger: Messenger<Context>;
+let messenger: Messenger<{}, unknown>;
 let communicator: PlatformCommunicator<unknown>;
-let contextDAO: ContextDAO<Context>;
+let contextDAO: ContextDAO<{}>;
 
 beforeEach(async () => {
-  messenger = spy<Messenger<Context>>({
+  messenger = spy<Messenger<{}, unknown>>({
+    generalizeRequest: () => Promise.reject(''),
     receiveRequest: () => Promise.reject(''),
     sendResponse: () => Promise.reject('')
   });
@@ -34,7 +32,7 @@ beforeEach(async () => {
     setTypingIndicator: () => Promise.reject('')
   });
 
-  contextDAO = spy<ContextDAO<Context>>({
+  contextDAO = spy<ContextDAO<{}>>({
     getContext: () => Promise.reject(''),
     setContext: () => Promise.reject(''),
     resetContext: () => Promise.reject('')
@@ -44,7 +42,7 @@ beforeEach(async () => {
 describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
-    const oldContext: Context = { a: 1, b: 2 };
+    const oldContext: {} = { a: 1, b: 2 };
     when(contextDAO.getContext(senderID)).thenResolve(oldContext);
     when(contextDAO.setContext(senderID, anything())).thenResolve();
     when(messenger.sendResponse(anything())).thenResolve();
@@ -54,9 +52,9 @@ describe('Save context on send', () => {
       saveContextOnSend(instance(contextDAO))
     );
 
-    const additionalContext: Partial<Context> = { a: 1, b: 2 };
+    const additionalContext: Partial<{}> = { a: 1, b: 2 };
 
-    const genericResponse: GenericResponse<Context> = {
+    const genericResponse: GenericResponse<{}> = {
       senderID,
       senderPlatform,
       additionalContext,
@@ -92,7 +90,7 @@ describe('Inject context on receive', () => {
       injectContextOnReceive(instance(contextDAO))
     );
 
-    const genericRequest: GenericRequest<Context> = {
+    const genericRequest: GenericRequest<{}> = {
       senderID,
       senderPlatform,
       oldContext: {},
@@ -127,15 +125,13 @@ describe('Save user for sender ID', () => {
 
     const transformed = compose(
       instance(messenger),
-      saveUserForSenderID(instance(communicator), async () => chatbotUser)
+      saveUserForSenderID(instance(communicator), async () => {})
     );
 
-    const genericRequest: GenericRequest<
-      Context & Pick<DefaultContext, 'senderID'>
-    > = {
+    const genericRequest: GenericRequest<{}> = {
       senderID,
       senderPlatform,
-      oldContext: { senderID: '' },
+      oldContext: {},
       data: []
     };
 

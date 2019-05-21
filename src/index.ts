@@ -10,23 +10,16 @@ export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export { createRedisContextDAO } from './context/RedisContextDAO';
 export { createAxiosCommunicator } from './messenger/axios-communicator';
 export { createFacebookCommunicator } from './messenger/facebook-communicator';
+export { createFacebookMessenger } from './messenger/facebook-messenger';
 export {
-  createFacebookBatchMessenger,
-  createFacebookMessenger
-} from './messenger/facebook-messenger';
-export {
-  createCrossPlatformBatchMessenger,
-  createCrossPlatformMessenger
+  createCrossPlatformBatchMessenger
 } from './messenger/generic-messenger';
 export {
   saveUserForSenderID,
   transformMessengersByDefault
 } from './messenger/messenger-transform';
 export { createTelegramCommunicator } from './messenger/telegram-communicator';
-export {
-  createTelegramBatchMessenger,
-  createTelegramMessenger
-} from './messenger/telegram-messenger';
+export { createTelegramMessenger } from './messenger/telegram-messenger';
 export { createWitCommunicator } from './messenger/wit-communicator';
 export * from './type/branch';
 export * from './type/common';

@@ -5,7 +5,7 @@ import {
 } from '../common/utils';
 import { Transformer } from '../type/common';
 import { Leaf } from '../type/leaf';
-import { BatchMessenger, Messenger } from '../type/messenger';
+import { Messenger } from '../type/messenger';
 import { GenericRequest } from '../type/request';
 import { GenericResponse } from '../type/response';
 import {
@@ -15,10 +15,7 @@ import {
   TelegramResponse
 } from '../type/telegram';
 import { VisualContent } from '../type/visual-content';
-import {
-  createBatchMessenger,
-  createGenericMessenger
-} from './generic-messenger';
+import { createMessenger } from './generic-messenger';
 
 /**
  * Map platform request to generic request for generic processing.
@@ -116,28 +113,17 @@ function createTelegramResponse<C>({
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: TelegramCommunicator,
-  ...transformers: readonly Transformer<Messenger<C>>[]
+  ...transformers: readonly Transformer<Messenger<C, TelegramRequest>>[]
 ): Promise<TelegramMessenger<C>> {
   await communicator.setWebhook();
 
-  const messenger = await createGenericMessenger(
+  const messenger = await createMessenger(
     leafSelector,
     communicator,
+    async req => createGenericRequest(req, 'telegram'),
     async res => createTelegramResponse(res as GenericResponse.Telegram<C>),
     ...transformers
   );
 
   return messenger;
-}
-
-/**
- * Create a Telegram mesenger.
- * @template C The context used by the current chatbot.
- */
-export function createTelegramBatchMessenger<C>(
-  messenger: TelegramMessenger<C>
-): BatchMessenger<TelegramRequest, TelegramResponse> {
-  return createBatchMessenger('telegram', messenger, async request => {
-    return createGenericRequest(request, 'telegram');
-  });
 }

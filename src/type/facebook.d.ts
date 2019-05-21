@@ -224,8 +224,4 @@ export interface FacebookCommunicator
  * Represents a Facebook-specific messenger.
  * @template C The context used by the current chatbot.
  */
-export interface FacebookMessenger<C> extends Messenger<C> {}
-
-/** * Represents a Facebook-specific batch messenger. */
-export interface FacebookBatchMessenger
-  extends BatchMessenger<FacebookRequest, FacebookResponse> {}
+export interface FacebookMessenger<C> extends Messenger<C, FacebookRequest> {}

@@ -9,10 +9,11 @@ import { Messenger } from '../type/messenger';
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
+ * @template PLRequest The platform-specific request.
  */
-export function saveContextOnSend<C>(
+export function saveContextOnSend<C, PLRequest>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
-): Transformer<Messenger<C>> {
+): Transformer<Messenger<C, PLRequest>> {
   return function saveContextOnSend(messenger) {
     return {
       ...messenger,
@@ -36,10 +37,11 @@ export function saveContextOnSend<C>(
  * Inject the relevant context for a sender every time a message group is
  * processed.
  * @template C The context used by the current chatbot.
+ * @template PLRequest The platform-specific request.*
  */
-export function injectContextOnReceive<C>(
+export function injectContextOnReceive<C, PLRequest>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
-): Transformer<Messenger<C>> {
+): Transformer<Messenger<C, PLRequest>> {
   return function injectContextOnReceive(messenger) {
     return {
       ...messenger,
@@ -57,25 +59,26 @@ export function injectContextOnReceive<C>(
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  * @template C The context used by the current chatbot.
- * @template PlatformResponse The platform-specific response.
+ * @template PLRequest The platform-specific request.
+ * @template PLResponse The platform-specific response.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
  */
-export function saveUserForSenderID<C, PlatformResponse, PUser>(
-  communicator: PlatformCommunicator<PlatformResponse>,
+export function saveUserForSenderID<C, PLRequest, PLResponse, PUser>(
+  communicator: PlatformCommunicator<PLResponse>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<Messenger<C & Pick<DefaultContext, 'senderID'>>> {
+): Transformer<Messenger<C, PLRequest>> {
   return function saveUserForSenderID(messenger) {
     return {
       ...messenger,
       receiveRequest: async request => {
         let { oldContext } = request;
         const { senderID } = request;
+        const sidKey: keyof DefaultContext = 'senderID';
 
-        if (!oldContext || !oldContext.senderID) {
+        if (!oldContext || !(oldContext as any)[sidKey]) {
           const platformUser = await communicator.getUser<PUser>(senderID);
           await saveUser(platformUser);
-          const sidKey: keyof DefaultContext = 'senderID';
 
           oldContext = deepClone(
             Object.assign(oldContext, { [sidKey]: senderID })
@@ -92,11 +95,12 @@ export function saveUserForSenderID<C, PlatformResponse, PUser>(
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
  * @template C The context used by the current chatbot.
- * @template PlatformResponse The platform-specific response.
+ * @template PLRequest The platform-specific request.
+ * @template PLResponse The platform-specific response.
  */
-export function setTypingIndicator<C, PlatformResponse>(
-  communicator: PlatformCommunicator<PlatformResponse>
-): Transformer<Messenger<C>> {
+export function setTypingIndicator<C, PLRequest, PLResponse>(
+  communicator: PlatformCommunicator<PLResponse>
+): Transformer<Messenger<C, PLRequest>> {
   return function setTypingIndicator(messenger) {
     return {
       ...messenger,
@@ -118,12 +122,13 @@ export function setTypingIndicator<C, PlatformResponse>(
 /**
  * Create default messenger transformers that all messengers should use.
  * @template C The context used by the current chatbot.
- * @template PlatformResponse The platform-specific response.
+ * @template PLRequest The platform-specific request.
+ * @template PLResponse The platform-specific response.
  */
-export function transformMessengersByDefault<C, PlatformResponse>(
+export function transformMessengersByDefault<C, PLRequest, PLResponse>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>,
-  communicator: PlatformCommunicator<PlatformResponse>
-): Transformer<Messenger<C>> {
+  communicator: PlatformCommunicator<PLResponse>
+): Transformer<Messenger<C, PLRequest>> {
   return messenger =>
     compose(
       messenger,

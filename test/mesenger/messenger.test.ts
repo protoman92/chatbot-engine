@@ -9,13 +9,15 @@ import {
   verify,
   when
 } from 'ts-mockito';
-import { Messenger, SupportedPlatform } from '../../src';
-import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import {
-  createCrossPlatformMessenger,
-  createGenericMessenger
+  CrossPlatformMessengerConfigs,
+  Messenger,
+  SupportedPlatform
+} from '../../src';
+import {
+  createCrossPlatformBatchMessenger,
+  createMessenger
 } from '../../src/messenger/generic-messenger';
-import { KV } from '../../src/type/common';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { Leaf } from '../../src/type/leaf';
 import { GenericRequest } from '../../src/type/request';
@@ -25,13 +27,11 @@ const senderID = 'sender-id';
 const senderPlatform = 'facebook' as const;
 
 describe('Generic unit messenger', () => {
-  interface Context extends KV<unknown> {}
-
-  let leafSelector: Leaf<Context>;
+  let leafSelector: Leaf<{}>;
   let communicator: PlatformCommunicator<unknown>;
 
   beforeEach(async () => {
-    leafSelector = spy<Leaf<Context>>({
+    leafSelector = spy<Leaf<{}>>({
       next: () => Promise.reject(''),
       subscribe: () => Promise.reject('')
     });
@@ -51,9 +51,10 @@ describe('Generic unit messenger', () => {
 
     // When
     const unitMessenger = spy(
-      await createGenericMessenger(
+      await createMessenger(
         instance(leafSelector),
         instance(communicator),
+        async () => [],
         async () => platformResponses
       )
     );
@@ -61,7 +62,7 @@ describe('Generic unit messenger', () => {
     // Then
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
-    const response: GenericResponse<Context> = {
+    const response: GenericResponse<{}> = {
       senderID,
       senderPlatform,
       visualContents: []
@@ -100,9 +101,10 @@ describe('Generic unit messenger', () => {
     ];
 
     // When
-    const unitMessenger = await createGenericMessenger(
+    const unitMessenger = await createMessenger(
       instance(leafSelector),
       instance(communicator),
+      async () => [],
       async () => []
     );
 
@@ -125,83 +127,67 @@ describe('Generic unit messenger', () => {
 });
 
 describe('Cross platform unit messenger', () => {
-  let fbMessenger: Messenger<{}>;
-  let tlMessenger: Messenger<{}>;
-  let messengers: Readonly<{ [K in SupportedPlatform]: Messenger<{}> }>;
-  let crossMessenger: Messenger<{}>;
+  let fbMessenger: Messenger<{}, unknown>;
+  let tlMessenger: Messenger<{}, unknown>;
+  let messengers: CrossPlatformMessengerConfigs<{}>;
+  let messengerInstances: CrossPlatformMessengerConfigs<{}>;
 
   beforeEach(() => {
-    fbMessenger = spy<Messenger<{}>>({
+    fbMessenger = spy<Messenger<{}, unknown>>({
+      generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    tlMessenger = spy<Messenger<{}>>({
+    tlMessenger = spy<Messenger<{}, unknown>>({
+      generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
     messengers = { facebook: fbMessenger, telegram: tlMessenger };
 
-    crossMessenger = createCrossPlatformMessenger(Object.entries(messengers)
+    messengerInstances = Object.entries(messengers)
       .map(([key, value]) => ({
         [key]: instance(value)
       }))
-      .reduce((acc, item) => ({ ...acc, ...item })) as typeof messengers);
+      .reduce((acc, item) => ({ ...acc, ...item })) as typeof messengers;
   });
 
   it('Should invoke correct messenger', async () => {
     // Setup
+    when(fbMessenger.generalizeRequest(anything())).thenResolve([
+      {
+        senderID,
+        senderPlatform: 'facebook',
+        oldContext: {},
+        data: []
+      }
+    ]);
+
+    when(tlMessenger.generalizeRequest(anything())).thenResolve([
+      {
+        senderID,
+        senderPlatform: 'telegram',
+        oldContext: {},
+        data: []
+      }
+    ]);
+
     const platforms = Object.keys(messengers) as readonly SupportedPlatform[];
 
     // When
     for (const senderPlatform of platforms) {
-      switch (senderPlatform) {
-        case 'facebook':
-          await crossMessenger.receiveRequest({
-            senderID,
-            senderPlatform,
-            oldContext: {},
-            data: [
-              {
-                senderPlatform,
-                inputText: '',
-                inputImageURL: '',
-                inputCoordinate: DEFAULT_COORDINATES,
-                stickerID: ''
-              }
-            ]
-          });
+      const crossMessenger = createCrossPlatformBatchMessenger(
+        messengerInstances,
+        () => senderPlatform
+      );
 
-          break;
-
-        case 'telegram':
-          await crossMessenger.receiveRequest({
-            senderID,
-            senderPlatform,
-            oldContext: {},
-            data: [
-              {
-                senderPlatform,
-                inputText: '',
-                inputImageURL: '',
-                inputCoordinate: DEFAULT_COORDINATES
-              }
-            ]
-          });
-
-          break;
-      }
-
-      await crossMessenger.sendResponse({
-        senderID,
-        senderPlatform,
-        visualContents: []
-      });
+      await crossMessenger.processPlatformRequest({});
 
       // Then
+      verify(messengers[senderPlatform].generalizeRequest(anything())).once();
       verify(messengers[senderPlatform].receiveRequest(anything())).once();
-      verify(messengers[senderPlatform].sendResponse(anything())).once();
     }
   });
 });

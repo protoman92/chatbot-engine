@@ -1,7 +1,5 @@
 import { GenericRequest } from './request';
 import { GenericResponse } from './response';
-import { FacebookMessenger, FacebookBatchMessenger } from './facebook';
-import { TelegramBatchMessenger } from './telegram';
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = 'facebook' | 'telegram';
@@ -14,9 +12,13 @@ export type SupportedPlatform = 'facebook' | 'telegram';
  *
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
+ * @template PLRequest The platform-specific request.
  * @template C The context used by the current chatbot.
  */
-export interface Messenger<C> {
+export interface Messenger<C, PLRequest> {
+  /** Generalize a platform request into a generic request. */
+  generalizeRequest(res: PLRequest): Promise<readonly GenericRequest<C>[]>;
+
   /** Receive an incoming generic request. */
   receiveRequest(req: GenericRequest<C>): Promise<{}>;
 
@@ -32,14 +34,11 @@ export interface Messenger<C> {
  * @template PlatformResponse The platform-specific response.
  */
 export interface BatchMessenger<PlatformRequest, PlatformResponse> {
-  readonly senderPlatform: SupportedPlatform;
-
   /** Process a platform request from end-to-end. */
   processPlatformRequest(req: PlatformRequest): Promise<unknown>;
 }
 
 /** Configuration for cross-platform batch messenger. */
-export interface CrossPlatformBatchMessengerConfigs {
-  readonly facebook: FacebookBatchMessenger;
-  readonly telegram: TelegramBatchMessenger;
-}
+export type CrossPlatformMessengerConfigs<C> = Readonly<
+  { [K in SupportedPlatform]: Messenger<C, unknown> }
+>;
