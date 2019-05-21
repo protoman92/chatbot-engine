@@ -1,5 +1,7 @@
 import commonJs from 'rollup-plugin-commonjs';
 import obfuscator from 'rollup-plugin-javascript-obfuscator';
+import builtins from 'rollup-plugin-node-builtins';
+import globals from 'rollup-plugin-node-globals';
 import resolve from 'rollup-plugin-node-resolve';
 import sourceMap from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
@@ -13,13 +15,15 @@ function createConfig({ file = 'dist/index.js' }) {
       format: 'umd',
       file,
       name: 'chatbot-engine',
-      globals: { axios: 'axios' }
+      globals: { axios: 'axios', redis: 'redis' }
     },
     external: [
       ...Object.keys(pkg.dependencies || {}),
       ...Object.keys(pkg.peerDependencies || {})
     ],
     plugins: [
+      globals(),
+      builtins(),
       typescript({
         tsconfigOverride: {
           compilerOptions: {
