@@ -1,7 +1,5 @@
-import { DeepReadonly } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
-import { Messenger } from './messenger';
-import { VisualContent } from './visual-content';
+import { BatchMessenger, Messenger } from './messenger';
 
 declare namespace TelegramRequest {
   namespace Input {
@@ -67,3 +65,7 @@ export interface TelegramCommunicator
  * @template C The context used by the current chatbot.
  */
 export interface TelegramMessenger<C> extends Messenger<C> {}
+
+/** * Represents a Telegram-specific batch messenger. */
+export interface TelegramBatchMessenger
+  extends BatchMessenger<TelegramRequest, TelegramResponse> {}

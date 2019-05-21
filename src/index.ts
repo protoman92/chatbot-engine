@@ -14,7 +14,10 @@ export {
   createFacebookBatchMessenger,
   createFacebookMessenger
 } from './messenger/facebook-messenger';
-export { createCrossPlatformMessenger } from './messenger/generic-messenger';
+export {
+  createCrossPlatformBatchMessenger,
+  createCrossPlatformMessenger
+} from './messenger/generic-messenger';
 export {
   saveUserForSenderID,
   transformMessengersByDefault

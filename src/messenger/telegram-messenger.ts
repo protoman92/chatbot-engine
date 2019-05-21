@@ -71,8 +71,10 @@ function createGenericRequest<C>(
  */
 function createTelegramResponse<C>({
   senderID,
+  senderPlatform,
   visualContents
 }: GenericResponse.Telegram<C>): readonly TelegramResponse[] {
+  console.log('TELEGRAM', senderPlatform, visualContents);
   function createTextResponse(
     senderID: string,
     { text }: VisualContent.MainContent.Text
@@ -133,9 +135,9 @@ export async function createTelegramMessenger<C>(
  * @template C The context used by the current chatbot.
  */
 export function createTelegramBatchMessenger<C>(
-  messenger: Messenger<C>
+  messenger: TelegramMessenger<C>
 ): BatchMessenger<TelegramRequest, TelegramResponse> {
-  return createBatchMessenger(messenger, async request => {
+  return createBatchMessenger('telegram', messenger, async request => {
     return createGenericRequest(request, 'telegram');
   });
 }

@@ -1,5 +1,7 @@
 import { GenericRequest } from './request';
 import { GenericResponse } from './response';
+import { FacebookMessenger, FacebookBatchMessenger } from './facebook';
+import { TelegramBatchMessenger } from './telegram';
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = 'facebook' | 'telegram';
@@ -30,6 +32,14 @@ export interface Messenger<C> {
  * @template PlatformResponse The platform-specific response.
  */
 export interface BatchMessenger<PlatformRequest, PlatformResponse> {
+  readonly senderPlatform: SupportedPlatform;
+
   /** Process a platform request from end-to-end. */
   processPlatformRequest(req: PlatformRequest): Promise<unknown>;
+}
+
+/** Configuration for cross-platform batch messenger. */
+export interface CrossPlatformBatchMessengerConfigs {
+  readonly facebook: FacebookBatchMessenger;
+  readonly telegram: TelegramBatchMessenger;
 }

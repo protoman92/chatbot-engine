@@ -154,7 +154,7 @@ function createGenericRequest<C>(
 
         return Object.entries(groupedRequests).map(([senderID, requests]) => ({
           senderID,
-          senderPlatform: 'facebook' as const,
+          senderPlatform: 'facebook',
           oldContext: {} as any,
           data: requests
             .map(req => processRequest(req, senderPlatform))
@@ -416,9 +416,9 @@ export async function createFacebookMessenger<C>(
  * @template C The context used by the current chatbot.
  */
 export function createFacebookBatchMessenger<C>(
-  messenger: Messenger<C>
+  messenger: FacebookMessenger<C>
 ): BatchMessenger<FacebookRequest, FacebookResponse> {
-  return createBatchMessenger(messenger, async req => {
+  return createBatchMessenger('facebook', messenger, async req => {
     if (isType<FacebookRequest>(req, 'object', 'entry')) {
       return createGenericRequest(req, 'facebook');
     }

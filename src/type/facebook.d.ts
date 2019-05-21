@@ -1,6 +1,6 @@
 import { DeepReadonly, Omit } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
-import { Messenger } from './messenger';
+import { Messenger, BatchMessenger } from './messenger';
 import { VisualContent } from './visual-content';
 
 declare namespace FacebookRequest {
@@ -225,3 +225,7 @@ export interface FacebookCommunicator
  * @template C The context used by the current chatbot.
  */
 export interface FacebookMessenger<C> extends Messenger<C> {}
+
+/** * Represents a Facebook-specific batch messenger. */
+export interface FacebookBatchMessenger
+  extends BatchMessenger<FacebookRequest, FacebookResponse> {}
