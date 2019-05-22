@@ -115,6 +115,7 @@ describe('Save user for sender ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
     const chatbotUser = { id: senderID };
+    when(contextDAO.setContext(anything(), anything())).thenResolve({});
 
     when(messenger.receiveRequest(anything())).thenResolve({
       senderID,
@@ -125,7 +126,11 @@ describe('Save user for sender ID', () => {
 
     const transformed = compose(
       instance(messenger),
-      saveUserForSenderID(instance(communicator), async () => {})
+      saveUserForSenderID(
+        instance(contextDAO),
+        instance(communicator),
+        async () => {}
+      )
     );
 
     const genericRequest: GenericRequest<{}> = {
@@ -140,6 +145,7 @@ describe('Save user for sender ID', () => {
 
     // Then
     verify(communicator.getUser(senderID)).once();
+    verify(contextDAO.setContext(senderID, deepEqual({ senderID }))).once();
 
     verify(
       messenger.receiveRequest(
