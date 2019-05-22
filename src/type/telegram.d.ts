@@ -38,7 +38,26 @@ export interface TelegramRequest {
 }
 
 declare namespace TelegramResponse {
-  interface SendMessage {
+  namespace Keyboard {
+    interface Button {
+      readonly text: string;
+      readonly request_contact: boolean | undefined;
+      readonly request_location: boolean | undefined;
+    }
+
+    interface ReplyMarkup {
+      readonly keyboard: readonly (readonly Button[])[];
+      readonly resize_keyboard: boolean | undefined;
+      readonly one_time_keyboard: boolean | undefined;
+      readonly selective: boolean | undefined;
+    }
+  }
+
+  interface HasReplyMarkup {
+    readonly reply_markup: Keyboard.ReplyMarkup | undefined;
+  }
+
+  interface SendMessage extends HasReplyMarkup {
     readonly action: 'sendMessage';
     readonly chat_id: string;
     readonly text: string;

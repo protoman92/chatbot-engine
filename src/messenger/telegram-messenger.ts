@@ -1,3 +1,4 @@
+import { Omit } from 'ts-essentials';
 import {
   DEFAULT_COORDINATES,
   formatTelegramError,
@@ -74,30 +75,62 @@ function createTelegramResponse<C>({
   function createTextResponse(
     senderID: string,
     { text }: VisualContent.MainContent.Text
-  ): TelegramResponse.SendMessage {
+  ): Omit<TelegramResponse.SendMessage, 'reply_markup'> {
     return { text, action: 'sendMessage', chat_id: senderID };
   }
 
-  function createResponse(
-    senderID: string,
-    content: GenericResponse.Telegram<C>['visualContents'][number]['content']
-  ) {
-    switch (content.type) {
+  /** Create a Telegram quick reply from a generic quick reply. */
+  function createQuickReply(
+    quickReply: VisualContent.QuickReply
+  ): TelegramResponse.Keyboard.Button {
+    const { text } = quickReply;
+
+    switch (quickReply.type) {
       case 'text':
-        return createTextResponse(senderID, content);
+      case 'postback':
+        return {
+          text,
+          request_contact: undefined,
+          request_location: undefined
+        };
+
+      case 'location':
+        return { text, request_contact: undefined, request_location: true };
 
       default:
         throw new Error(
-          formatTelegramError(`Unsupported content ${JSON.stringify(content)}`)
+          formatTelegramError(
+            `Invalid quick reply ${JSON.stringify(quickReply)}`
+          )
         );
     }
   }
 
   function createPlatformResponse(
     senderID: string,
-    { content }: GenericResponse<C>['visualContents'][number]
+    { quickReplies, content }: GenericResponse<C>['visualContents'][number]
   ): TelegramResponse {
-    return createResponse(senderID, content);
+    const tlQuickReplies:
+      | TelegramResponse.Keyboard.ReplyMarkup
+      | undefined = quickReplies && {
+      keyboard: quickReplies.map(qr => [createQuickReply(qr)]),
+      resize_keyboard: undefined,
+      one_time_keyboard: true,
+      selective: false
+    };
+
+    switch (content.type) {
+      case 'text':
+        return {
+          ...createTextResponse(senderID, content),
+          reply_markup: tlQuickReplies
+        };
+
+      default:
+        throw new Error(
+          formatTelegramError(`Unsupported content ${JSON.stringify(content)}`)
+        );
+    }
   }
 
   return visualContents.map(visualContent => {
