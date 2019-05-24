@@ -1,5 +1,7 @@
+import { Facebook } from './facebook';
 import { GenericRequest } from './request';
 import { GenericResponse } from './response';
+import { Telegram } from './telegram';
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = 'facebook' | 'telegram';
@@ -17,13 +19,13 @@ export type SupportedPlatform = 'facebook' | 'telegram';
  */
 export interface Messenger<C, PLRequest> {
   /** Generalize a platform request into a generic request. */
-  generalizeRequest(res: PLRequest): Promise<readonly GenericRequest<C>[]>;
+  generalizeRequest(request: PLRequest): Promise<readonly GenericRequest<C>[]>;
 
   /** Receive an incoming generic request. */
-  receiveRequest(req: GenericRequest<C>): Promise<{}>;
+  receiveRequest(request: GenericRequest<C>): Promise<{}>;
 
   /** Send an outgoing platform response. */
-  sendResponse(res: GenericResponse<C>): Promise<{}>;
+  sendResponse(response: GenericResponse<C>): Promise<{}>;
 }
 
 /**
@@ -39,6 +41,7 @@ export interface BatchMessenger<PLRequest, PLResponse> {
 }
 
 /** Configuration for cross-platform batch messenger. */
-export type CrossPlatformMessengerConfigs<C> = Readonly<
-  { [K in SupportedPlatform]: Messenger<C, unknown> }
->;
+export interface CrossPlatformMessengerConfigs<C> {
+  readonly facebook: Facebook.Messenger<C>;
+  readonly telegram: Telegram.Messenger<C>;
+}

@@ -1,5 +1,7 @@
 import { Coordinates } from './common';
+import { Facebook } from './facebook';
 import { SupportedPlatform } from './messenger';
+import { Telegram } from './telegram';
 
 declare namespace GenericRequest {
   namespace Data {
@@ -10,14 +12,16 @@ declare namespace GenericRequest {
     }
   }
 
-  type Data = Data.Facebook | Data.Telegram;
-
   interface Base<C> {
     readonly senderID: string;
     readonly senderPlatform: SupportedPlatform;
     readonly oldContext: C;
-    readonly data: readonly Data[];
+    readonly data: readonly Data.Base[];
   }
+}
+
+declare namespace GenericRequest {
+  type Data = Facebook.GenericRequest.Data | Telegram.GenericRequest.Data;
 }
 
 /**
@@ -26,5 +30,5 @@ declare namespace GenericRequest {
  */
 export type GenericRequest<C> =
   | GenericRequest.Base<C>
-  | GenericRequest.Facebook<C>
-  | GenericRequest.Telegram<C>;
+  | Facebook.GenericRequest<C>
+  | Telegram.GenericRequest<C>;

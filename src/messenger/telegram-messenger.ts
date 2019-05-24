@@ -7,14 +7,7 @@ import {
 import { Transformer } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { Messenger } from '../type/messenger';
-import { GenericRequest } from '../type/request';
-import { GenericResponse } from '../type/response';
-import {
-  TelegramCommunicator,
-  TelegramMessenger,
-  TelegramRequest,
-  TelegramResponse
-} from '../type/telegram';
+import { Telegram } from '../type/telegram';
 import { VisualContent } from '../type/visual-content';
 import { createMessenger } from './generic-messenger';
 
@@ -23,9 +16,9 @@ import { createMessenger } from './generic-messenger';
  * @template C The context used by the current chatbot.
  */
 function createTelegramRequest<C>(
-  webhook: TelegramRequest,
+  webhook: Telegram.PlatformRequest,
   senderPlatform: 'telegram'
-): readonly GenericRequest<C>[] {
+): readonly Telegram.GenericRequest<C>[] {
   const {
     message: {
       chat: { id }
@@ -33,12 +26,12 @@ function createTelegramRequest<C>(
   } = webhook;
 
   function processRequest(
-    request: TelegramRequest,
+    request: Telegram.PlatformRequest,
     senderPlatform: 'telegram'
-  ): GenericRequest.Telegram<C>['data'] {
+  ): Telegram.GenericRequest<C>['data'] {
     const { message } = request;
 
-    if (isType<TelegramRequest.Input.Text>(message, 'text')) {
+    if (isType<Telegram.PlatformRequest.Input.Text>(message, 'text')) {
       return [
         {
           senderPlatform,
@@ -71,18 +64,18 @@ function createTelegramRequest<C>(
 function createTelegramResponse<C>({
   senderID,
   visualContents
-}: GenericResponse.Telegram<C>): readonly TelegramResponse[] {
+}: Telegram.GenericResponse<C>): readonly Telegram.PlatformResponse[] {
   function createTextResponse(
     senderID: string,
     { text }: VisualContent.MainContent.Text
-  ): Omit<TelegramResponse.SendMessage, 'reply_markup'> {
+  ): Omit<Telegram.PlatformResponse.SendMessage, 'reply_markup'> {
     return { text, action: 'sendMessage', chat_id: senderID };
   }
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReply(
     quickReply: VisualContent.QuickReply
-  ): TelegramResponse.Keyboard.Button {
+  ): Telegram.PlatformResponse.Keyboard.Button {
     const { text } = quickReply;
 
     switch (quickReply.type) {
@@ -110,10 +103,10 @@ function createTelegramResponse<C>({
     {
       quickReplies,
       content
-    }: GenericResponse.Telegram<C>['visualContents'][number]
-  ): TelegramResponse {
+    }: Telegram.GenericResponse<C>['visualContents'][number]
+  ): Telegram.PlatformResponse {
     const tlQuickReplies:
-      | TelegramResponse.Keyboard.ReplyMarkup
+      | Telegram.PlatformResponse.Keyboard.ReplyMarkup
       | undefined = quickReplies && {
       keyboard: quickReplies.map(qrs => qrs.map(qr => createQuickReply(qr))),
       resize_keyboard: undefined,
@@ -146,9 +139,11 @@ function createTelegramResponse<C>({
  */
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
-  communicator: TelegramCommunicator,
-  ...transformers: readonly Transformer<Messenger<C, TelegramRequest>>[]
-): Promise<TelegramMessenger<C>> {
+  communicator: Telegram.Communicator,
+  ...transformers: readonly Transformer<
+    Messenger<C, Telegram.PlatformRequest>
+  >[]
+): Promise<Telegram.Messenger<C>> {
   await communicator.setWebhook();
 
   return createMessenger(
@@ -156,7 +151,7 @@ export async function createTelegramMessenger<C>(
     leafSelector,
     communicator,
     async req => createTelegramRequest(req, 'telegram'),
-    async res => createTelegramResponse(res as GenericResponse.Telegram<C>),
+    async res => createTelegramResponse(res as Telegram.GenericResponse<C>),
     ...transformers
   );
 }

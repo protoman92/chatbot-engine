@@ -1,7 +1,7 @@
-import { Transformer, Coordinates } from '../type/common';
+import { Coordinates, Transformer } from '../type/common';
+import { Facebook } from '../type/facebook';
 import { SupportedPlatform } from '../type/messenger';
-import { FacebookRequest } from '../type/facebook';
-import { TelegramRequest } from '../type/telegram';
+import { Telegram } from '../type/telegram';
 
 export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
@@ -202,11 +202,11 @@ export function formatTelegramError(error: string): string {
 
 /** Get the platform to which a request belongs. */
 export function getRequestPlatform(request: unknown): SupportedPlatform {
-  if (isType<FacebookRequest>(request, 'object', 'entry')) {
+  if (isType<Facebook.PlatformRequest>(request, 'object', 'entry')) {
     return 'facebook';
   }
 
-  if (isType<TelegramRequest>(request, 'update_id', 'message')) {
+  if (isType<Telegram.PlatformRequest>(request, 'update_id', 'message')) {
     return 'telegram';
   }
 

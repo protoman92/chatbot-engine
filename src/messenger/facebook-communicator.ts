@@ -1,12 +1,12 @@
 import { formatFacebookError } from '../common/utils';
 import { HTTPCommunicator } from '../type/communicator';
-import { FacebookCommunicator, FacebookConfigs } from '../type/facebook';
+import { Facebook } from '../type/facebook';
 
 /** Create a platform communicator for Facebook. */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  configs: FacebookConfigs
-): FacebookCommunicator {
+  configs: Facebook.Configs
+): Facebook.Communicator {
   function formatURL(...additionalPaths: string[]) {
     return `https://graph.facebook.com/v${
       configs.apiVersion

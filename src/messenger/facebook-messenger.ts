@@ -4,16 +4,9 @@ import {
   isType
 } from '../common/utils';
 import { Transformer } from '../type/common';
-import {
-  FacebookCommunicator,
-  FacebookMessenger,
-  FacebookRequest,
-  FacebookResponse
-} from '../type/facebook';
+import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
 import { Messenger } from '../type/messenger';
-import { GenericRequest } from '../type/request';
-import { GenericResponse } from '../type/response';
 import { VisualContent } from '../type/visual-content';
 import { createMessenger } from './generic-messenger';
 
@@ -22,15 +15,15 @@ import { createMessenger } from './generic-messenger';
  * @template C The context used by the current chatbot.
  */
 function createFacebookRequest<C>(
-  webhook: FacebookRequest,
+  webhook: Facebook.PlatformRequest,
   senderPlatform: 'facebook'
-): readonly GenericRequest.Facebook<C>[] {
+): readonly Facebook.GenericRequest<C>[] {
   const { object, entry } = webhook;
 
   /** Group requests based on sender ID. */
-  function groupRequests(reqs: readonly FacebookRequest.Input[]) {
+  function groupRequests(reqs: readonly Facebook.PlatformRequest.Input[]) {
     const requestMap: {
-      [K: string]: readonly FacebookRequest.Input[];
+      [K: string]: readonly Facebook.PlatformRequest.Input[];
     } = {};
 
     reqs.forEach(req => {
@@ -42,10 +35,10 @@ function createFacebookRequest<C>(
   }
 
   function processRequest(
-    request: FacebookRequest.Input,
+    request: Facebook.PlatformRequest.Input,
     senderPlatform: 'facebook'
-  ): GenericRequest.Facebook<C>['data'] {
-    if (isType<FacebookRequest.Input.Postback>(request, 'postback')) {
+  ): Facebook.GenericRequest<C>['data'] {
+    if (isType<Facebook.PlatformRequest.Input.Postback>(request, 'postback')) {
       return [
         {
           senderPlatform,
@@ -57,11 +50,14 @@ function createFacebookRequest<C>(
       ];
     }
 
-    if (isType<FacebookRequest.Input.Message>(request, 'message')) {
+    if (isType<Facebook.PlatformRequest.Input.Message>(request, 'message')) {
       const { message } = request;
 
       if (
-        isType<FacebookRequest.Input.Message.QuickReply>(message, 'quick_reply')
+        isType<Facebook.PlatformRequest.Input.Message.QuickReply>(
+          message,
+          'quick_reply'
+        )
       ) {
         return [
           {
@@ -75,7 +71,10 @@ function createFacebookRequest<C>(
       }
 
       if (
-        isType<FacebookRequest.Input.Message.Text['message']>(message, 'text')
+        isType<Facebook.PlatformRequest.Input.Message.Text['message']>(
+          message,
+          'text'
+        )
       ) {
         return [
           {
@@ -89,7 +88,7 @@ function createFacebookRequest<C>(
       }
 
       if (
-        isType<FacebookRequest.Input.Message.Attachment['message']>(
+        isType<Facebook.PlatformRequest.Input.Message.Attachment['message']>(
           message,
           'attachments'
         )
@@ -106,10 +105,9 @@ function createFacebookRequest<C>(
                 inputCoordinate: DEFAULT_COORDINATES,
                 stickerID: (() => {
                   if (
-                    isType<FacebookRequest.Input.Attachment.StickerImage>(
-                      attachment.payload,
-                      'sticker_id'
-                    )
+                    isType<
+                      Facebook.PlatformRequest.Input.Attachment.StickerImage
+                    >(attachment.payload, 'sticker_id')
                   ) {
                     return `${attachment.payload.sticker_id}`;
                   }
@@ -172,13 +170,13 @@ function createFacebookRequest<C>(
 function createFacebookResponse<C>({
   senderID,
   visualContents
-}: GenericResponse.Facebook<C>): readonly FacebookResponse[] {
+}: Facebook.GenericResponse<C>): readonly Facebook.PlatformResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(
     action: VisualContent.SubContent.Action
-  ): FacebookResponse.SubContent.Button {
+  ): Facebook.PlatformResponse.SubContent.Button {
     const { text: title } = action;
 
     switch (action.type) {
@@ -193,7 +191,7 @@ function createFacebookResponse<C>({
   function createButtonResponse({
     text,
     actions
-  }: VisualContent.MainContent.Button): FacebookResponse.Content.Button {
+  }: VisualContent.MainContent.Button): Facebook.PlatformResponse.Content.Button {
     return {
       messaging_type: 'RESPONSE',
       message: {
@@ -211,7 +209,7 @@ function createFacebookResponse<C>({
 
   function createCarouselResponse({
     items
-  }: VisualContent.MainContent.Carousel): FacebookResponse.Content.Carousel {
+  }: VisualContent.MainContent.Carousel): Facebook.PlatformResponse.Content.Carousel {
     if (!items.length) {
       throw Error(formatFacebookError('Not enough carousel items'));
     }
@@ -250,7 +248,7 @@ function createFacebookResponse<C>({
 
   function createListResponse(
     content: VisualContent.MainContent.List
-  ): FacebookResponse.Content.List {
+  ): Facebook.PlatformResponse.Content.List {
     const { items, actions: listActions } = content;
 
     /**
@@ -297,7 +295,7 @@ function createFacebookResponse<C>({
 
   function createMediaResponse({
     media: { type, url }
-  }: VisualContent.MainContent.Media): FacebookResponse.Content.Media {
+  }: VisualContent.MainContent.Media): Facebook.PlatformResponse.Content.Media {
     return {
       message: {
         attachment: {
@@ -318,13 +316,13 @@ function createFacebookResponse<C>({
 
   function createTextResponse({
     text
-  }: VisualContent.MainContent.Text): FacebookResponse.Content.Text {
+  }: VisualContent.MainContent.Text): Facebook.PlatformResponse.Content.Text {
     return { messaging_type: 'RESPONSE', message: { text } };
   }
 
   function createResponse(
-    content: GenericResponse.Facebook<C>['visualContents'][number]['content']
-  ): FacebookResponse.Output {
+    content: Facebook.GenericResponse<C>['visualContents'][number]['content']
+  ): Facebook.PlatformResponse.Output {
     switch (content.type) {
       case 'button':
         return createButtonResponse(content);
@@ -345,8 +343,8 @@ function createFacebookResponse<C>({
 
   /** Create a Facebook quick reply from a generic quick reply. */
   function createQuickReply(
-    quickReply: VisualContent.Facebook.QuickReply
-  ): FacebookResponse.QuickReply {
+    quickReply: Facebook.VisualContent.QuickReply
+  ): Facebook.PlatformResponse.QuickReply {
     const { text } = quickReply;
 
     switch (quickReply.type) {
@@ -370,8 +368,8 @@ function createFacebookResponse<C>({
     {
       content,
       quickReplies = []
-    }: GenericResponse.Facebook<C>['visualContents'][number]
-  ): FacebookResponse {
+    }: Facebook.GenericResponse<C>['visualContents'][number]
+  ): Facebook.PlatformResponse {
     const fbQuickReplies = quickReplies.map(qr => createQuickReply(qr));
     const fbResponse = createResponse(content);
     const { message: baseMessage } = fbResponse;
@@ -395,15 +393,17 @@ function createFacebookResponse<C>({
  */
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
-  communicator: FacebookCommunicator,
-  ...transformers: readonly Transformer<Messenger<C, FacebookRequest>>[]
-): Promise<FacebookMessenger<C>> {
+  communicator: Facebook.Communicator,
+  ...transformers: readonly Transformer<
+    Messenger<C, Facebook.PlatformRequest>
+  >[]
+): Promise<Facebook.Messenger<C>> {
   return createMessenger(
     'facebook',
     leafSelector,
     communicator,
     async req => {
-      if (isType<FacebookRequest>(req, 'object', 'entry')) {
+      if (isType<Facebook.PlatformRequest>(req, 'object', 'entry')) {
         return createFacebookRequest(req, 'facebook');
       }
 
@@ -411,7 +411,7 @@ export async function createFacebookMessenger<C>(
         formatFacebookError(`Invalid webhook ${JSON.stringify(req)}`)
       );
     },
-    async res => createFacebookResponse(res as GenericResponse.Facebook<C>),
+    async res => createFacebookResponse(res as Facebook.GenericResponse<C>),
     ...transformers
   );
 }

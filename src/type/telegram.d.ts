@@ -1,124 +1,114 @@
 import { PlatformCommunicator } from './communicator';
-import { Messenger } from './messenger';
-import { VisualContent } from './visual-content';
+import { Messenger as RootMessenger } from './messenger';
+import { GenericRequest as RootGenericRequest } from './request';
+import { GenericResponse as RootGenericResponse } from './response';
+import { VisualContent as RootVisualContent } from './visual-content';
 
-declare module './request' {
+export namespace Telegram {
   namespace GenericRequest {
-    namespace Data {
-      interface Telegram extends Base {
-        readonly senderPlatform: 'telegram';
+    interface Data extends RootGenericRequest.Data.Base {
+      readonly senderPlatform: 'telegram';
+    }
+  }
+
+  interface GenericRequest<C> extends RootGenericRequest.Base<C> {
+    readonly senderPlatform: 'telegram';
+    readonly data: readonly GenericRequest.Data[];
+  }
+
+  interface GenericResponse<C> extends RootGenericResponse.Base<C> {
+    readonly senderPlatform: 'telegram';
+    readonly visualContents: readonly VisualContent[];
+  }
+
+  namespace VisualContent {
+    type QuickReply = RootVisualContent.QuickReply;
+  }
+
+  interface VisualContent extends RootVisualContent.Base {
+    readonly quickReplies?: readonly (readonly VisualContent.QuickReply[])[];
+  }
+
+  namespace PlatformRequest {
+    namespace Input {
+      interface Base {
+        readonly message_id: number;
+
+        readonly from: Readonly<{
+          id: number;
+          is_bot: boolean;
+          first_name: string;
+          last_name: string;
+          username: string;
+          language_code: 'en';
+        }>;
+
+        readonly chat: Readonly<{
+          id: number;
+          first_name: string;
+          last_name: string;
+          username: string;
+          type: 'private';
+        }>;
+      }
+
+      interface Text extends Base {
+        readonly text: string;
       }
     }
 
-    interface Telegram<C> extends Base<C> {
-      readonly senderPlatform: 'telegram';
-      readonly data: readonly Data.Telegram[];
-    }
+    type Input = Input.Text;
   }
-}
 
-declare module './response' {
-  namespace GenericResponse {
-    interface Telegram<C> extends Base<C> {
-      readonly senderPlatform: 'telegram';
-      readonly visualContents: readonly VisualContent.Telegram[];
-    }
+  interface PlatformRequest {
+    readonly update_id: number;
+    readonly message: PlatformRequest.Input;
   }
-}
 
-declare module './visual-content' {
-  namespace VisualContent {
-    namespace Telegram {
-      type QuickReply = VisualContent.QuickReply;
+  namespace PlatformResponse {
+    namespace Keyboard {
+      interface Button {
+        readonly text: string;
+        readonly request_contact: boolean | undefined;
+        readonly request_location: boolean | undefined;
+      }
+
+      interface ReplyMarkup {
+        readonly keyboard: readonly (readonly Button[])[];
+        readonly resize_keyboard: boolean | undefined;
+        readonly one_time_keyboard: boolean | undefined;
+        readonly selective: boolean | undefined;
+      }
     }
 
-    interface Telegram {
-      readonly quickReplies?: readonly (readonly Telegram.QuickReply[])[];
-      readonly content: VisualContent.MainContent;
-    }
-  }
-}
-
-declare namespace TelegramRequest {
-  namespace Input {
-    interface Base {
-      readonly message_id: number;
-
-      readonly from: Readonly<{
-        id: number;
-        is_bot: boolean;
-        first_name: string;
-        last_name: string;
-        username: string;
-        language_code: 'en';
-      }>;
-
-      readonly chat: Readonly<{
-        id: number;
-        first_name: string;
-        last_name: string;
-        username: string;
-        type: 'private';
-      }>;
+    interface HasReplyMarkup {
+      readonly reply_markup: Keyboard.ReplyMarkup | undefined;
     }
 
-    interface Text extends Base {
+    interface SendMessage extends HasReplyMarkup {
+      readonly action: 'sendMessage';
+      readonly chat_id: string;
       readonly text: string;
     }
   }
 
-  type Input = Input.Text;
-}
+  type PlatformResponse = PlatformResponse.SendMessage;
 
-export interface TelegramRequest {
-  readonly update_id: number;
-  readonly message: TelegramRequest.Input;
-}
-
-declare namespace TelegramResponse {
-  namespace Keyboard {
-    interface Button {
-      readonly text: string;
-      readonly request_contact: boolean | undefined;
-      readonly request_location: boolean | undefined;
-    }
-
-    interface ReplyMarkup {
-      readonly keyboard: readonly (readonly Button[])[];
-      readonly resize_keyboard: boolean | undefined;
-      readonly one_time_keyboard: boolean | undefined;
-      readonly selective: boolean | undefined;
-    }
+  /** Represents Telegram configurations. */
+  interface Configs {
+    readonly authToken: string;
+    readonly webhookURL: string;
   }
 
-  interface HasReplyMarkup {
-    readonly reply_markup: Keyboard.ReplyMarkup | undefined;
+  /** A Telegram-specific communicator. */
+  interface Communicator extends PlatformCommunicator<PlatformResponse> {
+    /** Set webhook to start receiving message updates. */
+    setWebhook(): Promise<unknown>;
   }
 
-  interface SendMessage extends HasReplyMarkup {
-    readonly action: 'sendMessage';
-    readonly chat_id: string;
-    readonly text: string;
-  }
+  /**
+   * Represents a Telegram-specific messenger.
+   * @template C The context used by the current chatbot.
+   */
+  interface Messenger<C> extends RootMessenger<C, PlatformRequest> {}
 }
-
-export type TelegramResponse = TelegramResponse.SendMessage;
-
-/** Represents Telegram configurations. */
-export interface TelegramConfigs {
-  readonly authToken: string;
-  readonly webhookURL: string;
-}
-
-/** A Telegram-specific communicator. */
-export interface TelegramCommunicator
-  extends PlatformCommunicator<TelegramResponse> {
-  /** Set webhook to start receiving message updates. */
-  setWebhook(): Promise<unknown>;
-}
-
-/**
- * Represents a Telegram-specific messenger.
- * @template C The context used by the current chatbot.
- */
-export interface TelegramMessenger<C> extends Messenger<C, TelegramRequest> {}

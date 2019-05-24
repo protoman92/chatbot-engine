@@ -1,6 +1,8 @@
 import { compose, getRequestPlatform, mapSeries } from '../common/utils';
+import { STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
+import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
 import {
   BatchMessenger,
@@ -9,7 +11,7 @@ import {
   SupportedPlatform
 } from '../type/messenger';
 import { GenericResponse } from '../type/response';
-import { STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
+import { Telegram } from '../type/telegram';
 
 /**
  * Create a generic messenger.
@@ -28,20 +30,20 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   const messenger: Messenger<C, PLRequest> = compose(
     {
       generalizeRequest: platformReq => requestMapper(platformReq),
-      receiveRequest: ({
-        senderID,
-        senderPlatform,
-        oldContext,
-        data: data
-      }) => {
-        return mapSeries(data, datum => {
-          return leafSelector.next({
-            ...datum,
-            ...oldContext,
-            senderID,
-            senderPlatform
-          });
-        });
+      receiveRequest: ({ senderID, senderPlatform, oldContext, data }) => {
+        return mapSeries(
+          data as readonly (
+            | Facebook.GenericRequest.Data
+            | Telegram.GenericRequest.Data)[],
+          datum => {
+            return leafSelector.next({
+              ...datum,
+              ...oldContext,
+              senderID,
+              senderPlatform
+            });
+          }
+        );
       },
       sendResponse: async response => {
         const data = await responseMapper(response);
@@ -54,7 +56,10 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   await leafSelector.subscribe({
     next: async ({ senderPlatform: pf, ...restInput }) => {
       if (pf === senderPlatform) {
-        return messenger.sendResponse({ senderPlatform: pf, ...restInput });
+        return messenger.sendResponse({
+          senderPlatform: pf,
+          ...restInput
+        } as GenericResponse<C>);
       }
 
       return STREAM_INVALID_NEXT_RESULT;
@@ -95,19 +100,36 @@ export function createCrossPlatformBatchMessenger<C>(
   return createBatchMessenger<C, unknown, unknown>({
     generalizeRequest: async platformReq => {
       const senderPlatform = getPlatform(platformReq);
-      return messengers[senderPlatform].generalizeRequest(platformReq);
+
+      switch (senderPlatform) {
+        case 'facebook':
+          return messengers.facebook.generalizeRequest(
+            platformReq as Facebook.PlatformRequest
+          );
+
+        case 'telegram':
+          return messengers.telegram.generalizeRequest(
+            platformReq as Telegram.PlatformRequest
+          );
+      }
     },
-    receiveRequest: async ({ senderPlatform, ...restInput }) => {
-      return messengers[senderPlatform].receiveRequest({
-        ...restInput,
-        senderPlatform
-      });
+    receiveRequest: async request => {
+      switch (request.senderPlatform) {
+        case 'facebook':
+          return messengers.facebook.receiveRequest(request);
+
+        case 'telegram':
+          return messengers.telegram.receiveRequest(request);
+      }
     },
-    sendResponse: async ({ senderPlatform, ...restInput }) => {
-      return messengers[senderPlatform].sendResponse({
-        ...restInput,
-        senderPlatform
-      });
+    sendResponse: async response => {
+      switch (response.senderPlatform) {
+        case 'facebook':
+          return messengers.facebook.sendResponse(response);
+
+        case 'telegram':
+          return messengers.telegram.sendResponse(response);
+      }
     }
   });
 }

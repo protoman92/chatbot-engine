@@ -1,4 +1,7 @@
-export namespace VisualContent {
+import { Facebook } from './facebook';
+import { Telegram } from './telegram';
+
+declare namespace VisualContent {
   namespace QuickReply {
     interface Base {
       readonly text: string;
@@ -97,7 +100,11 @@ export namespace VisualContent {
     | MainContent.List
     | MainContent.Media
     | MainContent.Text;
+
+  interface Base {
+    readonly content: VisualContent.MainContent;
+  }
 }
 
 /** Represents content that will go out to the user. */
-export type VisualContent = VisualContent.Facebook | VisualContent.Telegram;
+export type VisualContent = Facebook.VisualContent | Telegram.VisualContent;

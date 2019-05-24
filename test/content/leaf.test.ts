@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
-import { GenericResponse, VisualContent } from '../../src';
+import { Facebook, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
@@ -144,7 +144,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    })) as GenericResponse.Facebook<Context2>;
+    })) as Facebook.GenericResponse<Context2>;
 
     // Then
     expectJs(text).to.equal('2');
@@ -184,7 +184,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    })) as GenericResponse.Facebook<Context1>;
+    })) as Facebook.GenericResponse<Context1>;
 
     // Then
     expectJs(text).to.equal('1');
@@ -236,7 +236,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    })) as GenericResponse.Facebook<Context1>;
+    })) as Facebook.GenericResponse<Context1>;
 
     // Then
     expectJs(nextResult1).to.equal(STREAM_INVALID_NEXT_RESULT);
@@ -346,7 +346,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    })) as GenericResponse.Facebook<Context2>;
+    })) as Facebook.GenericResponse<Context2>;
 
     // Then
     expectJs(text).to.equal('100');

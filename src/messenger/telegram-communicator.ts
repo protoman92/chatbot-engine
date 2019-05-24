@@ -1,11 +1,11 @@
 import { stringify } from 'querystring';
 import { HTTPCommunicator } from '../type/communicator';
-import { TelegramCommunicator, TelegramConfigs } from '../type/telegram';
+import { Telegram } from '../type/telegram';
 
 export function createTelegramCommunicator(
   communicator: HTTPCommunicator,
-  { authToken, webhookURL }: TelegramConfigs
-): TelegramCommunicator {
+  { authToken, webhookURL }: Telegram.Configs
+): Telegram.Communicator {
   function formatURL(action: string, query?: {}) {
     const qs = stringify(query);
     return `https://api.telegram.org/bot${authToken}/${action}?${qs}`;

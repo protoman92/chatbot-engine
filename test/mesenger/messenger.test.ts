@@ -11,6 +11,7 @@ import {
 } from 'ts-mockito';
 import {
   CrossPlatformMessengerConfigs,
+  Facebook,
   Messenger,
   SupportedPlatform
 } from '../../src';
@@ -21,7 +22,6 @@ import {
 import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { Leaf } from '../../src/type/leaf';
-import { GenericRequest } from '../../src/type/request';
 import { GenericResponse } from '../../src/type/response';
 
 const senderID = 'sender-id';
@@ -117,7 +117,7 @@ describe('Generic unit messenger', () => {
     when(leafSelector.next(anything())).thenResolve();
     const oldContext = { a: 1, b: 2 };
 
-    const data: readonly GenericRequest.Data[] = [
+    const data: readonly Facebook.GenericRequest.Data[] = [
       {
         senderPlatform,
         inputText: 'text-1',

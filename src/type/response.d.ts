@@ -1,12 +1,14 @@
+import { Facebook } from './facebook';
 import { SupportedPlatform } from './messenger';
+import { Telegram } from './telegram';
 import { VisualContent } from './visual-content';
 
 declare namespace GenericResponse {
-  interface Base<C> {
+  export interface Base<C> {
     readonly senderID: string;
     readonly senderPlatform: SupportedPlatform;
     readonly additionalContext?: Partial<C>;
-    readonly visualContents: readonly VisualContent[];
+    readonly visualContents: readonly VisualContent.Base[];
   }
 }
 
@@ -18,5 +20,5 @@ declare namespace GenericResponse {
  */
 export type GenericResponse<C> =
   | GenericResponse.Base<C>
-  | GenericResponse.Facebook<C>
-  | GenericResponse.Telegram<C>;
+  | Facebook.GenericResponse<C>
+  | Telegram.GenericResponse<C>;

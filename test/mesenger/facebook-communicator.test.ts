@@ -3,22 +3,21 @@ import { describe, it } from 'mocha';
 import { instance, spy, when } from 'ts-mockito';
 import {
   createFacebookCommunicator,
-  FacebookCommunicator,
-  FacebookConfigs,
+  Facebook,
   HTTPCommunicator
 } from '../../src';
 
 describe('Facebook communicator', () => {
   let communicator: HTTPCommunicator;
-  let configs: FacebookConfigs;
-  let fbCommunicator: FacebookCommunicator;
+  let configs: Facebook.Configs;
+  let fbCommunicator: Facebook.Communicator;
 
   beforeEach(async () => {
     communicator = spy<HTTPCommunicator>({
       communicate: () => Promise.reject('')
     });
 
-    configs = spy<FacebookConfigs>({
+    configs = spy<Facebook.Configs>({
       apiVersion: '',
       pageToken: '',
       verifyToken: ''
