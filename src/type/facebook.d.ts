@@ -1,7 +1,52 @@
 import { DeepReadonly, Omit } from 'ts-essentials';
 import { PlatformCommunicator } from './communicator';
-import { Messenger, BatchMessenger } from './messenger';
+import { Messenger } from './messenger';
 import { VisualContent } from './visual-content';
+
+declare module './request' {
+  namespace GenericRequest {
+    namespace Data {
+      interface Facebook extends Base {
+        readonly senderPlatform: 'facebook';
+        readonly stickerID: string;
+      }
+    }
+
+    interface Facebook<C> extends Base<C> {
+      readonly senderPlatform: 'facebook';
+      readonly data: readonly Data.Facebook[];
+    }
+  }
+}
+
+declare module './response' {
+  namespace GenericResponse {
+    interface Facebook<C> extends Base<C> {
+      readonly senderPlatform: 'facebook';
+      readonly visualContents: readonly VisualContent.Facebook[];
+    }
+  }
+}
+
+declare module './visual-content' {
+  namespace VisualContent {
+    namespace Facebook {
+      namespace QuickReply {
+        interface Postback extends VisualContent.QuickReply.Base {
+          readonly payload: string;
+          readonly type: 'postback';
+        }
+      }
+
+      type QuickReply = VisualContent.QuickReply | QuickReply.Postback;
+    }
+
+    interface Facebook {
+      readonly quickReplies?: readonly Facebook.QuickReply[];
+      readonly content: VisualContent.MainContent;
+    }
+  }
+}
 
 declare namespace FacebookRequest {
   namespace Input {

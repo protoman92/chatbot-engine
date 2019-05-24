@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
-import { VisualContent } from '../../src';
+import { GenericResponse, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
@@ -136,7 +136,7 @@ describe('Higher order functions', () => {
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
-    } = await bridgeEmission(resultLeaf)({
+    } = (await bridgeEmission(resultLeaf)({
       senderID,
       senderPlatform,
       a: 1000,
@@ -144,7 +144,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    });
+    })) as GenericResponse.Facebook<Context2>;
 
     // Then
     expectJs(text).to.equal('2');
@@ -176,7 +176,7 @@ describe('Higher order functions', () => {
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
-    } = await bridgeEmission(resultLeaf)({
+    } = (await bridgeEmission(resultLeaf)({
       senderID,
       senderPlatform,
       a: 1,
@@ -184,7 +184,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    });
+    })) as GenericResponse.Facebook<Context1>;
 
     // Then
     expectJs(text).to.equal('1');
@@ -228,7 +228,7 @@ describe('Higher order functions', () => {
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
-    } = await bridgeEmission(resultLeaf)({
+    } = (await bridgeEmission(resultLeaf)({
       senderID,
       senderPlatform,
       a: 1,
@@ -236,7 +236,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    });
+    })) as GenericResponse.Facebook<Context1>;
 
     // Then
     expectJs(nextResult1).to.equal(STREAM_INVALID_NEXT_RESULT);
@@ -338,7 +338,7 @@ describe('Higher order functions', () => {
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
-    } = await bridgeEmission(resultLeaf)({
+    } = (await bridgeEmission(resultLeaf)({
       senderID,
       senderPlatform,
       b: null,
@@ -346,7 +346,7 @@ describe('Higher order functions', () => {
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: ''
-    });
+    })) as GenericResponse.Facebook<Context2>;
 
     // Then
     expectJs(text).to.equal('100');

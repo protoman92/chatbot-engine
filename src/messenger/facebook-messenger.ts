@@ -345,7 +345,7 @@ function createFacebookResponse<C>({
 
   /** Create a Facebook quick reply from a generic quick reply. */
   function createQuickReply(
-    quickReply: VisualContent.QuickReply
+    quickReply: VisualContent.Facebook.QuickReply
   ): FacebookResponse.QuickReply {
     const { text } = quickReply;
 

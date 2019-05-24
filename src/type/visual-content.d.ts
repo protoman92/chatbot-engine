@@ -1,4 +1,4 @@
-declare namespace VisualContent {
+export namespace VisualContent {
   namespace QuickReply {
     interface Base {
       readonly text: string;
@@ -6,11 +6,6 @@ declare namespace VisualContent {
 
     interface Location extends Base {
       readonly type: 'location';
-    }
-
-    interface Postback extends Base {
-      readonly payload: string;
-      readonly type: 'postback';
     }
 
     interface SimpleText extends Base {
@@ -23,10 +18,7 @@ declare namespace VisualContent {
    * concept is available only on certain platforms (Facebook/Telegram) but is
    * an important one nonetheless.
    */
-  type QuickReply =
-    | QuickReply.Location
-    | QuickReply.Postback
-    | QuickReply.SimpleText;
+  type QuickReply = QuickReply.Location | QuickReply.SimpleText;
 
   namespace SubContent {
     namespace Action {
@@ -105,16 +97,6 @@ declare namespace VisualContent {
     | MainContent.List
     | MainContent.Media
     | MainContent.Text;
-
-  interface Facebook {
-    readonly quickReplies?: readonly QuickReply[];
-    readonly content: MainContent;
-  }
-
-  interface Telegram {
-    readonly quickReplies?: readonly QuickReply[];
-    readonly content: MainContent;
-  }
 }
 
 /** Represents content that will go out to the user. */

@@ -87,7 +87,6 @@ function createTelegramResponse<C>({
 
     switch (quickReply.type) {
       case 'text':
-      case 'postback':
         return {
           text,
           request_contact: undefined,
@@ -108,12 +107,15 @@ function createTelegramResponse<C>({
 
   function createPlatformResponse(
     senderID: string,
-    { quickReplies, content }: GenericResponse<C>['visualContents'][number]
+    {
+      quickReplies,
+      content
+    }: GenericResponse.Telegram<C>['visualContents'][number]
   ): TelegramResponse {
     const tlQuickReplies:
       | TelegramResponse.Keyboard.ReplyMarkup
       | undefined = quickReplies && {
-      keyboard: quickReplies.map(qr => [createQuickReply(qr)]),
+      keyboard: quickReplies.map(qrs => qrs.map(qr => createQuickReply(qr))),
       resize_keyboard: undefined,
       one_time_keyboard: true,
       selective: false

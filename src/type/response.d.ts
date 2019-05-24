@@ -8,16 +8,6 @@ declare namespace GenericResponse {
     readonly additionalContext?: Partial<C>;
     readonly visualContents: readonly VisualContent[];
   }
-
-  interface Facebook<C> extends Base<C> {
-    readonly senderPlatform: 'facebook';
-    readonly visualContents: readonly VisualContent.Facebook[];
-  }
-
-  interface Telegram<C> extends Base<C> {
-    readonly senderPlatform: 'telegram';
-    readonly visualContents: readonly VisualContent.Telegram[];
-  }
 }
 
 /**

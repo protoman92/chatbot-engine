@@ -1,5 +1,43 @@
 import { PlatformCommunicator } from './communicator';
-import { BatchMessenger, Messenger } from './messenger';
+import { Messenger } from './messenger';
+import { VisualContent } from './visual-content';
+
+declare module './request' {
+  namespace GenericRequest {
+    namespace Data {
+      interface Telegram extends Base {
+        readonly senderPlatform: 'telegram';
+      }
+    }
+
+    interface Telegram<C> extends Base<C> {
+      readonly senderPlatform: 'telegram';
+      readonly data: readonly Data.Telegram[];
+    }
+  }
+}
+
+declare module './response' {
+  namespace GenericResponse {
+    interface Telegram<C> extends Base<C> {
+      readonly senderPlatform: 'telegram';
+      readonly visualContents: readonly VisualContent.Telegram[];
+    }
+  }
+}
+
+declare module './visual-content' {
+  namespace VisualContent {
+    namespace Telegram {
+      type QuickReply = VisualContent.QuickReply;
+    }
+
+    interface Telegram {
+      readonly quickReplies?: readonly (readonly Telegram.QuickReply[])[];
+      readonly content: VisualContent.MainContent;
+    }
+  }
+}
 
 declare namespace TelegramRequest {
   namespace Input {

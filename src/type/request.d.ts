@@ -8,15 +8,6 @@ declare namespace GenericRequest {
       readonly inputImageURL: string;
       readonly inputCoordinate: Coordinates;
     }
-
-    interface Facebook extends Base {
-      readonly senderPlatform: 'facebook';
-      readonly stickerID: string;
-    }
-
-    interface Telegram extends Base {
-      readonly senderPlatform: 'telegram';
-    }
   }
 
   type Data = Data.Facebook | Data.Telegram;
@@ -26,16 +17,6 @@ declare namespace GenericRequest {
     readonly senderPlatform: SupportedPlatform;
     readonly oldContext: C;
     readonly data: readonly Data[];
-  }
-
-  interface Facebook<C> extends Base<C> {
-    readonly senderPlatform: 'facebook';
-    readonly data: readonly Data.Facebook[];
-  }
-
-  interface Telegram<C> extends Base<C> {
-    readonly senderPlatform: 'telegram';
-    readonly data: readonly Data.Telegram[];
   }
 }
 
