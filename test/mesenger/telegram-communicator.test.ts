@@ -1,6 +1,6 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe, it } from 'mocha';
-import { anything, instance, spy, when } from 'ts-mockito';
+import { anything, instance, spy, verify, when } from 'ts-mockito';
 import {
   createTelegramCommunicator,
   HTTPCommunicator,
@@ -69,5 +69,13 @@ describe('Telegram communicator', () => {
     } catch ({ message }) {
       expectJs(message).to.eql(description);
     }
+  });
+
+  it('Should not send typing action if setting to false', async () => {
+    // Setup && When
+    await tlCommunicator.setTypingIndicator('', false);
+
+    // Then
+    verify(communicator.communicate(anything())).never();
   });
 });

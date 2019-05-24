@@ -37,7 +37,13 @@ export function createTelegramCommunicator(
       });
     },
     // tslint:disable-next-line:variable-name
-    setTypingIndicator: async chat_id => {
+    setTypingIndicator: async (chat_id, enabled) => {
+      /**
+       * For Telegram, we don't need to call a separate action to switch off
+       * typing. It will be done for us the next time a message arrives.
+       */
+      if (!enabled) return {};
+
       return communicate({
         url: formatURL('sendChatAction'),
         method: 'POST',
