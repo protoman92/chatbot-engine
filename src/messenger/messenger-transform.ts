@@ -107,14 +107,10 @@ export function setTypingIndicator<C, PLRequest, PLResponse>(
   return function setTypingIndicator(messenger) {
     return {
       ...messenger,
-      receiveRequest: async request => {
-        const { senderID } = request;
-        await communicator.setTypingIndicator(senderID, true);
-        return messenger.receiveRequest(request);
-      },
       sendResponse: async response => {
-        const result = await messenger.sendResponse(response);
         const { senderID } = response;
+        await communicator.setTypingIndicator(senderID, true);
+        const result = await messenger.sendResponse(response);
         await communicator.setTypingIndicator(senderID, false);
         return result;
       }

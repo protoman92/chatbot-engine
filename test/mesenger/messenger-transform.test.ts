@@ -156,13 +156,8 @@ describe('Save user for sender ID', () => {
 });
 
 describe('Set typing indicator', () => {
-  it('Should set typing indicator on request and response', async () => {
+  it('Should set typing indicator when response is being sent', async () => {
     // Setup
-    when(messenger.receiveRequest(anything())).thenResolve({
-      senderID,
-      visualContents: []
-    });
-
     when(messenger.sendResponse(anything())).thenResolve();
     when(communicator.setTypingIndicator(senderID, anything())).thenResolve();
 
@@ -172,13 +167,6 @@ describe('Set typing indicator', () => {
     );
 
     // When
-    await transformed.receiveRequest({
-      senderID,
-      senderPlatform,
-      oldContext: {},
-      data: []
-    });
-
     await transformed.sendResponse({
       senderID,
       senderPlatform,
