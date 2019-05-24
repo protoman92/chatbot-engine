@@ -100,6 +100,25 @@ export namespace Telegram {
     readonly webhookURL: string;
   }
 
+  namespace Communicator {
+    namespace APIResponse {
+      interface Base {
+        readonly description: string;
+      }
+
+      interface Success extends Base {
+        readonly ok: true;
+        readonly result: unknown;
+      }
+
+      interface Failure extends Base {
+        readonly ok: false;
+      }
+    }
+
+    type APIResponse = APIResponse.Success | APIResponse.Failure;
+  }
+
   /** A Telegram-specific communicator. */
   interface Communicator extends PlatformCommunicator<PlatformResponse> {
     /** Set webhook to start receiving message updates. */

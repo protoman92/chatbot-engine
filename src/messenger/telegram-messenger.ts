@@ -88,13 +88,6 @@ function createTelegramResponse<C>({
 
       case 'location':
         return { text, request_contact: undefined, request_location: true };
-
-      default:
-        throw new Error(
-          formatTelegramError(
-            `Invalid quick reply ${JSON.stringify(quickReply)}`
-          )
-        );
     }
   }
 
@@ -109,7 +102,7 @@ function createTelegramResponse<C>({
       | Telegram.PlatformResponse.Keyboard.ReplyMarkup
       | undefined = quickReplies && {
       keyboard: quickReplies.map(qrs => qrs.map(qr => createQuickReply(qr))),
-      resize_keyboard: undefined,
+      resize_keyboard: true,
       one_time_keyboard: true,
       selective: false
     };

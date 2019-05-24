@@ -1,26 +1,27 @@
 import { KV } from './common';
 
-/** Represents a basic HTTP request. */
-interface HTTPRequest {
-  url: string;
-  headers?: Readonly<{ [K: string]: unknown }>;
-  query?: KV<unknown>;
-}
-
 declare namespace HTTPRequest {
-  export interface GET extends HTTPRequest {
+  interface Base {
+    url: string;
+    headers?: Readonly<{ [K: string]: unknown }>;
+    query?: KV<unknown>;
+  }
+
+  interface GET extends Base {
     readonly method: 'GET';
   }
 
-  export interface POST extends HTTPRequest {
+  interface POST extends Base {
     readonly method: 'POST';
     readonly body: unknown;
   }
 }
 
+export type HTTPRequest = HTTPRequest.GET | HTTPRequest.POST;
+
 /** Handle HTTP communication. */
 export interface HTTPCommunicator {
-  communicate<T>(request: HTTPRequest.GET | HTTPRequest.POST): Promise<T>;
+  communicate<T>(request: HTTPRequest): Promise<T>;
 }
 
 /**
