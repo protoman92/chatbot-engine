@@ -7,7 +7,7 @@ export {
   createComposeChain,
   createPipeChain
 } from './content/higher-order/transform-chain';
-export { useWitEngine } from './content/higher-order/wit';
+export { retryWithWit as useWitEngine } from './content/higher-order/wit';
 export { createDefaultErrorLeaf, createLeafWithObserver } from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';

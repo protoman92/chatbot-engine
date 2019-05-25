@@ -1,6 +1,6 @@
 import { beforeEach, describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import { useWitEngine } from '../../src/content/higher-order/wit';
+import { retryWithWit } from '../../src/content/higher-order/wit';
 import { Leaf } from '../../src/type/leaf';
 import { WitCommunicator, WitContext, WitResponse } from '../../src/type/wit';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
@@ -24,7 +24,7 @@ describe('Wit higher order function', () => {
   it('Wit engine should not fire if no error', async () => {
     // Setup
     when(rootLeaf.next(anything())).thenResolve({});
-    const transformed = await useWitEngine(instance(comm))(instance(rootLeaf));
+    const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When
     const input = {
@@ -64,7 +64,7 @@ describe('Wit higher order function', () => {
       msg_id: ''
     });
 
-    const transformed = await useWitEngine(instance(comm))(instance(rootLeaf));
+    const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When
     const input = {
