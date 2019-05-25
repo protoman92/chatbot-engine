@@ -3,11 +3,12 @@ export { firstValidResult } from './content/higher-order/first-valid';
 export { compactMapInput, mapInput } from './content/higher-order/map-input';
 export { mapOutput } from './content/higher-order/map-output';
 export { requireInputKeys } from './content/higher-order/require-keys';
+export { thenInvoke } from './content/higher-order/sequentialize';
 export {
   createComposeChain,
   createPipeChain
 } from './content/higher-order/transform-chain';
-export { retryWithWit as useWitEngine } from './content/higher-order/wit';
+export { retryWithWit } from './content/higher-order/wit';
 export { createDefaultErrorLeaf, createLeafWithObserver } from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
