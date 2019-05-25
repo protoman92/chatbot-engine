@@ -10,7 +10,7 @@ import { Leaf } from '../../type/leaf';
 export function catchError<C>(
   fallbackLeaf: Leaf<C & ErrorContext>
 ): Leaf.Transformer<C, C> {
-  return leaf => ({
+  return async leaf => ({
     next: async input => {
       try {
         return await leaf.next(input);

@@ -14,7 +14,7 @@ import { Messenger } from '../type/messenger';
 export function saveContextOnSend<C, PLRequest>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
 ): Transformer<Messenger<C, PLRequest>> {
-  return function saveContextOnSend(messenger) {
+  return async messenger => {
     return {
       ...messenger,
       sendResponse: async response => {
@@ -42,7 +42,7 @@ export function saveContextOnSend<C, PLRequest>(
 export function injectContextOnReceive<C, PLRequest>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
 ): Transformer<Messenger<C, PLRequest>> {
-  return function injectContextOnReceive(messenger) {
+  return async messenger => {
     return {
       ...messenger,
       receiveRequest: async request => {
@@ -69,7 +69,7 @@ export function saveUserForTargetID<C, PLRequest, PLResponse, PUser>(
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
 ): Transformer<Messenger<C, PLRequest>> {
-  return function saveUserForSenderID(messenger) {
+  return async messenger => {
     return {
       ...messenger,
       receiveRequest: async request => {
@@ -104,7 +104,7 @@ export function saveUserForTargetID<C, PLRequest, PLResponse, PUser>(
 export function setTypingIndicator<C, PLRequest, PLResponse>(
   communicator: PlatformCommunicator<PLResponse>
 ): Transformer<Messenger<C, PLRequest>> {
-  return function setTypingIndicator(messenger) {
+  return async messenger => {
     return {
       ...messenger,
       sendResponse: async response => {

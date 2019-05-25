@@ -8,9 +8,9 @@ import { Leaf } from '../../type/leaf';
 export function firstValidResult<CI, CO extends CI>(
   ...transformers: readonly Leaf.Transformer<CI, CO>[]
 ): Leaf.Transformer<CI, CO> {
-  return leaf =>
-    ((): Leaf<CO> => {
-      const transformed = transformers.map(tf => tf(leaf));
+  return async leaf =>
+    (async (): Promise<Leaf<CO>> => {
+      const transformed = await mapSeries(transformers, tf => tf(leaf));
 
       return {
         next: async input => {

@@ -43,8 +43,8 @@ describe('Utility functions', () => {
       }
     }));
 
-    const leafWithPipe = createPipeChain(baseLeaf)
-      .pipe(leaf => ({
+    const leafWithPipe = await createPipeChain(baseLeaf)
+      .pipe(async leaf => ({
         ...leaf,
         next: async input => {
           const previousResult = await leaf.next(input);
@@ -129,7 +129,7 @@ describe('Higher order functions', () => {
       subscribe: () => Promise.resolve(createSubscription(async () => {}))
     });
 
-    const transformed = createComposeChain()
+    const transformed = await createComposeChain()
       .compose(catchError(instance(fallbackLeaf)))
       .transform(instance(errorLeaf));
 
@@ -186,7 +186,7 @@ describe('Higher order functions', () => {
     );
 
     // When
-    const resultLeaf = mapInput<Context1, Context2>(
+    const resultLeaf = await mapInput<Context1, Context2>(
       async ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
@@ -233,7 +233,7 @@ describe('Higher order functions', () => {
     );
 
     // When
-    const resultLeaf = requireInputKeys<Context1, 'a'>('a')(originalLeaf);
+    const resultLeaf = await requireInputKeys<Context1, 'a'>('a')(originalLeaf);
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
@@ -275,7 +275,7 @@ describe('Higher order functions', () => {
     );
 
     // When
-    const resultLeaf = compactMapInput<Context1, Context1>(
+    const resultLeaf = await compactMapInput<Context1, Context1>(
       async ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
@@ -312,7 +312,7 @@ describe('Higher order functions', () => {
       readonly query?: string;
     }
 
-    const transformedLeaf = createComposeChain()
+    const transformedLeaf = await createComposeChain()
       .forContextOfType<Context>()
       .compose(
         firstValidResult<Context, Context>(
@@ -396,7 +396,7 @@ describe('Higher order functions', () => {
     );
 
     // When
-    const resultLeaf = createComposeChain()
+    const resultLeaf = await createComposeChain()
       .forContextOfType<Context2>()
       .compose(mapInput(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
       .transform(originalLeaf);

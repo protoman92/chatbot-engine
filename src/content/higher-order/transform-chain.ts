@@ -15,11 +15,11 @@ export function createComposeChain<CI, CO>(): Leaf.ComposeChain<CI, CO> {
       composeTransformers.unshift(fn);
       return composeChain as any;
     },
-    transform: leaf => {
-      const outputLeaf = compose(
+    transform: async leaf => {
+      const outputLeaf = (await compose(
         leaf,
         ...composeTransformers
-      ) as Leaf<CO>;
+      )) as Leaf<CO>;
 
       return { ...outputLeaf, toPipe: () => createPipeChain(outputLeaf) };
     },
@@ -42,7 +42,12 @@ export function createPipeChain<C>(leaf: Leaf<C>): Leaf.PipeChain<C, C> {
       pipeTransformers.push(fn);
       return pipeChain as any;
     },
-    transform: () => pipeTransformers.reduce((acc, item) => item(acc), leaf)
+    transform: async () => {
+      return compose(
+        leaf,
+        ...pipeTransformers
+      );
+    }
   };
 
   return pipeChain;

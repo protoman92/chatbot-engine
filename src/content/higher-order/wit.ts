@@ -9,7 +9,7 @@ import { WitCommunicator, WitContext } from '../../type/wit';
 export function useWitEngine<C>(
   comm: WitCommunicator
 ): Leaf.Transformer<C & WitContext, C> {
-  return leaf => ({
+  return async leaf => ({
     ...leaf,
     next: async input => {
       try {

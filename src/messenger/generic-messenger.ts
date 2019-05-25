@@ -27,7 +27,7 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   responseMapper: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>,
   ...transformers: readonly Transformer<Messenger<C, PLRequest>>[]
 ): Promise<Messenger<C, PLRequest>> {
-  const messenger: Messenger<C, PLRequest> = compose(
+  const messenger: Messenger<C, PLRequest> = await compose(
     {
       generalizeRequest: platformReq => requestMapper(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, data }) => {

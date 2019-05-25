@@ -10,7 +10,7 @@ import { Leaf } from '../../type/leaf';
 export function mapInput<CI, CO extends CI>(
   fn: (input: CO & DefaultContext) => Promise<CI & DefaultContext>
 ): Leaf.Transformer<CI, CO> {
-  return leaf => ({
+  return async leaf => ({
     ...leaf,
     next: async input => leaf.next(await fn(input))
   });
@@ -27,7 +27,7 @@ export function compactMapInput<CI, CO extends CI>(
     input: CO & DefaultContext
   ) => Promise<CI & DefaultContext | undefined | null>
 ): Leaf.Transformer<CI, CO> {
-  return leaf => ({
+  return async leaf => ({
     ...leaf,
     next: async input => {
       const newInput = await fn(input);

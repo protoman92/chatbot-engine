@@ -49,7 +49,7 @@ describe('Save context on send', () => {
     when(contextDAO.setContext(targetID, anything())).thenResolve();
     when(messenger.sendResponse(anything())).thenResolve();
 
-    const transformed = compose(
+    const transformed = await compose(
       instance(messenger),
       saveContextOnSend(instance(contextDAO))
     );
@@ -87,7 +87,7 @@ describe('Inject context on receive', () => {
 
     when(contextDAO.getContext(targetID)).thenResolve(expectedContext);
 
-    const transformed = compose(
+    const transformed = await compose(
       instance(messenger),
       injectContextOnReceive(instance(contextDAO))
     );
@@ -123,7 +123,7 @@ describe('Save user for target ID', () => {
       visualContents: []
     });
 
-    const transformed = compose(
+    const transformed = await compose(
       instance(messenger),
       saveUserForTargetID(
         instance(contextDAO),
@@ -177,7 +177,7 @@ describe('Save Telegram user for target ID', () => {
     when(contextDAO.setContext(anything(), anything())).thenResolve({});
     when(tlMessenger.generalizeRequest(anything())).thenResolve(genericReqs);
 
-    const transformed = compose(
+    const transformed = await compose(
       instance(tlMessenger),
       saveTelegramUser(instance(contextDAO), () => Promise.resolve({}))
     );
@@ -221,7 +221,7 @@ describe('Set typing indicator', () => {
     when(messenger.sendResponse(anything())).thenResolve();
     when(communicator.setTypingIndicator(targetID, anything())).thenResolve();
 
-    const transformed = compose(
+    const transformed = await compose(
       instance(messenger),
       setTypingIndicator(instance(communicator))
     );

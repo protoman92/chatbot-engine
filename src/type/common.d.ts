@@ -19,4 +19,4 @@ export interface ErrorContext {
   readonly error: Error;
 }
 
-export type Transformer<T> = (original: T) => T;
+export type Transformer<T> = (original: T) => Promise<T>;

@@ -50,11 +50,14 @@ export function deepClone<T>(object: T): T {
  * Compose an object with transformers to create a new wrapped object.
  * @template T The type of object to transform.
  */
-export function compose<T>(original: T, ...fs: readonly Transformer<T>[]): T {
+export async function compose<T>(
+  original: T,
+  ...fs: readonly Transformer<T>[]
+): Promise<T> {
   let newTransformed = original;
 
   for (const func of fs) {
-    newTransformed = func(newTransformed);
+    newTransformed = await func(newTransformed);
   }
 
   return newTransformed;

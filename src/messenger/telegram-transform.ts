@@ -11,7 +11,7 @@ export function saveTelegramUser<C>(
   contextDAO: ContextDAO<C>,
   saveUser: (user: Telegram.User) => Promise<unknown>
 ): Transformer<Telegram.Messenger<C>> {
-  return function saveTelegramUser(messenger: Telegram.Messenger<C>) {
+  return async messenger => {
     return {
       ...messenger,
       generalizeRequest: async platformReq => {

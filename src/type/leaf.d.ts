@@ -22,7 +22,7 @@ declare namespace Leaf {
    * @template CI The original context type.
    * @template CO The target context type.
    */
-  type Transformer<CI, CO> = (leaf: Leaf<CI>) => Leaf<CO>;
+  type Transformer<CI, CO> = (leaf: Leaf<CI>) => Promise<Leaf<CO>>;
 
   /**
    * Transform a leaf into another leaf, and give it the ability to enhace its
@@ -30,7 +30,9 @@ declare namespace Leaf {
    * @template CI The original context type.
    * @template CO The target context type.
    */
-  type TransformerWithPipe<CI, CO> = (leaf: Leaf<CI>) => LeafWithPipe<CO>;
+  type TransformerWithPipe<CI, CO> = (
+    leaf: Leaf<CI>
+  ) => Promise<LeafWithPipe<CO>>;
 
   /**
    * Represents a chain of transformer higher-order functions that transforms a
@@ -67,7 +69,7 @@ declare namespace Leaf {
     pipe<CO1>(fn: Transformer<CO, CO1>): PipeChain<CI, CO1>;
 
     /** Produce the final leaf with the source leaf. */
-    transform(): Leaf<CO>;
+    transform(): Promise<Leaf<CO>>;
   }
 }
 
