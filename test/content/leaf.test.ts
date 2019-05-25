@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
-import { Facebook, VisualContent } from '../../src';
+import { Facebook, mapOutput, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
@@ -30,8 +30,47 @@ import { WitContext } from '../../src/type/wit';
 const targetID = 'target-id';
 const targetPlatform = 'facebook' as const;
 
-describe('Utility functions', () => {
-  it('Create leaf with pipe', async () => {
+describe('Pipe functions', () => {
+  it('Map output should work correctly', async () => {
+    // Setup
+    let completedCount = 0;
+
+    const baseLeaf = await createLeafWithObserver<{}>(async observer => ({
+      next: async ({ targetID, targetPlatform, inputText }) => {
+        return observer.next({ targetID, targetPlatform, visualContents: [] });
+      },
+      complete: async () => {
+        completedCount += 1;
+      }
+    }));
+
+    const transformed = await createPipeChain(baseLeaf)
+      .pipe<{}>(
+        mapOutput(async response => ({
+          ...response,
+          additionalContext: { a: 1 }
+        }))
+      )
+      .transform();
+
+    // When
+    const { additionalContext } = await bridgeEmission(transformed)({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    !!transformed.complete && (await transformed.complete());
+
+    // Then
+    expectJs(completedCount).to.eql(1);
+    expectJs(additionalContext).to.eql({ a: 1 });
+  });
+
+  it('Create leaf with pipe chain', async () => {
     // Setup
     const baseLeaf = await createLeafWithObserver(async observer => ({
       next: async ({ inputText: text, targetID, targetPlatform }) => {
@@ -43,7 +82,7 @@ describe('Utility functions', () => {
       }
     }));
 
-    const leafWithPipe = await createPipeChain(baseLeaf)
+    const trasformed = await createPipeChain(baseLeaf)
       .pipe(async leaf => ({
         ...leaf,
         next: async input => {
@@ -62,14 +101,14 @@ describe('Utility functions', () => {
     // When
     let valueDeliveredCount = 0;
 
-    leafWithPipe.subscribe({
+    trasformed.subscribe({
       next: async () => {
         valueDeliveredCount += 1;
         return {};
       }
     });
 
-    await leafWithPipe.next({
+    await trasformed.next({
       targetID,
       targetPlatform,
       inputText: '',
