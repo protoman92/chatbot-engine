@@ -2,7 +2,10 @@ export { catchError } from './content/higher-order/catch-error';
 export { firstValidResult } from './content/higher-order/first-valid';
 export { compactMapInput, mapInput } from './content/higher-order/map-input';
 export { requireInputKeys } from './content/higher-order/require-keys';
-export { createTransformChain } from './content/higher-order/transform-chain';
+export {
+  createPipeChain,
+  createTransformChain
+} from './content/higher-order/transform-chain';
 export { useWitEngine } from './content/higher-order/wit';
 export { createDefaultErrorLeaf, createLeafWithObserver } from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';

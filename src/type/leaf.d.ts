@@ -53,6 +53,22 @@ declare namespace Leaf {
     /** This is only used for debugging, and serves no production purposes. */
     checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;
   }
+
+  /**
+   * While compose chain transforms input, pipe chain transforms output.
+   * @template CI The original context type.
+   * @template CO The target context type.
+   */
+  export interface PipeChain<CI, CO> {
+    /**
+     * Pipe a transformer to transform output of a leaf.
+     * @template CO1 The target context type.
+     */
+    pipe<CO1>(fn: Transformer<CO, CO1>): PipeChain<CI, CO1>;
+
+    /** Produce the final leaf with the source leaf. */
+    transform(): Leaf<CO>;
+  }
 }
 
 /**
@@ -68,9 +84,10 @@ export interface Leaf<C>
     ContentObservable<GenericResponse<C>> {}
 
 /**
- * Represents a leaf with a pipe function that can transform itself.
+ * Represents a leaf that support pipe functions.
  * @template C The context used by the current chatbot.
  */
 export interface LeafWithPipe<C> extends Leaf<C> {
-  pipe<C1>(transformer: Leaf.Transformer<C, C1>): LeafWithPipe<C1>;
+  /** Convert to a pipe chain to start piping operations. */
+  toPipe(): Leaf.PipeChain<C, C>;
 }

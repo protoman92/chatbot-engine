@@ -12,7 +12,7 @@ import {
 import { requireInputKeys } from '../../src/content/higher-order/require-keys';
 import {
   createTransformChain,
-  createLeafWithPipe
+  createPipeChain
 } from '../../src/content/higher-order/transform-chain';
 import {
   createDefaultErrorLeaf,
@@ -43,7 +43,7 @@ describe('Utility functions', () => {
       }
     }));
 
-    const leafWithPipe = createLeafWithPipe(baseLeaf)
+    const leafWithPipe = createPipeChain(baseLeaf)
       .pipe(leaf => ({
         ...leaf,
         next: async input => {
@@ -56,7 +56,8 @@ describe('Utility functions', () => {
           return STREAM_INVALID_NEXT_RESULT;
         }
       }))
-      .pipe(catchError(await createDefaultErrorLeaf()));
+      .pipe(catchError(await createDefaultErrorLeaf()))
+      .transform();
 
     // When
     let valueDeliveredCount = 0;
