@@ -20,9 +20,9 @@ describe('Leaf selector', () => {
   let currentLeaf: Leaf<Context>;
   let selector: TestLeafSelector;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     currentLeaf = spy<Leaf<Context>>(
-      createLeafWithObserver(() => ({
+      await createLeafWithObserver(async () => ({
         checkTextConditions: () => Promise.reject(''),
         checkContextConditions: () => Promise.reject(''),
         next: () => Promise.reject(''),

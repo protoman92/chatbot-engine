@@ -10,13 +10,13 @@ import { ContentObserver } from '../type/stream';
  * contents.
  * @template C The context used by the current chatbot.
  */
-export function createLeafWithObserver<C>(
+export async function createLeafWithObserver<C>(
   fn: (
     observer: Pick<ContentObserver<GenericResponse<C>>, 'next'>
-  ) => Omit<Leaf<C>, 'subscribe'>
-): Leaf<C> {
+  ) => Promise<Omit<Leaf<C>, 'subscribe'>>
+): Promise<Leaf<C>> {
   const subject = createContentSubject<GenericResponse<C>>();
-  const baseLeaf = fn(subject);
+  const baseLeaf = await fn(subject);
 
   return {
     ...baseLeaf,
@@ -35,8 +35,8 @@ export function createLeafWithObserver<C>(
  */
 export function createDefaultErrorLeaf<C>(
   fn?: (e: Error) => Promise<unknown>
-): Leaf<C & ErrorContext> {
-  return createLeafWithObserver(observer => ({
+): Promise<Leaf<C & ErrorContext>> {
+  return createLeafWithObserver(async observer => ({
     next: async ({ error, ...restInput }) => {
       !!fn && (await fn(error));
 

@@ -33,7 +33,7 @@ const targetPlatform = 'facebook' as const;
 describe('Utility functions', () => {
   it('Create leaf with pipe', async () => {
     // Setup
-    const baseLeaf = createLeafWithObserver(observer => ({
+    const baseLeaf = await createLeafWithObserver(async observer => ({
       next: async ({ inputText: text, targetID, targetPlatform }) => {
         return observer.next({
           targetID,
@@ -56,7 +56,7 @@ describe('Utility functions', () => {
           return STREAM_INVALID_NEXT_RESULT;
         }
       }))
-      .pipe(catchError(createDefaultErrorLeaf()));
+      .pipe(catchError(await createDefaultErrorLeaf()));
 
     // When
     let valueDeliveredCount = 0;
@@ -86,7 +86,7 @@ describe('Utility functions', () => {
 describe('Default error leaf', () => {
   it('Should work correctly', async () => {
     // Setup
-    const errorLeaf = createDefaultErrorLeaf();
+    const errorLeaf = await createDefaultErrorLeaf();
     const error = new Error('some-error');
 
     // When
@@ -167,20 +167,22 @@ describe('Higher order functions', () => {
       readonly a: number;
     }
 
-    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: async ({ targetID, a }) => {
-        return observer.next({
-          targetID,
-          targetPlatform,
-          visualContents: [
-            {
-              quickReplies: [{ type: 'text', text: `${a}` }],
-              content: { type: 'text', text: '' }
-            }
-          ]
-        });
-      }
-    }));
+    const originalLeaf: Leaf<Context1> = await createLeafWithObserver(
+      async observer => ({
+        next: async ({ targetID, a }) => {
+          return observer.next({
+            targetID,
+            targetPlatform,
+            visualContents: [
+              {
+                quickReplies: [{ type: 'text', text: `${a}` }],
+                content: { type: 'text', text: '' }
+              }
+            ]
+          });
+        }
+      })
+    );
 
     // When
     const resultLeaf = mapInput<Context1, Context2>(
@@ -212,20 +214,22 @@ describe('Higher order functions', () => {
       a?: number | undefined | null;
     }
 
-    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ targetID, a }) => {
-        return observer.next({
-          targetID,
-          targetPlatform,
-          visualContents: [
-            {
-              quickReplies: [{ type: 'text', text: `${a}` }],
-              content: { type: 'text', text: '' }
-            }
-          ]
-        });
-      }
-    }));
+    const originalLeaf: Leaf<Context1> = await createLeafWithObserver(
+      async observer => ({
+        next: ({ targetID, a }) => {
+          return observer.next({
+            targetID,
+            targetPlatform,
+            visualContents: [
+              {
+                quickReplies: [{ type: 'text', text: `${a}` }],
+                content: { type: 'text', text: '' }
+              }
+            ]
+          });
+        }
+      })
+    );
 
     // When
     const resultLeaf = requireInputKeys<Context1, 'a'>('a')(originalLeaf);
@@ -252,20 +256,22 @@ describe('Higher order functions', () => {
       a: number;
     }
 
-    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ targetID, a }) => {
-        return observer.next({
-          targetID,
-          targetPlatform,
-          visualContents: [
-            {
-              quickReplies: [{ type: 'text', text: `${a}` }],
-              content: { type: 'text', text: '' }
-            }
-          ]
-        });
-      }
-    }));
+    const originalLeaf: Leaf<Context1> = await createLeafWithObserver(
+      async observer => ({
+        next: ({ targetID, a }) => {
+          return observer.next({
+            targetID,
+            targetPlatform,
+            visualContents: [
+              {
+                quickReplies: [{ type: 'text', text: `${a}` }],
+                content: { type: 'text', text: '' }
+              }
+            ]
+          });
+        }
+      })
+    );
 
     // When
     const resultLeaf = compactMapInput<Context1, Context1>(
@@ -330,7 +336,7 @@ describe('Higher order functions', () => {
         )
       )
       .transform(
-        createLeafWithObserver(observer => ({
+        await createLeafWithObserver(async observer => ({
           next: async ({ targetID, query }) => {
             await observer.next({
               targetID,
@@ -371,20 +377,22 @@ describe('Higher order functions', () => {
       b: number | undefined | null;
     }
 
-    const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ targetID, a }) => {
-        return observer.next({
-          targetID,
-          targetPlatform,
-          visualContents: [
-            {
-              quickReplies: [{ type: 'text', text: `${a}` }],
-              content: { type: 'text', text: '' }
-            }
-          ]
-        });
-      }
-    }));
+    const originalLeaf: Leaf<Context1> = await createLeafWithObserver(
+      async observer => ({
+        next: ({ targetID, a }) => {
+          return observer.next({
+            targetID,
+            targetPlatform,
+            visualContents: [
+              {
+                quickReplies: [{ type: 'text', text: `${a}` }],
+                content: { type: 'text', text: '' }
+              }
+            ]
+          });
+        }
+      })
+    );
 
     // When
     const resultLeaf = createTransformChain()
