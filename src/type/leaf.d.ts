@@ -22,9 +22,15 @@ declare namespace Leaf {
    * @template CI The original context type.
    * @template CO The target context type.
    */
-  interface Transformer<CI, CO> {
-    (leaf: Leaf<CI>): Leaf<CO>;
-  }
+  type Transformer<CI, CO> = (leaf: Leaf<CI>) => Leaf<CO>;
+
+  /**
+   * Transform a leaf into another leaf, and give it the ability to enhace its
+   * output on its own.
+   * @template CI The original context type.
+   * @template CO The target context type.
+   */
+  type TransformerWithPipe<CI, CO> = (leaf: Leaf<CI>) => LeafWithPipe<CO>;
 
   /**
    * Represents a chain of transformer higher-order functions that transforms a
@@ -33,19 +39,13 @@ declare namespace Leaf {
    * @template CO The target context type.
    */
   export interface TransformChain<CI, CO> {
-    readonly transform: Transformer<CI, CO>;
+    readonly transform: TransformerWithPipe<CI, CO>;
 
     /**
      * Apply pre-transformers like wrapping layers on the base leaf.
      * @template CI1 The target context type.
      */
     compose<CI1>(fn: Transformer<CI1, CI>): TransformChain<CI1, CO>;
-
-    /**
-     * Apply post-transformers to transform results.
-     * @template CO1 The target context type.
-     */
-    pipe<CO1>(fn: Transformer<CO, CO1>): TransformChain<CI, CO1>;
 
     /** This is only used for debugging, and serves no production purposes. */
     forContextOfType<C>(ctx?: C): TransformChain<C, C>;
@@ -66,3 +66,11 @@ declare namespace Leaf {
 export interface Leaf<C>
   extends ContentObserver<C & DefaultContext>,
     ContentObservable<GenericResponse<C>> {}
+
+/**
+ * Represents a leaf with a pipe function that can transform itself.
+ * @template C The context used by the current chatbot.
+ */
+export interface LeafWithPipe<C> extends Leaf<C> {
+  pipe<C1>(transformer: Leaf.Transformer<C, C1>): LeafWithPipe<C1>;
+}

@@ -10,7 +10,10 @@ import {
   mapInput
 } from '../../src/content/higher-order/map-input';
 import { requireInputKeys } from '../../src/content/higher-order/require-keys';
-import { createTransformChain } from '../../src/content/higher-order/transform-chain';
+import {
+  createTransformChain,
+  createLeafWithPipe
+} from '../../src/content/higher-order/transform-chain';
 import {
   createDefaultErrorLeaf,
   createLeafWithObserver
@@ -26,6 +29,59 @@ import { WitContext } from '../../src/type/wit';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook' as const;
+
+describe('Utility functions', () => {
+  it('Create leaf with pipe', async () => {
+    // Setup
+    const baseLeaf = createLeafWithObserver(observer => ({
+      next: async ({ inputText: text, targetID, targetPlatform }) => {
+        return observer.next({
+          targetID,
+          targetPlatform,
+          visualContents: [{ content: { text, type: 'text' } }]
+        });
+      }
+    }));
+
+    const leafWithPipe = createLeafWithPipe(baseLeaf)
+      .pipe(leaf => ({
+        ...leaf,
+        next: async input => {
+          const previousResult = await leaf.next(input);
+
+          if (!!previousResult) {
+            throw new Error('some-error');
+          }
+
+          return STREAM_INVALID_NEXT_RESULT;
+        }
+      }))
+      .pipe(catchError(createDefaultErrorLeaf()));
+
+    // When
+    let valueDeliveredCount = 0;
+
+    leafWithPipe.subscribe({
+      next: async () => {
+        valueDeliveredCount += 1;
+        return {};
+      }
+    });
+
+    await leafWithPipe.next({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: '',
+      error: new Error('')
+    });
+
+    // Then
+    expectJs(valueDeliveredCount).to.eql(2);
+  });
+});
 
 describe('Default error leaf', () => {
   it('Should work correctly', async () => {
