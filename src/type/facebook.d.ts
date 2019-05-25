@@ -27,7 +27,7 @@ export namespace Facebook {
     type QuickReply =
       | RootVisualContent.QuickReply.Location
       | RootVisualContent.QuickReply.Postback
-      | RootVisualContent.QuickReply.SimpleText;
+      | RootVisualContent.QuickReply.Text;
   }
 
   interface VisualContent extends RootVisualContent.Base {

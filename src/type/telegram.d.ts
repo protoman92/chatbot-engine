@@ -24,13 +24,18 @@ export namespace Telegram {
 
   namespace VisualContent {
     namespace QuickReply {
+      interface Contact extends RootVisualContent.QuickReply.Base {
+        readonly type: 'contact';
+      }
+
       type InlineMarkup =
         | RootVisualContent.QuickReply.Postback
-        | RootVisualContent.QuickReply.SimpleText;
+        | RootVisualContent.QuickReply.Text;
 
       type ReplyMarkup =
         | RootVisualContent.QuickReply.Location
-        | RootVisualContent.QuickReply.SimpleText;
+        | RootVisualContent.QuickReply.Text
+        | QuickReply.Contact;
 
       type InlineMarkups = readonly (readonly InlineMarkup[])[];
       type ReplyMarkups = readonly (readonly ReplyMarkup[])[];

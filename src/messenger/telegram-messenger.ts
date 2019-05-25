@@ -103,18 +103,25 @@ function createTelegramResponse<C>({
           const { text } = qr;
 
           switch (qr.type) {
-            case 'text':
-              return {
-                text,
-                request_contact: undefined,
-                request_location: undefined
-              };
-
             case 'location':
               return {
                 text,
                 request_contact: undefined,
                 request_location: true
+              };
+
+            case 'contact':
+              return {
+                text,
+                request_contact: true,
+                request_location: undefined
+              };
+
+            case 'text':
+              return {
+                text,
+                request_contact: undefined,
+                request_location: undefined
               };
           }
         })
@@ -131,9 +138,11 @@ function createTelegramResponse<C>({
   ): Telegram.PlatformResponse.ReplyMarkup {
     const shouldBeReplyMarkup = quickReplies.every(
       (qrs: Telegram.VisualContent.QuickReplies[number]) =>
-        qrs.every((qr: Telegram.VisualContent.QuickReplies[number][number]) => {
-          return qr.type === 'location';
-        })
+        qrs.every(
+          ({ type }: Telegram.VisualContent.QuickReplies[number][number]) => {
+            return type === 'location';
+          }
+        )
     );
 
     if (shouldBeReplyMarkup) {

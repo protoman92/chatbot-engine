@@ -16,7 +16,7 @@ declare namespace VisualContent {
       readonly type: 'postback';
     }
 
-    interface SimpleText extends Base {
+    interface Text extends Base {
       readonly type: 'text';
     }
   }
