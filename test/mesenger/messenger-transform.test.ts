@@ -1,5 +1,7 @@
+import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
+import { Telegram } from '../../src';
 import { compose, joinObjects } from '../../src/common/utils';
 import {
   injectContextOnReceive,
@@ -7,6 +9,7 @@ import {
   saveUserForSenderID,
   setTypingIndicator
 } from '../../src/messenger/messenger-transform';
+import { saveTelegramUser } from '../../src/messenger/telegram-transform';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { ContextDAO } from '../../src/type/context-dao';
 import { Messenger } from '../../src/type/messenger';
@@ -152,6 +155,68 @@ describe('Save user for sender ID', () => {
         deepEqual({ ...genericRequest, oldContext: { senderID } })
       )
     ).once();
+  });
+});
+
+describe('Save Telegram user for sender ID', () => {
+  let tlMessenger: Telegram.Messenger<{}>;
+
+  beforeEach(() => {
+    tlMessenger = spy<Telegram.Messenger<{}>>({
+      generalizeRequest: () => Promise.reject(''),
+      receiveRequest: () => Promise.reject(''),
+      sendResponse: () => Promise.reject('')
+    });
+  });
+
+  it('Should save user when no user ID is present in context', async () => {
+    // Setup
+    const id = 1000;
+    const senderID = `${id}`;
+
+    const genericReqs: readonly Telegram.GenericRequest<{}>[] = [
+      { senderID, senderPlatform: 'telegram', oldContext: {}, data: [] },
+      { senderID, senderPlatform: 'telegram', oldContext: {}, data: [] }
+    ];
+
+    when(contextDAO.setContext(anything(), anything())).thenResolve({});
+    when(tlMessenger.generalizeRequest(anything())).thenResolve(genericReqs);
+
+    const transformed = compose(
+      instance(tlMessenger),
+      saveTelegramUser(instance(contextDAO), () => Promise.resolve({}))
+    );
+
+    // When
+    const actualGenericReqs = await transformed.generalizeRequest({
+      update_id: 0,
+      message: {
+        message_id: 0,
+        from: {
+          id,
+          first_name: '',
+          last_name: '',
+          username: '',
+          language_code: 'en',
+          is_bot: false
+        },
+        chat: {
+          id,
+          first_name: '',
+          last_name: '',
+          username: '',
+          type: 'private'
+        },
+        text: ''
+      }
+    });
+
+    // Then
+    verify(contextDAO.setContext(senderID, deepEqual({ senderID }))).once();
+
+    actualGenericReqs.forEach(({ oldContext }) => {
+      expectJs(oldContext).to.eql({ senderID });
+    });
   });
 });
 

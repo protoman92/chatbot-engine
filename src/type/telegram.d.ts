@@ -3,6 +3,7 @@ import { Messenger as RootMessenger } from './messenger';
 import { GenericRequest as RootGenericRequest } from './request';
 import { GenericResponse as RootGenericResponse } from './response';
 import { VisualContent as RootVisualContent } from './visual-content';
+import { Omit } from 'ts-essentials';
 
 export namespace Telegram {
   namespace GenericRequest {
@@ -33,23 +34,10 @@ export namespace Telegram {
     namespace Input {
       interface Base {
         readonly message_id: number;
+        readonly from: User;
 
-        readonly from: Readonly<{
-          id: number;
-          is_bot: boolean;
-          first_name: string;
-          last_name: string;
-          username: string;
-          language_code: 'en';
-        }>;
-
-        readonly chat: Readonly<{
-          id: number;
-          first_name: string;
-          last_name: string;
-          username: string;
-          type: 'private';
-        }>;
+        readonly chat: Omit<User, 'language_code' | 'is_bot'> &
+          Readonly<{ type: 'private' }>;
       }
 
       interface Text extends Base {
@@ -93,6 +81,15 @@ export namespace Telegram {
   }
 
   type PlatformResponse = PlatformResponse.SendMessage;
+
+  interface User {
+    readonly id: number;
+    readonly first_name: string;
+    readonly last_name: string;
+    readonly username: string;
+    readonly is_bot: boolean;
+    readonly language_code: 'en';
+  }
 
   /** Represents Telegram configurations. */
   interface Configs {
