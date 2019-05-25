@@ -11,8 +11,8 @@ type TestLeafSelector = ReturnType<
   typeof import('../../src/content/leaf-selector')['createLeafSelector']
 >;
 
-const senderID = 'sender-id';
-const senderPlatform = 'facebook';
+const targetID = 'target-id';
+const targetPlatform = 'facebook';
 
 describe('Leaf selector', () => {
   interface Context {}
@@ -61,8 +61,8 @@ describe('Leaf selector', () => {
 
     // When
     await instance(selector).next({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
@@ -130,8 +130,8 @@ describe('Leaf selector', () => {
     // When
     try {
       await instance(selector).next({
-        senderID,
-        senderPlatform,
+        targetID,
+        targetPlatform,
         inputText: '',
         inputImageURL: '',
         inputCoordinate: DEFAULT_COORDINATES,

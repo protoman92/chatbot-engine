@@ -8,17 +8,17 @@ import { Omit } from 'ts-essentials';
 export namespace Telegram {
   namespace GenericRequest {
     interface Data extends RootGenericRequest.Data.Base {
-      readonly senderPlatform: 'telegram';
+      readonly targetPlatform: 'telegram';
     }
   }
 
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
-    readonly senderPlatform: 'telegram';
+    readonly targetPlatform: 'telegram';
     readonly data: readonly GenericRequest.Data[];
   }
 
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
-    readonly senderPlatform: 'telegram';
+    readonly targetPlatform: 'telegram';
     readonly visualContents: readonly VisualContent[];
   }
 

@@ -16,8 +16,8 @@ import { Messenger } from '../../src/type/messenger';
 import { GenericRequest } from '../../src/type/request';
 import { GenericResponse } from '../../src/type/response';
 
-const senderID = 'sender-id';
-const senderPlatform = 'facebook';
+const targetID = 'target-id';
+const targetPlatform = 'facebook';
 let messenger: Messenger<{}, unknown>;
 let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<{}>;
@@ -46,8 +46,8 @@ describe('Save context on send', () => {
   it('Should save context on send', async () => {
     // Setup
     const oldContext: {} = { a: 1, b: 2 };
-    when(contextDAO.getContext(senderID)).thenResolve(oldContext);
-    when(contextDAO.setContext(senderID, anything())).thenResolve();
+    when(contextDAO.getContext(targetID)).thenResolve(oldContext);
+    when(contextDAO.setContext(targetID, anything())).thenResolve();
     when(messenger.sendResponse(anything())).thenResolve();
 
     const transformed = compose(
@@ -58,8 +58,8 @@ describe('Save context on send', () => {
     const additionalContext: Partial<{}> = { a: 1, b: 2 };
 
     const genericResponse: GenericResponse<{}> = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       additionalContext,
       visualContents: []
     };
@@ -69,8 +69,8 @@ describe('Save context on send', () => {
 
     // Then
     const newContext = joinObjects(oldContext, additionalContext);
-    verify(contextDAO.getContext(senderID)).once();
-    verify(contextDAO.setContext(senderID, deepEqual(newContext))).once();
+    verify(contextDAO.getContext(targetID)).once();
+    verify(contextDAO.setContext(targetID, deepEqual(newContext))).once();
     verify(messenger.sendResponse(deepEqual(genericResponse))).once();
   });
 });
@@ -81,12 +81,12 @@ describe('Inject context on receive', () => {
     const expectedContext = { a: 1, b: 2 };
 
     when(messenger.receiveRequest(anything())).thenResolve({
-      senderID,
+      targetID,
       newContext: expectedContext,
       visualContents: []
     });
 
-    when(contextDAO.getContext(senderID)).thenResolve(expectedContext);
+    when(contextDAO.getContext(targetID)).thenResolve(expectedContext);
 
     const transformed = compose(
       instance(messenger),
@@ -94,8 +94,8 @@ describe('Inject context on receive', () => {
     );
 
     const genericRequest: GenericRequest<{}> = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       oldContext: {},
       data: []
     };
@@ -104,7 +104,7 @@ describe('Inject context on receive', () => {
     await transformed.receiveRequest(genericRequest);
 
     // Then
-    verify(contextDAO.getContext(senderID)).once();
+    verify(contextDAO.getContext(targetID)).once();
 
     verify(
       messenger.receiveRequest(
@@ -114,18 +114,18 @@ describe('Inject context on receive', () => {
   });
 });
 
-describe('Save user for sender ID', () => {
+describe('Save user for target ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
-    const chatbotUser = { id: senderID };
+    const chatbotUser = { id: targetID };
     when(contextDAO.setContext(anything(), anything())).thenResolve({});
 
     when(messenger.receiveRequest(anything())).thenResolve({
-      senderID,
+      targetID,
       visualContents: []
     });
 
-    when(communicator.getUser(senderID)).thenResolve(chatbotUser);
+    when(communicator.getUser(targetID)).thenResolve(chatbotUser);
 
     const transformed = compose(
       instance(messenger),
@@ -137,8 +137,8 @@ describe('Save user for sender ID', () => {
     );
 
     const genericRequest: GenericRequest<{}> = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       oldContext: {},
       data: []
     };
@@ -147,18 +147,18 @@ describe('Save user for sender ID', () => {
     await transformed.receiveRequest(genericRequest);
 
     // Then
-    verify(communicator.getUser(senderID)).once();
-    verify(contextDAO.setContext(senderID, deepEqual({ senderID }))).once();
+    verify(communicator.getUser(targetID)).once();
+    verify(contextDAO.setContext(targetID, deepEqual({ targetID }))).once();
 
     verify(
       messenger.receiveRequest(
-        deepEqual({ ...genericRequest, oldContext: { senderID } })
+        deepEqual({ ...genericRequest, oldContext: { targetID } })
       )
     ).once();
   });
 });
 
-describe('Save Telegram user for sender ID', () => {
+describe('Save Telegram user for target ID', () => {
   let tlMessenger: Telegram.Messenger<{}>;
 
   beforeEach(() => {
@@ -172,11 +172,11 @@ describe('Save Telegram user for sender ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
     const id = 1000;
-    const senderID = `${id}`;
+    const targetID = `${id}`;
 
     const genericReqs: readonly Telegram.GenericRequest<{}>[] = [
-      { senderID, senderPlatform: 'telegram', oldContext: {}, data: [] },
-      { senderID, senderPlatform: 'telegram', oldContext: {}, data: [] }
+      { targetID, targetPlatform: 'telegram', oldContext: {}, data: [] },
+      { targetID, targetPlatform: 'telegram', oldContext: {}, data: [] }
     ];
 
     when(contextDAO.setContext(anything(), anything())).thenResolve({});
@@ -212,10 +212,10 @@ describe('Save Telegram user for sender ID', () => {
     });
 
     // Then
-    verify(contextDAO.setContext(senderID, deepEqual({ senderID }))).once();
+    verify(contextDAO.setContext(targetID, deepEqual({ targetID }))).once();
 
     actualGenericReqs.forEach(({ oldContext }) => {
-      expectJs(oldContext).to.eql({ senderID });
+      expectJs(oldContext).to.eql({ targetID });
     });
   });
 });
@@ -224,7 +224,7 @@ describe('Set typing indicator', () => {
   it('Should set typing indicator when response is being sent', async () => {
     // Setup
     when(messenger.sendResponse(anything())).thenResolve();
-    when(communicator.setTypingIndicator(senderID, anything())).thenResolve();
+    when(communicator.setTypingIndicator(targetID, anything())).thenResolve();
 
     const transformed = compose(
       instance(messenger),
@@ -233,14 +233,14 @@ describe('Set typing indicator', () => {
 
     // When
     await transformed.sendResponse({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       visualContents: []
     });
 
     // Then
-    verify(communicator.setTypingIndicator(senderID, true)).calledBefore(
-      communicator.setTypingIndicator(senderID, false)
+    verify(communicator.setTypingIndicator(targetID, true)).calledBefore(
+      communicator.setTypingIndicator(targetID, false)
     );
   });
 });

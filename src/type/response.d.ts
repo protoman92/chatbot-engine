@@ -5,8 +5,8 @@ import { VisualContent } from './visual-content';
 
 declare namespace GenericResponse {
   export interface Base<C> {
-    readonly senderID: string;
-    readonly senderPlatform: SupportedPlatform;
+    readonly targetID: string;
+    readonly targetPlatform: SupportedPlatform;
     readonly additionalContext?: Partial<C>;
     readonly visualContents: readonly VisualContent.Base[];
   }

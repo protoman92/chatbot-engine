@@ -5,8 +5,8 @@ import { Leaf } from '../../src/type/leaf';
 import { WitCommunicator, WitContext, WitResponse } from '../../src/type/wit';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 
-const senderID = 'sender-id';
-const senderPlatform = 'facebook' as const;
+const targetID = 'target-id';
+const targetPlatform = 'facebook' as const;
 
 describe('Wit higher order function', () => {
   let comm: WitCommunicator;
@@ -28,8 +28,8 @@ describe('Wit higher order function', () => {
 
     // When
     const input = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       inputText: 'some-text',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
@@ -68,8 +68,8 @@ describe('Wit higher order function', () => {
 
     // When
     const input = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       inputText,
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,

@@ -5,7 +5,7 @@ import { ContextDAO } from '../type/context-dao';
 import { Messenger } from '../type/messenger';
 
 /**
- * Save the context every time a message group is sent to a sender ID. If
+ * Save the context every time a message group is sent to a target ID. If
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
@@ -18,13 +18,13 @@ export function saveContextOnSend<C, PLRequest>(
     return {
       ...messenger,
       sendResponse: async response => {
-        const { senderID, additionalContext } = response;
+        const { targetID, additionalContext } = response;
         const result = await messenger.sendResponse(response);
 
         if (!!additionalContext) {
-          const oldContext = await contextDAO.getContext(senderID);
+          const oldContext = await contextDAO.getContext(targetID);
           const newContext = joinObjects(oldContext, additionalContext);
-          await contextDAO.setContext(senderID, newContext);
+          await contextDAO.setContext(targetID, newContext);
         }
 
         return result;
@@ -34,7 +34,7 @@ export function saveContextOnSend<C, PLRequest>(
 }
 
 /**
- * Inject the relevant context for a sender every time a message group is
+ * Inject the relevant context for a target every time a message group is
  * processed.
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.*
@@ -46,7 +46,7 @@ export function injectContextOnReceive<C, PLRequest>(
     return {
       ...messenger,
       receiveRequest: async request => {
-        let oldContext = await contextDAO.getContext(request.senderID);
+        let oldContext = await contextDAO.getContext(request.targetID);
         oldContext = deepClone({ ...request.oldContext, ...oldContext });
         return messenger.receiveRequest({ ...request, oldContext });
       }
@@ -55,7 +55,7 @@ export function injectContextOnReceive<C, PLRequest>(
 }
 
 /**
- * Save user in backend if there is no sender ID in context. This usually
+ * Save user in backend if there is no target ID in context. This usually
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  * @template C The context used by the current chatbot.
@@ -74,18 +74,18 @@ export function saveUserForSenderID<C, PLRequest, PLResponse, PUser>(
       ...messenger,
       receiveRequest: async request => {
         let { oldContext } = request;
-        const { senderID } = request;
-        const sidKey: keyof DefaultContext = 'senderID';
+        const { targetID } = request;
+        const sidKey: keyof DefaultContext = 'targetID';
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
-          const platformUser = await communicator.getUser<PUser>(senderID);
+          const platformUser = await communicator.getUser<PUser>(targetID);
           await saveUser(platformUser);
 
           oldContext = deepClone(
-            Object.assign(oldContext, { [sidKey]: senderID })
+            Object.assign(oldContext, { [sidKey]: targetID })
           );
 
-          await contextDAO.setContext(senderID, oldContext);
+          await contextDAO.setContext(targetID, oldContext);
         }
 
         return messenger.receiveRequest({ ...request, oldContext });
@@ -108,10 +108,10 @@ export function setTypingIndicator<C, PLRequest, PLResponse>(
     return {
       ...messenger,
       sendResponse: async response => {
-        const { senderID } = response;
-        await communicator.setTypingIndicator(senderID, true);
+        const { targetID } = response;
+        await communicator.setTypingIndicator(targetID, true);
         const result = await messenger.sendResponse(response);
-        await communicator.setTypingIndicator(senderID, false);
+        await communicator.setTypingIndicator(targetID, false);
         return result;
       }
     };

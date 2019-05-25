@@ -13,8 +13,8 @@ declare namespace GenericRequest {
   }
 
   interface Base<C> {
-    readonly senderID: string;
-    readonly senderPlatform: SupportedPlatform;
+    readonly targetID: string;
+    readonly targetPlatform: SupportedPlatform;
     readonly oldContext: C;
     readonly data: readonly Data.Base[];
   }

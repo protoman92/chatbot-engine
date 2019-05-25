@@ -20,7 +20,7 @@ import { Telegram } from '../type/telegram';
  * @template PLResponse The platform-specific response.
  */
 export async function createMessenger<C, PLRequest, PLResponse>(
-  senderPlatform: SupportedPlatform,
+  targetPlatform: SupportedPlatform,
   leafSelector: Leaf<C>,
   communicator: PlatformCommunicator<PLResponse>,
   requestMapper: Messenger<C, PLRequest>['generalizeRequest'],
@@ -30,7 +30,7 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   const messenger: Messenger<C, PLRequest> = compose(
     {
       generalizeRequest: platformReq => requestMapper(platformReq),
-      receiveRequest: ({ senderID, senderPlatform, oldContext, data }) => {
+      receiveRequest: ({ targetID, targetPlatform, oldContext, data }) => {
         return mapSeries(
           data as readonly (
             | Facebook.GenericRequest.Data
@@ -39,8 +39,8 @@ export async function createMessenger<C, PLRequest, PLResponse>(
             return leafSelector.next({
               ...datum,
               ...oldContext,
-              senderID,
-              senderPlatform
+              targetID,
+              targetPlatform
             });
           }
         );
@@ -54,10 +54,10 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   );
 
   await leafSelector.subscribe({
-    next: async ({ senderPlatform: pf, ...restInput }) => {
-      if (pf === senderPlatform) {
+    next: async ({ targetPlatform: pf, ...restInput }) => {
+      if (pf === targetPlatform) {
         return messenger.sendResponse({
-          senderPlatform: pf,
+          targetPlatform: pf,
           ...restInput
         } as GenericResponse<C>);
       }
@@ -99,9 +99,9 @@ export function createCrossPlatformBatchMessenger<C>(
 ): BatchMessenger<unknown, unknown> {
   return createBatchMessenger<C, unknown, unknown>({
     generalizeRequest: async platformReq => {
-      const senderPlatform = getPlatform(platformReq);
+      const targetPlatform = getPlatform(platformReq);
 
-      switch (senderPlatform) {
+      switch (targetPlatform) {
         case 'facebook':
           return messengers.facebook.generalizeRequest(
             platformReq as Facebook.PlatformRequest
@@ -114,7 +114,7 @@ export function createCrossPlatformBatchMessenger<C>(
       }
     },
     receiveRequest: async request => {
-      switch (request.senderPlatform) {
+      switch (request.targetPlatform) {
         case 'facebook':
           return messengers.facebook.receiveRequest(request);
 
@@ -123,7 +123,7 @@ export function createCrossPlatformBatchMessenger<C>(
       }
     },
     sendResponse: async response => {
-      switch (response.senderPlatform) {
+      switch (response.targetPlatform) {
         case 'facebook':
           return messengers.facebook.sendResponse(response);
 

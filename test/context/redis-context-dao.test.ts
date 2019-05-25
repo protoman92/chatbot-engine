@@ -6,7 +6,7 @@ import { createRedisContextDAO } from '../../src/context/RedisContextDAO';
 import { KV } from '../../src/type/common';
 import { ContextDAO } from '../../src/type/context-dao';
 
-const senderID = 'sender-id';
+const targetID = 'target-id';
 
 describe('Redis context DAO', () => {
   interface Context extends KV<unknown> {}
@@ -14,8 +14,8 @@ describe('Redis context DAO', () => {
   let redis: Pick<RedisClient, 'get' | 'set' | 'del'>;
   let contextDAO: ContextDAO<Context>;
 
-  function getCacheKey(senderID: string) {
-    return `facebook-${senderID}`;
+  function getCacheKey(targetID: string) {
+    return `facebook-${targetID}`;
   }
 
   beforeEach(() => {
@@ -37,10 +37,10 @@ describe('Redis context DAO', () => {
     });
 
     // When
-    const storedContext = await contextDAO.getContext(senderID);
+    const storedContext = await contextDAO.getContext(targetID);
 
     // Then
-    verify(redis.get(getCacheKey(senderID), anything())).once();
+    verify(redis.get(getCacheKey(targetID), anything())).once();
     expectJs(storedContext).to.eql(context);
   });
 
@@ -53,11 +53,11 @@ describe('Redis context DAO', () => {
     );
 
     // When
-    const result = await contextDAO.setContext(senderID, context);
+    const result = await contextDAO.setContext(targetID, context);
 
     // Then
     verify(
-      redis.set(getCacheKey(senderID), JSON.stringify(context), anything())
+      redis.set(getCacheKey(targetID), JSON.stringify(context), anything())
     ).once();
 
     expectJs(result).to.equal('OK');
@@ -70,10 +70,10 @@ describe('Redis context DAO', () => {
     });
 
     // When
-    const result = await contextDAO.resetContext(senderID);
+    const result = await contextDAO.resetContext(targetID);
 
     // Then
-    verify(redis.del(getCacheKey(senderID), anything())).once();
+    verify(redis.del(getCacheKey(targetID), anything())).once();
     expectJs(result).to.equal(true);
   });
 });

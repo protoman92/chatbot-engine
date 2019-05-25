@@ -8,18 +8,18 @@ import { VisualContent as RootVisualContent } from './visual-content';
 export namespace Facebook {
   namespace GenericRequest {
     interface Data extends RootGenericRequest.Data.Base {
-      readonly senderPlatform: 'facebook';
+      readonly targetPlatform: 'facebook';
       readonly stickerID: string;
     }
   }
 
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
-    readonly senderPlatform: 'facebook';
+    readonly targetPlatform: 'facebook';
     readonly data: readonly GenericRequest.Data[];
   }
 
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
-    readonly senderPlatform: 'facebook';
+    readonly targetPlatform: 'facebook';
     readonly visualContents: readonly VisualContent[];
   }
 

@@ -30,9 +30,9 @@ export function createFacebookCommunicator(
   }
 
   return {
-    getUser: async <U>(senderID: string) => {
-      const facebookUser = await get<U | undefined | null>(senderID);
-      if (!facebookUser) throw Error(`Unable to find user for id ${senderID}`);
+    getUser: async <U>(targetID: string) => {
+      const facebookUser = await get<U | undefined | null>(targetID);
+      if (!facebookUser) throw Error(`Unable to find user for id ${targetID}`);
       return facebookUser;
     },
     resolveVerifyChallenge: async ({
@@ -49,10 +49,10 @@ export function createFacebookCommunicator(
     sendResponse: data => {
       return post(data, 'me', 'messages');
     },
-    setTypingIndicator: (senderID, enabled) => {
+    setTypingIndicator: (targetID, enabled) => {
       return post(
         {
-          recipient: { id: senderID },
+          recipient: { id: targetID },
           sender_action: enabled ? 'typing_on' : 'typing_off'
         },
         'me',

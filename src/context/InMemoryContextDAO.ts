@@ -10,17 +10,17 @@ export function createInMemoryContextDAO<C>(
 ): ContextDAO<C> {
   const storage: { [K: string]: C } = {};
 
-  function getCacheKey(senderID: string) {
-    return `${platform}-${senderID}`;
+  function getCacheKey(targetID: string) {
+    return `${platform}-${targetID}`;
   }
 
   return {
-    getContext: async senderID => {
-      const cacheKey = getCacheKey(senderID);
+    getContext: async targetID => {
+      const cacheKey = getCacheKey(targetID);
       return storage[cacheKey] || ({} as C);
     },
-    setContext: async (senderID, context) => {
-      const cacheKey = getCacheKey(senderID);
+    setContext: async (targetID, context) => {
+      const cacheKey = getCacheKey(targetID);
       storage[cacheKey] = context;
     },
     resetContext: async () => {

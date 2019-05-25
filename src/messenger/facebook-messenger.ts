@@ -16,19 +16,19 @@ import { createMessenger } from './generic-messenger';
  */
 function createFacebookRequest<C>(
   webhook: Facebook.PlatformRequest,
-  senderPlatform: 'facebook'
+  targetPlatform: 'facebook'
 ): readonly Facebook.GenericRequest<C>[] {
   const { object, entry } = webhook;
 
-  /** Group requests based on sender ID. */
+  /** Group requests based on target ID. */
   function groupRequests(reqs: readonly Facebook.PlatformRequest.Input[]) {
     const requestMap: {
       [K: string]: readonly Facebook.PlatformRequest.Input[];
     } = {};
 
     reqs.forEach(req => {
-      const senderID = req.sender.id;
-      requestMap[senderID] = (requestMap[senderID] || []).concat([req]);
+      const targetID = req.sender.id;
+      requestMap[targetID] = (requestMap[targetID] || []).concat([req]);
     });
 
     return requestMap;
@@ -36,12 +36,12 @@ function createFacebookRequest<C>(
 
   function processRequest(
     request: Facebook.PlatformRequest.Input,
-    senderPlatform: 'facebook'
+    targetPlatform: 'facebook'
   ): Facebook.GenericRequest<C>['data'] {
     if (isType<Facebook.PlatformRequest.Input.Postback>(request, 'postback')) {
       return [
         {
-          senderPlatform,
+          targetPlatform,
           inputText: request.postback.payload,
           inputImageURL: '',
           inputCoordinate: DEFAULT_COORDINATES,
@@ -61,7 +61,7 @@ function createFacebookRequest<C>(
       ) {
         return [
           {
-            senderPlatform,
+            targetPlatform,
             inputText: message.quick_reply.payload,
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
@@ -78,7 +78,7 @@ function createFacebookRequest<C>(
       ) {
         return [
           {
-            senderPlatform,
+            targetPlatform,
             inputText: message.text,
             inputImageURL: '',
             inputCoordinate: DEFAULT_COORDINATES,
@@ -99,7 +99,7 @@ function createFacebookRequest<C>(
           switch (attachment.type) {
             case 'image':
               return {
-                senderPlatform,
+                targetPlatform,
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
                 inputCoordinate: DEFAULT_COORDINATES,
@@ -121,7 +121,7 @@ function createFacebookRequest<C>(
               const coordinates = { lat, lng: long };
 
               return {
-                senderPlatform,
+                targetPlatform,
                 inputText: JSON.stringify(coordinates),
                 inputImageURL: '',
                 inputCoordinate: coordinates,
@@ -147,12 +147,12 @@ function createFacebookRequest<C>(
 
         const groupedRequests = groupRequests(allRequests);
 
-        return Object.entries(groupedRequests).map(([senderID, requests]) => ({
-          senderID,
-          senderPlatform: 'facebook',
+        return Object.entries(groupedRequests).map(([targetID, requests]) => ({
+          targetID,
+          targetPlatform: 'facebook',
           oldContext: {} as any,
           data: requests
-            .map(req => processRequest(req, senderPlatform))
+            .map(req => processRequest(req, targetPlatform))
             .reduce((acc, items) => acc.concat(items), [])
         }));
       }
@@ -168,7 +168,7 @@ function createFacebookRequest<C>(
  * @template C The context used by the current chatbot.
  */
 function createFacebookResponse<C>({
-  senderID,
+  targetID,
   visualContents
 }: Facebook.GenericResponse<C>): readonly Facebook.PlatformResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
@@ -364,7 +364,7 @@ function createFacebookResponse<C>({
   }
 
   function createPlatformResponse(
-    senderID: string,
+    targetID: string,
     {
       content,
       quickReplies = []
@@ -379,11 +379,11 @@ function createFacebookResponse<C>({
       quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined
     };
 
-    return { ...fbResponse, message, recipient: { id: senderID } };
+    return { ...fbResponse, message, recipient: { id: targetID } };
   }
 
   return visualContents.map(visualContent => {
-    return createPlatformResponse(senderID, visualContent);
+    return createPlatformResponse(targetID, visualContent);
   });
 }
 

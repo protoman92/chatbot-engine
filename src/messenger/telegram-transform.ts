@@ -4,7 +4,7 @@ import { Telegram } from '../type/telegram';
 import { deepClone } from '../common/utils';
 
 /**
- * Save a Telegram user in backend if senderID is not found in context.
+ * Save a Telegram user in backend if targetID is not found in context.
  * @template C The context used by the current chatbot.
  */
 export function saveTelegramUser<C>(
@@ -25,17 +25,17 @@ export function saveTelegramUser<C>(
         } = platformReq;
 
         let { oldContext } = genericReq;
-        const { senderID } = genericReq;
-        const sidKey: keyof DefaultContext = 'senderID';
+        const { targetID } = genericReq;
+        const sidKey: keyof DefaultContext = 'targetID';
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           await saveUser(user);
 
           oldContext = deepClone(
-            Object.assign(oldContext, { [sidKey]: senderID })
+            Object.assign(oldContext, { [sidKey]: targetID })
           );
 
-          await contextDAO.setContext(senderID, oldContext);
+          await contextDAO.setContext(targetID, oldContext);
           genericReqs = genericReqs.map(req => ({ ...req, oldContext }));
         }
 

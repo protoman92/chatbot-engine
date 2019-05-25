@@ -32,11 +32,11 @@ export interface HTTPCommunicator {
  */
 export interface PlatformCommunicator<PLResponse> {
   /** Get the user associated with a sender ID. */
-  getUser<U>(senderID: string): Promise<U>;
+  getUser<U>(targetID: string): Promise<U>;
 
   /** Send a response to the related platform. */
   sendResponse(data: PLResponse): Promise<unknown>;
 
   /** Toggle typing indicator. */
-  setTypingIndicator(senderID: string, enabled: boolean): Promise<unknown>;
+  setTypingIndicator(targetID: string, enabled: boolean): Promise<unknown>;
 }

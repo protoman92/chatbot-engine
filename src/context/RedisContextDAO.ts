@@ -7,8 +7,8 @@ export function createRedisContextDAO<C>(
   redis: Pick<RedisClient, 'get' | 'set' | 'del'>,
   platform: SupportedPlatform
 ): ContextDAO<C> {
-  function getCacheKey(senderID: string) {
-    return `${platform}-${senderID}`;
+  function getCacheKey(targetID: string) {
+    return `${platform}-${targetID}`;
   }
 
   const promisifiedGet = promisify1(redis.get).bind(redis);
@@ -16,15 +16,15 @@ export function createRedisContextDAO<C>(
   const promisifiedDel = promisify1(redis.del).bind(redis);
 
   const contextDAO: ContextDAO<C> = {
-    getContext: async senderID => {
-      const context = await promisifiedGet(getCacheKey(senderID));
+    getContext: async targetID => {
+      const context = await promisifiedGet(getCacheKey(targetID));
       return JSON.parse(context);
     },
-    setContext: (senderID, context) => {
-      return promisifiedSet(getCacheKey(senderID), JSON.stringify(context));
+    setContext: (targetID, context) => {
+      return promisifiedSet(getCacheKey(targetID), JSON.stringify(context));
     },
-    resetContext: senderID => {
-      return promisifiedDel(getCacheKey(senderID));
+    resetContext: targetID => {
+      return promisifiedDel(getCacheKey(targetID));
     }
   };
 

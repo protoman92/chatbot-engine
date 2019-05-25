@@ -17,7 +17,7 @@ import { createMessenger } from './generic-messenger';
  */
 function createTelegramRequest<C>(
   webhook: Telegram.PlatformRequest,
-  senderPlatform: 'telegram'
+  targetPlatform: 'telegram'
 ): readonly Telegram.GenericRequest<C>[] {
   const {
     message: {
@@ -27,14 +27,14 @@ function createTelegramRequest<C>(
 
   function processRequest(
     request: Telegram.PlatformRequest,
-    senderPlatform: 'telegram'
+    targetPlatform: 'telegram'
   ): Telegram.GenericRequest<C>['data'] {
     const { message } = request;
 
     if (isType<Telegram.PlatformRequest.Input.Text>(message, 'text')) {
       return [
         {
-          senderPlatform,
+          targetPlatform,
           inputText: message.text,
           inputImageURL: '',
           inputCoordinate: DEFAULT_COORDINATES
@@ -49,10 +49,10 @@ function createTelegramRequest<C>(
 
   return [
     {
-      senderPlatform,
-      senderID: `${id}`,
+      targetPlatform,
+      targetID: `${id}`,
       oldContext: {} as C,
-      data: processRequest(webhook, senderPlatform)
+      data: processRequest(webhook, targetPlatform)
     }
   ];
 }
@@ -62,14 +62,14 @@ function createTelegramRequest<C>(
  * @template C The context used by the current chatbot.
  */
 function createTelegramResponse<C>({
-  senderID,
+  targetID,
   visualContents
 }: Telegram.GenericResponse<C>): readonly Telegram.PlatformResponse[] {
   function createTextResponse(
-    senderID: string,
+    targetID: string,
     { text }: VisualContent.MainContent.Text
   ): Omit<Telegram.PlatformResponse.SendMessage, 'reply_markup'> {
-    return { text, action: 'sendMessage', chat_id: senderID };
+    return { text, action: 'sendMessage', chat_id: targetID };
   }
 
   /** Create a Telegram quick reply from a generic quick reply. */
@@ -92,7 +92,7 @@ function createTelegramResponse<C>({
   }
 
   function createPlatformResponse(
-    senderID: string,
+    targetID: string,
     {
       quickReplies,
       content
@@ -110,7 +110,7 @@ function createTelegramResponse<C>({
     switch (content.type) {
       case 'text':
         return {
-          ...createTextResponse(senderID, content),
+          ...createTextResponse(targetID, content),
           reply_markup: tlQuickReplies
         };
 
@@ -122,7 +122,7 @@ function createTelegramResponse<C>({
   }
 
   return visualContents.map(visualContent => {
-    return createPlatformResponse(senderID, visualContent);
+    return createPlatformResponse(targetID, visualContent);
   });
 }
 

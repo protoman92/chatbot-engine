@@ -24,8 +24,8 @@ import { ErrorContext } from '../../src/type/common';
 import { Leaf } from '../../src/type/leaf';
 import { WitContext } from '../../src/type/wit';
 
-const senderID = 'sender-id';
-const senderPlatform = 'facebook' as const;
+const targetID = 'target-id';
+const targetPlatform = 'facebook' as const;
 
 describe('Default error leaf', () => {
   it('Should work correctly', async () => {
@@ -35,8 +35,8 @@ describe('Default error leaf', () => {
 
     // When
     const { visualContents } = await bridgeEmission(errorLeaf)({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       error,
       inputText: '',
       inputImageURL: '',
@@ -78,8 +78,8 @@ describe('Higher order functions', () => {
 
     // When
     const input = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
@@ -112,10 +112,10 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: async ({ senderID, a }) => {
+      next: async ({ targetID, a }) => {
         return observer.next({
-          senderID,
-          senderPlatform,
+          targetID,
+          targetPlatform,
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
@@ -137,8 +137,8 @@ describe('Higher order functions', () => {
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       a: 1000,
       inputText: '',
       inputImageURL: '',
@@ -157,10 +157,10 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ senderID, a }) => {
+      next: ({ targetID, a }) => {
         return observer.next({
-          senderID,
-          senderPlatform,
+          targetID,
+          targetPlatform,
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
@@ -177,8 +177,8 @@ describe('Higher order functions', () => {
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       a: 1,
       inputText: '',
       inputImageURL: '',
@@ -197,10 +197,10 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ senderID, a }) => {
+      next: ({ targetID, a }) => {
         return observer.next({
-          senderID,
-          senderPlatform,
+          targetID,
+          targetPlatform,
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
@@ -217,8 +217,8 @@ describe('Higher order functions', () => {
     )(originalLeaf);
 
     const nextResult1 = await resultLeaf.next({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       a: 0,
       inputText: '',
       inputImageURL: '',
@@ -229,8 +229,8 @@ describe('Higher order functions', () => {
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       a: 1,
       inputText: '',
       inputImageURL: '',
@@ -275,10 +275,10 @@ describe('Higher order functions', () => {
       )
       .transform(
         createLeafWithObserver(observer => ({
-          next: async ({ senderID, query }) => {
+          next: async ({ targetID, query }) => {
             await observer.next({
-              senderID,
-              senderPlatform,
+              targetID,
+              targetPlatform,
               additionalContext: { query },
               visualContents: []
             });
@@ -290,8 +290,8 @@ describe('Higher order functions', () => {
 
     // When
     const { additionalContext } = await bridgeEmission(transformedLeaf)({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       inputText: '',
       inputImageURL: '',
       inputCoordinate: DEFAULT_COORDINATES,
@@ -316,10 +316,10 @@ describe('Higher order functions', () => {
     }
 
     const originalLeaf: Leaf<Context1> = createLeafWithObserver(observer => ({
-      next: ({ senderID, a }) => {
+      next: ({ targetID, a }) => {
         return observer.next({
-          senderID,
-          senderPlatform,
+          targetID,
+          targetPlatform,
           visualContents: [
             {
               quickReplies: [{ type: 'text', text: `${a}` }],
@@ -339,8 +339,8 @@ describe('Higher order functions', () => {
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       b: null,
       inputText: '',
       inputImageURL: '',

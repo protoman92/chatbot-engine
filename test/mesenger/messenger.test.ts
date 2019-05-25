@@ -24,8 +24,8 @@ import { PlatformCommunicator } from '../../src/type/communicator';
 import { Leaf } from '../../src/type/leaf';
 import { GenericResponse } from '../../src/type/response';
 
-const senderID = 'sender-id';
-const senderPlatform = 'facebook' as const;
+const targetID = 'target-id';
+const targetPlatform = 'facebook' as const;
 
 describe('Generic unit messenger', () => {
   let leafSelector: Leaf<{}>;
@@ -53,7 +53,7 @@ describe('Generic unit messenger', () => {
     // When
     const unitMessenger = spy(
       await createMessenger(
-        senderPlatform,
+        targetPlatform,
         instance(leafSelector),
         instance(communicator),
         async () => [],
@@ -64,8 +64,8 @@ describe('Generic unit messenger', () => {
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
     const response: GenericResponse<{}> = {
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       visualContents: []
     };
 
@@ -80,7 +80,7 @@ describe('Generic unit messenger', () => {
     });
   });
 
-  it('Should not trigger send without matching sender platform', async () => {
+  it('Should not trigger send without matching target platform', async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(communicator.sendResponse(anything())).thenResolve();
@@ -100,8 +100,8 @@ describe('Generic unit messenger', () => {
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
     const nextResult = await next({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       visualContents: []
     });
 
@@ -119,14 +119,14 @@ describe('Generic unit messenger', () => {
 
     const data: readonly Facebook.GenericRequest.Data[] = [
       {
-        senderPlatform,
+        targetPlatform,
         inputText: 'text-1',
         inputImageURL: 'image-1',
         inputCoordinate: { lat: 0, lng: 0 },
         stickerID: ''
       },
       {
-        senderPlatform,
+        targetPlatform,
         inputText: 'text-2',
         inputImageURL: 'image-2',
         inputCoordinate: { lat: 1, lng: 1 },
@@ -136,7 +136,7 @@ describe('Generic unit messenger', () => {
 
     // When
     const unitMessenger = await createMessenger(
-      senderPlatform,
+      targetPlatform,
       instance(leafSelector),
       instance(communicator),
       async () => [],
@@ -144,8 +144,8 @@ describe('Generic unit messenger', () => {
     );
 
     await unitMessenger.receiveRequest({
-      senderID,
-      senderPlatform,
+      targetID,
+      targetPlatform,
       oldContext,
       data
     });
@@ -154,7 +154,7 @@ describe('Generic unit messenger', () => {
     data.forEach(datum =>
       verify(
         leafSelector.next(
-          deepEqual({ ...datum, ...oldContext, senderID, senderPlatform })
+          deepEqual({ ...datum, ...oldContext, targetID, targetPlatform })
         )
       ).once()
     );
@@ -193,8 +193,8 @@ describe('Cross platform unit messenger', () => {
     // Setup
     when(fbMessenger.generalizeRequest(anything())).thenResolve([
       {
-        senderID,
-        senderPlatform: 'facebook',
+        targetID,
+        targetPlatform: 'facebook',
         oldContext: {},
         data: []
       }
@@ -202,8 +202,8 @@ describe('Cross platform unit messenger', () => {
 
     when(tlMessenger.generalizeRequest(anything())).thenResolve([
       {
-        senderID,
-        senderPlatform: 'telegram',
+        targetID,
+        targetPlatform: 'telegram',
         oldContext: {},
         data: []
       }
@@ -212,17 +212,17 @@ describe('Cross platform unit messenger', () => {
     const platforms = Object.keys(messengers) as readonly SupportedPlatform[];
 
     // When
-    for (const senderPlatform of platforms) {
+    for (const targetPlatform of platforms) {
       const crossMessenger = createCrossPlatformBatchMessenger(
         messengerInstances,
-        () => senderPlatform
+        () => targetPlatform
       );
 
       await crossMessenger.processPlatformRequest({});
 
       // Then
-      verify(messengers[senderPlatform].generalizeRequest(anything())).once();
-      verify(messengers[senderPlatform].receiveRequest(anything())).once();
+      verify(messengers[targetPlatform].generalizeRequest(anything())).once();
+      verify(messengers[targetPlatform].receiveRequest(anything())).once();
     }
   });
 });

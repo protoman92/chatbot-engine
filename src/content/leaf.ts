@@ -42,7 +42,7 @@ export function createDefaultErrorLeaf<C>(
 
       return observer.next({
         ...restInput,
-        senderPlatform: restInput.senderPlatform,
+        targetPlatform: restInput.targetPlatform,
         visualContents: [
           {
             content: {

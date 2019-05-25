@@ -6,11 +6,11 @@
  */
 export interface ContextDAO<C> {
   /** Get the whole context in storage. */
-  getContext(senderID: string): Promise<C>;
+  getContext(targetID: string): Promise<C>;
 
   /** Set the whole context in storage. */
-  setContext(senderID: string, context: C): Promise<unknown>;
+  setContext(targetID: string, context: C): Promise<unknown>;
 
   /** Reset all context to factory. */
-  resetContext(senderID: string): Promise<unknown>;
+  resetContext(targetID: string): Promise<unknown>;
 }
