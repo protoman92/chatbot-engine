@@ -24,14 +24,10 @@ export namespace Facebook {
   }
 
   namespace VisualContent {
-    namespace QuickReply {
-      interface Postback extends RootVisualContent.QuickReply.Base {
-        readonly payload: string;
-        readonly type: 'postback';
-      }
-    }
-
-    type QuickReply = RootVisualContent.QuickReply | QuickReply.Postback;
+    type QuickReply =
+      | RootVisualContent.QuickReply.Location
+      | RootVisualContent.QuickReply.Postback
+      | RootVisualContent.QuickReply.SimpleText;
   }
 
   interface VisualContent extends RootVisualContent.Base {

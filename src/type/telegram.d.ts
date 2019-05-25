@@ -23,11 +23,24 @@ export namespace Telegram {
   }
 
   namespace VisualContent {
-    type QuickReply = RootVisualContent.QuickReply;
+    namespace QuickReply {
+      type InlineMarkup =
+        | RootVisualContent.QuickReply.Postback
+        | RootVisualContent.QuickReply.SimpleText;
+
+      type ReplyMarkup =
+        | RootVisualContent.QuickReply.Location
+        | RootVisualContent.QuickReply.SimpleText;
+
+      type InlineMarkups = readonly (readonly InlineMarkup[])[];
+      type ReplyMarkups = readonly (readonly ReplyMarkup[])[];
+    }
+
+    type QuickReplies = QuickReply.InlineMarkups | QuickReply.ReplyMarkups;
   }
 
   interface VisualContent extends RootVisualContent.Base {
-    readonly quickReplies?: readonly (readonly VisualContent.QuickReply[])[];
+    readonly quickReplies?: VisualContent.QuickReplies;
   }
 
   namespace PlatformRequest {
@@ -54,23 +67,47 @@ export namespace Telegram {
   }
 
   namespace PlatformResponse {
-    namespace Keyboard {
+    namespace ReplyKeyboardMarkup {
       interface Button {
         readonly text: string;
         readonly request_contact: boolean | undefined;
         readonly request_location: boolean | undefined;
       }
-
-      interface ReplyMarkup {
-        readonly keyboard: readonly (readonly Button[])[];
-        readonly resize_keyboard: boolean | undefined;
-        readonly one_time_keyboard: boolean | undefined;
-        readonly selective: boolean | undefined;
-      }
     }
 
+    interface ReplyKeyboardMarkup {
+      readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
+      readonly resize_keyboard: boolean | undefined;
+      readonly one_time_keyboard: boolean | undefined;
+      readonly selective: boolean | undefined;
+    }
+
+    namespace InlineKeyboardMarkup {
+      namespace Button {
+        interface Base {
+          readonly text: string;
+        }
+
+        interface Postback extends Base {
+          readonly callback_data: string;
+        }
+
+        interface URL extends Base {
+          readonly url: string;
+        }
+      }
+
+      type Button = Button.Postback | Button.URL;
+    }
+
+    interface InlineKeyboardMarkup {
+      readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
+    }
+
+    type ReplyMarkup = ReplyKeyboardMarkup | InlineKeyboardMarkup;
+
     interface HasReplyMarkup {
-      readonly reply_markup: Keyboard.ReplyMarkup | undefined;
+      readonly reply_markup: ReplyMarkup | undefined;
     }
 
     interface SendMessage extends HasReplyMarkup {

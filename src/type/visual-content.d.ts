@@ -11,17 +11,15 @@ declare namespace VisualContent {
       readonly type: 'location';
     }
 
+    interface Postback extends QuickReply.Base {
+      readonly payload: string;
+      readonly type: 'postback';
+    }
+
     interface SimpleText extends Base {
       readonly type: 'text';
     }
   }
-
-  /**
-   * Represents a bubble of text that supports quick decision-making. This
-   * concept is available only on certain platforms (Facebook/Telegram) but is
-   * an important one nonetheless.
-   */
-  type QuickReply = QuickReply.Location | QuickReply.SimpleText;
 
   namespace SubContent {
     namespace Action {

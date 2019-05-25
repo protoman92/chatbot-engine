@@ -72,23 +72,79 @@ function createTelegramResponse<C>({
     return { text, action: 'sendMessage', chat_id: targetID };
   }
 
+  /** Only certain quick reply types supports inline markups. */
+  function createInlineMarkups(
+    quickReplies: Telegram.VisualContent.QuickReply.InlineMarkups
+  ): Telegram.PlatformResponse.InlineKeyboardMarkup {
+    return {
+      inline_keyboard: quickReplies.map(qrs =>
+        qrs.map(qr => {
+          const { text } = qr;
+
+          switch (qr.type) {
+            case 'postback':
+              return { text, callback_data: qr.payload };
+
+            case 'text':
+              return { text, callback_data: text };
+          }
+        })
+      )
+    };
+  }
+
+  /** Only certain quick reply types support reply markups. */
+  function createReplyMarkups(
+    quickReplies: Telegram.VisualContent.QuickReply.ReplyMarkups
+  ): Telegram.PlatformResponse.ReplyKeyboardMarkup {
+    return {
+      keyboard: quickReplies.map(qrs =>
+        qrs.map(qr => {
+          const { text } = qr;
+
+          switch (qr.type) {
+            case 'text':
+              return {
+                text,
+                request_contact: undefined,
+                request_location: undefined
+              };
+
+            case 'location':
+              return {
+                text,
+                request_contact: undefined,
+                request_location: true
+              };
+          }
+        })
+      ),
+      resize_keyboard: true,
+      one_time_keyboard: true,
+      selective: false
+    };
+  }
+
   /** Create a Telegram quick reply from a generic quick reply. */
-  function createQuickReply(
-    quickReply: VisualContent.QuickReply
-  ): Telegram.PlatformResponse.Keyboard.Button {
-    const { text } = quickReply;
+  function createQuickReplies(
+    quickReplies: Telegram.VisualContent.QuickReplies
+  ): Telegram.PlatformResponse.ReplyMarkup {
+    const shouldBeReplyMarkup = quickReplies.every(
+      (qrs: Telegram.VisualContent.QuickReplies[number]) =>
+        qrs.every((qr: Telegram.VisualContent.QuickReplies[number][number]) => {
+          return qr.type === 'location';
+        })
+    );
 
-    switch (quickReply.type) {
-      case 'text':
-        return {
-          text,
-          request_contact: undefined,
-          request_location: undefined
-        };
-
-      case 'location':
-        return { text, request_contact: undefined, request_location: true };
+    if (shouldBeReplyMarkup) {
+      return createReplyMarkups(
+        quickReplies as Telegram.VisualContent.QuickReply.ReplyMarkups
+      );
     }
+
+    return createInlineMarkups(
+      quickReplies as Telegram.VisualContent.QuickReply.InlineMarkups
+    );
   }
 
   function createPlatformResponse(
@@ -98,14 +154,7 @@ function createTelegramResponse<C>({
       content
     }: Telegram.GenericResponse<C>['visualContents'][number]
   ): Telegram.PlatformResponse {
-    const tlQuickReplies:
-      | Telegram.PlatformResponse.Keyboard.ReplyMarkup
-      | undefined = quickReplies && {
-      keyboard: quickReplies.map(qrs => qrs.map(qr => createQuickReply(qr))),
-      resize_keyboard: true,
-      one_time_keyboard: true,
-      selective: false
-    };
+    const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
     switch (content.type) {
       case 'text':
