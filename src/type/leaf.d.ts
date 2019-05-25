@@ -4,12 +4,16 @@ import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
 
 declare namespace Leaf {
+  interface Base<C, Extra>
+    extends ContentObserver<C & Extra>,
+      ContentObservable<GenericResponse<C>> {}
+
   /**
    * Represents a collection of leaf information that is derived from
    * enumerating all possibilities in a key-value branch object.
    * @template C The context used by the current chatbot.
    */
-  export interface Enumerated<C> {
+  interface Enumerated<C> {
     readonly parentBranch: Branch<C>;
     readonly prefixLeafPaths: readonly string[];
     readonly currentLeaf: Leaf<C>;
@@ -33,6 +37,16 @@ declare namespace Leaf {
   type TransformerWithPipe<CI, CO> = (
     leaf: Leaf<CI>
   ) => Promise<LeafWithPipe<CO>>;
+
+  /**
+   * Compose functions that have the same input/output type.
+   * @template C The original context type.
+   */
+  interface MonoTransformer<C> extends Transformer<C, C> {}
+
+  interface Base<C, Extra>
+    extends ContentObserver<C & Extra>,
+      ContentObservable<GenericResponse<C>> {}
 
   /**
    * Represents a chain of transformer higher-order functions that transforms a
@@ -81,9 +95,7 @@ declare namespace Leaf {
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  * @template C The context used by the current chatbot.
  */
-export interface Leaf<C>
-  extends ContentObserver<C & DefaultContext>,
-    ContentObservable<GenericResponse<C>> {}
+export interface Leaf<C> extends Leaf.Base<C, DefaultContext> {}
 
 /**
  * Represents a leaf that support pipe functions.

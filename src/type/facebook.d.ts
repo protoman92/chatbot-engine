@@ -1,5 +1,7 @@
 import { DeepReadonly, Omit } from 'ts-essentials';
+import { DefaultContext as RootDefaultContext } from './common';
 import { PlatformCommunicator } from './communicator';
+import { Leaf as RootLeaf } from './leaf';
 import { Messenger as RootMessenger } from './messenger';
 import { GenericRequest as RootGenericRequest } from './request';
 import { GenericResponse as RootGenericResponse } from './response';
@@ -33,6 +35,9 @@ export namespace Facebook {
   interface VisualContent extends RootVisualContent.Base {
     readonly quickReplies?: readonly VisualContent.QuickReply[];
   }
+
+  type DefaultContext = RootDefaultContext & GenericRequest.Data;
+  type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {
     namespace Input {

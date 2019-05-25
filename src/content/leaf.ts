@@ -1,9 +1,14 @@
 import { Omit } from 'ts-essentials';
-import { createContentSubject } from '../stream/stream';
+import {
+  createCompositeSubscription,
+  createContentSubject
+} from '../stream/stream';
 import { ErrorContext } from '../type/common';
+import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
 import { ContentObserver } from '../type/stream';
+import { Telegram } from '../type/telegram';
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -54,4 +59,39 @@ export function createDefaultErrorLeaf<C>(
       });
     }
   }));
+}
+
+/**
+ * Create a leaf that handles content for different platforms, based on the
+ * leaf input.
+ * @template C The context used by the current chatbot.
+ */
+export function createLeafForPlatforms<C>({
+  facebook,
+  telegram
+}: Readonly<{
+  facebook: Facebook.Leaf<C>;
+  telegram: Telegram.Leaf<C>;
+}>): Leaf<C> {
+  return {
+    next: async input => {
+      switch (input.targetPlatform) {
+        case 'facebook':
+          return facebook.next(input);
+
+        case 'telegram':
+          return telegram.next(input);
+      }
+    },
+    complete: async () => {
+      !!facebook.complete && (await facebook.complete());
+      !!telegram.complete && (await telegram.complete());
+    },
+    subscribe: async handlers => {
+      return createCompositeSubscription(
+        await facebook.subscribe(handlers),
+        await telegram.subscribe(handlers)
+      );
+    }
+  };
 }

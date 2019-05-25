@@ -1,7 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
-import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
-import { Facebook, mapOutput, VisualContent } from '../../src';
+import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
+import { Facebook, mapOutput, Telegram, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import { catchError } from '../../src/content/higher-order/catch-error';
 import { firstValidResult } from '../../src/content/higher-order/first-valid';
@@ -16,6 +16,7 @@ import {
 } from '../../src/content/higher-order/transform-chain';
 import {
   createDefaultErrorLeaf,
+  createLeafForPlatforms,
   createLeafWithObserver
 } from '../../src/content/leaf';
 import {
@@ -148,6 +149,70 @@ describe('Default error leaf', () => {
     } else {
       throw new Error('Never should have come here');
     }
+  });
+});
+
+describe('Leaf for platforms', () => {
+  let fbLeaf: Facebook.Leaf<{}>;
+  let tlLeaf: Telegram.Leaf<{}>;
+  let platformLeaf: Leaf<{}>;
+
+  beforeEach(async () => {
+    fbLeaf = spy<Facebook.Leaf<{}>>(
+      await createLeafWithObserver(async () => ({
+        next: () => Promise.reject(''),
+        complete: () => Promise.reject('')
+      }))
+    );
+
+    tlLeaf = spy<Telegram.Leaf<{}>>(
+      await createLeafWithObserver(async () => ({
+        next: () => Promise.reject(''),
+        complete: () => Promise.reject('')
+      }))
+    );
+
+    platformLeaf = createLeafForPlatforms({
+      facebook: instance(fbLeaf),
+      telegram: instance(tlLeaf)
+    });
+  });
+
+  it('Should work for different platforms', async () => {
+    // Setup
+    when(fbLeaf.next(anything())).thenResolve({});
+    when(fbLeaf.complete!()).thenResolve({});
+    when(tlLeaf.next(anything())).thenResolve({});
+    when(tlLeaf.complete!()).thenResolve({});
+
+    // When
+    await platformLeaf.next({
+      targetID,
+      targetPlatform: 'facebook',
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    await platformLeaf.next({
+      targetID,
+      targetPlatform: 'telegram',
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES
+    });
+
+    await platformLeaf.complete!();
+    await platformLeaf.subscribe({ next: async () => ({}) });
+
+    // Then
+    verify(fbLeaf.next(anything())).once();
+    verify(fbLeaf.complete!()).once();
+    verify(fbLeaf.subscribe(anything())).once();
+    verify(tlLeaf.next(anything())).once();
+    verify(tlLeaf.complete!()).once();
+    verify(tlLeaf.subscribe(anything())).once();
   });
 });
 
