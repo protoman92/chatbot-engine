@@ -6,7 +6,7 @@ import { compose, joinObjects } from '../../src/common/utils';
 import {
   injectContextOnReceive,
   saveContextOnSend,
-  saveUserForSenderID,
+  saveUserForTargetID,
   setTypingIndicator
 } from '../../src/messenger/messenger-transform';
 import { saveTelegramUser } from '../../src/messenger/telegram-transform';
@@ -30,7 +30,6 @@ beforeEach(async () => {
   });
 
   communicator = spy<PlatformCommunicator<unknown>>({
-    getUser: () => Promise.reject(''),
     sendResponse: () => Promise.reject(''),
     setTypingIndicator: () => Promise.reject('')
   });
@@ -117,7 +116,6 @@ describe('Inject context on receive', () => {
 describe('Save user for target ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
-    const chatbotUser = { id: targetID };
     when(contextDAO.setContext(anything(), anything())).thenResolve({});
 
     when(messenger.receiveRequest(anything())).thenResolve({
@@ -125,13 +123,11 @@ describe('Save user for target ID', () => {
       visualContents: []
     });
 
-    when(communicator.getUser(targetID)).thenResolve(chatbotUser);
-
     const transformed = compose(
       instance(messenger),
-      saveUserForSenderID(
+      saveUserForTargetID(
         instance(contextDAO),
-        instance(communicator),
+        async () => ({ id: targetID }),
         async () => {}
       )
     );
@@ -147,7 +143,6 @@ describe('Save user for target ID', () => {
     await transformed.receiveRequest(genericRequest);
 
     // Then
-    verify(communicator.getUser(targetID)).once();
     verify(contextDAO.setContext(targetID, deepEqual({ targetID }))).once();
 
     verify(

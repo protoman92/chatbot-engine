@@ -64,9 +64,9 @@ export function injectContextOnReceive<C, PLRequest>(
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
  */
-export function saveUserForSenderID<C, PLRequest, PLResponse, PUser>(
+export function saveUserForTargetID<C, PLRequest, PLResponse, PUser>(
   contextDAO: ContextDAO<C>,
-  communicator: PlatformCommunicator<PLResponse>,
+  getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
 ): Transformer<Messenger<C, PLRequest>> {
   return function saveUserForSenderID(messenger) {
@@ -78,7 +78,7 @@ export function saveUserForSenderID<C, PLRequest, PLResponse, PUser>(
         const sidKey: keyof DefaultContext = 'targetID';
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
-          const platformUser = await communicator.getUser<PUser>(targetID);
+          const platformUser = await getUser(targetID);
           await saveUser(platformUser);
 
           oldContext = deepClone(

@@ -246,6 +246,9 @@ export namespace Facebook {
 
   /** Represents a Facebook-specific communicator. */
   interface Communicator extends PlatformCommunicator<PlatformResponse> {
+    /** Get the user associated with a sender ID. */
+    getUser(targetID: string): Promise<User>;
+
     /** Resolve Facebook hub challenge to establish connection with chatbot. */
     resolveVerifyChallenge(
       requestQuery: Readonly<{

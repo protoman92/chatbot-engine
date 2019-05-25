@@ -38,7 +38,6 @@ describe('Generic unit messenger', () => {
     });
 
     communicator = spy<PlatformCommunicator<unknown>>({
-      getUser: () => Promise.reject(''),
       sendResponse: () => Promise.reject(''),
       setTypingIndicator: () => Promise.reject('')
     });

@@ -11,15 +11,14 @@ export { createRedisContextDAO } from './context/RedisContextDAO';
 export { createAxiosCommunicator } from './messenger/axios-communicator';
 export { createFacebookCommunicator } from './messenger/facebook-communicator';
 export { createFacebookMessenger } from './messenger/facebook-messenger';
+export { saveFacebookUser } from './messenger/facebook-transform';
 export {
   createCrossPlatformBatchMessenger
 } from './messenger/generic-messenger';
-export {
-  saveUserForSenderID,
-  transformMessengersByDefault
-} from './messenger/messenger-transform';
+export { transformMessengersByDefault } from './messenger/messenger-transform';
 export { createTelegramCommunicator } from './messenger/telegram-communicator';
 export { createTelegramMessenger } from './messenger/telegram-messenger';
+export { saveTelegramUser } from './messenger/telegram-transform';
 export { createWitCommunicator } from './messenger/wit-communicator';
 export * from './type/branch';
 export * from './type/common';

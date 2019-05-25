@@ -31,9 +31,6 @@ export interface HTTPCommunicator {
  * @template PLResponse The platform-specific response.
  */
 export interface PlatformCommunicator<PLResponse> {
-  /** Get the user associated with a sender ID. */
-  getUser<U>(targetID: string): Promise<U>;
-
   /** Send a response to the related platform. */
   sendResponse(data: PLResponse): Promise<unknown>;
 

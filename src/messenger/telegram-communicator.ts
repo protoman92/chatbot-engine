@@ -28,7 +28,6 @@ export function createTelegramCommunicator(
   }
 
   return {
-    getUser: async <U>() => ({} as U),
     sendResponse: ({ action, ...payload }) => {
       return communicate({
         url: formatURL(action),
