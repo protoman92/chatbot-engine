@@ -11,7 +11,7 @@ import {
 } from '../../src/content/higher-order/map-input';
 import { requireInputKeys } from '../../src/content/higher-order/require-keys';
 import {
-  createTransformChain,
+  createComposeChain,
   createPipeChain
 } from '../../src/content/higher-order/transform-chain';
 import {
@@ -129,7 +129,7 @@ describe('Higher order functions', () => {
       subscribe: () => Promise.resolve(createSubscription(async () => {}))
     });
 
-    const transformed = createTransformChain()
+    const transformed = createComposeChain()
       .compose(catchError(instance(fallbackLeaf)))
       .transform(instance(errorLeaf));
 
@@ -312,7 +312,7 @@ describe('Higher order functions', () => {
       readonly query?: string;
     }
 
-    const transformedLeaf = createTransformChain()
+    const transformedLeaf = createComposeChain()
       .forContextOfType<Context>()
       .compose(
         firstValidResult<Context, Context>(
@@ -368,7 +368,7 @@ describe('Higher order functions', () => {
     expectJs(additionalContext).to.eql({ query: 'second_transformer' });
   });
 
-  it('Transform chain should work', async () => {
+  it('Compose chain should work', async () => {
     // Setup
     interface Context1 {
       a: number;
@@ -396,7 +396,7 @@ describe('Higher order functions', () => {
     );
 
     // When
-    const resultLeaf = createTransformChain()
+    const resultLeaf = createComposeChain()
       .forContextOfType<Context2>()
       .compose(mapInput(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
       .transform(originalLeaf);

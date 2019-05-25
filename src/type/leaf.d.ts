@@ -34,21 +34,21 @@ declare namespace Leaf {
 
   /**
    * Represents a chain of transformer higher-order functions that transforms a
-   * leaf instance declaratively.
+   * leaf instance declaratively on the input side.
    * @template CI The original context type.
    * @template CO The target context type.
    */
-  export interface TransformChain<CI, CO> {
+  export interface ComposeChain<CI, CO> {
     readonly transform: TransformerWithPipe<CI, CO>;
 
     /**
      * Apply pre-transformers like wrapping layers on the base leaf.
      * @template CI1 The target context type.
      */
-    compose<CI1>(fn: Transformer<CI1, CI>): TransformChain<CI1, CO>;
+    compose<CI1>(fn: Transformer<CI1, CI>): ComposeChain<CI1, CO>;
 
     /** This is only used for debugging, and serves no production purposes. */
-    forContextOfType<C>(ctx?: C): TransformChain<C, C>;
+    forContextOfType<C>(ctx?: C): ComposeChain<C, C>;
 
     /** This is only used for debugging, and serves no production purposes. */
     checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;

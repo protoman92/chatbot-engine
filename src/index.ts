@@ -3,8 +3,8 @@ export { firstValidResult } from './content/higher-order/first-valid';
 export { compactMapInput, mapInput } from './content/higher-order/map-input';
 export { requireInputKeys } from './content/higher-order/require-keys';
 export {
-  createPipeChain,
-  createTransformChain
+  createComposeChain,
+  createPipeChain
 } from './content/higher-order/transform-chain';
 export { useWitEngine } from './content/higher-order/wit';
 export { createDefaultErrorLeaf, createLeafWithObserver } from './content/leaf';

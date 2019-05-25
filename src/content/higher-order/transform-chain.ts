@@ -2,38 +2,32 @@ import { compose } from '../../common/utils';
 import { Leaf } from '../../type/leaf';
 
 /**
- * Create a leaf transform chain to transform a leaf declaratively.
+ * Create a leaf compose chain to transform a leaf declaratively.
  * @template CI The original context type.
  * @template CO The target context type.
- * @return A leaf transform chain.
+ * @return A leaf compose chain.
  */
-export function createTransformChain<CI, CO>(): Leaf.TransformChain<CI, CO> {
-  function cl(
-    originalLeaf: Leaf<any>,
-    ...transformers: readonly Leaf.Transformer<any, any>[]
-  ): Leaf<any> {
-    return compose(
-      originalLeaf,
-      ...transformers
-    );
-  }
-
+export function createComposeChain<CI, CO>(): Leaf.ComposeChain<CI, CO> {
   const composeTransformers: Leaf.Transformer<any, any>[] = [];
 
-  const transformChain: Leaf.TransformChain<CI, CO> = {
+  const composeChain: Leaf.ComposeChain<CI, CO> = {
     compose: <CI1>(fn: Leaf.Transformer<CI1, CI>) => {
       composeTransformers.unshift(fn);
-      return transformChain as any;
+      return composeChain as any;
     },
     transform: leaf => {
-      const outputLeaf = cl(leaf, ...composeTransformers) as Leaf<CO>;
+      const outputLeaf = compose(
+        leaf,
+        ...composeTransformers
+      ) as Leaf<CO>;
+
       return { ...outputLeaf, toPipe: () => createPipeChain(outputLeaf) };
     },
-    forContextOfType: () => transformChain as any,
-    checkThis: () => transformChain
+    forContextOfType: () => composeChain as any,
+    checkThis: () => composeChain
   };
 
-  return transformChain;
+  return composeChain;
 }
 
 /**
