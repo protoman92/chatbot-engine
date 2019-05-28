@@ -3,14 +3,14 @@ import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import {
   Facebook,
-  thenInvoke,
   mapOutput,
   Telegram,
+  thenInvoke,
   VisualContent
 } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
+import { anyTransformer } from '../../src/content/higher-order/any-transformer';
 import { catchError } from '../../src/content/higher-order/catch-error';
-import { firstValidResult } from '../../src/content/higher-order/first-valid';
 import {
   compactMapInput,
   mapInput
@@ -332,7 +332,7 @@ describe('Compose chain', () => {
     const transformedLeaf = await createComposeChain()
       .forContextOfType<Context>()
       .compose(
-        firstValidResult<Context, Context>(
+        anyTransformer<Context, Context>(
           compactMapInput(async ({ inputText, ...restInput }) => {
             if (!inputText) return null;
             return { ...restInput, inputText, query: 'first_transformer' };

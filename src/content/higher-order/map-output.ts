@@ -4,8 +4,8 @@ import { createLeafWithObserver } from '../leaf';
 
 /**
  * Map output of a leaf to another output.
- * @param CI The original context type.
- * @param CO The target context type.
+ * @param CI The original input type.
+ * @param CO The target input type.
  */
 export function mapOutput<CI, CO extends CI>(
   fn: (response: GenericResponse<CI>) => Promise<GenericResponse<CO>>

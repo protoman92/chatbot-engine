@@ -1,5 +1,5 @@
+export { anyTransformer } from './content/higher-order/any-transformer';
 export { catchError } from './content/higher-order/catch-error';
-export { firstValidResult } from './content/higher-order/first-valid';
 export { compactMapInput, mapInput } from './content/higher-order/map-input';
 export { mapOutput } from './content/higher-order/map-output';
 export { requireInputKeys } from './content/higher-order/require-keys';

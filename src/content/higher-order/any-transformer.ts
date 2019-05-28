@@ -5,7 +5,13 @@ import {
 } from '../../stream/stream';
 import { Leaf } from '../../type/leaf';
 
-export function firstValidResult<CI, CO extends CI>(
+/**
+ * Run through a sequence of transformers and stop whenever a valid result is
+ * returned. Discard all other transformers.
+ * @template CI The original input type.
+ * @template CO The target input type.
+ */
+export function anyTransformer<CI, CO extends CI>(
   ...transformers: readonly Leaf.Transformer<CI, CO>[]
 ): Leaf.Transformer<CI, CO> {
   return async leaf =>

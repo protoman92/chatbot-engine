@@ -4,7 +4,7 @@ import { WitCommunicator, WitContext } from '../../type/wit';
 /**
  * Retry a failing message with wit, by running the input text through wit
  * engine and injecting entities into leaf input.
- * @template C The original context type.
+ * @template C The original input type.
  */
 export function retryWithWit<C>(
   comm: WitCommunicator

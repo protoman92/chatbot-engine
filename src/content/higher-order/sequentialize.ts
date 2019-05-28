@@ -8,7 +8,7 @@ import { NextResult } from '../../type/stream';
 
 /**
  * Produce output from a sequence of leaves after the current leaf is done.
- * @template C The context used by the current chatbot.
+ * @template C The original input type.
  */
 export function thenInvoke<C>(
   ...leaves: readonly Leaf<C>[]

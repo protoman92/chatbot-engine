@@ -4,8 +4,8 @@ import { Leaf } from '../../type/leaf';
 
 /**
  * Map one input type to another.
- * @template CI The original context type.
- * @template CO The target context type.
+ * @template CI The original input type.
+ * @template CO The target input type.
  */
 export function mapInput<CI, CO extends CI>(
   fn: (input: CO & DefaultContext) => Promise<CI & DefaultContext>
@@ -19,8 +19,8 @@ export function mapInput<CI, CO extends CI>(
 /**
  * Map one input type to another, but returns invalid if the resulting input
  * object is null or undefined.
- * @template CI The original context type.
- * @template CO The target context type.
+ * @template CI The original input type.
+ * @template CO The target input type.
  */
 export function compactMapInput<CI, CO extends CI>(
   fn: (

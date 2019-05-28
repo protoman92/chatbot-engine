@@ -3,9 +3,8 @@ import { ErrorContext } from '../../type/common';
 import { Leaf } from '../../type/leaf';
 
 /**
- * If a leaf throws error while trying to produce content, switch to a fallback
- * leaf.
- * @template C The original context type/
+ * If a leaf throws error while producing content, switch to fallback leaf.
+ * @template C The original input type.
  */
 export function catchError<C>(
   fallbackLeaf: Leaf<C & ErrorContext>
