@@ -1,12 +1,12 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
+import { Omit } from 'ts-essentials';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
 import { Facebook, Telegram, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import {
   createDefaultErrorLeaf,
-  createLeafForPlatforms,
-  createLeafWithObserver
+  createLeafForPlatforms
 } from '../../src/content/leaf';
 import { bridgeEmission } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
@@ -43,29 +43,25 @@ describe('Default error leaf', () => {
 });
 
 describe('Leaf for platforms', () => {
-  let fbLeaf: Facebook.Leaf<{}>;
-  let tlLeaf: Telegram.Leaf<{}>;
+  let fbLeaf: Omit<Facebook.Leaf<{}>, 'subscribe'>;
+  let tlLeaf: Omit<Telegram.Leaf<{}>, 'subscribe'>;
   let platformLeaf: Leaf<{}>;
 
   beforeEach(async () => {
-    fbLeaf = spy<Facebook.Leaf<{}>>(
-      await createLeafWithObserver(async () => ({
-        next: () => Promise.reject(''),
-        complete: () => Promise.reject('')
-      }))
-    );
+    fbLeaf = spy<Omit<Facebook.Leaf<{}>, 'subscribe'>>({
+      next: () => Promise.reject(''),
+      complete: () => Promise.reject('')
+    });
 
-    tlLeaf = spy<Telegram.Leaf<{}>>(
-      await createLeafWithObserver(async () => ({
-        next: () => Promise.reject(''),
-        complete: () => Promise.reject('')
-      }))
-    );
+    tlLeaf = spy<Omit<Telegram.Leaf<{}>, 'subscribe'>>({
+      next: () => Promise.reject(''),
+      complete: () => Promise.reject('')
+    });
 
-    platformLeaf = createLeafForPlatforms({
+    platformLeaf = await createLeafForPlatforms(async () => ({
       facebook: instance(fbLeaf),
       telegram: instance(tlLeaf)
-    });
+    }));
   });
 
   it('Should work for different platforms', async () => {
@@ -99,9 +95,7 @@ describe('Leaf for platforms', () => {
     // Then
     verify(fbLeaf.next(anything())).once();
     verify(fbLeaf.complete!()).once();
-    verify(fbLeaf.subscribe(anything())).once();
     verify(tlLeaf.next(anything())).once();
     verify(tlLeaf.complete!()).once();
-    verify(tlLeaf.subscribe(anything())).once();
   });
 });

@@ -1,8 +1,5 @@
 import { Omit } from 'ts-essentials';
-import {
-  createCompositeSubscription,
-  createContentSubject
-} from '../stream/stream';
+import { createContentSubject } from '../stream/stream';
 import { ErrorContext } from '../type/common';
 import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
@@ -66,32 +63,33 @@ export function createDefaultErrorLeaf<C>(
  * leaf input.
  * @template C The context used by the current chatbot.
  */
-export function createLeafForPlatforms<C>({
-  facebook,
-  telegram
-}: Readonly<{
-  facebook: Facebook.Leaf<C>;
-  telegram: Telegram.Leaf<C>;
-}>): Leaf<C> {
-  return {
-    next: async input => {
-      switch (input.targetPlatform) {
-        case 'facebook':
-          return facebook.next(input);
+export function createLeafForPlatforms<C>(
+  fn: (
+    observer: Pick<ContentObserver<GenericResponse<C>>, 'next'>
+  ) => Promise<
+    Readonly<{
+      facebook: Omit<Facebook.Leaf<C>, 'subscribe'>;
+      telegram: Omit<Telegram.Leaf<C>, 'subscribe'>;
+    }>
+  >
+): Promise<Leaf<C>> {
+  return createLeafWithObserver(async observer => {
+    const { facebook, telegram } = await fn(observer);
 
-        case 'telegram':
-          return telegram.next(input);
+    return {
+      next: async input => {
+        switch (input.targetPlatform) {
+          case 'facebook':
+            return facebook.next(input);
+
+          case 'telegram':
+            return telegram.next(input);
+        }
+      },
+      complete: async () => {
+        !!facebook.complete && (await facebook.complete());
+        !!telegram.complete && (await telegram.complete());
       }
-    },
-    complete: async () => {
-      !!facebook.complete && (await facebook.complete());
-      !!telegram.complete && (await telegram.complete());
-    },
-    subscribe: async handlers => {
-      return createCompositeSubscription(
-        await facebook.subscribe(handlers),
-        await telegram.subscribe(handlers)
-      );
-    }
-  };
+    };
+  });
 }
