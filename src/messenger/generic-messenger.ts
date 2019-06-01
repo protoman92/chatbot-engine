@@ -1,5 +1,4 @@
 import { compose, getRequestPlatform, mapSeries } from '../common/utils';
-
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { Facebook } from '../type/facebook';
@@ -27,6 +26,9 @@ export async function createMessenger<C, PLRequest, PLResponse>(
   responseMapper: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>,
   ...transformers: readonly Transformer<Messenger<C, PLRequest>>[]
 ): Promise<Messenger<C, PLRequest>> {
+  const reversedTransformers = [...transformers];
+  reversedTransformers.reverse();
+
   const messenger: Messenger<C, PLRequest> = await compose(
     {
       generalizeRequest: platformReq => requestMapper(platformReq),
@@ -50,7 +52,7 @@ export async function createMessenger<C, PLRequest, PLResponse>(
         return mapSeries(data, datum => communicator.sendResponse(datum));
       }
     },
-    ...transformers
+    ...reversedTransformers
   );
 
   await leafSelector.subscribe({

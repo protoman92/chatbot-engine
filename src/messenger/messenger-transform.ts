@@ -58,11 +58,10 @@ export function injectContextOnReceive<C, PLRequest>(
  * recently flushed.
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
- * @template PLResponse The platform-specific response.
  * @template PUser The platform user type.
  * @template CUser The chatbot's user type.
  */
-export function saveUserForTargetID<C, PLRequest, PLResponse, PUser>(
+export function saveUserForTargetID<C, PLRequest, PUser>(
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
