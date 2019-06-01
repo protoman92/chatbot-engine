@@ -51,6 +51,11 @@ export namespace Telegram {
   }
 
   type DefaultContext = RootDefaultContext & GenericRequest.Data;
+
+  namespace Leaf {
+    type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
+  }
+
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {

@@ -16,7 +16,8 @@ export {
   createLeafForPlatforms,
   createLeafFromAllLeaves,
   createLeafFromAnyLeaf,
-  createLeafWithObserver
+  createLeafWithObserver,
+  curryLeafObserverForPlatforms
 } from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
