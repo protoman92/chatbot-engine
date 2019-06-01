@@ -1,4 +1,9 @@
-import { Coordinates, Transformer } from '../type/common';
+import {
+  Coordinates,
+  PromiseConvertible,
+  StringKeys,
+  Transformer
+} from '../type/common';
 import { Facebook } from '../type/facebook';
 import { SupportedPlatform } from '../type/messenger';
 import { Telegram } from '../type/telegram';
@@ -10,32 +15,13 @@ export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
  * @template T The type of object to check for.
  * @template K The keys of the type to check for.
  */
-export function isType<T, K extends keyof T = keyof T>(
+export function isType<T, K extends StringKeys<T> = StringKeys<T>>(
   object: any,
   ...keys: readonly K[]
 ): object is T {
   if (!object) return false;
-  return keys.every(key => object[key] !== undefined);
-}
-
-/**
- * Check if an object has certain keys.
- * @template K The keys to check for.
- * @template T The object type to check for.
- */
-export function hasKeys<
-  Keys extends string,
-  T extends { [K in Keys]: unknown }
->(object: any, ...keys: Keys[]): object is T {
-  return isType<T, Keys>(object, ...keys);
-}
-
-/**
- * Convert something that could either be a single value or an Array to Array.
- * @template T The type of value to be converted to an Array.
- */
-export function toArray<T>(value: T | readonly T[]): readonly T[] {
-  return value instanceof Array ? value : [value];
+  const objectKeySet = new Set(Object.keys(object));
+  return keys.every(key => objectKeySet.has(key));
 }
 
 /**
@@ -186,6 +172,26 @@ export function requireKeys<T, K extends keyof T>(
   });
 
   return object as any;
+}
+
+/**
+ * Convert something that could either be a single value or an Array to Array.
+ * @template T The type of value to be converted to an Array.
+ */
+export function toArray<T>(value: T | readonly T[]): readonly T[] {
+  return value instanceof Array ? value : [value];
+}
+
+/**
+ * Transform a promise-convertible to a promise.
+ * @template T The promise result type.
+ */
+export async function toPromise<T>(convertible: PromiseConvertible<T>) {
+  if (isType<Promise<T>>(convertible, 'then')) {
+    return convertible;
+  }
+
+  return convertible;
 }
 
 /** Format a special key. */

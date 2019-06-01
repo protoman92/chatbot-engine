@@ -63,25 +63,34 @@ describe('Pipe functions', () => {
     // Setup
     const sequentialLeafCount = 100;
     const invalidIndex = 50;
+    let nextCount = 0;
+    let completeCount = 0;
+    let subscribeCount = 0;
 
-    const sequentialLeaves = [...Array(sequentialLeafCount).keys()].map(i =>
-      spy<Leaf<{}>>({
-        next: async () => {
-          return i === invalidIndex ? STREAM_INVALID_NEXT_RESULT : {};
-        },
-        complete: async () => ({}),
-        subscribe: async () => createSubscription(async () => ({}))
-      })
-    );
+    const sequentialLeaves: readonly Leaf<{}>[] = [
+      ...Array(sequentialLeafCount).keys()
+    ].map(i => ({
+      next: async () => {
+        if (i === invalidIndex) {
+          return STREAM_INVALID_NEXT_RESULT;
+        }
+
+        nextCount += 1;
+        return {};
+      },
+      complete: async () => (completeCount += 1),
+      subscribe: async () => {
+        subscribeCount += 1;
+        return createSubscription(async () => ({}));
+      }
+    }));
 
     const baseLeaf = spy(
-      await createLeafWithObserver(async () => ({
-        next: async () => ({})
-      }))
+      await createLeafWithObserver(async () => ({ next: async () => ({}) }))
     );
 
     const transformed = await createPipeChain()
-      .pipe(thenInvoke(...sequentialLeaves.map(leaf => instance(leaf))))
+      .pipe(thenInvoke(...sequentialLeaves.map(leaf => leaf)))
       .transform(instance(baseLeaf));
 
     // When
@@ -101,17 +110,9 @@ describe('Pipe functions', () => {
     verify(baseLeaf.next(anything())).once();
     verify(baseLeaf.complete!()).once();
     verify(baseLeaf.subscribe(anything())).once();
-
-    sequentialLeaves.forEach((leaf, i) => {
-      if (i <= invalidIndex) {
-        verify(leaf.next(anything())).once();
-      } else {
-        verify(leaf.next(anything())).never();
-      }
-
-      verify(leaf.complete!()).once();
-      verify(leaf.subscribe(anything())).once();
-    });
+    expectJs(nextCount).to.eql(invalidIndex);
+    expectJs(completeCount).to.eql(sequentialLeafCount);
+    expectJs(subscribeCount).to.eql(sequentialLeafCount);
   });
 
   it('Create leaf with pipe chain', async () => {

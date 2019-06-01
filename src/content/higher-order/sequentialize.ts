@@ -1,5 +1,9 @@
-import { mapSeries } from '../../common/utils';
-import { createCompositeSubscription, STREAM_INVALID_NEXT_RESULT } from '../../stream/stream';
+import { mapSeries, toPromise } from '../../common/utils';
+import {
+  createCompositeSubscription,
+  STREAM_INVALID_NEXT_RESULT
+} from '../../stream/stream';
+import { PromiseConvertible } from '../../type/common';
 import { Leaf } from '../../type/leaf';
 import { NextResult } from '../../type/stream';
 
@@ -8,11 +12,11 @@ import { NextResult } from '../../type/stream';
  * @template C The original input type.
  */
 export function thenInvoke<C>(
-  ...leaves: readonly Leaf<C>[]
+  ...leaves: readonly PromiseConvertible<Leaf<C>>[]
 ): Leaf.Transformer<C, C> {
   return async leaf =>
     (async (): Promise<Leaf<C>> => {
-      const allLeaves = [leaf, ...leaves];
+      const allLeaves = [leaf, ...(await mapSeries(leaves, l => toPromise(l)))];
 
       return {
         next: async input => {

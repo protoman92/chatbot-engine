@@ -19,4 +19,6 @@ export interface ErrorContext {
   readonly error: Error;
 }
 
+export type PromiseConvertible<T> = T | Promise<T>;
 export type Transformer<T> = (original: T) => Promise<T>;
+export type StringKeys<T> = Extract<keyof T, string>;
