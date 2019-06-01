@@ -8,7 +8,7 @@ import { Leaf } from '../../type/leaf';
  * @template CI The original input type.
  * @template CO The target input type.
  */
-export function anyTransformer<CI, CO extends CI>(
+export function higherOrderAnyTransformer<CI, CO extends CI>(
   ...transformers: readonly Leaf.Transformer<CI, CO>[]
 ): Leaf.Transformer<CI, CO> {
   return async leaf =>

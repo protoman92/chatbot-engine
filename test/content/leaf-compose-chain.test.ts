@@ -2,16 +2,16 @@ import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
 import {
-  anyTransformer,
-  catchError,
-  compactMapInput,
   createComposeChain,
   createLeafWithObserver,
   ErrorContext,
   Facebook,
+  higherOrderAnyTransformer,
+  higherOrderCatchError,
+  higherOrderCompactMapInput,
+  higherOrderMapInput,
+  higherOrderRequireInputKeys,
   Leaf,
-  mapInput,
-  requireInputKeys,
   WitContext
 } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
@@ -38,7 +38,7 @@ describe('Compose chain', () => {
     });
 
     const transformed = await createComposeChain()
-      .compose(catchError(instance(fallbackLeaf)))
+      .compose(higherOrderCatchError(instance(fallbackLeaf)))
       .transform(instance(errorLeaf));
 
     // When
@@ -94,7 +94,7 @@ describe('Compose chain', () => {
     );
 
     // When
-    const resultLeaf = await mapInput<Context1, Context2>(
+    const resultLeaf = await higherOrderMapInput<Context1, Context2>(
       async ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
@@ -141,7 +141,9 @@ describe('Compose chain', () => {
     );
 
     // When
-    const resultLeaf = await requireInputKeys<Context1, 'a'>('a')(originalLeaf);
+    const resultLeaf = await higherOrderRequireInputKeys<Context1, 'a'>('a')(
+      originalLeaf
+    );
 
     const {
       visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
@@ -183,7 +185,7 @@ describe('Compose chain', () => {
     );
 
     // When
-    const resultLeaf = await compactMapInput<Context1, Context1>(
+    const resultLeaf = await higherOrderCompactMapInput<Context1, Context1>(
       async ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
@@ -223,12 +225,12 @@ describe('Compose chain', () => {
     const transformedLeaf = await createComposeChain()
       .forContextOfType<Context>()
       .compose(
-        anyTransformer<Context, Context>(
-          compactMapInput(async ({ inputText, ...restInput }) => {
+        higherOrderAnyTransformer<Context, Context>(
+          higherOrderCompactMapInput(async ({ inputText, ...restInput }) => {
             if (!inputText) return null;
             return { ...restInput, inputText, query: 'first_transformer' };
           }),
-          compactMapInput(
+          higherOrderCompactMapInput(
             async ({
               witEntities: { witKey: [{ value }] = [{ value: '' }] },
               ...restInput
@@ -306,7 +308,11 @@ describe('Compose chain', () => {
     // When
     const resultLeaf = await createComposeChain()
       .forContextOfType<Context2>()
-      .compose(mapInput(async ({ b, ...rest }) => ({ a: b || 100, ...rest })))
+      .compose(
+        higherOrderMapInput(async ({ b, ...rest }) => {
+          return { a: b || 100, ...rest };
+        })
+      )
       .transform(originalLeaf);
 
     const {

@@ -6,7 +6,7 @@ import { Leaf } from '../../type/leaf';
  * @template CI The original input type.
  * @template CO The target input type.
  */
-export function mapInput<CI, CO extends CI>(
+export function higherOrderMapInput<CI, CO extends CI>(
   fn: (input: CO & DefaultContext) => Promise<CI & DefaultContext>
 ): Leaf.Transformer<CI, CO> {
   return async leaf => ({
@@ -21,7 +21,7 @@ export function mapInput<CI, CO extends CI>(
  * @template CI The original input type.
  * @template CO The target input type.
  */
-export function compactMapInput<CI, CO extends CI>(
+export function higherOrderCompactMapInput<CI, CO extends CI>(
   fn: (
     input: CO & DefaultContext
   ) => Promise<CI & DefaultContext | undefined | null>

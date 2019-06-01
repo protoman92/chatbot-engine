@@ -6,7 +6,7 @@ import { WitCommunicator, WitContext } from '../../type/wit';
  * engine and injecting entities into leaf input.
  * @template C The original input type.
  */
-export function retryWithWit<C>(
+export function higherOrderRetryWithWit<C>(
   comm: WitCommunicator
 ): Leaf.Transformer<C & WitContext, C> {
   return async leaf => ({

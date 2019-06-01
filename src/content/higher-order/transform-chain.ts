@@ -5,7 +5,7 @@ import { Leaf, LeafWithPipe } from '../../type/leaf';
  * Create a pipeable leaf from an original leaf.
  * @template C The original context type.
  */
-export function createLeafWithPipe<C>(leaf: Leaf<C>): LeafWithPipe<C> {
+function createLeafWithPipe<C>(leaf: Leaf<C>): LeafWithPipe<C> {
   return {
     ...leaf,
     pipe: async fn => {

@@ -9,7 +9,7 @@ import { createLeafFromAllLeaves } from '../leaf';
  * Produce output from a sequence of leaves after the current leaf is done.
  * @template C The original input type.
  */
-export function thenInvokeAll<C>(
+export function higherOrderThenInvokeAll<C>(
   fn: (
     observer: NextContentObserver<GenericResponse<C>>
   ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>

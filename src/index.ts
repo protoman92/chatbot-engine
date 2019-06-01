@@ -1,16 +1,21 @@
-export { anyTransformer } from './content/higher-order/any-transformer';
-export { catchError } from './content/higher-order/catch-error';
-export { compactMapInput, mapInput } from './content/higher-order/map-input';
-export { mapOutput } from './content/higher-order/map-output';
-export { requireInputKeys } from './content/higher-order/require-keys';
 export {
-  thenInvokeAll as thenInvoke
-} from './content/higher-order/sequentialize';
+  higherOrderAnyTransformer
+} from './content/higher-order/any-transformer';
+export { higherOrderCatchError } from './content/higher-order/catch-error';
+export {
+  higherOrderCompactMapInput,
+  higherOrderMapInput
+} from './content/higher-order/map-input';
+export { higherOrderMapOutput } from './content/higher-order/map-output';
+export {
+  higherOrderRequireInputKeys
+} from './content/higher-order/require-keys';
+export { higherOrderThenInvokeAll } from './content/higher-order/sequentialize';
 export {
   createComposeChain,
   createPipeChain
 } from './content/higher-order/transform-chain';
-export { retryWithWit } from './content/higher-order/wit';
+export { higherOrderRetryWithWit } from './content/higher-order/wit';
 export {
   createDefaultErrorLeaf,
   createLeafForPlatforms,

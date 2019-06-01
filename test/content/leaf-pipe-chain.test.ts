@@ -1,12 +1,12 @@
 import expectJs from 'expect.js';
 import {
-  catchError,
   createDefaultErrorLeaf,
   createLeafWithObserver,
   createPipeChain,
-  Leaf,
-  mapOutput,
-  thenInvoke
+  higherOrderCatchError,
+  higherOrderMapOutput,
+  higherOrderThenInvokeAll,
+  Leaf
 } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import { bridgeEmission, createSubscription } from '../../src/stream/stream';
@@ -30,7 +30,7 @@ describe('Pipe functions', () => {
 
     const transformed = await createPipeChain()
       .pipe<{}>(
-        mapOutput(async response => ({
+        higherOrderMapOutput(async response => ({
           ...response,
           additionalContext: { a: 1 }
         }))
@@ -76,7 +76,7 @@ describe('Pipe functions', () => {
 
     const transformed = await createPipeChain()
       .pipe(
-        thenInvoke(async () => {
+        higherOrderThenInvokeAll(async () => {
           return [...Array(sequentialLeafCount).keys()].map(i => ({
             next: async () => {
               if (i === invalidIndex) return undefined;
@@ -129,7 +129,7 @@ describe('Pipe functions', () => {
           return undefined;
         }
       }))
-      .pipe(catchError(await createDefaultErrorLeaf()))
+      .pipe(higherOrderCatchError(await createDefaultErrorLeaf()))
       .transform(baseLeaf);
 
     // When
