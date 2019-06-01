@@ -449,14 +449,14 @@ describe('Pipe functions', () => {
       }
     }));
 
-    const transformed = await createPipeChain(baseLeaf)
+    const transformed = await createPipeChain()
       .pipe<{}>(
         mapOutput(async response => ({
           ...response,
           additionalContext: { a: 1 }
         }))
       )
-      .transform();
+      .transform(baseLeaf);
 
     // When
     const { additionalContext } = await bridgeEmission(transformed)({
@@ -494,9 +494,9 @@ describe('Pipe functions', () => {
       next: async () => ({})
     }));
 
-    const transformed = await createPipeChain(baseLeaf)
+    const transformed = await createPipeChain()
       .pipe(thenInvoke(...sequentialLeaves.map(leaf => instance(leaf))))
-      .transform();
+      .transform(baseLeaf);
 
     // When
     await transformed.next({
@@ -536,7 +536,7 @@ describe('Pipe functions', () => {
       }
     }));
 
-    const trasformed = await createPipeChain(baseLeaf)
+    const trasformed = await createPipeChain()
       .pipe(async leaf => ({
         ...leaf,
         next: async input => {
@@ -550,7 +550,7 @@ describe('Pipe functions', () => {
         }
       }))
       .pipe(catchError(await createDefaultErrorLeaf()))
-      .transform();
+      .transform(baseLeaf);
 
     // When
     let valueDeliveredCount = 0;

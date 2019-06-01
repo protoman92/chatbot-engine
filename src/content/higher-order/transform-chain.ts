@@ -1,5 +1,19 @@
 import { compose } from '../../common/utils';
-import { Leaf } from '../../type/leaf';
+import { Leaf, LeafWithPipe } from '../../type/leaf';
+
+/**
+ * Create a pipeable leaf from an original leaf.
+ * @template C The original context type.
+ */
+export function createLeafWithPipe<C>(leaf: Leaf<C>): LeafWithPipe<C> {
+  return {
+    ...leaf,
+    pipe: async fn => {
+      const newLeaf = await fn(leaf);
+      return createLeafWithPipe(newLeaf);
+    }
+  };
+}
 
 /**
  * Create a leaf compose chain to transform a leaf declaratively.
@@ -21,7 +35,7 @@ export function createComposeChain<CI, CO>(): Leaf.ComposeChain<CI, CO> {
         ...composeTransformers
       )) as Leaf<CO>;
 
-      return { ...outputLeaf, toPipe: () => createPipeChain(outputLeaf) };
+      return createLeafWithPipe(outputLeaf);
     },
     forContextOfType: () => composeChain as any,
     checkThis: () => composeChain
@@ -34,7 +48,7 @@ export function createComposeChain<CI, CO>(): Leaf.ComposeChain<CI, CO> {
  * Create a pipe chain from an original leaf.
  * @param C The context used by the current chatbot.
  */
-export function createPipeChain<C>(leaf: Leaf<C>): Leaf.PipeChain<C, C> {
+export function createPipeChain<C>(): Leaf.PipeChain<C, C> {
   const pipeTransformers: Leaf.Transformer<any, any>[] = [];
 
   const pipeChain: Leaf.PipeChain<C, C> = {
@@ -42,12 +56,16 @@ export function createPipeChain<C>(leaf: Leaf<C>): Leaf.PipeChain<C, C> {
       pipeTransformers.push(fn);
       return pipeChain as any;
     },
-    transform: async () => {
-      return compose(
+    transform: async leaf => {
+      const outputLeaf = await compose(
         leaf,
         ...pipeTransformers
       );
-    }
+
+      return createLeafWithPipe(outputLeaf);
+    },
+    forContextOfType: () => pipeChain as any,
+    checkThis: () => pipeChain
   };
 
   return pipeChain;
