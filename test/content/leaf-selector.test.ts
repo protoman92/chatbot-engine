@@ -4,7 +4,6 @@ import { anything, instance, spy, verify, when } from 'ts-mockito';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
 import { createLeafWithObserver } from '../../src/content/leaf';
 import { createLeafSelector } from '../../src/content/leaf-selector';
-import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
 
 type TestLeafSelector = ReturnType<
@@ -51,11 +50,8 @@ describe('Leaf selector', () => {
 
     when(selector.triggerLeafContent(anything(), anything())).thenCall(
       async ({ currentLeafID }) => {
-        if (currentLeafID === `${validLeafID}`) {
-          return {};
-        }
-
-        return STREAM_INVALID_NEXT_RESULT;
+        if (currentLeafID === `${validLeafID}`) return {};
+        return undefined;
       }
     );
 

@@ -15,11 +15,7 @@ import {
   WitContext
 } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
-import {
-  bridgeEmission,
-  createSubscription,
-  STREAM_INVALID_NEXT_RESULT
-} from '../../src/stream/stream';
+import { bridgeEmission, createSubscription } from '../../src/stream/stream';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook' as const;
@@ -214,7 +210,7 @@ describe('Compose chain', () => {
     })) as Facebook.GenericResponse<Context1>;
 
     // Then
-    expectJs(nextResult1).to.equal(STREAM_INVALID_NEXT_RESULT);
+    expectJs(nextResult1).to.equal(undefined);
     expectJs(text).to.equal('100');
   });
 

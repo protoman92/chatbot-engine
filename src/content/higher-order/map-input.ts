@@ -1,4 +1,3 @@
-import { STREAM_INVALID_NEXT_RESULT } from '../../stream/stream';
 import { DefaultContext } from '../../type/common';
 import { Leaf } from '../../type/leaf';
 
@@ -33,7 +32,7 @@ export function compactMapInput<CI, CO extends CI>(
       const newInput = await fn(input);
 
       if (newInput === undefined || newInput === null) {
-        return STREAM_INVALID_NEXT_RESULT;
+        return undefined;
       }
 
       return leaf.next(newInput);

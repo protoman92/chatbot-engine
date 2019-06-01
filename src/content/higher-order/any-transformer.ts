@@ -1,8 +1,5 @@
 import { mapSeries } from '../../common/utils';
-import {
-  createCompositeSubscription,
-  STREAM_INVALID_NEXT_RESULT
-} from '../../stream/stream';
+import { createCompositeSubscription } from '../../stream/stream';
 import { Leaf } from '../../type/leaf';
 
 /**
@@ -22,10 +19,10 @@ export function anyTransformer<CI, CO extends CI>(
         next: async input => {
           for (const tfLeaf of transformed) {
             const result = await tfLeaf.next(input);
-            if (result !== STREAM_INVALID_NEXT_RESULT) return result;
+            if (result !== undefined) return result;
           }
 
-          return STREAM_INVALID_NEXT_RESULT;
+          return undefined;
         },
         complete: () => {
           return mapSeries(

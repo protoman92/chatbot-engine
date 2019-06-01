@@ -10,11 +10,7 @@ import {
   createLeafFromAllLeaves,
   createLeafFromAnyLeaf
 } from '../../src/content/leaf';
-import {
-  bridgeEmission,
-  createSubscription,
-  STREAM_INVALID_NEXT_RESULT
-} from '../../src/stream/stream';
+import { bridgeEmission, createSubscription } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
 
 const targetID = 'target-id';
@@ -119,10 +115,7 @@ describe('Leaf from sequence of leaves', () => {
       ...Array(sequentialLeafCount).keys()
     ].map(i => ({
       next: async () => {
-        if (i === invalidIndex) {
-          return STREAM_INVALID_NEXT_RESULT;
-        }
-
+        if (i === invalidIndex) return undefined;
         nextCount += 1;
         return {};
       },
@@ -166,12 +159,9 @@ describe('Leaf from sequence of leaves', () => {
       ...Array(sequentialLeafCount).keys()
     ].map(i => ({
       next: async () => {
-        if (i === validIndex) {
-          return {};
-        }
-
+        if (i === validIndex) return {};
         skipNextCount += 1;
-        return STREAM_INVALID_NEXT_RESULT;
+        return undefined;
       },
       complete: async () => (completeCount += 1),
       subscribe: async () => {

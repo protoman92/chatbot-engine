@@ -2,8 +2,7 @@ import { Omit } from 'ts-essentials';
 import { mapSeries, toPromise } from '../common/utils';
 import {
   createCompositeSubscription,
-  createContentSubject,
-  STREAM_INVALID_NEXT_RESULT
+  createContentSubject
 } from '../stream/stream';
 import { ErrorContext, PromiseConvertible } from '../type/common';
 import { Facebook } from '../type/facebook';
@@ -109,12 +108,12 @@ async function createBaseLeafFromLeaves<C>(
 
   return {
     next: async input => {
-      let result: NextResult = STREAM_INVALID_NEXT_RESULT;
+      let result: NextResult = undefined;
 
       for (const nextLeaf of allLeaves) {
         result = await nextLeaf.next(input);
 
-        if (result === STREAM_INVALID_NEXT_RESULT) {
+        if (result === undefined || result === null) {
           if (!!anyLeaf) continue;
           else return result;
         } else if (!!anyLeaf) return result;

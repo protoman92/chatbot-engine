@@ -1,5 +1,5 @@
 import { deepClone, mapSeries } from '../common/utils';
-import { mergeObservables, STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
+import { mergeObservables } from '../stream/stream';
 import { Branch } from '../type/branch';
 import { DefaultContext, KV } from '../type/common';
 import { Leaf } from '../type/leaf';
@@ -86,7 +86,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
           clonedInput
         );
 
-        if (nextResult !== STREAM_INVALID_NEXT_RESULT) return nextResult;
+        if (nextResult !== undefined) return nextResult;
       }
 
       throw new Error('This bot has nothing to say');

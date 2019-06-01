@@ -9,11 +9,7 @@ import {
   thenInvoke
 } from '../../src';
 import { DEFAULT_COORDINATES } from '../../src/common/utils';
-import {
-  bridgeEmission,
-  createSubscription,
-  STREAM_INVALID_NEXT_RESULT
-} from '../../src/stream/stream';
+import { bridgeEmission, createSubscription } from '../../src/stream/stream';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook';
@@ -82,10 +78,7 @@ describe('Pipe functions', () => {
       ...Array(sequentialLeafCount).keys()
     ].map(i => ({
       next: async () => {
-        if (i === invalidIndex) {
-          return STREAM_INVALID_NEXT_RESULT;
-        }
-
+        if (i === invalidIndex) return undefined;
         nextCount += 1;
         return {};
       },
@@ -136,12 +129,8 @@ describe('Pipe functions', () => {
         ...leaf,
         next: async input => {
           const previousResult = await leaf.next(input);
-
-          if (!!previousResult) {
-            throw new Error('some-error');
-          }
-
-          return STREAM_INVALID_NEXT_RESULT;
+          if (!!previousResult) throw new Error('some-error');
+          return undefined;
         }
       }))
       .pipe(catchError(await createDefaultErrorLeaf()))

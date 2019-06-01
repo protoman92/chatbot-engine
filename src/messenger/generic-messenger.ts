@@ -1,5 +1,5 @@
 import { compose, getRequestPlatform, mapSeries } from '../common/utils';
-import { STREAM_INVALID_NEXT_RESULT } from '../stream/stream';
+
 import { Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { Facebook } from '../type/facebook';
@@ -62,7 +62,7 @@ export async function createMessenger<C, PLRequest, PLResponse>(
         } as GenericResponse<C>);
       }
 
-      return STREAM_INVALID_NEXT_RESULT;
+      return undefined;
     },
     complete: async () => {}
   });

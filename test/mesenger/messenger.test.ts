@@ -19,7 +19,6 @@ import {
   createCrossPlatformBatchMessenger,
   createMessenger
 } from '../../src/messenger/generic-messenger';
-import { STREAM_INVALID_NEXT_RESULT } from '../../src/stream/stream';
 import { PlatformCommunicator } from '../../src/type/communicator';
 import { Leaf } from '../../src/type/leaf';
 import { GenericResponse } from '../../src/type/response';
@@ -105,7 +104,7 @@ describe('Generic unit messenger', () => {
     });
 
     // Then
-    expectJs(nextResult).to.eql(STREAM_INVALID_NEXT_RESULT);
+    expectJs(nextResult).to.eql(undefined);
     expectJs(complete).to.be.ok();
     verify(unitMessenger.sendResponse(anything())).never();
   });

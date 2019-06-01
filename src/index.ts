@@ -13,6 +13,7 @@ export {
 export { retryWithWit } from './content/higher-order/wit';
 export {
   createDefaultErrorLeaf,
+  createLeafForPlatforms,
   createLeafFromAllLeaves,
   createLeafFromAnyLeaf,
   createLeafWithObserver

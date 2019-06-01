@@ -3,12 +3,8 @@ import {
   ContentObservable,
   ContentObserver,
   ContentSubject,
-  ContentSubscription,
-  InvalidNextResult as INR
+  ContentSubscription
 } from '../type/stream';
-
-/** Use this to signify invalid next result. */
-export const STREAM_INVALID_NEXT_RESULT: INR = 'INVALID_NEXT_RESULT';
 
 /** Create a subscription with custom unsubscribe logic. */
 export function createSubscription(
@@ -60,9 +56,9 @@ export function createContentSubject<T>(): ContentSubject<T> {
       });
     },
     next: async contents => {
-      if (isCompleted) return STREAM_INVALID_NEXT_RESULT;
+      if (isCompleted) return undefined;
 
-      return mapSeries(Object.entries(observerMap), ([id, obs]) => {
+      return mapSeries(Object.entries(observerMap), ([, obs]) => {
         return obs.next(contents);
       });
     },
