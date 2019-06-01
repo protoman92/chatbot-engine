@@ -39,3 +39,19 @@ export function higherOrderCompactMapInput<CI, CO extends CI>(
     }
   });
 }
+
+/**
+ * Filter out falsy input and stop this leaf prematurely if the input does not
+ * pass a condition.
+ * @template CI The original input type.
+ * @template CO The target input type.
+ */
+export function higherOrderFilterInput<CI, CO extends CI>(
+  fn: (input: CO & DefaultContext) => Promise<boolean | undefined | null>
+): Leaf.Transformer<CI, CO> {
+  return higherOrderCompactMapInput(async input => {
+    const passed = await fn(input);
+    if (!passed) return undefined;
+    return input;
+  });
+}

@@ -9,6 +9,7 @@ import {
   higherOrderAnyTransformer,
   higherOrderCatchError,
   higherOrderCompactMapInput,
+  higherOrderFilterInput,
   higherOrderMapInput,
   higherOrderRequireInputKeys,
   Leaf,
@@ -313,6 +314,7 @@ describe('Compose chain', () => {
           return { a: b || 100, ...rest };
         })
       )
+      .compose(higherOrderFilterInput(async () => true))
       .transform(originalLeaf);
 
     const {

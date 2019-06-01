@@ -4,6 +4,7 @@ export {
 export { higherOrderCatchError } from './content/higher-order/catch-error';
 export {
   higherOrderCompactMapInput,
+  higherOrderFilterInput,
   higherOrderMapInput
 } from './content/higher-order/map-input';
 export { higherOrderMapOutput } from './content/higher-order/map-output';
