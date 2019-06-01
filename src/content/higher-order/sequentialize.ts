@@ -1,8 +1,5 @@
 import { mapSeries } from '../../common/utils';
-import {
-  createCompositeSubscription,
-  STREAM_INVALID_NEXT_RESULT
-} from '../../stream/stream';
+import { createCompositeSubscription, STREAM_INVALID_NEXT_RESULT } from '../../stream/stream';
 import { Leaf } from '../../type/leaf';
 import { NextResult } from '../../type/stream';
 
@@ -29,11 +26,11 @@ export function thenInvoke<C>(
           return result;
         },
         complete: async () => {
-          return mapSeries(leaves, async l => !!l.complete && l.complete());
+          return mapSeries(allLeaves, async l => !!l.complete && l.complete());
         },
         subscribe: async handlers => {
           return createCompositeSubscription(
-            ...(await mapSeries(leaves, l => l.subscribe(handlers)))
+            ...(await mapSeries(allLeaves, l => l.subscribe(handlers)))
           );
         }
       };

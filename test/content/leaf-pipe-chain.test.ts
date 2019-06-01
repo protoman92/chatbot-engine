@@ -74,13 +74,15 @@ describe('Pipe functions', () => {
       })
     );
 
-    const baseLeaf = await createLeafWithObserver(async () => ({
-      next: async () => ({})
-    }));
+    const baseLeaf = spy(
+      await createLeafWithObserver(async () => ({
+        next: async () => ({})
+      }))
+    );
 
     const transformed = await createPipeChain()
       .pipe(thenInvoke(...sequentialLeaves.map(leaf => instance(leaf))))
-      .transform(baseLeaf);
+      .transform(instance(baseLeaf));
 
     // When
     await transformed.next({
@@ -96,6 +98,10 @@ describe('Pipe functions', () => {
     await transformed.subscribe({ next: async () => ({}) });
 
     // Then
+    verify(baseLeaf.next(anything())).once();
+    verify(baseLeaf.complete!()).once();
+    verify(baseLeaf.subscribe(anything())).once();
+
     sequentialLeaves.forEach((leaf, i) => {
       if (i <= invalidIndex) {
         verify(leaf.next(anything())).once();
