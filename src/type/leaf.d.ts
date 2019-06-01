@@ -4,9 +4,13 @@ import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
 
 declare namespace Leaf {
-  interface Base<C, Extra>
-    extends ContentObserver<C & Extra>,
-      ContentObservable<GenericResponse<C>> {}
+  namespace Base {
+    interface Observer<C, Extra> extends ContentObserver<C & Extra> {}
+    interface Observable<C> extends ContentObservable<GenericResponse<C>> {}
+  }
+
+  interface Base<C, E> extends Base.Observer<C, E>, Base.Observable<C> {}
+  interface Observer<C> extends Base.Observer<C, DefaultContext> {}
 
   /**
    * Represents a collection of leaf information that is derived from

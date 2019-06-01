@@ -74,23 +74,19 @@ describe('Pipe functions', () => {
       }
     };
 
-    const sequentialLeaves: readonly Leaf<{}>[] = [
-      ...Array(sequentialLeafCount).keys()
-    ].map(i => ({
-      next: async () => {
-        if (i === invalidIndex) return undefined;
-        nextCount += 1;
-        return {};
-      },
-      complete: async () => (completeCount += 1),
-      subscribe: async () => {
-        subscribeCount += 1;
-        return createSubscription(async () => ({}));
-      }
-    }));
-
     const transformed = await createPipeChain()
-      .pipe(thenInvoke(...sequentialLeaves))
+      .pipe(
+        thenInvoke(async () => {
+          return [...Array(sequentialLeafCount).keys()].map(i => ({
+            next: async () => {
+              if (i === invalidIndex) return undefined;
+              nextCount += 1;
+              return {};
+            },
+            complete: async () => (completeCount += 1)
+          }));
+        })
+      )
       .transform(baseLeaf);
 
     // When
@@ -109,7 +105,7 @@ describe('Pipe functions', () => {
     // Then
     expectJs(nextCount).to.eql(invalidIndex + 1);
     expectJs(completeCount).to.eql(sequentialLeafCount + 1);
-    expectJs(subscribeCount).to.eql(sequentialLeafCount + 1);
+    expectJs(subscribeCount).to.eql(1);
   });
 
   it('Create leaf with pipe chain', async () => {

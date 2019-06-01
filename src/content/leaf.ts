@@ -1,14 +1,15 @@
 import { Omit } from 'ts-essentials';
 import { mapSeries, toPromise } from '../common/utils';
-import {
-  createCompositeSubscription,
-  createContentSubject
-} from '../stream/stream';
+import { createContentSubject } from '../stream/stream';
 import { ErrorContext, PromiseConvertible } from '../type/common';
 import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
-import { ContentObserver, NextResult } from '../type/stream';
+import {
+  ContentObserver,
+  NextContentObserver,
+  NextResult
+} from '../type/stream';
 import { Telegram } from '../type/telegram';
 
 /**
@@ -18,7 +19,7 @@ import { Telegram } from '../type/telegram';
  */
 export async function createLeafWithObserver<C>(
   fn: (
-    observer: Pick<ContentObserver<GenericResponse<C>>, 'next'>
+    observer: NextContentObserver<GenericResponse<C>>
   ) => Promise<Omit<Leaf<C>, 'subscribe'>>
 ): Promise<Leaf<C>> {
   const subject = createContentSubject<GenericResponse<C>>();
@@ -102,34 +103,34 @@ export function createLeafForPlatforms<C>(
  */
 async function createBaseLeafFromLeaves<C>(
   anyLeaf: boolean,
-  ...leaves: readonly PromiseConvertible<Leaf<C>>[]
+  fn: (
+    observer: NextContentObserver<GenericResponse<C>>
+  ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
 ): Promise<Leaf<C>> {
-  const allLeaves = await mapSeries(leaves, toPromise);
+  return createLeafWithObserver(async observer => {
+    const convertibleLeaves = await fn(observer);
+    const allLeaves = await mapSeries(convertibleLeaves, toPromise);
 
-  return {
-    next: async input => {
-      let result: NextResult = undefined;
+    return {
+      next: async input => {
+        let result: NextResult = undefined;
 
-      for (const nextLeaf of allLeaves) {
-        result = await nextLeaf.next(input);
+        for (const nextLeaf of allLeaves) {
+          result = await nextLeaf.next(input);
 
-        if (result === undefined || result === null) {
-          if (!!anyLeaf) continue;
-          else return result;
-        } else if (!!anyLeaf) return result;
+          if (result === undefined || result === null) {
+            if (!!anyLeaf) continue;
+            else return result;
+          } else if (!!anyLeaf) return result;
+        }
+
+        return result;
+      },
+      complete: async () => {
+        return mapSeries(allLeaves, async l => !!l.complete && l.complete());
       }
-
-      return result;
-    },
-    complete: async () => {
-      return mapSeries(allLeaves, async l => !!l.complete && l.complete());
-    },
-    subscribe: async handlers => {
-      return createCompositeSubscription(
-        ...(await mapSeries(allLeaves, l => l.subscribe(handlers)))
-      );
-    }
-  };
+    };
+  });
 }
 
 /**
@@ -137,9 +138,11 @@ async function createBaseLeafFromLeaves<C>(
  * @template C The original context type.
  */
 export function createLeafFromAllLeaves<C>(
-  ...leaves: readonly PromiseConvertible<Leaf<C>>[]
+  fn: (
+    observer: NextContentObserver<GenericResponse<C>>
+  ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
 ) {
-  return createBaseLeafFromLeaves(false, ...leaves);
+  return createBaseLeafFromLeaves(false, fn);
 }
 
 /**
@@ -148,7 +151,9 @@ export function createLeafFromAllLeaves<C>(
  * @template C The original context type.
  */
 export function createLeafFromAnyLeaf<C>(
-  ...leaves: readonly PromiseConvertible<Leaf<C>>[]
+  fn: (
+    observer: NextContentObserver<GenericResponse<C>>
+  ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
 ) {
-  return createBaseLeafFromLeaves(true, ...leaves);
+  return createBaseLeafFromLeaves(true, fn);
 }

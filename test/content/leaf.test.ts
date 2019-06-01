@@ -10,7 +10,7 @@ import {
   createLeafFromAllLeaves,
   createLeafFromAnyLeaf
 } from '../../src/content/leaf';
-import { bridgeEmission, createSubscription } from '../../src/stream/stream';
+import { bridgeEmission } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
 
 const targetID = 'target-id';
@@ -109,24 +109,17 @@ describe('Leaf from sequence of leaves', () => {
     const invalidIndex = 50;
     let nextCount = 0;
     let completeCount = 0;
-    let subscribeCount = 0;
 
-    const sequentialLeaves: readonly Leaf<{}>[] = [
-      ...Array(sequentialLeafCount).keys()
-    ].map(i => ({
-      next: async () => {
-        if (i === invalidIndex) return undefined;
-        nextCount += 1;
-        return {};
-      },
-      complete: async () => (completeCount += 1),
-      subscribe: async () => {
-        subscribeCount += 1;
-        return createSubscription(async () => ({}));
-      }
-    }));
-
-    const transformed = await createLeafFromAllLeaves(...sequentialLeaves);
+    const transformed = await createLeafFromAllLeaves(async () => {
+      return [...Array(sequentialLeafCount).keys()].map(i => ({
+        next: async () => {
+          if (i === invalidIndex) return undefined;
+          nextCount += 1;
+          return {};
+        },
+        complete: async () => (completeCount += 1)
+      }));
+    });
 
     // When
     await transformed.next({
@@ -144,7 +137,6 @@ describe('Leaf from sequence of leaves', () => {
     // Then
     expectJs(nextCount).to.eql(invalidIndex);
     expectJs(completeCount).to.eql(sequentialLeafCount);
-    expectJs(subscribeCount).to.eql(sequentialLeafCount);
   });
 
   it('Leaf from any leaf should work', async () => {
@@ -153,24 +145,17 @@ describe('Leaf from sequence of leaves', () => {
     const validIndex = 50;
     let skipNextCount = 0;
     let completeCount = 0;
-    let subscribeCount = 0;
 
-    const sequentialLeaves: readonly Leaf<{}>[] = [
-      ...Array(sequentialLeafCount).keys()
-    ].map(i => ({
-      next: async () => {
-        if (i === validIndex) return {};
-        skipNextCount += 1;
-        return undefined;
-      },
-      complete: async () => (completeCount += 1),
-      subscribe: async () => {
-        subscribeCount += 1;
-        return createSubscription(async () => ({}));
-      }
-    }));
-
-    const transformed = await createLeafFromAnyLeaf(...sequentialLeaves);
+    const transformed = await createLeafFromAnyLeaf(async () => {
+      return [...Array(sequentialLeafCount).keys()].map(i => ({
+        next: async () => {
+          if (i === validIndex) return {};
+          skipNextCount += 1;
+          return undefined;
+        },
+        complete: async () => (completeCount += 1)
+      }));
+    });
 
     // When
     await transformed.next({
@@ -188,6 +173,5 @@ describe('Leaf from sequence of leaves', () => {
     // Then
     expectJs(skipNextCount).to.eql(validIndex);
     expectJs(completeCount).to.eql(sequentialLeafCount);
-    expectJs(subscribeCount).to.eql(sequentialLeafCount);
   });
 });
