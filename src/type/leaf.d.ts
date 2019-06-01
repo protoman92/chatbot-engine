@@ -34,10 +34,6 @@ declare namespace Leaf {
    */
   interface MonoTransformer<C> extends Transformer<C, C> {}
 
-  interface Base<C, Extra>
-    extends ContentObserver<C & Extra>,
-      ContentObservable<GenericResponse<C>> {}
-
   interface BaseTransformChain<CI, CO> {
     /** Perform transformation, and make the input leaf pipeable. */
     transform(leaf: Leaf<CI>): Promise<LeafWithPipe<CO>>;

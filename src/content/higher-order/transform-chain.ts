@@ -19,7 +19,6 @@ export function createLeafWithPipe<C>(leaf: Leaf<C>): LeafWithPipe<C> {
  * Create a leaf compose chain to transform a leaf declaratively.
  * @template CI The original context type.
  * @template CO The target context type.
- * @return A leaf compose chain.
  */
 export function createComposeChain<CI, CO>(): Leaf.ComposeChain<CI, CO> {
   const composeTransformers: Leaf.Transformer<any, any>[] = [];
@@ -48,11 +47,11 @@ export function createComposeChain<CI, CO>(): Leaf.ComposeChain<CI, CO> {
  * Create a pipe chain from an original leaf.
  * @param C The context used by the current chatbot.
  */
-export function createPipeChain<C>(): Leaf.PipeChain<C, C> {
+export function createPipeChain<CI, CO>(): Leaf.PipeChain<CI, CO> {
   const pipeTransformers: Leaf.Transformer<any, any>[] = [];
 
-  const pipeChain: Leaf.PipeChain<C, C> = {
-    pipe: <CO1>(fn: Leaf.Transformer<C, CO1>): Leaf.PipeChain<C, CO1> => {
+  const pipeChain: Leaf.PipeChain<CI, CO> = {
+    pipe: <CO1>(fn: Leaf.Transformer<CO, CO1>): Leaf.PipeChain<CI, CO1> => {
       pipeTransformers.push(fn);
       return pipeChain as any;
     },
