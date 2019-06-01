@@ -3,13 +3,20 @@ export { catchError } from './content/higher-order/catch-error';
 export { compactMapInput, mapInput } from './content/higher-order/map-input';
 export { mapOutput } from './content/higher-order/map-output';
 export { requireInputKeys } from './content/higher-order/require-keys';
-export { thenInvoke } from './content/higher-order/sequentialize';
+export {
+  thenInvokeAll as thenInvoke
+} from './content/higher-order/sequentialize';
 export {
   createComposeChain,
   createPipeChain
 } from './content/higher-order/transform-chain';
 export { retryWithWit } from './content/higher-order/wit';
-export { createDefaultErrorLeaf, createLeafWithObserver } from './content/leaf';
+export {
+  createDefaultErrorLeaf,
+  createLeafFromAllLeaves,
+  createLeafFromAnyLeaf,
+  createLeafWithObserver
+} from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
 export { createRedisContextDAO } from './context/RedisContextDAO';

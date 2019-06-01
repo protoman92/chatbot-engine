@@ -1,5 +1,4 @@
 import expectJs from 'expect.js';
-import { anything, instance, spy, verify } from 'ts-mockito';
 import {
   catchError,
   createDefaultErrorLeaf,
@@ -67,6 +66,18 @@ describe('Pipe functions', () => {
     let completeCount = 0;
     let subscribeCount = 0;
 
+    const baseLeaf: Leaf<{}> = {
+      next: async () => {
+        nextCount += 1;
+        return {};
+      },
+      complete: async () => (completeCount += 1),
+      subscribe: async () => {
+        subscribeCount += 1;
+        return createSubscription(async () => ({}));
+      }
+    };
+
     const sequentialLeaves: readonly Leaf<{}>[] = [
       ...Array(sequentialLeafCount).keys()
     ].map(i => ({
@@ -85,13 +96,9 @@ describe('Pipe functions', () => {
       }
     }));
 
-    const baseLeaf = spy(
-      await createLeafWithObserver(async () => ({ next: async () => ({}) }))
-    );
-
     const transformed = await createPipeChain()
-      .pipe(thenInvoke(...sequentialLeaves.map(leaf => leaf)))
-      .transform(instance(baseLeaf));
+      .pipe(thenInvoke(...sequentialLeaves))
+      .transform(baseLeaf);
 
     // When
     await transformed.next({
@@ -107,12 +114,9 @@ describe('Pipe functions', () => {
     await transformed.subscribe({ next: async () => ({}) });
 
     // Then
-    verify(baseLeaf.next(anything())).once();
-    verify(baseLeaf.complete!()).once();
-    verify(baseLeaf.subscribe(anything())).once();
-    expectJs(nextCount).to.eql(invalidIndex);
-    expectJs(completeCount).to.eql(sequentialLeafCount);
-    expectJs(subscribeCount).to.eql(sequentialLeafCount);
+    expectJs(nextCount).to.eql(invalidIndex + 1);
+    expectJs(completeCount).to.eql(sequentialLeafCount + 1);
+    expectJs(subscribeCount).to.eql(sequentialLeafCount + 1);
   });
 
   it('Create leaf with pipe chain', async () => {

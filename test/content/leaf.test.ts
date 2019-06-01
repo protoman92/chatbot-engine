@@ -6,9 +6,15 @@ import { Facebook, Telegram, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import {
   createDefaultErrorLeaf,
-  createLeafForPlatforms
+  createLeafForPlatforms,
+  createLeafFromAllLeaves,
+  createLeafFromAnyLeaf
 } from '../../src/content/leaf';
-import { bridgeEmission } from '../../src/stream/stream';
+import {
+  bridgeEmission,
+  createSubscription,
+  STREAM_INVALID_NEXT_RESULT
+} from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
 
 const targetID = 'target-id';
@@ -97,5 +103,101 @@ describe('Leaf for platforms', () => {
     verify(fbLeaf.complete!()).once();
     verify(tlLeaf.next(anything())).once();
     verify(tlLeaf.complete!()).once();
+  });
+});
+
+describe('Leaf from sequence of leaves', () => {
+  it('Leaf from all leaves should work', async () => {
+    // Setup
+    const sequentialLeafCount = 100;
+    const invalidIndex = 50;
+    let nextCount = 0;
+    let completeCount = 0;
+    let subscribeCount = 0;
+
+    const sequentialLeaves: readonly Leaf<{}>[] = [
+      ...Array(sequentialLeafCount).keys()
+    ].map(i => ({
+      next: async () => {
+        if (i === invalidIndex) {
+          return STREAM_INVALID_NEXT_RESULT;
+        }
+
+        nextCount += 1;
+        return {};
+      },
+      complete: async () => (completeCount += 1),
+      subscribe: async () => {
+        subscribeCount += 1;
+        return createSubscription(async () => ({}));
+      }
+    }));
+
+    const transformed = await createLeafFromAllLeaves(...sequentialLeaves);
+
+    // When
+    await transformed.next({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    await transformed.complete!();
+    await transformed.subscribe({ next: async () => ({}) });
+
+    // Then
+    expectJs(nextCount).to.eql(invalidIndex);
+    expectJs(completeCount).to.eql(sequentialLeafCount);
+    expectJs(subscribeCount).to.eql(sequentialLeafCount);
+  });
+
+  it('Leaf from any leaf should work', async () => {
+    // Setup
+    const sequentialLeafCount = 100;
+    const validIndex = 50;
+    let skipNextCount = 0;
+    let completeCount = 0;
+    let subscribeCount = 0;
+
+    const sequentialLeaves: readonly Leaf<{}>[] = [
+      ...Array(sequentialLeafCount).keys()
+    ].map(i => ({
+      next: async () => {
+        if (i === validIndex) {
+          return {};
+        }
+
+        skipNextCount += 1;
+        return STREAM_INVALID_NEXT_RESULT;
+      },
+      complete: async () => (completeCount += 1),
+      subscribe: async () => {
+        subscribeCount += 1;
+        return createSubscription(async () => ({}));
+      }
+    }));
+
+    const transformed = await createLeafFromAnyLeaf(...sequentialLeaves);
+
+    // When
+    await transformed.next({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    await transformed.complete!();
+    await transformed.subscribe({ next: async () => ({}) });
+
+    // Then
+    expectJs(skipNextCount).to.eql(validIndex);
+    expectJs(completeCount).to.eql(sequentialLeafCount);
+    expectJs(subscribeCount).to.eql(sequentialLeafCount);
   });
 });
