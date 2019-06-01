@@ -2,17 +2,15 @@ import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { RedisClient } from 'redis';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
+import { joinObjects } from '../../src/common/utils';
 import { createRedisContextDAO } from '../../src/context/RedisContextDAO';
-import { KV } from '../../src/type/common';
 import { ContextDAO } from '../../src/type/context-dao';
 
 const targetID = 'target-id';
 
 describe('Redis context DAO', () => {
-  interface Context extends KV<unknown> {}
-
   let redis: Pick<RedisClient, 'get' | 'set' | 'del'>;
-  let contextDAO: ContextDAO<Context>;
+  let contextDAO: ContextDAO<{}>;
 
   function getCacheKey(targetID: string) {
     return `facebook-${targetID}`;
@@ -20,9 +18,9 @@ describe('Redis context DAO', () => {
 
   beforeEach(() => {
     redis = spy<Pick<RedisClient, 'get' | 'set' | 'del'>>({
-      get: (...params) => false,
-      set: (...params: any[]) => false,
-      del: (...params: any[]) => false
+      get: () => false,
+      set: () => false,
+      del: () => false
     });
 
     contextDAO = createRedisContextDAO(instance(redis), 'facebook');
@@ -30,7 +28,7 @@ describe('Redis context DAO', () => {
 
   it('Should return context on get call', async () => {
     // Setup
-    const context: Context = { a: 1, b: 2 };
+    const context = { a: 1, b: 2 };
 
     when(redis.get(anything(), anything())).thenCall((param1, param2) => {
       param2(null, JSON.stringify(context));
@@ -44,20 +42,27 @@ describe('Redis context DAO', () => {
     expectJs(storedContext).to.eql(context);
   });
 
-  it('Should set context on set call', async () => {
+  it('Should append context on set call', async () => {
     // Setup
-    const context: Context = { a: 1, b: 2 };
+    const oldContext = { a: 1, b: 2 };
+    const additionalContext = { c: 3 };
+
+    when(redis.get(anything(), anything())).thenCall((param1, param2) => {
+      param2(null, JSON.stringify(oldContext));
+    });
 
     when(redis.set(anything(), anything(), anything())).thenCall(
       (param1, param2, param3) => param3(null, 'OK')
     );
 
     // When
-    const result = await contextDAO.setContext(targetID, context);
+    const result = await contextDAO.appendContext(targetID, additionalContext);
 
     // Then
+    const finalContext = joinObjects<{}>(oldContext, additionalContext);
+
     verify(
-      redis.set(getCacheKey(targetID), JSON.stringify(context), anything())
+      redis.set(getCacheKey(targetID), JSON.stringify(finalContext), anything())
     ).once();
 
     expectJs(result).to.equal('OK');

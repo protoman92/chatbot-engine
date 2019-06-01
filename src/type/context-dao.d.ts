@@ -8,8 +8,8 @@ export interface ContextDAO<C> {
   /** Get the whole context in storage. */
   getContext(targetID: string): Promise<C>;
 
-  /** Set the whole context in storage. */
-  setContext(targetID: string, context: C): Promise<unknown>;
+  /** Append to the current context in storage. */
+  appendContext(targetID: string, context: Partial<C>): Promise<unknown>;
 
   /** Reset all context to factory. */
   resetContext(targetID: string): Promise<unknown>;

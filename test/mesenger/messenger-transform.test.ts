@@ -2,7 +2,7 @@ import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import { Telegram } from '../../src';
-import { compose, joinObjects } from '../../src/common/utils';
+import { compose } from '../../src/common/utils';
 import {
   injectContextOnReceive,
   saveContextOnSend,
@@ -36,7 +36,7 @@ beforeEach(async () => {
 
   contextDAO = spy<ContextDAO<{}>>({
     getContext: () => Promise.reject(''),
-    setContext: () => Promise.reject(''),
+    appendContext: () => Promise.reject(''),
     resetContext: () => Promise.reject('')
   });
 });
@@ -46,7 +46,7 @@ describe('Save context on send', () => {
     // Setup
     const oldContext: {} = { a: 1, b: 2 };
     when(contextDAO.getContext(targetID)).thenResolve(oldContext);
-    when(contextDAO.setContext(targetID, anything())).thenResolve();
+    when(contextDAO.appendContext(targetID, anything())).thenResolve();
     when(messenger.sendResponse(anything())).thenResolve();
 
     const transformed = await compose(
@@ -67,9 +67,10 @@ describe('Save context on send', () => {
     await transformed.sendResponse(genericResponse);
 
     // Then
-    const newContext = joinObjects(oldContext, additionalContext);
-    verify(contextDAO.getContext(targetID)).once();
-    verify(contextDAO.setContext(targetID, deepEqual(newContext))).once();
+    verify(
+      contextDAO.appendContext(targetID, deepEqual(additionalContext))
+    ).once();
+
     verify(messenger.sendResponse(deepEqual(genericResponse))).once();
   });
 });
@@ -116,7 +117,7 @@ describe('Inject context on receive', () => {
 describe('Save user for target ID', () => {
   it('Should save user when no user ID is present in context', async () => {
     // Setup
-    when(contextDAO.setContext(anything(), anything())).thenResolve({});
+    when(contextDAO.appendContext(anything(), anything())).thenResolve({});
 
     when(messenger.receiveRequest(anything())).thenResolve({
       targetID,
@@ -143,12 +144,10 @@ describe('Save user for target ID', () => {
     await transformed.receiveRequest(genericRequest);
 
     // Then
-    verify(contextDAO.setContext(targetID, deepEqual({ targetID }))).once();
+    verify(contextDAO.appendContext(targetID, deepEqual({ targetID }))).once();
 
     verify(
-      messenger.receiveRequest(
-        deepEqual({ ...genericRequest, oldContext: { targetID } })
-      )
+      messenger.receiveRequest(deepEqual({ ...genericRequest, oldContext: {} }))
     ).once();
   });
 });
@@ -174,7 +173,7 @@ describe('Save Telegram user for target ID', () => {
       { targetID, targetPlatform: 'telegram', oldContext: {}, data: [] }
     ];
 
-    when(contextDAO.setContext(anything(), anything())).thenResolve({});
+    when(contextDAO.appendContext(anything(), anything())).thenResolve({});
     when(tlMessenger.generalizeRequest(anything())).thenResolve(genericReqs);
 
     const transformed = await compose(
@@ -183,7 +182,7 @@ describe('Save Telegram user for target ID', () => {
     );
 
     // When
-    const actualGenericReqs = await transformed.generalizeRequest({
+    const actualGenericRequests = await transformed.generalizeRequest({
       update_id: 0,
       message: {
         message_id: 0,
@@ -207,9 +206,9 @@ describe('Save Telegram user for target ID', () => {
     });
 
     // Then
-    verify(contextDAO.setContext(targetID, deepEqual({ targetID }))).once();
+    verify(contextDAO.appendContext(targetID, deepEqual({ targetID }))).once();
 
-    actualGenericReqs.forEach(({ oldContext }) => {
+    actualGenericRequests.forEach(({ oldContext }) => {
       expectJs(oldContext).to.eql({ targetID });
     });
   });

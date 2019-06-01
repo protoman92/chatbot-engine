@@ -1,4 +1,4 @@
-import { compose, deepClone, joinObjects } from '../common/utils';
+import { compose, deepClone } from '../common/utils';
 import { DefaultContext, Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
@@ -12,7 +12,7 @@ import { Messenger } from '../type/messenger';
  * @template PLRequest The platform-specific request.
  */
 export function saveContextOnSend<C, PLRequest>(
-  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>
+  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>
 ): Transformer<Messenger<C, PLRequest>> {
   return async messenger => {
     return {
@@ -22,9 +22,7 @@ export function saveContextOnSend<C, PLRequest>(
         const result = await messenger.sendResponse(response);
 
         if (!!additionalContext) {
-          const oldContext = await contextDAO.getContext(targetID);
-          const newContext = joinObjects(oldContext, additionalContext);
-          await contextDAO.setContext(targetID, newContext);
+          await contextDAO.appendContext(targetID, additionalContext);
         }
 
         return result;
@@ -73,19 +71,14 @@ export function saveUserForTargetID<C, PLRequest, PLResponse, PUser>(
     return {
       ...messenger,
       receiveRequest: async request => {
-        let { oldContext } = request;
-        const { targetID } = request;
+        const { oldContext, targetID } = request;
         const sidKey: keyof DefaultContext = 'targetID';
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           const platformUser = await getUser(targetID);
           await saveUser(platformUser);
-
-          oldContext = deepClone(
-            Object.assign(oldContext, { [sidKey]: targetID })
-          );
-
-          await contextDAO.setContext(targetID, oldContext);
+          const additionalContext: {} = { [sidKey]: targetID };
+          await contextDAO.appendContext(targetID, additionalContext);
         }
 
         return messenger.receiveRequest({ ...request, oldContext });
@@ -125,7 +118,7 @@ export function setTypingIndicator<C, PLRequest, PLResponse>(
  * @template PLResponse The platform-specific response.
  */
 export function transformMessengersByDefault<C, PLRequest, PLResponse>(
-  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'setContext'>,
+  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>,
   communicator: PlatformCommunicator<PLResponse>
 ): Transformer<Messenger<C, PLRequest>> {
   return messenger =>

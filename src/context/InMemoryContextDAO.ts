@@ -1,5 +1,6 @@
 import { ContextDAO } from '../type/context-dao';
 import { SupportedPlatform } from '../type/messenger';
+import { joinObjects } from '../common/utils';
 
 /**
  * Create an in-memory context DAO store. This is useful for debugging.
@@ -19,9 +20,9 @@ export function createInMemoryContextDAO<C>(
       const cacheKey = getCacheKey(targetID);
       return storage[cacheKey] || ({} as C);
     },
-    setContext: async (targetID, context) => {
+    appendContext: async (targetID, context) => {
       const cacheKey = getCacheKey(targetID);
-      storage[cacheKey] = context;
+      storage[cacheKey] = joinObjects(storage[cacheKey], context);
     },
     resetContext: async () => {
       const keys = Object.keys(storage);

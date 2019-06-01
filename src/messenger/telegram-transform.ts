@@ -35,7 +35,7 @@ export function saveTelegramUser<C>(
             Object.assign(oldContext, { [sidKey]: targetID })
           );
 
-          await contextDAO.setContext(targetID, oldContext);
+          await contextDAO.appendContext(targetID, oldContext);
           genericReqs = genericReqs.map(req => ({ ...req, oldContext }));
         }
 

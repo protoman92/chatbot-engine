@@ -1,5 +1,5 @@
 import { RedisClient } from 'redis';
-import { promisify1, promisify2 } from '../common/utils';
+import { joinObjects, promisify1, promisify2 } from '../common/utils';
 import { ContextDAO } from '../type/context-dao';
 import { SupportedPlatform } from '../type/messenger';
 
@@ -20,8 +20,10 @@ export function createRedisContextDAO<C>(
       const context = await promisifiedGet(getCacheKey(targetID));
       return JSON.parse(context);
     },
-    setContext: (targetID, context) => {
-      return promisifiedSet(getCacheKey(targetID), JSON.stringify(context));
+    appendContext: async (targetID, context) => {
+      const oldContext = await contextDAO.getContext(targetID);
+      const newContext = joinObjects(oldContext, context);
+      return promisifiedSet(getCacheKey(targetID), JSON.stringify(newContext));
     },
     resetContext: targetID => {
       return promisifiedDel(getCacheKey(targetID));
