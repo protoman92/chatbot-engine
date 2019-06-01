@@ -1,8 +1,4 @@
-import {
-  DEFAULT_COORDINATES,
-  formatFacebookError,
-  isType
-} from '../common/utils';
+import { DEFAULT_COORDINATES, formatFacebookError, isType } from '../common/utils';
 import { Transformer } from '../type/common';
 import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
@@ -399,19 +395,23 @@ export async function createFacebookMessenger<C>(
   >[]
 ): Promise<Facebook.Messenger<C>> {
   return createMessenger(
-    'facebook',
-    leafSelector,
-    communicator,
-    async req => {
-      if (isType<Facebook.PlatformRequest>(req, 'object', 'entry')) {
-        return createFacebookRequest(req, 'facebook');
-      }
+    {
+      leafSelector,
+      communicator,
+      targetPlatform: 'facebook',
+      mapRequest: async req => {
+        if (isType<Facebook.PlatformRequest>(req, 'object', 'entry')) {
+          return createFacebookRequest(req, 'facebook');
+        }
 
-      throw new Error(
-        formatFacebookError(`Invalid webhook ${JSON.stringify(req)}`)
-      );
+        throw new Error(
+          formatFacebookError(`Invalid webhook ${JSON.stringify(req)}`)
+        );
+      },
+      mapResponse: async res => {
+        return createFacebookResponse(res as Facebook.GenericResponse<C>);
+      }
     },
-    async res => createFacebookResponse(res as Facebook.GenericResponse<C>),
     ...transformers
   );
 }

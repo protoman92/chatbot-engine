@@ -146,6 +146,7 @@ async function createBaseLeafFromLeaves<C>(
 
 /**
  * Create a leaf from a sequence of leaves, but only when all leaves are valid.
+ * This means stop at the first leaf that produces an invalid next result.
  * @template C The context used by the current chatbot.
  */
 export function createLeafFromAllLeaves<C>(
@@ -157,8 +158,8 @@ export function createLeafFromAllLeaves<C>(
 }
 
 /**
- * Create a leaf from a sequence of leaves, but stop at the first leaf that is
- * value.
+ * Create a leaf from a sequence of leaves, but stop at the first leaf that
+ * produces a valid next result.
  * @template C The context used by the current chatbot.
  */
 export function createLeafFromAnyLeaf<C>(

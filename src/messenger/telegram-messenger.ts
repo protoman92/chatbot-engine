@@ -198,11 +198,15 @@ export async function createTelegramMessenger<C>(
   await communicator.setWebhook();
 
   return createMessenger(
-    'telegram',
-    leafSelector,
-    communicator,
-    async req => createTelegramRequest(req, 'telegram'),
-    async res => createTelegramResponse(res as Telegram.GenericResponse<C>),
+    {
+      leafSelector,
+      communicator,
+      targetPlatform: 'telegram',
+      mapRequest: async req => createTelegramRequest(req, 'telegram'),
+      mapResponse: async res => {
+        return createTelegramResponse(res as Telegram.GenericResponse<C>);
+      }
+    },
     ...transformers
   );
 }

@@ -2,9 +2,27 @@ import { Facebook } from './facebook';
 import { GenericRequest } from './request';
 import { GenericResponse } from './response';
 import { Telegram } from './telegram';
+import { Leaf } from './leaf';
+import { PlatformCommunicator } from './communicator';
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = 'facebook' | 'telegram';
+
+declare namespace Messenger {
+  /**
+   * Configurations to set up a generic messenger.
+   * @template C The context used by the current chatbot.
+   * @template PLRequest The platform-specific request.
+   * @template PLResponse The platform-specific response.
+   */
+  interface Configs<C, PLRequest, PLResponse> {
+    readonly targetPlatform: SupportedPlatform;
+    readonly leafSelector: Leaf<C>;
+    readonly communicator: PlatformCommunicator<PLResponse>;
+    readonly mapRequest: Messenger<C, PLRequest>['generalizeRequest'];
+    mapResponse: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>;
+  }
+}
 
 /**
  * Represents a messenger that can process incoming request (including parsing,
@@ -14,8 +32,8 @@ export type SupportedPlatform = 'facebook' | 'telegram';
  *
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
- * @template PLRequest The platform-specific request.
  * @template C The context used by the current chatbot.
+ * @template PLRequest The platform-specific request.
  */
 export interface Messenger<C, PLRequest> {
   /** Generalize a platform request into a generic request. */

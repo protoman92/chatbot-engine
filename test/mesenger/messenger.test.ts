@@ -50,13 +50,13 @@ describe('Generic unit messenger', () => {
 
     // When
     const unitMessenger = spy(
-      await createMessenger(
+      await createMessenger({
         targetPlatform,
-        instance(leafSelector),
-        instance(communicator),
-        async () => [],
-        async () => platformResponses
-      )
+        leafSelector: instance(leafSelector),
+        communicator: instance(communicator),
+        mapRequest: async () => [],
+        mapResponse: async () => platformResponses
+      })
     );
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
@@ -86,13 +86,13 @@ describe('Generic unit messenger', () => {
 
     // When
     const unitMessenger = spy(
-      await createMessenger(
-        'telegram',
-        instance(leafSelector),
-        instance(communicator),
-        async () => [],
-        async () => platformResponses
-      )
+      await createMessenger({
+        targetPlatform: 'telegram',
+        leafSelector: instance(leafSelector),
+        communicator: instance(communicator),
+        mapRequest: async () => [],
+        mapResponse: async () => platformResponses
+      })
     );
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
@@ -133,13 +133,13 @@ describe('Generic unit messenger', () => {
     ];
 
     // When
-    const unitMessenger = await createMessenger(
+    const unitMessenger = await createMessenger({
       targetPlatform,
-      instance(leafSelector),
-      instance(communicator),
-      async () => [],
-      async () => []
-    );
+      leafSelector: instance(leafSelector),
+      communicator: instance(communicator),
+      mapRequest: async () => [],
+      mapResponse: async () => []
+    });
 
     await unitMessenger.receiveRequest({
       targetID,

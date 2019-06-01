@@ -1,8 +1,6 @@
 import { compose, getRequestPlatform, mapSeries } from '../common/utils';
 import { Transformer } from '../type/common';
-import { PlatformCommunicator } from '../type/communicator';
 import { Facebook } from '../type/facebook';
-import { Leaf } from '../type/leaf';
 import {
   BatchMessenger,
   CrossPlatformMessengerConfigs,
@@ -19,11 +17,13 @@ import { Telegram } from '../type/telegram';
  * @template PLResponse The platform-specific response.
  */
 export async function createMessenger<C, PLRequest, PLResponse>(
-  targetPlatform: SupportedPlatform,
-  leafSelector: Leaf<C>,
-  communicator: PlatformCommunicator<PLResponse>,
-  requestMapper: Messenger<C, PLRequest>['generalizeRequest'],
-  responseMapper: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>,
+  {
+    targetPlatform,
+    leafSelector,
+    communicator,
+    mapRequest,
+    mapResponse
+  }: Messenger.Configs<C, PLRequest, PLResponse>,
   ...transformers: readonly Transformer<Messenger<C, PLRequest>>[]
 ): Promise<Messenger<C, PLRequest>> {
   const reversedTransformers = [...transformers];
@@ -31,7 +31,7 @@ export async function createMessenger<C, PLRequest, PLResponse>(
 
   const messenger: Messenger<C, PLRequest> = await compose(
     {
-      generalizeRequest: platformReq => requestMapper(platformReq),
+      generalizeRequest: platformReq => mapRequest(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, data }) => {
         return mapSeries(
           data as readonly (
@@ -48,7 +48,7 @@ export async function createMessenger<C, PLRequest, PLResponse>(
         );
       },
       sendResponse: async response => {
-        const data = await responseMapper(response);
+        const data = await mapResponse(response);
         return mapSeries(data, datum => communicator.sendResponse(datum));
       }
     },
