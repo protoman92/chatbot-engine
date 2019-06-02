@@ -11,6 +11,16 @@ import { Telegram } from '../type/telegram';
 export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
 /**
+ * Guard check if an object is both defined and not-null.
+ * @template T The type of object to check for.
+ */
+export function isDefinedAndNotNull<T>(
+  object?: T | undefined | null
+): object is NonNullable<T> {
+  return object !== undefined && object !== null;
+}
+
+/**
  * Check if an object is of a certain type.
  * @template T The type of object to check for.
  * @template K The keys of the type to check for.

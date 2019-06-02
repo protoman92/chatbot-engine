@@ -107,11 +107,25 @@ describe('Leaf for platforms', () => {
 describe('Leaf observer chain', () => {
   it('Observer chain should work', async () => {
     // Setup
-    const observer = createObserverChain()
-      .andNext(async () => ({}))
-      .orNext(async () => undefined)
-      .andNext(async () => ({}))
-      .orNext(async () => null)
+    let nextCount = 0;
+
+    const observer = await createObserverChain()
+      .orNext(async () => {
+        nextCount += 1;
+        return undefined;
+      })
+      .andNext(async () => {
+        nextCount += 1;
+        return {};
+      })
+      .orNext(async () => {
+        nextCount += 1;
+        return undefined;
+      })
+      .andNext(async () => {
+        nextCount += 1;
+        return {};
+      })
       .toObserver();
 
     // When
@@ -125,6 +139,83 @@ describe('Leaf observer chain', () => {
     });
 
     // Then
+    expectJs(nextCount).to.eql(4);
     expectJs(result).to.eql({});
+  });
+
+  it('Observer chain should terminate early with invalid and', async () => {
+    // Setup
+    let nextCount = 0;
+
+    const observer = await createObserverChain()
+      .andNext(async () => {
+        nextCount += 1;
+        return {};
+      })
+      .andNext(async () => {
+        nextCount += 1;
+        return undefined;
+      })
+      .andNext(async () => {
+        nextCount += 1;
+        return {};
+      })
+      .andNext(async () => {
+        nextCount += 1;
+        return {};
+      })
+      .toObserver();
+
+    // When
+    const result = await observer.next({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    // Then
+    expectJs(nextCount).to.eql(2);
+    expectJs(result).to.not.be.ok();
+  });
+
+  it('Observer chain should terminate early with valid or', async () => {
+    // Setup
+    let nextCount = 0;
+
+    const observer = await createObserverChain()
+      .andNext(async () => {
+        nextCount += 1;
+        return {};
+      })
+      .orNext(async () => {
+        nextCount += 1;
+        return {};
+      })
+      .orNext(async () => {
+        nextCount += 1;
+        return undefined;
+      })
+      .orNext(async () => {
+        nextCount += 1;
+        return undefined;
+      })
+      .toObserver();
+
+    // When
+    const result = await observer.next({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    // Then
+    expectJs(nextCount).to.eql(2);
+    expectJs(result).to.be.ok();
   });
 });

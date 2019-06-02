@@ -1,9 +1,11 @@
 import { Omit } from 'ts-essentials';
 import { createContentSubject } from '../stream/stream';
-import { ErrorContext } from '../type/common';
+import { ErrorContext, PromiseConvertible } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
 import { NextContentObserver } from '../type/stream';
+import { toPromise, mapSeries, isDefinedAndNotNull } from '../common/utils';
+import { isNullOrUndefined } from 'util';
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -87,46 +89,60 @@ export async function createLeafObserverForPlatforms<C>({
  * @template C The context used by the current chatbot.
  */
 export function createObserverChain<C>(): Leaf.ObserverChain<C> {
-  let currentObserver: Leaf.Observer<C> = { next: async () => ({}) };
+  const convertibles: [PromiseConvertible<Leaf.Observer<C>>, 'and' | 'or'][] = [
+    [{ next: async () => ({}) }, 'and']
+  ];
 
   const observerChain: Leaf.ObserverChain<C> = {
-    and: observer => {
-      const oldObserver = currentObserver;
-
-      currentObserver = {
-        next: async input => {
-          const result = await oldObserver.next(input);
-          if (result === undefined || result === null) return result;
-          return observer.next(input);
-        },
-        complete: async () => {
-          !!oldObserver.complete && (await oldObserver.complete());
-          !!observer.complete && (await observer.complete());
-        }
-      };
-
+    and: convertible => {
+      convertibles.push([convertible, 'and']);
       return observerChain;
     },
     andNext: next => observerChain.and({ next }),
-    or: observer => {
-      const oldObserver = currentObserver;
-
-      currentObserver = {
-        next: async input => {
-          const result = await oldObserver.next(input);
-          if (result !== undefined && result !== null) return result;
-          return observer.next(input);
-        },
-        complete: async () => {
-          !!oldObserver.complete && (await oldObserver.complete());
-          !!observer.complete && (await observer.complete());
-        }
-      };
-
+    or: convertible => {
+      convertibles.push([convertible, 'or']);
       return observerChain;
     },
     orNext: next => observerChain.or({ next }),
-    toObserver: () => currentObserver
+    toObserver: async () => {
+      const observers = await mapSeries(
+        convertibles,
+        async ([convertible, type]): Promise<
+          [Leaf.Observer<C>, 'and' | 'or']
+        > => [await toPromise(convertible), type]
+      );
+
+      let currentObserver: Leaf.Observer<C> = { next: async () => ({}) };
+
+      return {
+        next: async input => {
+          let result = await currentObserver.next(input);
+
+          for (const [observer, type] of observers) {
+            currentObserver = observer;
+            result = await currentObserver.next(input);
+
+            switch (type) {
+              case 'and':
+                if (isNullOrUndefined(result)) return result;
+                break;
+
+              case 'or':
+                if (isDefinedAndNotNull(result)) return result;
+                break;
+            }
+          }
+
+          return result;
+        },
+        complete: async () => {
+          return mapSeries(
+            observers,
+            async ([observer]) => !!observer.complete && observer.complete()
+          );
+        }
+      };
+    }
   };
 
   return observerChain;

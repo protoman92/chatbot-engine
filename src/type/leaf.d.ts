@@ -1,5 +1,5 @@
 import { Branch } from './branch';
-import { DefaultContext } from './common';
+import { DefaultContext, PromiseConvertible } from './common';
 import { Facebook } from './facebook';
 import { GenericResponse } from './response';
 import { ContentObservable, ContentObserver } from './stream';
@@ -82,7 +82,7 @@ declare namespace Leaf {
      * Make sure that the chain only succeeds if the existing chain and the
      * new observer both produce valid next result.
      */
-    and(observer: Observer<C>): ObserverChain<C>;
+    and(convertible: PromiseConvertible<Observer<C>>): ObserverChain<C>;
 
     /** Same as and, but convert the next function into an observer. */
     andNext(nextFn: Observer<C>['next']): ObserverChain<C>;
@@ -91,12 +91,12 @@ declare namespace Leaf {
      * Make sure that the chain succeeds if either the existing chain or the
      * new observer produces valid next result.
      */
-    or(observer: Observer<C>): ObserverChain<C>;
+    or(convertible: PromiseConvertible<Observer<C>>): ObserverChain<C>;
 
     /** Same as or, but convert the next function into an observer. */
     orNext(nextFn: Observer<C>['next']): ObserverChain<C>;
 
-    toObserver(): Observer<C>;
+    toObserver(): Promise<Observer<C>>;
   }
 }
 
