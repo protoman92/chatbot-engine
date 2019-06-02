@@ -14,7 +14,6 @@ import {
   higherOrderMapInput,
   higherOrderMapOutput,
   higherOrderRequireInputKeys,
-  higherOrderThenInvokeAll,
   Leaf,
   WitContext
 } from '../../src';
@@ -319,60 +318,6 @@ describe('Transform chain', () => {
     // Then
     expectJs(nextResult1).to.equal(undefined);
     expectJs(text).to.equal('100');
-  });
-
-  it('Sequentialize should work', async () => {
-    // Setup
-    const sequentialLeafCount = 100;
-    const invalidIndex = 50;
-    let nextCount = 0;
-    let completeCount = 0;
-    let subscribeCount = 0;
-
-    const baseLeaf: Leaf<{}> = {
-      next: async () => {
-        nextCount += 1;
-        return {};
-      },
-      complete: async () => (completeCount += 1),
-      subscribe: async () => {
-        subscribeCount += 1;
-        return createSubscription(async () => ({}));
-      }
-    };
-
-    const transformed = await createTransformChain()
-      .pipe(
-        higherOrderThenInvokeAll(async () => {
-          return [...Array(sequentialLeafCount).keys()].map(i => ({
-            next: async () => {
-              if (i === invalidIndex) return undefined;
-              nextCount += 1;
-              return {};
-            },
-            complete: async () => (completeCount += 1)
-          }));
-        })
-      )
-      .transform(baseLeaf);
-
-    // When
-    await transformed.next({
-      targetID,
-      targetPlatform,
-      inputText: '',
-      inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
-    });
-
-    await transformed.complete!();
-    await transformed.subscribe({ next: async () => ({}) });
-
-    // Then
-    expectJs(nextCount).to.eql(invalidIndex + 1);
-    expectJs(completeCount).to.eql(sequentialLeafCount + 1);
-    expectJs(subscribeCount).to.eql(1);
   });
 
   it('Create leaf with pipe chain', async () => {

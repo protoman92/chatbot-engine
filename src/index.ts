@@ -11,14 +11,11 @@ export { higherOrderMapOutput } from './content/higher-order/map-output';
 export {
   higherOrderRequireInputKeys
 } from './content/higher-order/require-keys';
-export { higherOrderThenInvokeAll } from './content/higher-order/sequentialize';
 export { createTransformChain } from './content/higher-order/transform-chain';
 export { higherOrderRetryWithWit } from './content/higher-order/wit';
 export {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
-  createLeafObserverFromAllObservers,
-  createLeafObserverFromAnyObserver,
   createLeafWithObserver,
   createObserverChain
 } from './content/leaf';

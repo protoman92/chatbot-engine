@@ -1,10 +1,9 @@
 import { Omit } from 'ts-essentials';
-import { mapSeries, toPromise } from '../common/utils';
 import { createContentSubject } from '../stream/stream';
-import { ErrorContext, PromiseConvertible } from '../type/common';
+import { ErrorContext } from '../type/common';
 import { Leaf } from '../type/leaf';
 import { GenericResponse } from '../type/response';
-import { NextContentObserver, NextResult } from '../type/stream';
+import { NextContentObserver } from '../type/stream';
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -81,62 +80,6 @@ export async function createLeafObserverForPlatforms<C>({
       !!telegram.complete && (await telegram.complete());
     }
   };
-}
-
-/**
- * If anyLeaf is false, stop at the first leaf observer that produces a valid
- * next result. Otherwise, stop at the first leaf that produces an invalid next
- * result.
- * @template C The context used by the current chatbot.
- */
-async function createBaseLeafObserverFromObservers<C>(
-  anyLeaf: boolean,
-  ...observers: readonly PromiseConvertible<Leaf.Observer<C>>[]
-): Promise<Leaf.Observer<C>> {
-  const allObservers = await mapSeries(observers, toPromise);
-
-  return {
-    next: async input => {
-      let result: NextResult = undefined;
-
-      for (const nextLeaf of allObservers) {
-        result = await nextLeaf.next(input);
-
-        if (result === undefined || result === null) {
-          if (!!anyLeaf) continue;
-          else return result;
-        } else if (!!anyLeaf) return result;
-      }
-
-      return result;
-    },
-    complete: async () => {
-      return mapSeries(allObservers, async l => !!l.complete && l.complete());
-    }
-  };
-}
-
-/**
- * Create a leaf observer from a sequence of leaf observers, but only when all
- * leaves are valid. This means stop at the first leaf that produces an invalid
- * next result.
- * @template C The context used by the current chatbot.
- */
-export function createLeafObserverFromAllObservers<C>(
-  ...observers: readonly PromiseConvertible<Leaf.Observer<C>>[]
-) {
-  return createBaseLeafObserverFromObservers(false, ...observers);
-}
-
-/**
- * Create a leaf observer from a sequence of leaf observers, but stop at the
- * first leaf that produces a valid next result.
- * @template C The context used by the current chatbot.
- */
-export function createLeafObserverFromAnyObserver<C>(
-  ...observers: readonly PromiseConvertible<Leaf.Observer<C>>[]
-) {
-  return createBaseLeafObserverFromObservers(true, ...observers);
 }
 
 /**

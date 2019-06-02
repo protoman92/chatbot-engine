@@ -7,8 +7,6 @@ import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
-  createLeafObserverFromAllObservers,
-  createLeafObserverFromAnyObserver,
   createLeafWithObserver,
   createObserverChain
 } from '../../src/content/leaf';
@@ -103,84 +101,6 @@ describe('Leaf for platforms', () => {
     verify(fbLeaf.complete!()).once();
     verify(tlLeaf.next(anything())).once();
     verify(tlLeaf.complete!()).once();
-  });
-});
-
-describe('Leaf from sequence of leaves', () => {
-  it('Leaf from all leaves should work', async () => {
-    // Setup
-    const sequentialLeafCount = 100;
-    const invalidIndex = 50;
-    let nextCount = 0;
-    let completeCount = 0;
-
-    const transformed = await createLeafWithObserver<{}>(async () => {
-      return createLeafObserverFromAllObservers(
-        ...[...Array(sequentialLeafCount).keys()].map(i => ({
-          next: async () => {
-            if (i === invalidIndex) return undefined;
-            nextCount += 1;
-            return {};
-          },
-          complete: async () => (completeCount += 1)
-        }))
-      );
-    });
-
-    // When
-    await transformed.next({
-      targetID,
-      targetPlatform,
-      inputText: '',
-      inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
-    });
-
-    await transformed.complete!();
-    await transformed.subscribe({ next: async () => ({}) });
-
-    // Then
-    expectJs(nextCount).to.eql(invalidIndex);
-    expectJs(completeCount).to.eql(sequentialLeafCount);
-  });
-
-  it('Leaf from any leaf should work', async () => {
-    // Setup
-    const sequentialLeafCount = 100;
-    const validIndex = 50;
-    let skipNextCount = 0;
-    let completeCount = 0;
-
-    const transformed = await createLeafWithObserver<{}>(async () => {
-      return createLeafObserverFromAnyObserver(
-        ...[...Array(sequentialLeafCount).keys()].map(i => ({
-          next: async () => {
-            if (i === validIndex) return {};
-            skipNextCount += 1;
-            return undefined;
-          },
-          complete: async () => (completeCount += 1)
-        }))
-      );
-    });
-
-    // When
-    await transformed.next({
-      targetID,
-      targetPlatform,
-      inputText: '',
-      inputImageURL: '',
-      inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
-    });
-
-    await transformed.complete!();
-    await transformed.subscribe({ next: async () => ({}) });
-
-    // Then
-    expectJs(skipNextCount).to.eql(validIndex);
-    expectJs(completeCount).to.eql(sequentialLeafCount);
   });
 });
 
