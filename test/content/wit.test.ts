@@ -58,7 +58,7 @@ describe('Wit higher order function', () => {
 
     when(rootLeaf.next(anything())).thenCall(async ({ witEntities = {} }) => {
       if (Object.entries(witEntities).length === 0) {
-        throw new Error('some-error');
+        return undefined;
       }
 
       return {};

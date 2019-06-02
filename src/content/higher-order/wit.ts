@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from 'util';
 import { Leaf } from '../../type/leaf';
 import { WitCommunicator, WitContext } from '../../type/wit';
 
@@ -12,12 +13,14 @@ export function higherOrderRetryWithWit<C>(
   return async leaf => ({
     ...leaf,
     next: async input => {
-      try {
-        return await leaf.next({ ...input, witEntities: {} });
-      } catch (e) {
+      const result = await leaf.next({ ...input, witEntities: {} });
+
+      if (isNullOrUndefined(result)) {
         const { entities: witEntities } = await comm.validate(input.inputText);
-        return await leaf.next({ ...input, witEntities });
+        return leaf.next({ ...input, witEntities });
       }
+
+      return result;
     }
   });
 }
