@@ -187,7 +187,7 @@ describe('Transform chain', () => {
     let completedCount = 0;
 
     const baseLeaf = await createLeafWithObserver<{}>(async observer => ({
-      next: async ({ targetID, targetPlatform, inputText }) => {
+      next: async ({ targetID, targetPlatform }) => {
         return observer.next({ targetID, targetPlatform, visualContents: [] });
       },
       complete: async () => {

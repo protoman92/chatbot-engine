@@ -28,11 +28,11 @@ export interface HTTPCommunicator {
  * Represents an object that handles the communicator to/from the relevant
  * platform. For example, a Facebook platform communicator should be able to
  * handle all methods specified here.
- * @template PLResponse The platform-specific response.
+ * @template PResponse The platform-specific response.
  */
-export interface PlatformCommunicator<PLResponse> {
+export interface PlatformCommunicator<PResponse> {
   /** Send a response to the related platform. */
-  sendResponse(data: PLResponse): Promise<unknown>;
+  sendResponse(data: PResponse): Promise<unknown>;
 
   /** Toggle typing indicator. */
   setTypingIndicator(targetID: string, enabled: boolean): Promise<unknown>;

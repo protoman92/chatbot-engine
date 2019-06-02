@@ -6,7 +6,6 @@ import {
 } from '../common/utils';
 import { Transformer } from '../type/common';
 import { Leaf } from '../type/leaf';
-import { Messenger } from '../type/messenger';
 import { Telegram } from '../type/telegram';
 import { VisualContent } from '../type/visual-content';
 import { createMessenger } from './generic-messenger';
@@ -231,9 +230,7 @@ function createTelegramResponse<C>({
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: Telegram.Communicator,
-  ...transformers: readonly Transformer<
-    Messenger<C, Telegram.PlatformRequest, Telegram.GenericRequest<C>>
-  >[]
+  ...transformers: readonly Transformer<Telegram.Messenger<C>>[]
 ): Promise<Telegram.Messenger<C>> {
   await communicator.setWebhook();
 

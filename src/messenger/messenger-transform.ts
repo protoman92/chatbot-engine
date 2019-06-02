@@ -10,16 +10,16 @@ import { GenericRequest } from '../type/request';
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
+ * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  */
 export function saveContextOnSend<
   C,
-  PLRequest,
+  PRequest,
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>
-): Transformer<Messenger<C, PLRequest, GRequest>> {
+): Transformer<Messenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -41,16 +41,16 @@ export function saveContextOnSend<
  * Inject the relevant context for a target every time a message group is
  * processed.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
+ * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  */
 export function injectContextOnReceive<
   C,
-  PLRequest,
+  PRequest,
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
-): Transformer<Messenger<C, PLRequest, GRequest>> {
+): Transformer<Messenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -68,20 +68,20 @@ export function injectContextOnReceive<
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
+ * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  * @template PUser The platform user type.
  */
 export function saveUserForTargetID<
   C,
-  PLRequest,
+  PRequest,
   GRequest extends GenericRequest<C>,
   PUser
 >(
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<Messenger<C, PLRequest, GRequest>> {
+): Transformer<Messenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -106,18 +106,18 @@ export function saveUserForTargetID<
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
- * @template PLResponse The platform-specific response.
+ * @template PRequest The platform-specific request.
+ * @template PResponse The platform-specific response.
  * @template GRequest The platform-specific generic request.
  */
 export function setTypingIndicator<
   C,
-  PLRequest,
-  PLResponse,
+  PRequest,
+  PResponse,
   GRequest extends GenericRequest<C>
 >(
-  communicator: PlatformCommunicator<PLResponse>
-): Transformer<Messenger<C, PLRequest, GRequest>> {
+  communicator: PlatformCommunicator<PResponse>
+): Transformer<Messenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -135,19 +135,19 @@ export function setTypingIndicator<
 /**
  * Create default messenger transformers that all messengers should use.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
- * @template PLResponse The platform-specific response.
+ * @template PRequest The platform-specific request.
+ * @template PResponse The platform-specific response.
  * @template GRequest The platform-specific generic request.
  */
 export function transformMessengersByDefault<
   C,
-  PLRequest,
-  PLResponse,
+  PRequest,
+  PResponse,
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>,
-  communicator: PlatformCommunicator<PLResponse>
-): Transformer<Messenger<C, PLRequest, GRequest>> {
+  communicator: PlatformCommunicator<PResponse>
+): Transformer<Messenger<C, PRequest, GRequest>> {
   return messenger =>
     compose(
       messenger,

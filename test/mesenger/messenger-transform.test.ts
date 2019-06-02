@@ -1,13 +1,5 @@
 import { beforeEach, describe } from 'mocha';
-import {
-  anything,
-  deepEqual,
-  instance,
-  spy,
-  verify,
-  when,
-  capture
-} from 'ts-mockito';
+import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
 import { Telegram } from '../../src';
 import { compose } from '../../src/common/utils';
 import {
@@ -197,7 +189,6 @@ describe('Save Telegram user for target ID', () => {
     });
 
     // Then
-    console.log(capture(contextDAO.appendContext));
     verify(contextDAO.appendContext(targetID, deepEqual({ targetID }))).once();
   });
 });

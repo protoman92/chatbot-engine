@@ -6,7 +6,6 @@ import {
 import { Transformer } from '../type/common';
 import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
-import { Messenger } from '../type/messenger';
 import { VisualContent } from '../type/visual-content';
 import { createMessenger } from './generic-messenger';
 
@@ -394,9 +393,7 @@ function createFacebookResponse<C>({
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: Facebook.Communicator,
-  ...transformers: readonly Transformer<
-    Messenger<C, Facebook.PlatformRequest, Facebook.GenericRequest<C>>
-  >[]
+  ...transformers: readonly Transformer<Facebook.Messenger<C>>[]
 ): Promise<Facebook.Messenger<C>> {
   return createMessenger(
     {

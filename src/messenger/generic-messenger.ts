@@ -7,21 +7,20 @@ import {
   Messenger,
   SupportedPlatform
 } from '../type/messenger';
-import { GenericResponse } from '../type/response';
-import { Telegram } from '../type/telegram';
 import { GenericRequest } from '../type/request';
+import { Telegram } from '../type/telegram';
 
 /**
  * Create a generic messenger.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
- * @template PLResponse The platform-specific response.
+ * @template PRequest The platform-specific request.
+ * @template PResponse The platform-specific response.
  * @template GRequest The platform-specific generic request.
  */
 export async function createMessenger<
   C,
-  PLRequest,
-  PLResponse,
+  PRequest,
+  PResponse,
   GRequest extends GenericRequest<C>
 >(
   {
@@ -30,13 +29,13 @@ export async function createMessenger<
     communicator,
     mapRequest,
     mapResponse
-  }: Messenger.Configs<C, PLRequest, PLResponse, GRequest>,
-  ...transformers: readonly Transformer<Messenger<C, PLRequest, GRequest>>[]
-): Promise<Messenger<C, PLRequest, GRequest>> {
+  }: Messenger.Configs<C, PRequest, PResponse, GRequest>,
+  ...transformers: readonly Transformer<Messenger<C, PRequest, GRequest>>[]
+): Promise<Messenger<C, PRequest, GRequest>> {
   const reversedTransformers = [...transformers];
   reversedTransformers.reverse();
 
-  const messenger: Messenger<C, PLRequest, GRequest> = await compose(
+  const messenger: Messenger<C, PRequest, GRequest> = await compose(
     {
       generalizeRequest: platformReq => mapRequest(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, data }) => {
@@ -65,10 +64,7 @@ export async function createMessenger<
   await leafSelector.subscribe({
     next: async ({ targetPlatform: pf, ...restInput }) => {
       if (pf === targetPlatform) {
-        return messenger.sendResponse({
-          targetPlatform: pf,
-          ...restInput
-        } as GenericResponse<C>);
+        return messenger.sendResponse({ ...restInput, targetPlatform: pf });
       }
 
       return undefined;
@@ -83,18 +79,18 @@ export async function createMessenger<
  * Create a generic messenger. Note that a platform request may include multiple
  * generic requests, so it's safer to return an Array of generic requests.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
- * @template PLResponse The platform-specific response.
+ * @template PRequest The platform-specific request.
+ * @template PResponse The platform-specific response.
  * @template GRequest The platform-specific generic request.
  */
 export function createBatchMessenger<
   C,
-  PLRequest,
-  PLResponse,
+  PRequest,
+  PResponse,
   GRequest extends GenericRequest<C>
 >(
-  messenger: Messenger<C, PLRequest, GRequest>
-): BatchMessenger<PLRequest, PLResponse> {
+  messenger: Messenger<C, PRequest, GRequest>
+): BatchMessenger<PRequest, PResponse> {
   return {
     processPlatformRequest: async platformReq => {
       const genericReq = await messenger.generalizeRequest(platformReq);

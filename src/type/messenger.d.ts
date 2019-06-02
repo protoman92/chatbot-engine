@@ -12,21 +12,21 @@ declare namespace Messenger {
   /**
    * Configurations to set up a generic messenger.
    * @template C The context used by the current chatbot.
-   * @template PLRequest The platform-specific request.
-   * @template PLResponse The platform-specific response.
+   * @template PRequest The platform-specific request.
+   * @template PResponse The platform-specific response.
    * @template GRequest The platform-specific generic request.
    */
   interface Configs<
     C,
-    PLRequest,
-    PLResponse,
+    PRequest,
+    PResponse,
     GRequest extends GenericRequest<C>
   > {
     readonly targetPlatform: SupportedPlatform;
     readonly leafSelector: Leaf<C>;
-    readonly communicator: PlatformCommunicator<PLResponse>;
-    readonly mapRequest: Messenger<C, PLRequest, GRequest>['generalizeRequest'];
-    mapResponse: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>;
+    readonly communicator: PlatformCommunicator<PResponse>;
+    readonly mapRequest: Messenger<C, PRequest, GRequest>['generalizeRequest'];
+    mapResponse: (res: GenericResponse<C>) => Promise<readonly PResponse[]>;
   }
 }
 
@@ -39,12 +39,12 @@ declare namespace Messenger {
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.
+ * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  */
-export interface Messenger<C, PLRequest, GRequest extends GenericRequest<C>> {
+export interface Messenger<C, PRequest, GRequest extends GenericRequest<C>> {
   /** Generalize a platform request into a generic request. */
-  generalizeRequest(request: PLRequest): Promise<readonly GRequest[]>;
+  generalizeRequest(request: PRequest): Promise<readonly GRequest[]>;
 
   /** Receive an incoming generic request. */
   receiveRequest(request: GRequest): Promise<{}>;
@@ -57,12 +57,12 @@ export interface Messenger<C, PLRequest, GRequest extends GenericRequest<C>> {
  * Represents a messenger that deals with a platform request end-to-end, from
  * handling data to sending response. Note that each generic messenger should
  * have a generic messenger that handles requests one-by-one.
- * @template PLRequest The platform-specific request.
- * @template PLResponse The platform-specific response.
+ * @template PRequest The platform-specific request.
+ * @template PResponse The platform-specific response.
  */
-export interface BatchMessenger<PLRequest, PLResponse> {
+export interface BatchMessenger<PRequest, PResponse> {
   /** Process a platform request from end-to-end. */
-  processPlatformRequest(req: PLRequest): Promise<unknown>;
+  processPlatformRequest(req: PRequest): Promise<unknown>;
 }
 
 /** Configuration for cross-platform batch messenger. */
