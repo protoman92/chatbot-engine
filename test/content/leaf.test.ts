@@ -9,7 +9,8 @@ import {
   createLeafObserverForPlatforms,
   createLeafObserverFromAllObservers,
   createLeafObserverFromAnyObserver,
-  createLeafWithObserver
+  createLeafWithObserver,
+  createObserverChain
 } from '../../src/content/leaf';
 import { bridgeEmission } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
@@ -180,5 +181,30 @@ describe('Leaf from sequence of leaves', () => {
     // Then
     expectJs(skipNextCount).to.eql(validIndex);
     expectJs(completeCount).to.eql(sequentialLeafCount);
+  });
+});
+
+describe('Leaf observer chain', () => {
+  it('Observer chain should work', async () => {
+    // Setup
+    const observer = createObserverChain()
+      .andNext(async () => ({}))
+      .orNext(async () => undefined)
+      .andNext(async () => ({}))
+      .orNext(async () => null)
+      .toObserver();
+
+    // When
+    const result = await observer.next({
+      targetID,
+      targetPlatform,
+      inputText: '',
+      inputImageURL: '',
+      inputCoordinate: DEFAULT_COORDINATES,
+      stickerID: ''
+    });
+
+    // Then
+    expectJs(result).to.eql({});
   });
 });

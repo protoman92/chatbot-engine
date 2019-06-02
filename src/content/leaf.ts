@@ -138,3 +138,53 @@ export function createLeafObserverFromAnyObserver<C>(
 ) {
   return createBaseLeafObserverFromObservers(true, ...observers);
 }
+
+/**
+ * Create an observer chain from multiple observers.
+ * @template C The context used by the current chatbot.
+ */
+export function createObserverChain<C>(): Leaf.ObserverChain<C> {
+  let currentObserver: Leaf.Observer<C> = { next: async () => ({}) };
+
+  const observerChain: Leaf.ObserverChain<C> = {
+    and: observer => {
+      const oldObserver = currentObserver;
+
+      currentObserver = {
+        next: async input => {
+          const result = await oldObserver.next(input);
+          if (result === undefined || result === null) return result;
+          return observer.next(input);
+        },
+        complete: async () => {
+          !!oldObserver.complete && (await oldObserver.complete());
+          !!observer.complete && (await observer.complete());
+        }
+      };
+
+      return observerChain;
+    },
+    andNext: next => observerChain.and({ next }),
+    or: observer => {
+      const oldObserver = currentObserver;
+
+      currentObserver = {
+        next: async input => {
+          const result = await oldObserver.next(input);
+          if (result !== undefined && result !== null) return result;
+          return observer.next(input);
+        },
+        complete: async () => {
+          !!oldObserver.complete && (await oldObserver.complete());
+          !!observer.complete && (await observer.complete());
+        }
+      };
+
+      return observerChain;
+    },
+    orNext: next => observerChain.or({ next }),
+    toObserver: () => currentObserver
+  };
+
+  return observerChain;
+}

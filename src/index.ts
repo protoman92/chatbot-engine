@@ -16,10 +16,11 @@ export { createTransformChain } from './content/higher-order/transform-chain';
 export { higherOrderRetryWithWit } from './content/higher-order/wit';
 export {
   createDefaultErrorLeaf,
+  createLeafObserverForPlatforms,
   createLeafObserverFromAllObservers,
   createLeafObserverFromAnyObserver,
-  createLeafObserverForPlatforms,
-  createLeafWithObserver
+  createLeafWithObserver,
+  createObserverChain
 } from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';
