@@ -229,7 +229,7 @@ export function getRequestPlatform(request: unknown): SupportedPlatform {
     return 'facebook';
   }
 
-  if (isType<Telegram.PlatformRequest>(request, 'update_id', 'message')) {
+  if (isType<Telegram.PlatformRequest>(request, 'update_id')) {
     return 'telegram';
   }
 

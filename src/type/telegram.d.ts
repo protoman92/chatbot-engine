@@ -1,4 +1,4 @@
-import { Omit } from 'ts-essentials';
+import { DeepReadonly, Omit } from 'ts-essentials';
 import { DefaultContext as RootDefaultContext } from './common';
 import { PlatformCommunicator } from './communicator';
 import { Leaf as RootLeaf } from './leaf';
@@ -59,27 +59,46 @@ export namespace Telegram {
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {
-    namespace Input {
-      interface Base {
-        readonly message_id: number;
-        readonly from: User;
+    namespace SubContent {
+      namespace Message {
+        interface Base {
+          readonly message_id: number;
+          readonly from: User;
 
-        readonly chat: Omit<User, 'language_code' | 'is_bot'> &
-          Readonly<{ type: 'private' }>;
+          readonly chat: Omit<User, 'language_code' | 'is_bot'> &
+            Readonly<{ type: 'private' }>;
+        }
+
+        interface Text extends Base {
+          readonly text: string;
+        }
       }
 
-      interface Text extends Base {
-        readonly text: string;
-      }
+      type Message = Message.Text;
     }
 
-    type Input = Input.Text;
+    interface Base {
+      readonly update_id: number;
+    }
+
+    /** Payload that includes on message field. */
+    interface Message extends Base {
+      readonly message: SubContent.Message;
+    }
+
+    /** Payload that includes callback field, usually for quick replies. */
+    interface Callback extends Base {
+      readonly callback_query: DeepReadonly<{
+        id: string;
+        from: User;
+        message: SubContent.Message;
+        chat_instance: string;
+        data: string;
+      }>;
+    }
   }
 
-  interface PlatformRequest {
-    readonly update_id: number;
-    readonly message: PlatformRequest.Input;
-  }
+  type PlatformRequest = PlatformRequest.Message | PlatformRequest.Callback;
 
   namespace PlatformResponse {
     namespace ReplyKeyboardMarkup {

@@ -19,41 +19,82 @@ function createTelegramRequest<C>(
   webhook: Telegram.PlatformRequest,
   targetPlatform: 'telegram'
 ): readonly Telegram.GenericRequest<C>[] {
-  const {
+  function processMessageRequest({
     message: {
-      chat: { id }
+      from: { id },
+      ...restMessage
     }
-  } = webhook;
+  }: Telegram.PlatformRequest.Message):
+    | [number, Telegram.GenericRequest<C>['data']]
+    | undefined {
+    if (
+      isType<Telegram.PlatformRequest.SubContent.Message.Text>(
+        restMessage,
+        'text'
+      )
+    ) {
+      return [
+        id,
+        [
+          {
+            targetPlatform,
+            inputText: restMessage.text,
+            inputImageURL: '',
+            inputCoordinate: DEFAULT_COORDINATES
+          }
+        ]
+      ];
+    }
+
+    return undefined;
+  }
+
+  function processCallbackRequest({
+    callback_query: {
+      data,
+      from: { id }
+    }
+  }: Telegram.PlatformRequest.Callback):
+    | [number, Telegram.GenericRequest<C>['data']]
+    | undefined {
+    return [
+      id,
+      [
+        {
+          targetPlatform,
+          inputText: data,
+          inputImageURL: '',
+          inputCoordinate: DEFAULT_COORDINATES
+        }
+      ]
+    ];
+  }
 
   function processRequest(
     request: Telegram.PlatformRequest,
     targetPlatform: 'telegram'
-  ): Telegram.GenericRequest<C>['data'] {
-    const { message } = request;
+  ): [number, Telegram.GenericRequest<C>['data']] {
+    let result: [number, Telegram.GenericRequest<C>['data']] | undefined;
 
-    if (isType<Telegram.PlatformRequest.Input.Text>(message, 'text')) {
-      return [
-        {
-          targetPlatform,
-          inputText: message.text,
-          inputImageURL: '',
-          inputCoordinate: DEFAULT_COORDINATES
-        }
-      ];
+    if (isType<Telegram.PlatformRequest.Message>(request, 'message')) {
+      result = processMessageRequest(request);
     }
+
+    if (isType<Telegram.PlatformRequest.Callback>(request, 'callback_query')) {
+      result = processCallbackRequest(request);
+    }
+
+    if (!!result) return result;
 
     throw Error(
       formatTelegramError(`Invalid request ${JSON.stringify(request)}`)
     );
   }
 
+  const [targetID, data] = processRequest(webhook, targetPlatform);
+
   return [
-    {
-      targetPlatform,
-      targetID: `${id}`,
-      oldContext: {} as C,
-      data: processRequest(webhook, targetPlatform)
-    }
+    { targetPlatform, data, targetID: `${targetID}`, oldContext: {} as C }
   ];
 }
 
