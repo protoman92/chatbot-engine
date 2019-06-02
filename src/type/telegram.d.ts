@@ -16,6 +16,7 @@ export namespace Telegram {
 
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
     readonly targetPlatform: 'telegram';
+    readonly telegramUser: User;
     readonly data: readonly GenericRequest.Data[];
   }
 
@@ -197,5 +198,6 @@ export namespace Telegram {
    * Represents a Telegram-specific messenger.
    * @template C The context used by the current chatbot.
    */
-  interface Messenger<C> extends RootMessenger<C, PlatformRequest> {}
+  interface Messenger<C>
+    extends RootMessenger<C, PlatformRequest, GenericRequest<C>> {}
 }

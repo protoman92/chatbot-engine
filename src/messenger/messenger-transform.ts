@@ -3,6 +3,7 @@ import { DefaultContext, Transformer } from '../type/common';
 import { PlatformCommunicator } from '../type/communicator';
 import { ContextDAO } from '../type/context-dao';
 import { Messenger } from '../type/messenger';
+import { GenericRequest } from '../type/request';
 
 /**
  * Save the context every time a message group is sent to a target ID. If
@@ -10,10 +11,15 @@ import { Messenger } from '../type/messenger';
  * append this context to it then save the whole thing.
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
+ * @template GRequest The platform-specific generic request.
  */
-export function saveContextOnSend<C, PLRequest>(
+export function saveContextOnSend<
+  C,
+  PLRequest,
+  GRequest extends GenericRequest<C>
+>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>
-): Transformer<Messenger<C, PLRequest>> {
+): Transformer<Messenger<C, PLRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -35,11 +41,16 @@ export function saveContextOnSend<C, PLRequest>(
  * Inject the relevant context for a target every time a message group is
  * processed.
  * @template C The context used by the current chatbot.
- * @template PLRequest The platform-specific request.*
+ * @template PLRequest The platform-specific request.
+ * @template GRequest The platform-specific generic request.
  */
-export function injectContextOnReceive<C, PLRequest>(
+export function injectContextOnReceive<
+  C,
+  PLRequest,
+  GRequest extends GenericRequest<C>
+>(
   contextDAO: Pick<ContextDAO<C>, 'getContext'>
-): Transformer<Messenger<C, PLRequest>> {
+): Transformer<Messenger<C, PLRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -58,14 +69,19 @@ export function injectContextOnReceive<C, PLRequest>(
  * recently flushed.
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
+ * @template GRequest The platform-specific generic request.
  * @template PUser The platform user type.
- * @template CUser The chatbot's user type.
  */
-export function saveUserForTargetID<C, PLRequest, PUser>(
+export function saveUserForTargetID<
+  C,
+  PLRequest,
+  GRequest extends GenericRequest<C>,
+  PUser
+>(
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<Messenger<C, PLRequest>> {
+): Transformer<Messenger<C, PLRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -92,10 +108,16 @@ export function saveUserForTargetID<C, PLRequest, PUser>(
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
  * @template PLResponse The platform-specific response.
+ * @template GRequest The platform-specific generic request.
  */
-export function setTypingIndicator<C, PLRequest, PLResponse>(
+export function setTypingIndicator<
+  C,
+  PLRequest,
+  PLResponse,
+  GRequest extends GenericRequest<C>
+>(
   communicator: PlatformCommunicator<PLResponse>
-): Transformer<Messenger<C, PLRequest>> {
+): Transformer<Messenger<C, PLRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -115,11 +137,17 @@ export function setTypingIndicator<C, PLRequest, PLResponse>(
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
  * @template PLResponse The platform-specific response.
+ * @template GRequest The platform-specific generic request.
  */
-export function transformMessengersByDefault<C, PLRequest, PLResponse>(
+export function transformMessengersByDefault<
+  C,
+  PLRequest,
+  PLResponse,
+  GRequest extends GenericRequest<C>
+>(
   contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>,
   communicator: PlatformCommunicator<PLResponse>
-): Transformer<Messenger<C, PLRequest>> {
+): Transformer<Messenger<C, PLRequest, GRequest>> {
   return messenger =>
     compose(
       messenger,

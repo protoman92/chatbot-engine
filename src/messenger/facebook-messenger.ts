@@ -1,4 +1,8 @@
-import { DEFAULT_COORDINATES, formatFacebookError, isType } from '../common/utils';
+import {
+  DEFAULT_COORDINATES,
+  formatFacebookError,
+  isType
+} from '../common/utils';
 import { Transformer } from '../type/common';
 import { Facebook } from '../type/facebook';
 import { Leaf } from '../type/leaf';
@@ -391,7 +395,7 @@ export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: Facebook.Communicator,
   ...transformers: readonly Transformer<
-    Messenger<C, Facebook.PlatformRequest>
+    Messenger<C, Facebook.PlatformRequest, Facebook.GenericRequest<C>>
   >[]
 ): Promise<Facebook.Messenger<C>> {
   return createMessenger(

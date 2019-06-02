@@ -14,12 +14,18 @@ declare namespace Messenger {
    * @template C The context used by the current chatbot.
    * @template PLRequest The platform-specific request.
    * @template PLResponse The platform-specific response.
+   * @template GRequest The platform-specific generic request.
    */
-  interface Configs<C, PLRequest, PLResponse> {
+  interface Configs<
+    C,
+    PLRequest,
+    PLResponse,
+    GRequest extends GenericRequest<C>
+  > {
     readonly targetPlatform: SupportedPlatform;
     readonly leafSelector: Leaf<C>;
     readonly communicator: PlatformCommunicator<PLResponse>;
-    readonly mapRequest: Messenger<C, PLRequest>['generalizeRequest'];
+    readonly mapRequest: Messenger<C, PLRequest, GRequest>['generalizeRequest'];
     mapResponse: (res: GenericResponse<C>) => Promise<readonly PLResponse[]>;
   }
 }
@@ -34,13 +40,14 @@ declare namespace Messenger {
  * apply decorators more effectively.
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
+ * @template GRequest The platform-specific generic request.
  */
-export interface Messenger<C, PLRequest> {
+export interface Messenger<C, PLRequest, GRequest extends GenericRequest<C>> {
   /** Generalize a platform request into a generic request. */
-  generalizeRequest(request: PLRequest): Promise<readonly GenericRequest<C>[]>;
+  generalizeRequest(request: PLRequest): Promise<readonly GRequest[]>;
 
   /** Receive an incoming generic request. */
-  receiveRequest(request: GenericRequest<C>): Promise<{}>;
+  receiveRequest(request: GRequest): Promise<{}>;
 
   /** Send an outgoing platform response. */
   sendResponse(response: GenericResponse<C>): Promise<{}>;

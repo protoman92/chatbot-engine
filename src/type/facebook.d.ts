@@ -269,5 +269,6 @@ export namespace Facebook {
    * Represents a Facebook-specific messenger.
    * @template C The context used by the current chatbot.
    */
-  interface Messenger<C> extends RootMessenger<C, PlatformRequest> {}
+  interface Messenger<C>
+    extends RootMessenger<C, PlatformRequest, GenericRequest<C>> {}
 }

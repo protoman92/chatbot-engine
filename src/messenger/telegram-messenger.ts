@@ -20,12 +20,9 @@ function createTelegramRequest<C>(
   targetPlatform: 'telegram'
 ): readonly Telegram.GenericRequest<C>[] {
   function processMessageRequest({
-    message: {
-      from: { id },
-      ...restMessage
-    }
+    message: { from: user, ...restMessage }
   }: Telegram.PlatformRequest.Message):
-    | [number, Telegram.GenericRequest<C>['data']]
+    | [Telegram.User, Telegram.GenericRequest<C>['data']]
     | undefined {
     if (
       isType<Telegram.PlatformRequest.SubContent.Message.Text>(
@@ -34,7 +31,7 @@ function createTelegramRequest<C>(
       )
     ) {
       return [
-        id,
+        user,
         [
           {
             targetPlatform,
@@ -50,15 +47,12 @@ function createTelegramRequest<C>(
   }
 
   function processCallbackRequest({
-    callback_query: {
-      data,
-      from: { id }
-    }
+    callback_query: { data, from: user }
   }: Telegram.PlatformRequest.Callback):
-    | [number, Telegram.GenericRequest<C>['data']]
+    | [Telegram.User, Telegram.GenericRequest<C>['data']]
     | undefined {
     return [
-      id,
+      user,
       [
         {
           targetPlatform,
@@ -71,10 +65,9 @@ function createTelegramRequest<C>(
   }
 
   function processRequest(
-    request: Telegram.PlatformRequest,
-    targetPlatform: 'telegram'
-  ): [number, Telegram.GenericRequest<C>['data']] {
-    let result: [number, Telegram.GenericRequest<C>['data']] | undefined;
+    request: Telegram.PlatformRequest
+  ): [Telegram.User, Telegram.GenericRequest<C>['data']] {
+    let result: [Telegram.User, Telegram.GenericRequest<C>['data']] | undefined;
 
     if (isType<Telegram.PlatformRequest.Message>(request, 'message')) {
       result = processMessageRequest(request);
@@ -91,10 +84,16 @@ function createTelegramRequest<C>(
     );
   }
 
-  const [targetID, data] = processRequest(webhook, targetPlatform);
+  const [telegramUser, data] = processRequest(webhook);
 
   return [
-    { targetPlatform, data, targetID: `${targetID}`, oldContext: {} as C }
+    {
+      targetPlatform,
+      telegramUser,
+      data,
+      targetID: `${telegramUser.id}`,
+      oldContext: {} as C
+    }
   ];
 }
 
@@ -233,7 +232,7 @@ export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: Telegram.Communicator,
   ...transformers: readonly Transformer<
-    Messenger<C, Telegram.PlatformRequest>
+    Messenger<C, Telegram.PlatformRequest, Telegram.GenericRequest<C>>
   >[]
 ): Promise<Telegram.Messenger<C>> {
   await communicator.setWebhook();

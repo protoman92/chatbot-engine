@@ -9,27 +9,34 @@ import {
 } from '../type/messenger';
 import { GenericResponse } from '../type/response';
 import { Telegram } from '../type/telegram';
+import { GenericRequest } from '../type/request';
 
 /**
  * Create a generic messenger.
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
  * @template PLResponse The platform-specific response.
+ * @template GRequest The platform-specific generic request.
  */
-export async function createMessenger<C, PLRequest, PLResponse>(
+export async function createMessenger<
+  C,
+  PLRequest,
+  PLResponse,
+  GRequest extends GenericRequest<C>
+>(
   {
     targetPlatform,
     leafSelector,
     communicator,
     mapRequest,
     mapResponse
-  }: Messenger.Configs<C, PLRequest, PLResponse>,
-  ...transformers: readonly Transformer<Messenger<C, PLRequest>>[]
-): Promise<Messenger<C, PLRequest>> {
+  }: Messenger.Configs<C, PLRequest, PLResponse, GRequest>,
+  ...transformers: readonly Transformer<Messenger<C, PLRequest, GRequest>>[]
+): Promise<Messenger<C, PLRequest, GRequest>> {
   const reversedTransformers = [...transformers];
   reversedTransformers.reverse();
 
-  const messenger: Messenger<C, PLRequest> = await compose(
+  const messenger: Messenger<C, PLRequest, GRequest> = await compose(
     {
       generalizeRequest: platformReq => mapRequest(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, data }) => {
@@ -78,9 +85,15 @@ export async function createMessenger<C, PLRequest, PLResponse>(
  * @template C The context used by the current chatbot.
  * @template PLRequest The platform-specific request.
  * @template PLResponse The platform-specific response.
+ * @template GRequest The platform-specific generic request.
  */
-export function createBatchMessenger<C, PLRequest, PLResponse>(
-  messenger: Messenger<C, PLRequest>
+export function createBatchMessenger<
+  C,
+  PLRequest,
+  PLResponse,
+  GRequest extends GenericRequest<C>
+>(
+  messenger: Messenger<C, PLRequest, GRequest>
 ): BatchMessenger<PLRequest, PLResponse> {
   return {
     processPlatformRequest: async platformReq => {
@@ -99,7 +112,7 @@ export function createCrossPlatformBatchMessenger<C>(
   messengers: CrossPlatformMessengerConfigs<C>,
   getPlatform: (platformReq: unknown) => SupportedPlatform = getRequestPlatform
 ): BatchMessenger<unknown, unknown> {
-  return createBatchMessenger<C, unknown, unknown>({
+  return createBatchMessenger<C, unknown, unknown, GenericRequest<C>>({
     generalizeRequest: async platformReq => {
       const targetPlatform = getPlatform(platformReq);
 
@@ -118,10 +131,14 @@ export function createCrossPlatformBatchMessenger<C>(
     receiveRequest: async request => {
       switch (request.targetPlatform) {
         case 'facebook':
-          return messengers.facebook.receiveRequest(request);
+          return messengers.facebook.receiveRequest(
+            request as Facebook.GenericRequest<C>
+          );
 
         case 'telegram':
-          return messengers.telegram.receiveRequest(request);
+          return messengers.telegram.receiveRequest(
+            request as Telegram.GenericRequest<C>
+          );
       }
     },
     sendResponse: async response => {

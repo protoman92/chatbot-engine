@@ -22,10 +22,10 @@ export function createTransformChain<CI, CO>(): Leaf.TransformChain<CI, CO> {
       return transformChain as any;
     },
     transform: async leaf => {
-      const outputLeaf = (await compose(
+      const outputLeaf = await compose(
         leaf,
         ...composeTransformers
-      )) as Leaf<CO>;
+      );
 
       return compose(
         outputLeaf,

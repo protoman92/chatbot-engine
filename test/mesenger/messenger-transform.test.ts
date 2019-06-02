@@ -1,6 +1,13 @@
-import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
-import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
+import {
+  anything,
+  deepEqual,
+  instance,
+  spy,
+  verify,
+  when,
+  capture
+} from 'ts-mockito';
 import { Telegram } from '../../src';
 import { compose } from '../../src/common/utils';
 import {
@@ -18,12 +25,12 @@ import { GenericResponse } from '../../src/type/response';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook';
-let messenger: Messenger<{}, unknown>;
+let messenger: Messenger<{}, unknown, GenericRequest<{}>>;
 let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<{}>;
 
 beforeEach(async () => {
-  messenger = spy<Messenger<{}, unknown>>({
+  messenger = spy<Messenger<{}, unknown, GenericRequest<{}>>>({
     generalizeRequest: () => Promise.reject(''),
     receiveRequest: () => Promise.reject(''),
     sendResponse: () => Promise.reject('')
@@ -165,16 +172,8 @@ describe('Save Telegram user for target ID', () => {
 
   it('Should save user when no user ID is present in context', async () => {
     // Setup
-    const id = 1000;
-    const targetID = `${id}`;
-
-    const genericReqs: readonly Telegram.GenericRequest<{}>[] = [
-      { targetID, targetPlatform: 'telegram', oldContext: {}, data: [] },
-      { targetID, targetPlatform: 'telegram', oldContext: {}, data: [] }
-    ];
-
     when(contextDAO.appendContext(anything(), anything())).thenResolve({});
-    when(tlMessenger.generalizeRequest(anything())).thenResolve(genericReqs);
+    when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
     const transformed = await compose(
       instance(tlMessenger),
@@ -182,35 +181,24 @@ describe('Save Telegram user for target ID', () => {
     );
 
     // When
-    const actualGenericRequests = await transformed.generalizeRequest({
-      update_id: 0,
-      message: {
-        message_id: 0,
-        from: {
-          id,
-          first_name: '',
-          last_name: '',
-          username: '',
-          language_code: 'en',
-          is_bot: false
-        },
-        chat: {
-          id,
-          first_name: '',
-          last_name: '',
-          username: '',
-          type: 'private'
-        },
-        text: ''
-      }
+    await transformed.receiveRequest({
+      targetID,
+      telegramUser: {
+        id: 0,
+        first_name: '',
+        last_name: '',
+        username: '',
+        language_code: 'en' as const,
+        is_bot: false
+      },
+      targetPlatform: 'telegram',
+      oldContext: {},
+      data: []
     });
 
     // Then
+    console.log(capture(contextDAO.appendContext));
     verify(contextDAO.appendContext(targetID, deepEqual({ targetID }))).once();
-
-    actualGenericRequests.forEach(({ oldContext }) => {
-      expectJs(oldContext).to.eql({ targetID });
-    });
   });
 });
 

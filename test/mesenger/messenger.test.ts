@@ -12,8 +12,9 @@ import {
 import {
   CrossPlatformMessengerConfigs,
   Facebook,
-  Messenger,
-  SupportedPlatform
+  GenericRequest,
+  SupportedPlatform,
+  Telegram
 } from '../../src';
 import {
   createCrossPlatformBatchMessenger,
@@ -137,7 +138,7 @@ describe('Generic unit messenger', () => {
       targetPlatform,
       leafSelector: instance(leafSelector),
       communicator: instance(communicator),
-      mapRequest: async () => [],
+      mapRequest: async () => [] as readonly GenericRequest<{}>[],
       mapResponse: async () => []
     });
 
@@ -160,19 +161,19 @@ describe('Generic unit messenger', () => {
 });
 
 describe('Cross platform unit messenger', () => {
-  let fbMessenger: Messenger<{}, unknown>;
-  let tlMessenger: Messenger<{}, unknown>;
+  let fbMessenger: Facebook.Messenger<{}>;
+  let tlMessenger: Telegram.Messenger<{}>;
   let messengers: CrossPlatformMessengerConfigs<{}>;
   let messengerInstances: CrossPlatformMessengerConfigs<{}>;
 
   beforeEach(() => {
-    fbMessenger = spy<Messenger<{}, unknown>>({
+    fbMessenger = spy<Facebook.Messenger<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    tlMessenger = spy<Messenger<{}, unknown>>({
+    tlMessenger = spy<Telegram.Messenger<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
@@ -201,9 +202,17 @@ describe('Cross platform unit messenger', () => {
     when(tlMessenger.generalizeRequest(anything())).thenResolve([
       {
         targetID,
-        targetPlatform: 'telegram',
+        targetPlatform: 'telegram' as const,
         oldContext: {},
-        data: []
+        data: [],
+        telegramUser: {
+          id: 0,
+          first_name: '',
+          last_name: '',
+          username: '',
+          language_code: 'en' as const,
+          is_bot: false
+        }
       }
     ]);
 
