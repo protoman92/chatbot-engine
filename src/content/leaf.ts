@@ -58,114 +58,83 @@ export function createDefaultErrorLeaf<C>(
 }
 
 /**
- * Curry a leaf observer that handles content differently based on the platform
- * being served. This curried function accepts an generic response observer and
- * produce a leaf observer.
+ * Create a leaf observer that handles content for different platforms, based
+ * on the leaf input.
  * @template C The context used by the current chatbot.
  */
-export function curryLeafObserverForPlatforms<C>(
-  fn: (
-    observer: NextContentObserver<GenericResponse<C>>
-  ) => Promise<Leaf.Platform.Observer<C>>
-): (
-  observer: NextContentObserver<GenericResponse<C>>
-) => Promise<Leaf.Observer<C>> {
-  return async observer => {
-    const { facebook, telegram } = await fn(observer);
+export async function createLeafObserverForPlatforms<C>({
+  facebook,
+  telegram
+}: Leaf.Platform.Observer<C>): Promise<Leaf.Observer<C>> {
+  return {
+    next: async input => {
+      switch (input.targetPlatform) {
+        case 'facebook':
+          return facebook.next(input);
 
-    return {
-      next: async input => {
-        switch (input.targetPlatform) {
-          case 'facebook':
-            return facebook.next(input);
-
-          case 'telegram':
-            return telegram.next(input);
-        }
-      },
-      complete: async () => {
-        !!facebook.complete && (await facebook.complete());
-        !!telegram.complete && (await telegram.complete());
+        case 'telegram':
+          return telegram.next(input);
       }
-    };
+    },
+    complete: async () => {
+      !!facebook.complete && (await facebook.complete());
+      !!telegram.complete && (await telegram.complete());
+    }
   };
 }
 
 /**
- * Create a leaf that handles content for different platforms, based on the
- * leaf input.
- * @template C The context used by the current chatbot.
- */
-export function createLeafForPlatforms<C>(
-  fn: (
-    observer: NextContentObserver<GenericResponse<C>>
-  ) => Promise<Leaf.Platform.Observer<C>>
-): Promise<Leaf<C>> {
-  return createLeafWithObserver(observer => {
-    return curryLeafObserverForPlatforms(fn)(observer);
-  });
-}
-
-/**
- * If anyLeaf is false, stop at the first leaf that produces a valid next
- * result. Otherwise, stop at the first leaf that produces an invalid next
+ * If anyLeaf is false, stop at the first leaf observer that produces a valid
+ * next result. Otherwise, stop at the first leaf that produces an invalid next
  * result.
  * @template C The context used by the current chatbot.
  */
-async function createBaseLeafFromLeaves<C>(
+async function createBaseLeafObserverFromObservers<C>(
   anyLeaf: boolean,
-  fn: (
-    observer: NextContentObserver<GenericResponse<C>>
-  ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
-): Promise<Leaf<C>> {
-  return createLeafWithObserver(async observer => {
-    const convertibleLeaves = await fn(observer);
-    const allLeaves = await mapSeries(convertibleLeaves, toPromise);
+  ...observers: readonly PromiseConvertible<Leaf.Observer<C>>[]
+): Promise<Leaf.Observer<C>> {
+  const allObservers = await mapSeries(observers, toPromise);
 
-    return {
-      next: async input => {
-        let result: NextResult = undefined;
+  return {
+    next: async input => {
+      let result: NextResult = undefined;
 
-        for (const nextLeaf of allLeaves) {
-          result = await nextLeaf.next(input);
+      for (const nextLeaf of allObservers) {
+        result = await nextLeaf.next(input);
 
-          if (result === undefined || result === null) {
-            if (!!anyLeaf) continue;
-            else return result;
-          } else if (!!anyLeaf) return result;
-        }
-
-        return result;
-      },
-      complete: async () => {
-        return mapSeries(allLeaves, async l => !!l.complete && l.complete());
+        if (result === undefined || result === null) {
+          if (!!anyLeaf) continue;
+          else return result;
+        } else if (!!anyLeaf) return result;
       }
-    };
-  });
+
+      return result;
+    },
+    complete: async () => {
+      return mapSeries(allObservers, async l => !!l.complete && l.complete());
+    }
+  };
 }
 
 /**
- * Create a leaf from a sequence of leaves, but only when all leaves are valid.
- * This means stop at the first leaf that produces an invalid next result.
+ * Create a leaf observer from a sequence of leaf observers, but only when all
+ * leaves are valid. This means stop at the first leaf that produces an invalid
+ * next result.
  * @template C The context used by the current chatbot.
  */
-export function createLeafFromAllLeaves<C>(
-  fn: (
-    observer: NextContentObserver<GenericResponse<C>>
-  ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
+export function createLeafObserverFromAllObservers<C>(
+  ...observers: readonly PromiseConvertible<Leaf.Observer<C>>[]
 ) {
-  return createBaseLeafFromLeaves(false, fn);
+  return createBaseLeafObserverFromObservers(false, ...observers);
 }
 
 /**
- * Create a leaf from a sequence of leaves, but stop at the first leaf that
- * produces a valid next result.
+ * Create a leaf observer from a sequence of leaf observers, but stop at the
+ * first leaf that produces a valid next result.
  * @template C The context used by the current chatbot.
  */
-export function createLeafFromAnyLeaf<C>(
-  fn: (
-    observer: NextContentObserver<GenericResponse<C>>
-  ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
+export function createLeafObserverFromAnyObserver<C>(
+  ...observers: readonly PromiseConvertible<Leaf.Observer<C>>[]
 ) {
-  return createBaseLeafFromLeaves(true, fn);
+  return createBaseLeafObserverFromObservers(true, ...observers);
 }

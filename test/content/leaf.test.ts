@@ -6,9 +6,10 @@ import { Facebook, Telegram, VisualContent } from '../../src';
 import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
 import {
   createDefaultErrorLeaf,
-  createLeafForPlatforms,
-  createLeafFromAllLeaves,
-  createLeafFromAnyLeaf
+  createLeafObserverForPlatforms,
+  createLeafObserverFromAllObservers,
+  createLeafObserverFromAnyObserver,
+  createLeafWithObserver
 } from '../../src/content/leaf';
 import { bridgeEmission } from '../../src/stream/stream';
 import { Leaf } from '../../src/type/leaf';
@@ -60,10 +61,12 @@ describe('Leaf for platforms', () => {
       complete: () => Promise.reject('')
     });
 
-    platformLeaf = await createLeafForPlatforms(async () => ({
-      facebook: instance(fbLeaf),
-      telegram: instance(tlLeaf)
-    }));
+    platformLeaf = await createLeafWithObserver(() => {
+      return createLeafObserverForPlatforms({
+        facebook: instance(fbLeaf),
+        telegram: instance(tlLeaf)
+      });
+    });
   });
 
   it('Should work for different platforms', async () => {
@@ -110,15 +113,17 @@ describe('Leaf from sequence of leaves', () => {
     let nextCount = 0;
     let completeCount = 0;
 
-    const transformed = await createLeafFromAllLeaves(async () => {
-      return [...Array(sequentialLeafCount).keys()].map(i => ({
-        next: async () => {
-          if (i === invalidIndex) return undefined;
-          nextCount += 1;
-          return {};
-        },
-        complete: async () => (completeCount += 1)
-      }));
+    const transformed = await createLeafWithObserver<{}>(async () => {
+      return createLeafObserverFromAllObservers(
+        ...[...Array(sequentialLeafCount).keys()].map(i => ({
+          next: async () => {
+            if (i === invalidIndex) return undefined;
+            nextCount += 1;
+            return {};
+          },
+          complete: async () => (completeCount += 1)
+        }))
+      );
     });
 
     // When
@@ -146,15 +151,17 @@ describe('Leaf from sequence of leaves', () => {
     let skipNextCount = 0;
     let completeCount = 0;
 
-    const transformed = await createLeafFromAnyLeaf(async () => {
-      return [...Array(sequentialLeafCount).keys()].map(i => ({
-        next: async () => {
-          if (i === validIndex) return {};
-          skipNextCount += 1;
-          return undefined;
-        },
-        complete: async () => (completeCount += 1)
-      }));
+    const transformed = await createLeafWithObserver<{}>(async () => {
+      return createLeafObserverFromAnyObserver(
+        ...[...Array(sequentialLeafCount).keys()].map(i => ({
+          next: async () => {
+            if (i === validIndex) return {};
+            skipNextCount += 1;
+            return undefined;
+          },
+          complete: async () => (completeCount += 1)
+        }))
+      );
     });
 
     // When

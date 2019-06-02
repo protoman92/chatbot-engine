@@ -19,11 +19,10 @@ export {
 export { higherOrderRetryWithWit } from './content/higher-order/wit';
 export {
   createDefaultErrorLeaf,
-  createLeafForPlatforms,
-  createLeafFromAllLeaves,
-  createLeafFromAnyLeaf,
-  createLeafWithObserver,
-  curryLeafObserverForPlatforms
+  createLeafObserverFromAllObservers,
+  createLeafObserverFromAnyObserver,
+  createLeafObserverForPlatforms,
+  createLeafWithObserver
 } from './content/leaf';
 export { createLeafSelector } from './content/leaf-selector';
 export { createInMemoryContextDAO } from './context/InMemoryContextDAO';

@@ -3,7 +3,10 @@ import { PromiseConvertible } from '../../type/common';
 import { Leaf } from '../../type/leaf';
 import { GenericResponse } from '../../type/response';
 import { NextContentObserver } from '../../type/stream';
-import { createLeafFromAllLeaves } from '../leaf';
+import {
+  createLeafObserverFromAllObservers,
+  createLeafWithObserver
+} from '../leaf';
 
 /**
  * Produce output from a sequence of leaves after the current leaf is done.
@@ -15,24 +18,25 @@ export function higherOrderThenInvokeAll<C>(
   ) => Promise<readonly PromiseConvertible<Leaf.Observer<C>>[]>
 ): Leaf.Transformer<C, C> {
   return async leaf => {
-    const concatenatedLeaf = await createLeafFromAllLeaves(
-      async observer => await fn(observer)
-    );
+    const concatenated = await createLeafWithObserver(async observer => {
+      const leaves = await fn(observer);
+      return createLeafObserverFromAllObservers(...leaves);
+    });
 
     return {
       next: async input => {
         const result = await leaf.next(input);
         if (result === undefined || result === null) return result;
-        return concatenatedLeaf.next(input);
+        return concatenated.next(input);
       },
       complete: async () => {
         !!leaf.complete && (await leaf.complete());
-        !!concatenatedLeaf.complete && (await concatenatedLeaf.complete());
+        !!concatenated.complete && (await concatenated.complete());
       },
       subscribe: async handlers => {
         return createCompositeSubscription(
           await leaf.subscribe(handlers),
-          await concatenatedLeaf.subscribe(handlers)
+          await concatenated.subscribe(handlers)
         );
       }
     };
