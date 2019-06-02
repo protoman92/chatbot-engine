@@ -187,6 +187,10 @@ export function toArray<T>(value: T | readonly T[]): readonly T[] {
  * @template T The promise result type.
  */
 export async function toPromise<T>(convertible: PromiseConvertible<T>) {
+  if (typeof convertible === 'function') {
+    return (convertible as Function)();
+  }
+
   if (isType<Promise<T>>(convertible, 'then')) {
     return convertible;
   }
