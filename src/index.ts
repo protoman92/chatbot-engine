@@ -12,10 +12,7 @@ export {
   higherOrderRequireInputKeys
 } from './content/higher-order/require-keys';
 export { higherOrderThenInvokeAll } from './content/higher-order/sequentialize';
-export {
-  createComposeChain,
-  createPipeChain
-} from './content/higher-order/transform-chain';
+export { createTransformChain } from './content/higher-order/transform-chain';
 export { higherOrderRetryWithWit } from './content/higher-order/wit';
 export {
   createDefaultErrorLeaf,

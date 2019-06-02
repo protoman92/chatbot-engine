@@ -48,8 +48,7 @@ declare namespace Leaf {
   interface MonoTransformer<C> extends Transformer<C, C> {}
 
   interface BaseTransformChain<CI, CO> {
-    /** Perform transformation, and make the input leaf pipeable. */
-    transform(leaf: Leaf<CI>): Promise<LeafWithPipe<CO>>;
+    transform: Transformer<CI, CO>;
 
     /** This is only used for debugging, and serves no production purposes. */
     checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;
@@ -57,35 +56,25 @@ declare namespace Leaf {
 
   /**
    * Represents a chain of transformer higher-order functions that transforms a
-   * leaf instance declaratively on the input side.
+   * leaf instance declaratively .
    * @template CI The original context type.
    * @template CO The target context type.
    */
-  interface ComposeChain<CI, CO> extends BaseTransformChain<CI, CO> {
+  interface TransformChain<CI, CO> extends BaseTransformChain<CI, CO> {
     /**
      * Apply pre-transformers like wrapping layers on the base leaf.
      * @template CI1 The target context type.
      */
-    compose<CI1>(fn: Transformer<CI1, CI>): ComposeChain<CI1, CO>;
+    compose<CI1>(fn: Transformer<CI1, CI>): TransformChain<CI1, CO>;
 
-    /** This is only used for debugging, and serves no production purposes. */
-    forContextOfType<C>(ctx?: C): ComposeChain<C, C>;
-  }
-
-  /**
-   * While compose chain transforms input, pipe chain transforms output.
-   * @template CI The original context type.
-   * @template CO The target context type.
-   */
-  interface PipeChain<CI, CO> extends BaseTransformChain<CI, CO> {
     /**
-     * Pipe a transformer to transform output of a leaf.
+     * Apply post-transformers on the base leaf.
      * @template CO1 The target context type.
      */
-    pipe<CO1>(fn: Transformer<CO, CO1>): PipeChain<CI, CO1>;
+    pipe<CO1>(fn: Transformer<CO, CO1>): TransformChain<CI, CO1>;
 
     /** This is only used for debugging, and serves no production purposes. */
-    forContextOfType<C>(ctx?: C): PipeChain<C, C>;
+    forContextOfType<C>(ctx?: C): TransformChain<C, C>;
   }
 }
 
@@ -98,15 +87,3 @@ declare namespace Leaf {
  * @template C The context used by the current chatbot.
  */
 export interface Leaf<C> extends Leaf.Base<C, DefaultContext> {}
-
-/**
- * Represents a leaf that support pipe functions.
- * @template C The context used by the current chatbot.
- */
-export interface LeafWithPipe<C> extends Leaf<C> {
-  /**
-   * Transform with a pipe function.
-   * @template C1 The target context type.
-   */
-  pipe<C1>(fn: Leaf.Transformer<C, C1>): Promise<LeafWithPipe<C1>>;
-}
