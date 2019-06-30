@@ -8,7 +8,7 @@ declare namespace GenericResponse {
     readonly targetID: string;
     readonly targetPlatform: SupportedPlatform;
     readonly additionalContext?: Partial<C>;
-    readonly visualContents: readonly VisualContent.Base[];
+    readonly output: readonly VisualContent.Base[];
   }
 }
 

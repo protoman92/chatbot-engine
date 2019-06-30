@@ -9,7 +9,7 @@ import { VisualContent as RootVisualContent } from './visual-content';
 
 export namespace Facebook {
   namespace GenericRequest {
-    interface Data extends RootGenericRequest.Data.Base {
+    interface Input extends RootGenericRequest.Base.Input {
       readonly targetPlatform: 'facebook';
       readonly stickerID: string;
     }
@@ -17,12 +17,12 @@ export namespace Facebook {
 
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
     readonly targetPlatform: 'facebook';
-    readonly data: readonly GenericRequest.Data[];
+    readonly input: readonly GenericRequest.Input[];
   }
 
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
     readonly targetPlatform: 'facebook';
-    readonly visualContents: readonly VisualContent[];
+    readonly output: readonly VisualContent[];
   }
 
   namespace VisualContent {
@@ -36,7 +36,7 @@ export namespace Facebook {
     readonly quickReplies?: readonly VisualContent.QuickReply[];
   }
 
-  type DefaultContext = RootDefaultContext & GenericRequest.Data;
+  type DefaultContext = RootDefaultContext & GenericRequest.Input;
 
   namespace Leaf {
     type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
@@ -45,14 +45,22 @@ export namespace Facebook {
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {
-    namespace Input {
-      interface Base {
+    namespace Base {
+      interface Input {
         readonly sender: Readonly<{ id: string }>;
         readonly recipient: Readonly<{ id: string }>;
         readonly timestamp: number;
       }
 
-      interface Postback extends Base {
+      interface Message extends Input {
+        readonly message: Readonly<{ mid: string; seq: number }>;
+      }
+    }
+  }
+
+  namespace PlatformRequest {
+    namespace Input {
+      interface Postback extends Base.Input {
         readonly postback: Readonly<{ payload: string; title: string }>;
       }
 
@@ -76,25 +84,21 @@ export namespace Facebook {
         }
       }
 
-      interface BaseMessage extends Input.Base {
-        readonly message: Readonly<{ mid: string; seq: number }>;
-      }
-
       type Attachment =
         | Attachment.Image
         | Attachment.StickerImage
         | Attachment.Location;
 
       namespace Message {
-        type Attachment = BaseMessage &
+        type Attachment = Base.Message &
           DeepReadonly<{
             message: { attachments: readonly Input.Attachment[] };
           }>;
 
-        type QuickReply = BaseMessage &
+        type QuickReply = Base.Message &
           DeepReadonly<{ quick_reply: { payload: string } }>;
 
-        type Text = BaseMessage & DeepReadonly<{ message: { text: string } }>;
+        type Text = Base.Message & DeepReadonly<{ message: { text: string } }>;
       }
 
       type Message = Message.Attachment | Message.Text | Message.QuickReply;
@@ -114,6 +118,18 @@ export namespace Facebook {
   }
 
   namespace PlatformResponse {
+    namespace Base {
+      namespace SubContent {
+        interface Button {
+          readonly title: string;
+        }
+      }
+
+      interface Content {}
+    }
+  }
+
+  namespace PlatformResponse {
     interface QuickReply {
       readonly title: string;
       readonly content_type: 'location' | 'text';
@@ -122,16 +138,12 @@ export namespace Facebook {
 
     namespace SubContent {
       namespace Button {
-        interface Base {
-          readonly title: string;
-        }
-
-        interface Postback extends Base {
+        interface Postback extends Base.SubContent.Button {
           readonly type: 'postback';
           readonly payload: string;
         }
 
-        interface URL extends Base {
+        interface URL extends Base.SubContent.Button {
           readonly type: 'web_url';
           readonly url: string;
         }
@@ -141,9 +153,7 @@ export namespace Facebook {
     }
 
     namespace Content {
-      interface Base {}
-
-      type Button = Base &
+      type Button = Base.Content &
         DeepReadonly<{
           messaging_type: 'RESPONSE';
           message: {
@@ -167,7 +177,7 @@ export namespace Facebook {
         }
       }
 
-      type Carousel = Base &
+      type Carousel = Base.Content &
         DeepReadonly<{
           messaging_type: 'RESPONSE';
           message: {
@@ -189,7 +199,7 @@ export namespace Facebook {
         }
       }
 
-      type List = Base &
+      type List = Base.Content &
         DeepReadonly<{
           messaging_type: 'RESPONSE';
           message: {
@@ -205,7 +215,7 @@ export namespace Facebook {
           };
         }>;
 
-      type Media = Base &
+      type Media = Base.Content &
         DeepReadonly<{
           message: {
             attachment: {
@@ -215,7 +225,7 @@ export namespace Facebook {
           };
         }>;
 
-      type Text = Base &
+      type Text = Base.Content &
         DeepReadonly<{ messaging_type: 'RESPONSE'; message: { text: string } }>;
     }
 

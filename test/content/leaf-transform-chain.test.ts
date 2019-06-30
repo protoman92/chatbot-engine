@@ -61,7 +61,7 @@ describe('Transform chain', () => {
               targetID,
               targetPlatform,
               additionalContext: { query },
-              visualContents: []
+              output: []
             });
 
             return {};
@@ -147,7 +147,7 @@ describe('Transform chain', () => {
           return observer.next({
             targetID,
             targetPlatform,
-            visualContents: [
+            output: [
               {
                 quickReplies: [{ type: 'text', text: `${a}` }],
                 content: { type: 'text', text: '' }
@@ -167,7 +167,7 @@ describe('Transform chain', () => {
     )(originalLeaf);
 
     const {
-      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
@@ -188,7 +188,7 @@ describe('Transform chain', () => {
 
     const baseLeaf = await createLeafWithObserver<{}>(async observer => ({
       next: async ({ targetID, targetPlatform }) => {
-        return observer.next({ targetID, targetPlatform, visualContents: [] });
+        return observer.next({ targetID, targetPlatform, output: [] });
       },
       complete: async () => {
         completedCount += 1;
@@ -233,7 +233,7 @@ describe('Transform chain', () => {
           return observer.next({
             targetID,
             targetPlatform,
-            visualContents: [
+            output: [
               {
                 quickReplies: [{ type: 'text', text: `${a}` }],
                 content: { type: 'text', text: '' }
@@ -250,7 +250,7 @@ describe('Transform chain', () => {
     );
 
     const {
-      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
@@ -277,7 +277,7 @@ describe('Transform chain', () => {
           return observer.next({
             targetID,
             targetPlatform,
-            visualContents: [
+            output: [
               {
                 quickReplies: [{ type: 'text', text: `${a}` }],
                 content: { type: 'text', text: '' }
@@ -304,7 +304,7 @@ describe('Transform chain', () => {
     });
 
     const {
-      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
@@ -327,7 +327,7 @@ describe('Transform chain', () => {
         return observer.next({
           targetID,
           targetPlatform,
-          visualContents: [{ content: { text, type: 'text' } }]
+          output: [{ content: { text, type: 'text' } }]
         });
       }
     }));
@@ -384,7 +384,7 @@ describe('Transform chain', () => {
           return observer.next({
             targetID,
             targetPlatform,
-            visualContents: [
+            output: [
               {
                 quickReplies: [{ type: 'text', text: `${a}` }],
                 content: { type: 'text', text: '' }
@@ -407,7 +407,7 @@ describe('Transform chain', () => {
       .transform(originalLeaf);
 
     const {
-      visualContents: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,

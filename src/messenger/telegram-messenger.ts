@@ -6,7 +6,7 @@ import {
 } from '../common/utils';
 import { Transformer } from '../type/common';
 import { Leaf } from '../type/leaf';
-import { Telegram } from '../type/telegram';
+import { Telegram as TL } from '../type/telegram';
 import { VisualContent } from '../type/visual-content';
 import { createMessenger } from './generic-messenger';
 
@@ -15,19 +15,16 @@ import { createMessenger } from './generic-messenger';
  * @template C The context used by the current chatbot.
  */
 function createTelegramRequest<C>(
-  webhook: Telegram.PlatformRequest,
+  webhook: TL.PlatformRequest,
   targetPlatform: 'telegram'
-): readonly Telegram.GenericRequest<C>[] {
+): readonly TL.GenericRequest<C>[] {
   function processMessageRequest({
     message: { from: user, ...restMessage }
-  }: Telegram.PlatformRequest.Message):
-    | [Telegram.User, Telegram.GenericRequest<C>['data']]
+  }: TL.PlatformRequest.Message):
+    | [TL.User, TL.GenericRequest<C>['input']]
     | undefined {
     if (
-      isType<Telegram.PlatformRequest.SubContent.Message.Text>(
-        restMessage,
-        'text'
-      )
+      isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, 'text')
     ) {
       return [
         user,
@@ -47,8 +44,8 @@ function createTelegramRequest<C>(
 
   function processCallbackRequest({
     callback_query: { data, from: user }
-  }: Telegram.PlatformRequest.Callback):
-    | [Telegram.User, Telegram.GenericRequest<C>['data']]
+  }: TL.PlatformRequest.Callback):
+    | [TL.User, TL.GenericRequest<C>['input']]
     | undefined {
     return [
       user,
@@ -64,15 +61,15 @@ function createTelegramRequest<C>(
   }
 
   function processRequest(
-    request: Telegram.PlatformRequest
-  ): [Telegram.User, Telegram.GenericRequest<C>['data']] {
-    let result: [Telegram.User, Telegram.GenericRequest<C>['data']] | undefined;
+    request: TL.PlatformRequest
+  ): [TL.User, TL.GenericRequest<C>['input']] {
+    let result: [TL.User, TL.GenericRequest<C>['input']] | undefined;
 
-    if (isType<Telegram.PlatformRequest.Message>(request, 'message')) {
+    if (isType<TL.PlatformRequest.Message>(request, 'message')) {
       result = processMessageRequest(request);
     }
 
-    if (isType<Telegram.PlatformRequest.Callback>(request, 'callback_query')) {
+    if (isType<TL.PlatformRequest.Callback>(request, 'callback_query')) {
       result = processCallbackRequest(request);
     }
 
@@ -89,7 +86,7 @@ function createTelegramRequest<C>(
     {
       targetPlatform,
       telegramUser,
-      data,
+      input: data,
       targetID: `${telegramUser.id}`,
       oldContext: {} as C
     }
@@ -102,19 +99,19 @@ function createTelegramRequest<C>(
  */
 function createTelegramResponse<C>({
   targetID,
-  visualContents
-}: Telegram.GenericResponse<C>): readonly Telegram.PlatformResponse[] {
+  output: visualContents
+}: TL.GenericResponse<C>): readonly TL.PlatformResponse[] {
   function createTextResponse(
     targetID: string,
     { text }: VisualContent.MainContent.Text
-  ): Omit<Telegram.PlatformResponse.SendMessage, 'reply_markup'> {
+  ): Omit<TL.PlatformResponse.SendMessage, 'reply_markup'> {
     return { text, action: 'sendMessage', chat_id: targetID };
   }
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    quickReplies: Telegram.VisualContent.QuickReply.InlineMarkups
-  ): Telegram.PlatformResponse.InlineKeyboardMarkup {
+    quickReplies: TL.VisualContent.QuickReply.InlineMarkups
+  ): TL.PlatformResponse.InlineKeyboardMarkup {
     return {
       inline_keyboard: quickReplies.map(qrs =>
         qrs.map(qr => {
@@ -134,8 +131,8 @@ function createTelegramResponse<C>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    quickReplies: Telegram.VisualContent.QuickReply.ReplyMarkups
-  ): Telegram.PlatformResponse.ReplyKeyboardMarkup {
+    quickReplies: TL.VisualContent.QuickReply.ReplyMarkups
+  ): TL.PlatformResponse.ReplyKeyboardMarkup {
     return {
       keyboard: quickReplies.map(qrs =>
         qrs.map(qr => {
@@ -173,35 +170,30 @@ function createTelegramResponse<C>({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReplies: Telegram.VisualContent.QuickReplies
-  ): Telegram.PlatformResponse.ReplyMarkup {
+    quickReplies: TL.VisualContent.QuickReplies
+  ): TL.PlatformResponse.ReplyMarkup {
     const shouldBeReplyMarkup = quickReplies.every(
-      (qrs: Telegram.VisualContent.QuickReplies[number]) =>
-        qrs.every(
-          ({ type }: Telegram.VisualContent.QuickReplies[number][number]) => {
-            return type === 'location';
-          }
-        )
+      (qrs: TL.VisualContent.QuickReplies[number]) =>
+        qrs.every(({ type }: TL.VisualContent.QuickReplies[number][number]) => {
+          return type === 'location';
+        })
     );
 
     if (shouldBeReplyMarkup) {
       return createReplyMarkups(
-        quickReplies as Telegram.VisualContent.QuickReply.ReplyMarkups
+        quickReplies as TL.VisualContent.QuickReply.ReplyMarkups
       );
     }
 
     return createInlineMarkups(
-      quickReplies as Telegram.VisualContent.QuickReply.InlineMarkups
+      quickReplies as TL.VisualContent.QuickReply.InlineMarkups
     );
   }
 
   function createPlatformResponse(
     targetID: string,
-    {
-      quickReplies,
-      content
-    }: Telegram.GenericResponse<C>['visualContents'][number]
-  ): Telegram.PlatformResponse {
+    { quickReplies, content }: TL.GenericResponse<C>['output'][number]
+  ): TL.PlatformResponse {
     const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
     switch (content.type) {
@@ -229,9 +221,9 @@ function createTelegramResponse<C>({
  */
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
-  communicator: Telegram.Communicator,
-  ...transformers: readonly Transformer<Telegram.Messenger<C>>[]
-): Promise<Telegram.Messenger<C>> {
+  communicator: TL.Communicator,
+  ...transformers: readonly Transformer<TL.Messenger<C>>[]
+): Promise<TL.Messenger<C>> {
   await communicator.setWebhook();
 
   return createMessenger(
@@ -241,7 +233,7 @@ export async function createTelegramMessenger<C>(
       targetPlatform: 'telegram',
       mapRequest: async req => createTelegramRequest(req, 'telegram'),
       mapResponse: async res => {
-        return createTelegramResponse(res as Telegram.GenericResponse<C>);
+        return createTelegramResponse(res as TL.GenericResponse<C>);
       }
     },
     ...transformers

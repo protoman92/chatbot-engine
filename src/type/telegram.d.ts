@@ -9,7 +9,7 @@ import { VisualContent as RootVisualContent } from './visual-content';
 
 export namespace Telegram {
   namespace GenericRequest {
-    interface Data extends RootGenericRequest.Data.Base {
+    interface Input extends RootGenericRequest.Base.Input {
       readonly targetPlatform: 'telegram';
     }
   }
@@ -17,17 +17,17 @@ export namespace Telegram {
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
     readonly targetPlatform: 'telegram';
     readonly telegramUser: User;
-    readonly data: readonly GenericRequest.Data[];
+    readonly input: readonly GenericRequest.Input[];
   }
 
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
     readonly targetPlatform: 'telegram';
-    readonly visualContents: readonly VisualContent[];
+    readonly output: readonly VisualContent[];
   }
 
   namespace VisualContent {
     namespace QuickReply {
-      interface Contact extends RootVisualContent.QuickReply.Base {
+      interface Contact extends RootVisualContent.Base.QuickReply {
         readonly type: 'contact';
       }
 
@@ -51,7 +51,7 @@ export namespace Telegram {
     readonly quickReplies?: VisualContent.QuickReplies;
   }
 
-  type DefaultContext = RootDefaultContext & GenericRequest.Data;
+  type DefaultContext = RootDefaultContext & GenericRequest.Input;
 
   namespace Leaf {
     type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
@@ -60,26 +60,30 @@ export namespace Telegram {
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {
+    namespace Base {
+      interface Message {
+        readonly message_id: number;
+        readonly from: User;
+
+        readonly chat: Omit<User, 'language_code' | 'is_bot'> &
+          Readonly<{ type: 'private' }>;
+      }
+    }
+
+    interface Base {
+      readonly update_id: number;
+    }
+  }
+
+  namespace PlatformRequest {
     namespace SubContent {
       namespace Message {
-        interface Base {
-          readonly message_id: number;
-          readonly from: User;
-
-          readonly chat: Omit<User, 'language_code' | 'is_bot'> &
-            Readonly<{ type: 'private' }>;
-        }
-
-        interface Text extends Base {
+        interface Text extends Base.Message {
           readonly text: string;
         }
       }
 
       type Message = Message.Text;
-    }
-
-    interface Base {
-      readonly update_id: number;
     }
 
     /** Payload that includes on message field. */
@@ -102,6 +106,16 @@ export namespace Telegram {
   type PlatformRequest = PlatformRequest.Message | PlatformRequest.Callback;
 
   namespace PlatformResponse {
+    namespace Base {
+      namespace InlineKeyboardMarkup {
+        interface Button {
+          readonly text: string;
+        }
+      }
+    }
+  }
+
+  namespace PlatformResponse {
     namespace ReplyKeyboardMarkup {
       interface Button {
         readonly text: string;
@@ -119,15 +133,11 @@ export namespace Telegram {
 
     namespace InlineKeyboardMarkup {
       namespace Button {
-        interface Base {
-          readonly text: string;
-        }
-
-        interface Postback extends Base {
+        interface Postback extends Base.InlineKeyboardMarkup.Button {
           readonly callback_data: string;
         }
 
-        interface URL extends Base {
+        interface URL extends Base.InlineKeyboardMarkup.Button {
           readonly url: string;
         }
       }
@@ -170,17 +180,21 @@ export namespace Telegram {
   }
 
   namespace Communicator {
-    namespace APIResponse {
-      interface Base {
+    namespace Base {
+      interface APIResponse {
         readonly description: string;
       }
+    }
+  }
 
-      interface Success extends Base {
+  namespace Communicator {
+    namespace APIResponse {
+      interface Success extends Base.APIResponse {
         readonly ok: true;
         readonly result: unknown;
       }
 
-      interface Failure extends Base {
+      interface Failure extends Base.APIResponse {
         readonly ok: false;
       }
     }

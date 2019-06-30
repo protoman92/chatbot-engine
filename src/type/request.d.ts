@@ -4,24 +4,26 @@ import { SupportedPlatform } from './messenger';
 import { Telegram } from './telegram';
 
 declare namespace GenericRequest {
-  namespace Data {
-    interface Base {
+  namespace Base {
+    interface Input {
       readonly inputText: string;
       readonly inputImageURL: string;
       readonly inputCoordinate: Coordinates;
     }
   }
+}
 
+declare namespace GenericRequest {
   interface Base<C> {
     readonly targetID: string;
     readonly targetPlatform: SupportedPlatform;
     readonly oldContext: C;
-    readonly data: readonly Data.Base[];
+    readonly input: readonly Base.Input[];
   }
 }
 
 declare namespace GenericRequest {
-  type Data = Facebook.GenericRequest.Data | Telegram.GenericRequest.Data;
+  type Input = Facebook.GenericRequest.Input | Telegram.GenericRequest.Input;
 }
 
 /**

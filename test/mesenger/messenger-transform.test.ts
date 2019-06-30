@@ -59,7 +59,7 @@ describe('Save context on send', () => {
       targetID,
       targetPlatform,
       additionalContext,
-      visualContents: []
+      output: []
     };
 
     // When
@@ -96,7 +96,7 @@ describe('Inject context on receive', () => {
       targetID,
       targetPlatform,
       oldContext: {},
-      data: []
+      input: []
     };
 
     // When
@@ -136,7 +136,7 @@ describe('Save user for target ID', () => {
       targetID,
       targetPlatform,
       oldContext: {},
-      data: []
+      input: []
     };
 
     // When
@@ -185,7 +185,7 @@ describe('Save Telegram user for target ID', () => {
       },
       targetPlatform: 'telegram',
       oldContext: {},
-      data: []
+      input: []
     });
 
     // Then
@@ -208,7 +208,7 @@ describe('Set typing indicator', () => {
     await transformed.sendResponse({
       targetID,
       targetPlatform,
-      visualContents: []
+      output: []
     });
 
     // Then

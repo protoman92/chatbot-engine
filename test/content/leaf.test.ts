@@ -23,7 +23,7 @@ describe('Default error leaf', () => {
     const error = new Error('some-error');
 
     // When
-    const { visualContents } = await bridgeEmission(errorLeaf)({
+    const { output: visualContents } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
       error,

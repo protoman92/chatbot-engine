@@ -65,7 +65,7 @@ describe('Generic unit messenger', () => {
     const response: GenericResponse<{}> = {
       targetID,
       targetPlatform,
-      visualContents: []
+      output: []
     };
 
     await next(response);
@@ -101,7 +101,7 @@ describe('Generic unit messenger', () => {
     const nextResult = await next({
       targetID,
       targetPlatform,
-      visualContents: []
+      output: []
     });
 
     // Then
@@ -116,7 +116,7 @@ describe('Generic unit messenger', () => {
     when(leafSelector.next(anything())).thenResolve();
     const oldContext = { a: 1, b: 2 };
 
-    const data: readonly Facebook.GenericRequest.Data[] = [
+    const input: readonly Facebook.GenericRequest.Input[] = [
       {
         targetPlatform,
         inputText: 'text-1',
@@ -146,11 +146,11 @@ describe('Generic unit messenger', () => {
       targetID,
       targetPlatform,
       oldContext,
-      data
+      input
     });
 
     // Then
-    data.forEach(datum =>
+    input.forEach(datum =>
       verify(
         leafSelector.next(
           deepEqual({ ...datum, ...oldContext, targetID, targetPlatform })
@@ -195,7 +195,7 @@ describe('Cross platform unit messenger', () => {
         targetID,
         targetPlatform: 'facebook',
         oldContext: {},
-        data: []
+        input: []
       }
     ]);
 
@@ -204,7 +204,7 @@ describe('Cross platform unit messenger', () => {
         targetID,
         targetPlatform: 'telegram' as const,
         oldContext: {},
-        data: [],
+        input: [],
         telegramUser: {
           id: 0,
           first_name: '',

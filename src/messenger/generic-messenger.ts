@@ -38,11 +38,11 @@ export async function createMessenger<
   const messenger: Messenger<C, PRequest, GRequest> = await compose(
     {
       generalizeRequest: platformReq => mapRequest(platformReq),
-      receiveRequest: ({ targetID, targetPlatform, oldContext, data }) => {
+      receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
         return mapSeries(
-          data as readonly (
-            | Facebook.GenericRequest.Data
-            | Telegram.GenericRequest.Data)[],
+          input as readonly (
+            | Facebook.GenericRequest.Input
+            | Telegram.GenericRequest.Input)[],
           datum => {
             return leafSelector.next({
               ...datum,
