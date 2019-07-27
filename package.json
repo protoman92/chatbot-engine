@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Experimental chatbot engine",
   "files": [
-    "dist/src"
+    "dist"
   ],
   "scripts": {
     "build:cleanup": "rm -rf dist/**/*.test.*",

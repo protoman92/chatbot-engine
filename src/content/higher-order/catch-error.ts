@@ -6,7 +6,7 @@ import { Leaf } from "../../type/leaf";
  * If a leaf throws error while producing content, switch to fallback leaf.
  * @template C The original input type.
  */
-export function higherOrderCatchError<C>(
+export function catchError<C>(
   fallbackLeaf: Leaf<C & ErrorContext>
 ): Leaf.Transformer<C, C> {
   return async leaf => ({

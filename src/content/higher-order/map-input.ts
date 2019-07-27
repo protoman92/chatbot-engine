@@ -6,7 +6,7 @@ import { Leaf } from "../../type/leaf";
  * @template CI The original input type.
  * @template CO The target input type.
  */
-export function higherOrderMapInput<CI, CO extends CI>(
+export function mapInput<CI, CO extends CI>(
   fn: (input: CO & DefaultContext) => Promise<CI & DefaultContext>
 ): Leaf.Transformer<CI, CO> {
   return async leaf => ({
@@ -21,7 +21,7 @@ export function higherOrderMapInput<CI, CO extends CI>(
  * @template CI The original input type.
  * @template CO The target input type.
  */
-export function higherOrderCompactMapInput<CI, CO extends CI>(
+export function compactMapInput<CI, CO extends CI>(
   fn: (
     input: CO & DefaultContext
   ) => Promise<CI & DefaultContext | undefined | null>
@@ -46,10 +46,10 @@ export function higherOrderCompactMapInput<CI, CO extends CI>(
  * @template CI The original input type.
  * @template CO The target input type.
  */
-export function higherOrderFilterInput<CI, CO extends CI>(
+export function filterInput<CI, CO extends CI>(
   fn: (input: CO & DefaultContext) => Promise<boolean | undefined | null>
 ): Leaf.Transformer<CI, CO> {
-  return higherOrderCompactMapInput(async input => {
+  return compactMapInput(async input => {
     const passed = await fn(input);
     if (!passed) return undefined;
     return input;

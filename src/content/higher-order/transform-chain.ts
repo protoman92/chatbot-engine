@@ -15,9 +15,7 @@ export function createTransformChain<CI, CO>(): Leaf.TransformChain<CI, CO> {
       composeTransformers.unshift(fn);
       return transformChain as any;
     },
-    pipe: <CO1>(
-      fn: Leaf.Transformer<CO, CO1>
-    ): Leaf.TransformChain<CI, CO1> => {
+    pipe: <CO1>(fn: Leaf.Transformer<CO, CO1>) => {
       pipeTransformers.push(fn);
       return transformChain as any;
     },

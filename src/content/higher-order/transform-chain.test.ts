@@ -8,14 +8,10 @@ import { Facebook } from "../../type/facebook";
 import { Leaf } from "../../type/leaf";
 import { WitContext } from "../../type/wit";
 import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
-import { higherOrderAnyTransformer } from "./any-transformer";
-import { higherOrderCatchError } from "./catch-error";
-import {
-  higherOrderCompactMapInput,
-  higherOrderFilterInput,
-  higherOrderMapInput
-} from "./map-input";
-import { higherOrderMapOutput } from "./map-output";
+import { anyTransformer } from "./any-transformer";
+import { catchError } from "./catch-error";
+import { compactMapInput, filterInput, mapInput } from "./map-input";
+import { mapOutput } from "./map-output";
 import { higherOrderRequireInputKeys } from "./require-keys";
 import { createTransformChain } from "./transform-chain";
 
@@ -32,12 +28,12 @@ describe("Transform chain", () => {
     const transformedLeaf = await createTransformChain()
       .forContextOfType<Context>()
       .compose(
-        higherOrderAnyTransformer<Context, Context>(
-          higherOrderCompactMapInput(async ({ inputText, ...restInput }) => {
+        anyTransformer<Context, Context>(
+          compactMapInput(async ({ inputText, ...restInput }) => {
             if (!inputText) return null;
             return { ...restInput, inputText, query: "first_transformer" };
           }),
-          higherOrderCompactMapInput(
+          compactMapInput(
             async ({
               witEntities: { witKey: [{ value }] = [{ value: "" }] },
               ...restInput
@@ -102,7 +98,7 @@ describe("Transform chain", () => {
     });
 
     const transformed = await createTransformChain()
-      .compose(higherOrderCatchError(instance(fallbackLeaf)))
+      .compose(catchError(instance(fallbackLeaf)))
       .transform(instance(errorLeaf));
 
     // When
@@ -158,7 +154,7 @@ describe("Transform chain", () => {
     );
 
     // When
-    const resultLeaf = await higherOrderMapInput<Context1, Context2>(
+    const resultLeaf = await mapInput<Context1, Context2>(
       async ({ a, ...restContext }) => ({
         ...restContext,
         a: !!a ? (a === 1 ? 1 : 2) : 0
@@ -196,7 +192,7 @@ describe("Transform chain", () => {
 
     const transformed = await createTransformChain()
       .pipe<{}>(
-        higherOrderMapOutput(async response => ({
+        mapOutput(async response => ({
           ...response,
           additionalContext: { a: 1 }
         }))
@@ -288,7 +284,7 @@ describe("Transform chain", () => {
     );
 
     // When
-    const resultLeaf = await higherOrderCompactMapInput<Context1, Context1>(
+    const resultLeaf = await compactMapInput<Context1, Context1>(
       async ({ a, ...restContext }) => (!!a ? { a: 100, ...restContext } : null)
     )(originalLeaf);
 
@@ -340,7 +336,7 @@ describe("Transform chain", () => {
           return undefined;
         }
       }))
-      .pipe(higherOrderCatchError(await createDefaultErrorLeaf()))
+      .pipe(catchError(await createDefaultErrorLeaf()))
       .transform(baseLeaf);
 
     // When
@@ -398,11 +394,11 @@ describe("Transform chain", () => {
     const resultLeaf = await createTransformChain()
       .forContextOfType<Context2>()
       .compose(
-        higherOrderMapInput(async ({ b, ...rest }) => {
+        mapInput(async ({ b, ...rest }) => {
           return { a: b || 100, ...rest };
         })
       )
-      .compose(higherOrderFilterInput(async () => true))
+      .compose(filterInput(async () => true))
       .transform(originalLeaf);
 
     const {
