@@ -1,6 +1,6 @@
-import { ContextDAO } from '../type/context-dao';
-import { SupportedPlatform } from '../type/messenger';
-import { joinObjects } from '../common/utils';
+import { ContextDAO } from "../type/context-dao";
+import { SupportedPlatform } from "../type/messenger";
+import { joinObjects } from "../common/utils";
 
 /**
  * Create an in-memory context DAO store. This is useful for debugging.

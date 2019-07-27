@@ -1,9 +1,9 @@
-import { compose, deepClone } from '../common/utils';
-import { DefaultContext, Transformer } from '../type/common';
-import { PlatformCommunicator } from '../type/communicator';
-import { ContextDAO } from '../type/context-dao';
-import { Messenger } from '../type/messenger';
-import { GenericRequest } from '../type/request';
+import { compose, deepClone } from "../common/utils";
+import { DefaultContext, Transformer } from "../type/common";
+import { PlatformCommunicator } from "../type/communicator";
+import { ContextDAO } from "../type/context-dao";
+import { Messenger } from "../type/messenger";
+import { GenericRequest } from "../type/request";
 
 /**
  * Save the context every time a message group is sent to a target ID. If
@@ -18,7 +18,7 @@ export function saveContextOnSend<
   PRequest,
   GRequest extends GenericRequest<C>
 >(
-  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>
+  contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">
 ): Transformer<Messenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
@@ -49,7 +49,7 @@ export function injectContextOnReceive<
   PRequest,
   GRequest extends GenericRequest<C>
 >(
-  contextDAO: Pick<ContextDAO<C>, 'getContext'>
+  contextDAO: Pick<ContextDAO<C>, "getContext">
 ): Transformer<Messenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
@@ -87,7 +87,7 @@ export function saveUserForTargetID<
       ...messenger,
       receiveRequest: async request => {
         const { oldContext, targetID } = request;
-        const sidKey: keyof DefaultContext = 'targetID';
+        const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           const platformUser = await getUser(targetID);
@@ -145,7 +145,7 @@ export function transformMessengersByDefault<
   PResponse,
   GRequest extends GenericRequest<C>
 >(
-  contextDAO: Pick<ContextDAO<C>, 'getContext' | 'appendContext'>,
+  contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">,
   communicator: PlatformCommunicator<PResponse>
 ): Transformer<Messenger<C, PRequest, GRequest>> {
   return messenger =>

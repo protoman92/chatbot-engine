@@ -3,10 +3,10 @@ import {
   PromiseConvertible,
   StringKeys,
   Transformer
-} from '../type/common';
-import { Facebook } from '../type/facebook';
-import { SupportedPlatform } from '../type/messenger';
-import { Telegram } from '../type/telegram';
+} from "../type/common";
+import { Facebook } from "../type/facebook";
+import { SupportedPlatform } from "../type/messenger";
+import { Telegram } from "../type/telegram";
 
 export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
@@ -71,7 +71,7 @@ export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
  * Join the path components of a branch to produce the full path.
  */
 export function joinPaths(...pathComponents: readonly string[]) {
-  return pathComponents.join('.');
+  return pathComponents.join(".");
 }
 
 /**
@@ -79,7 +79,7 @@ export function joinPaths(...pathComponents: readonly string[]) {
  */
 export function getCurrentLeafID(activeBranch?: string): string | undefined {
   if (!activeBranch) return undefined;
-  const branchPaths = activeBranch.split('.');
+  const branchPaths = activeBranch.split(".");
 
   return branchPaths.length > 0
     ? branchPaths[branchPaths.length - 1]
@@ -197,11 +197,11 @@ export function toArray<T>(value: T | readonly T[]): readonly T[] {
  * @template T The promise result type.
  */
 export async function toPromise<T>(convertible: PromiseConvertible<T>) {
-  if (typeof convertible === 'function') {
+  if (typeof convertible === "function") {
     return (convertible as Function)();
   }
 
-  if (isType<Promise<T>>(convertible, 'then')) {
+  if (isType<Promise<T>>(convertible, "then")) {
     return convertible;
   }
 
@@ -225,12 +225,12 @@ export function formatTelegramError(error: string): string {
 
 /** Get the platform to which a request belongs. */
 export function getRequestPlatform(request: unknown): SupportedPlatform {
-  if (isType<Facebook.PlatformRequest>(request, 'object', 'entry')) {
-    return 'facebook';
+  if (isType<Facebook.PlatformRequest>(request, "object", "entry")) {
+    return "facebook";
   }
 
-  if (isType<Telegram.PlatformRequest>(request, 'update_id')) {
-    return 'telegram';
+  if (isType<Telegram.PlatformRequest>(request, "update_id")) {
+    return "telegram";
   }
 
   throw new Error(`Unsupported platform for ${JSON.stringify(request)}`);

@@ -1,10 +1,10 @@
-import expectJs from 'expect.js';
-import { describe, it } from 'mocha';
-import { mapSeries } from '../common/utils';
-import { createContentSubject, mergeObservables } from './stream';
+import expectJs from "expect.js";
+import { describe, it } from "mocha";
+import { mapSeries } from "../common/utils";
+import { createContentSubject, mergeObservables } from "./stream";
 
-describe('Content stream and subject', () => {
-  it('Should receive updates on subscription', async () => {
+describe("Content stream and subject", () => {
+  it("Should receive updates on subscription", async () => {
     // Setup
     let nextCount = 0;
     let completeCount = 0;
@@ -26,7 +26,7 @@ describe('Content stream and subject', () => {
     expectJs(completeCount).to.equal(1);
   });
 
-  it('Should complete all internal observers on complete', async () => {
+  it("Should complete all internal observers on complete", async () => {
     // Setup
     let nextCount = 0;
     let completeCount = 0;
@@ -49,7 +49,7 @@ describe('Content stream and subject', () => {
     expectJs(nextCount).not.to.be.ok();
   });
 
-  it('Should merge all emissions when using merging observables', async () => {
+  it("Should merge all emissions when using merging observables", async () => {
     // Setup
     const subjectCount = 1000;
 

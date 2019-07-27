@@ -1,6 +1,6 @@
-import { stringify } from 'querystring';
-import { HTTPCommunicator } from '../type/communicator';
-import { Telegram } from '../type/telegram';
+import { stringify } from "querystring";
+import { HTTPCommunicator } from "../type/communicator";
+import { Telegram } from "../type/telegram";
 
 export function createTelegramCommunicator(
   communicator: HTTPCommunicator,
@@ -12,7 +12,7 @@ export function createTelegramCommunicator(
   }
 
   async function communicate(
-    ...params: Parameters<HTTPCommunicator['communicate']>
+    ...params: Parameters<HTTPCommunicator["communicate"]>
   ): Promise<unknown> {
     const response = await communicator.communicate<
       Telegram.Communicator.APIResponse
@@ -31,7 +31,7 @@ export function createTelegramCommunicator(
     sendResponse: ({ action, ...payload }) => {
       return communicate({
         url: formatURL(action),
-        method: 'POST',
+        method: "POST",
         body: payload
       });
     },
@@ -44,15 +44,15 @@ export function createTelegramCommunicator(
       if (!enabled) return {};
 
       return communicate({
-        url: formatURL('sendChatAction'),
-        method: 'POST',
-        body: { chat_id, action: 'typing' }
+        url: formatURL("sendChatAction"),
+        method: "POST",
+        body: { chat_id, action: "typing" }
       });
     },
     setWebhook: () => {
       return communicate({
-        url: formatURL('setWebhook'),
-        method: 'GET',
+        url: formatURL("setWebhook"),
+        method: "GET",
         query: { url: webhookURL }
       });
     }

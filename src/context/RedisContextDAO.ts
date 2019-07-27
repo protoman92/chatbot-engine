@@ -1,10 +1,10 @@
-import { RedisClient } from 'redis';
-import { joinObjects, promisify1, promisify2 } from '../common/utils';
-import { ContextDAO } from '../type/context-dao';
-import { SupportedPlatform } from '../type/messenger';
+import { RedisClient } from "redis";
+import { joinObjects, promisify1, promisify2 } from "../common/utils";
+import { ContextDAO } from "../type/context-dao";
+import { SupportedPlatform } from "../type/messenger";
 
 export function createRedisContextDAO<C>(
-  redis: Pick<RedisClient, 'get' | 'set' | 'del'>,
+  redis: Pick<RedisClient, "get" | "set" | "del">,
   platform: SupportedPlatform
 ): ContextDAO<C> {
   function getCacheKey(targetID: string) {

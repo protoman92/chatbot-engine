@@ -1,31 +1,27 @@
-import { beforeEach, describe, it } from 'mocha';
-import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import {
-  higherOrderRetryWithWit,
-  Leaf,
-  WitCommunicator,
-  WitContext,
-  WitResponse
-} from '../..';
-import { DEFAULT_COORDINATES } from '../../common/utils';
+import { beforeEach, describe, it } from "mocha";
+import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
+import { DEFAULT_COORDINATES } from "../../common/utils";
+import { Leaf } from "../../type/leaf";
+import { WitCommunicator, WitContext, WitResponse } from "../../type/wit";
+import { higherOrderRetryWithWit } from "./wit";
 
-const targetID = 'target-id';
-const targetPlatform = 'facebook' as const;
+const targetID = "target-id";
+const targetPlatform = "facebook" as const;
 
-describe('Wit higher order function', () => {
+describe("Wit higher order function", () => {
   let comm: WitCommunicator;
   let rootLeaf: Leaf<WitContext>;
 
   beforeEach(() => {
-    comm = spy<WitCommunicator>({ validate: () => Promise.reject('') });
+    comm = spy<WitCommunicator>({ validate: () => Promise.reject("") });
 
     rootLeaf = spy<Leaf<WitContext>>({
-      next: () => Promise.reject(''),
-      subscribe: () => Promise.reject('')
+      next: () => Promise.reject(""),
+      subscribe: () => Promise.reject("")
     });
   });
 
-  it('Wit engine should not fire if no error', async () => {
+  it("Wit engine should not fire if no error", async () => {
     // Setup
     when(rootLeaf.next(anything())).thenResolve({});
     const transformed = await higherOrderRetryWithWit(instance(comm))(
@@ -36,10 +32,10 @@ describe('Wit higher order function', () => {
     const input = {
       targetID,
       targetPlatform,
-      inputText: 'some-text',
-      inputImageURL: '',
+      inputText: "some-text",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     };
 
     await transformed.next(input);
@@ -48,13 +44,13 @@ describe('Wit higher order function', () => {
     verify(comm.validate(anything())).never();
   });
 
-  it('Wit engine should intercept errors', async () => {
+  it("Wit engine should intercept errors", async () => {
     // Setup
-    const witEntities: WitResponse['entities'] = {
-      a: [{ confidence: 1, value: 'some-value', type: 'value' }]
+    const witEntities: WitResponse["entities"] = {
+      a: [{ confidence: 1, value: "some-value", type: "value" }]
     };
 
-    const inputText = 'some-text';
+    const inputText = "some-text";
 
     when(rootLeaf.next(anything())).thenCall(async ({ witEntities = {} }) => {
       if (Object.entries(witEntities).length === 0) {
@@ -67,7 +63,7 @@ describe('Wit higher order function', () => {
     when(comm.validate(anything())).thenResolve({
       entities: witEntities,
       _text: inputText,
-      msg_id: ''
+      msg_id: ""
     });
 
     const transformed = await higherOrderRetryWithWit(instance(comm))(
@@ -79,9 +75,9 @@ describe('Wit higher order function', () => {
       targetID,
       targetPlatform,
       inputText,
-      inputImageURL: '',
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     };
 
     await transformed.next(input);

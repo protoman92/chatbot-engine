@@ -1,17 +1,17 @@
 {
   "name": "chatbot-engine",
   "version": "1.0.0",
-  "description": "Experimental chatbot engine.",
-  "main": "dist/index.js",
-  "types": "dist/src/index.d.ts",
-  "typings": "dist/src/index.d.ts",
+  "description": "Experimental chatbot engine",
   "files": [
     "dist/src"
   ],
   "scripts": {
-    "build": "rm -rf dist && rollup -c && cp -r src/type dist/src/type",
+    "build:cleanup": "rm -rf dist/**/*.test.*",
+    "build:copyfiles": "cp -r src/type dist/type",
+    "build:ts": "rm -rf dist && tsc",
+    "build": "npm run build:ts && npm run build:copyfiles && npm run build:cleanup",
     "gulp": "gulp",
-    "test": "mocha --require ts-node/register test/**/*.test.ts"
+    "test": "mocha --require ts-node/register **/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -37,27 +37,13 @@
     "gulp-run": "^1.7.1",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.0",
-    "prettier": "^1.17.1",
-    "rollup": "^1.12.3",
-    "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-javascript-obfuscator": "^1.0.4",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.4",
-    "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript2": "^0.21.1",
-    "rollup-plugin-uglify": "^6.0.2",
     "ts-essentials": "^2.0.7",
     "ts-mockito": "^2.3.1",
     "ts-node": "^8.1.0",
-    "tslint": "^5.15.0",
-    "tslint-config-airbnb": "^5.11.1",
-    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.4.5"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "redis": "^2.8.0"
   }
 }

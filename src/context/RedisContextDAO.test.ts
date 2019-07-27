@@ -1,15 +1,15 @@
-import expectJs from 'expect.js';
-import { beforeEach, describe } from 'mocha';
-import { RedisClient } from 'redis';
-import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { joinObjects } from '../common/utils';
-import { createRedisContextDAO } from './RedisContextDAO';
-import { ContextDAO } from '../type/context-dao';
+import expectJs from "expect.js";
+import { beforeEach, describe } from "mocha";
+import { RedisClient } from "redis";
+import { anything, instance, spy, verify, when } from "ts-mockito";
+import { joinObjects } from "../common/utils";
+import { createRedisContextDAO } from "./RedisContextDAO";
+import { ContextDAO } from "../type/context-dao";
 
-const targetID = 'target-id';
+const targetID = "target-id";
 
-describe('Redis context DAO', () => {
-  let redis: Pick<RedisClient, 'get' | 'set' | 'del'>;
+describe("Redis context DAO", () => {
+  let redis: Pick<RedisClient, "get" | "set" | "del">;
   let contextDAO: ContextDAO<{}>;
 
   function getCacheKey(targetID: string) {
@@ -17,16 +17,16 @@ describe('Redis context DAO', () => {
   }
 
   beforeEach(() => {
-    redis = spy<Pick<RedisClient, 'get' | 'set' | 'del'>>({
+    redis = spy<Pick<RedisClient, "get" | "set" | "del">>({
       get: () => false,
       set: () => false,
       del: () => false
     });
 
-    contextDAO = createRedisContextDAO(instance(redis), 'facebook');
+    contextDAO = createRedisContextDAO(instance(redis), "facebook");
   });
 
-  it('Should return context on get call', async () => {
+  it("Should return context on get call", async () => {
     // Setup
     const context = { a: 1, b: 2 };
 
@@ -42,7 +42,7 @@ describe('Redis context DAO', () => {
     expectJs(storedContext).to.eql(context);
   });
 
-  it('Should append context on set call', async () => {
+  it("Should append context on set call", async () => {
     // Setup
     const oldContext = { a: 1, b: 2 };
     const additionalContext = { c: 3 };
@@ -52,7 +52,7 @@ describe('Redis context DAO', () => {
     });
 
     when(redis.set(anything(), anything(), anything())).thenCall(
-      (param1, param2, param3) => param3(null, 'OK')
+      (param1, param2, param3) => param3(null, "OK")
     );
 
     // When
@@ -65,10 +65,10 @@ describe('Redis context DAO', () => {
       redis.set(getCacheKey(targetID), JSON.stringify(finalContext), anything())
     ).once();
 
-    expectJs(result).to.equal('OK');
+    expectJs(result).to.equal("OK");
   });
 
-  it('Should clear context on reset call', async () => {
+  it("Should clear context on reset call", async () => {
     // Setup
     when(redis.del(anything(), anything())).thenCall((param1, param2) => {
       param2(null, true);

@@ -1,7 +1,7 @@
-import { Coordinates } from './common';
-import { Facebook } from './facebook';
-import { SupportedPlatform } from './messenger';
-import { Telegram } from './telegram';
+import { Coordinates } from "./common";
+import { Facebook } from "./facebook";
+import { SupportedPlatform } from "./messenger";
+import { Telegram } from "./telegram";
 
 declare namespace GenericRequest {
   namespace Base {

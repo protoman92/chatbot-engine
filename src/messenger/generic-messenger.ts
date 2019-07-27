@@ -1,14 +1,14 @@
-import { compose, getRequestPlatform, mapSeries } from '../common/utils';
-import { Transformer } from '../type/common';
-import { Facebook } from '../type/facebook';
+import { compose, getRequestPlatform, mapSeries } from "../common/utils";
+import { Transformer } from "../type/common";
+import { Facebook } from "../type/facebook";
 import {
   BatchMessenger,
   CrossPlatformMessengerConfigs,
   Messenger,
   SupportedPlatform
-} from '../type/messenger';
-import { GenericRequest } from '../type/request';
-import { Telegram } from '../type/telegram';
+} from "../type/messenger";
+import { GenericRequest } from "../type/request";
+import { Telegram } from "../type/telegram";
 
 /**
  * Create a generic messenger.
@@ -113,12 +113,12 @@ export function createCrossPlatformBatchMessenger<C>(
       const targetPlatform = getPlatform(platformReq);
 
       switch (targetPlatform) {
-        case 'facebook':
+        case "facebook":
           return messengers.facebook.generalizeRequest(
             platformReq as Facebook.PlatformRequest
           );
 
-        case 'telegram':
+        case "telegram":
           return messengers.telegram.generalizeRequest(
             platformReq as Telegram.PlatformRequest
           );
@@ -126,12 +126,12 @@ export function createCrossPlatformBatchMessenger<C>(
     },
     receiveRequest: async request => {
       switch (request.targetPlatform) {
-        case 'facebook':
+        case "facebook":
           return messengers.facebook.receiveRequest(
             request as Facebook.GenericRequest<C>
           );
 
-        case 'telegram':
+        case "telegram":
           return messengers.telegram.receiveRequest(
             request as Telegram.GenericRequest<C>
           );
@@ -139,10 +139,10 @@ export function createCrossPlatformBatchMessenger<C>(
     },
     sendResponse: async response => {
       switch (response.targetPlatform) {
-        case 'facebook':
+        case "facebook":
           return messengers.facebook.sendResponse(response);
 
-        case 'telegram':
+        case "telegram":
           return messengers.telegram.sendResponse(response);
       }
     }

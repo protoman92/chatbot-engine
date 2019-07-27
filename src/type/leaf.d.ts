@@ -1,9 +1,9 @@
-import { Branch } from './branch';
-import { DefaultContext, PromiseConvertible } from './common';
-import { Facebook } from './facebook';
-import { GenericResponse } from './response';
-import { ContentObservable, ContentObserver } from './stream';
-import { Telegram } from './telegram';
+import { Branch } from "./branch";
+import { DefaultContext, PromiseConvertible } from "./common";
+import { Facebook } from "./facebook";
+import { GenericResponse } from "./response";
+import { ContentObservable, ContentObserver } from "./stream";
+import { Telegram } from "./telegram";
 
 declare namespace Leaf {
   namespace Base {
@@ -85,7 +85,7 @@ declare namespace Leaf {
     and(convertible: PromiseConvertible<Observer<C>>): ObserverChain<C>;
 
     /** Same as and, but convert the next function into an observer. */
-    andNext(nextFn: Observer<C>['next']): ObserverChain<C>;
+    andNext(nextFn: Observer<C>["next"]): ObserverChain<C>;
 
     /**
      * Make sure that the chain succeeds if either the existing chain or the
@@ -94,7 +94,7 @@ declare namespace Leaf {
     or(convertible: PromiseConvertible<Observer<C>>): ObserverChain<C>;
 
     /** Same as or, but convert the next function into an observer. */
-    orNext(nextFn: Observer<C>['next']): ObserverChain<C>;
+    orNext(nextFn: Observer<C>["next"]): ObserverChain<C>;
 
     toObserver(): Promise<Observer<C>>;
   }

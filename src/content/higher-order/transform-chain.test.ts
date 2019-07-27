@@ -1,32 +1,31 @@
-import expectJs from 'expect.js';
-import { describe, it } from 'mocha';
-import { anything, deepEqual, instance, spy, verify } from 'ts-mockito';
+import expectJs from "expect.js";
+import { describe, it } from "mocha";
+import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
+import { DEFAULT_COORDINATES } from "../../common/utils";
+import { bridgeEmission, createSubscription } from "../../stream/stream";
+import { ErrorContext } from "../../type/common";
+import { Facebook } from "../../type/facebook";
+import { Leaf } from "../../type/leaf";
+import { WitContext } from "../../type/wit";
+import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
+import { higherOrderAnyTransformer } from "./any-transformer";
+import { higherOrderCatchError } from "./catch-error";
 import {
-  createDefaultErrorLeaf,
-  createLeafWithObserver,
-  createTransformChain,
-  ErrorContext,
-  Facebook,
-  higherOrderAnyTransformer,
-  higherOrderCatchError,
   higherOrderCompactMapInput,
   higherOrderFilterInput,
-  higherOrderMapInput,
-  higherOrderMapOutput,
-  higherOrderRequireInputKeys,
-  Leaf,
-  WitContext
-} from '../..';
-import { DEFAULT_COORDINATES } from '../../common/utils';
-import { bridgeEmission, createSubscription } from '../../stream/stream';
+  higherOrderMapInput
+} from "./map-input";
+import { higherOrderMapOutput } from "./map-output";
+import { higherOrderRequireInputKeys } from "./require-keys";
+import { createTransformChain } from "./transform-chain";
 
-const targetID = 'target-id';
-const targetPlatform = 'facebook' as const;
+const targetID = "target-id";
+const targetPlatform = "facebook" as const;
 
-describe('Transform chain', () => {
-  it('Any transformer should work', async () => {
+describe("Transform chain", () => {
+  it("Any transformer should work", async () => {
     // Setup
-    interface Context extends WitContext<'witKey'> {
+    interface Context extends WitContext<"witKey"> {
       readonly query?: string;
     }
 
@@ -36,11 +35,11 @@ describe('Transform chain', () => {
         higherOrderAnyTransformer<Context, Context>(
           higherOrderCompactMapInput(async ({ inputText, ...restInput }) => {
             if (!inputText) return null;
-            return { ...restInput, inputText, query: 'first_transformer' };
+            return { ...restInput, inputText, query: "first_transformer" };
           }),
           higherOrderCompactMapInput(
             async ({
-              witEntities: { witKey: [{ value }] = [{ value: '' }] },
+              witEntities: { witKey: [{ value }] = [{ value: "" }] },
               ...restInput
             }) => {
               if (!value) return null;
@@ -48,7 +47,7 @@ describe('Transform chain', () => {
               return {
                 ...restInput,
                 witEntities: {},
-                query: 'second_transformer'
+                query: "second_transformer"
               };
             }
           )
@@ -73,22 +72,22 @@ describe('Transform chain', () => {
     const { additionalContext } = await bridgeEmission(transformedLeaf)({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: '',
+      stickerID: "",
       witEntities: {
-        witKey: [{ confidence: 1, value: 'witValue', type: 'value' }]
+        witKey: [{ confidence: 1, value: "witValue", type: "value" }]
       }
     });
 
     // Then
-    expectJs(additionalContext).to.eql({ query: 'second_transformer' });
+    expectJs(additionalContext).to.eql({ query: "second_transformer" });
   });
 
-  it('Catch error should work correctly', async () => {
+  it("Catch error should work correctly", async () => {
     // Setup
-    const error = new Error('Something happened');
+    const error = new Error("Something happened");
 
     const errorLeaf = spy<Leaf<{}>>({
       next: () => Promise.reject(error),
@@ -110,10 +109,10 @@ describe('Transform chain', () => {
     const input = {
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: '',
+      stickerID: "",
       a: 1,
       b: 2
     };
@@ -131,7 +130,7 @@ describe('Transform chain', () => {
     expectJs(nextResult).to.eql({});
   });
 
-  it('Map input should work correctly', async () => {
+  it("Map input should work correctly", async () => {
     // Setup
     interface Context1 {
       readonly a?: number;
@@ -149,8 +148,8 @@ describe('Transform chain', () => {
             targetPlatform,
             output: [
               {
-                quickReplies: [{ type: 'text', text: `${a}` }],
-                content: { type: 'text', text: '' }
+                quickReplies: [{ type: "text", text: `${a}` }],
+                content: { type: "text", text: "" }
               }
             ]
           });
@@ -167,22 +166,22 @@ describe('Transform chain', () => {
     )(originalLeaf);
 
     const {
-      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: "" }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
       a: 1000,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     })) as Facebook.GenericResponse<Context2>;
 
     // Then
-    expectJs(text).to.equal('2');
+    expectJs(text).to.equal("2");
   });
 
-  it('Map output should work correctly', async () => {
+  it("Map output should work correctly", async () => {
     // Setup
     let completedCount = 0;
 
@@ -208,10 +207,10 @@ describe('Transform chain', () => {
     const { additionalContext } = await bridgeEmission(transformed)({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     !!transformed.complete && (await transformed.complete());
@@ -221,7 +220,7 @@ describe('Transform chain', () => {
     expectJs(additionalContext).to.eql({ a: 1 });
   });
 
-  it('Require input keys should work correctly', async () => {
+  it("Require input keys should work correctly", async () => {
     // Setup
     interface Context1 {
       a?: number | undefined | null;
@@ -235,8 +234,8 @@ describe('Transform chain', () => {
             targetPlatform,
             output: [
               {
-                quickReplies: [{ type: 'text', text: `${a}` }],
-                content: { type: 'text', text: '' }
+                quickReplies: [{ type: "text", text: `${a}` }],
+                content: { type: "text", text: "" }
               }
             ]
           });
@@ -245,27 +244,27 @@ describe('Transform chain', () => {
     );
 
     // When
-    const resultLeaf = await higherOrderRequireInputKeys<Context1, 'a'>('a')(
+    const resultLeaf = await higherOrderRequireInputKeys<Context1, "a">("a")(
       originalLeaf
     );
 
     const {
-      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: "" }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
       a: 1,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     })) as Facebook.GenericResponse<Context1>;
 
     // Then
-    expectJs(text).to.equal('1');
+    expectJs(text).to.equal("1");
   });
 
-  it('Compact map input should work', async () => {
+  it("Compact map input should work", async () => {
     // Setup
     interface Context1 {
       a: number;
@@ -279,8 +278,8 @@ describe('Transform chain', () => {
             targetPlatform,
             output: [
               {
-                quickReplies: [{ type: 'text', text: `${a}` }],
-                content: { type: 'text', text: '' }
+                quickReplies: [{ type: "text", text: `${a}` }],
+                content: { type: "text", text: "" }
               }
             ]
           });
@@ -297,37 +296,37 @@ describe('Transform chain', () => {
       targetID,
       targetPlatform,
       a: 0,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     const {
-      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: "" }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
       a: 1,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     })) as Facebook.GenericResponse<Context1>;
 
     // Then
     expectJs(nextResult1).to.equal(undefined);
-    expectJs(text).to.equal('100');
+    expectJs(text).to.equal("100");
   });
 
-  it('Create leaf with pipe chain', async () => {
+  it("Create leaf with pipe chain", async () => {
     // Setup
     const baseLeaf = await createLeafWithObserver(async observer => ({
       next: async ({ inputText: text, targetID, targetPlatform }) => {
         return observer.next({
           targetID,
           targetPlatform,
-          output: [{ content: { text, type: 'text' } }]
+          output: [{ content: { text, type: "text" } }]
         });
       }
     }));
@@ -337,7 +336,7 @@ describe('Transform chain', () => {
         ...leaf,
         next: async input => {
           const previousResult = await leaf.next(input);
-          if (!!previousResult) throw new Error('some-error');
+          if (!!previousResult) throw new Error("some-error");
           return undefined;
         }
       }))
@@ -357,18 +356,18 @@ describe('Transform chain', () => {
     await trasformed.next({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: '',
-      error: new Error('')
+      stickerID: "",
+      error: new Error("")
     });
 
     // Then
     expectJs(valueDeliveredCount).to.eql(2);
   });
 
-  it('Transform chain should work', async () => {
+  it("Transform chain should work", async () => {
     // Setup
     interface Context1 {
       a: number;
@@ -386,8 +385,8 @@ describe('Transform chain', () => {
             targetPlatform,
             output: [
               {
-                quickReplies: [{ type: 'text', text: `${a}` }],
-                content: { type: 'text', text: '' }
+                quickReplies: [{ type: "text", text: `${a}` }],
+                content: { type: "text", text: "" }
               }
             ]
           });
@@ -407,18 +406,18 @@ describe('Transform chain', () => {
       .transform(originalLeaf);
 
     const {
-      output: [{ quickReplies: [{ text }] = [{ text: '' }] }]
+      output: [{ quickReplies: [{ text }] = [{ text: "" }] }]
     } = (await bridgeEmission(resultLeaf)({
       targetID,
       targetPlatform,
       b: null,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     })) as Facebook.GenericResponse<Context2>;
 
     // Then
-    expectJs(text).to.equal('100');
+    expectJs(text).to.equal("100");
   });
 });

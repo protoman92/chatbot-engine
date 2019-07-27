@@ -1,10 +1,10 @@
-import { deepClone, mapSeries } from '../common/utils';
-import { mergeObservables } from '../stream/stream';
-import { Branch } from '../type/branch';
-import { DefaultContext, KV } from '../type/common';
-import { Leaf } from '../type/leaf';
-import { GenericResponse } from '../type/response';
-import { ContentObservable, ContentObserver, NextResult } from '../type/stream';
+import { deepClone, mapSeries } from "../common/utils";
+import { mergeObservables } from "../stream/stream";
+import { Branch } from "../type/branch";
+import { DefaultContext, KV } from "../type/common";
+import { Leaf } from "../type/leaf";
+import { GenericResponse } from "../type/response";
+import { ContentObservable, ContentObserver, NextResult } from "../type/stream";
 
 /**
  * Enumerate a key-value branch object to produce the entire list of enumerated
@@ -89,7 +89,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
         if (nextResult !== undefined) return nextResult;
       }
 
-      throw new Error('This bot has nothing to say');
+      throw new Error("This bot has nothing to say");
     },
     complete: async () => {
       const enumeratedLeaves = await selector.enumerateLeaves();

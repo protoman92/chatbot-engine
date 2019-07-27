@@ -1,5 +1,5 @@
-import { DefaultContext, KV } from './common';
-import { Leaf } from './leaf';
+import { DefaultContext, KV } from "./common";
+import { Leaf } from "./leaf";
 
 /**
  * A branch contains zero or more leaves, and zero of more branches. A branch

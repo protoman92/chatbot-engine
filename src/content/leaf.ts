@@ -1,11 +1,11 @@
-import { Omit } from 'ts-essentials';
-import { createContentSubject } from '../stream/stream';
-import { ErrorContext, PromiseConvertible } from '../type/common';
-import { Leaf } from '../type/leaf';
-import { GenericResponse } from '../type/response';
-import { NextContentObserver } from '../type/stream';
-import { toPromise, mapSeries, isDefinedAndNotNull } from '../common/utils';
-import { isNullOrUndefined } from 'util';
+import { Omit } from "ts-essentials";
+import { createContentSubject } from "../stream/stream";
+import { ErrorContext, PromiseConvertible } from "../type/common";
+import { Leaf } from "../type/leaf";
+import { GenericResponse } from "../type/response";
+import { NextContentObserver } from "../type/stream";
+import { toPromise, mapSeries, isDefinedAndNotNull } from "../common/utils";
+import { isNullOrUndefined } from "util";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -15,7 +15,7 @@ import { isNullOrUndefined } from 'util';
 export async function createLeafWithObserver<C>(
   fn: (
     observer: NextContentObserver<GenericResponse<C>>
-  ) => Promise<Omit<Leaf<C>, 'subscribe'>>
+  ) => Promise<Omit<Leaf<C>, "subscribe">>
 ): Promise<Leaf<C>> {
   const subject = createContentSubject<GenericResponse<C>>();
   const baseLeaf = await fn(subject);
@@ -48,7 +48,7 @@ export function createDefaultErrorLeaf<C>(
         output: [
           {
             content: {
-              type: 'text',
+              type: "text",
               text: `Encountered an error: '${error.message}'`
             }
           }
@@ -70,10 +70,10 @@ export async function createLeafObserverForPlatforms<C>({
   return {
     next: async input => {
       switch (input.targetPlatform) {
-        case 'facebook':
+        case "facebook":
           return facebook.next(input);
 
-        case 'telegram':
+        case "telegram":
           return telegram.next(input);
       }
     },
@@ -89,18 +89,18 @@ export async function createLeafObserverForPlatforms<C>({
  * @template C The context used by the current chatbot.
  */
 export function createObserverChain<C>(): Leaf.ObserverChain<C> {
-  const convertibles: [PromiseConvertible<Leaf.Observer<C>>, 'and' | 'or'][] = [
-    [{ next: async () => ({}) }, 'and']
+  const convertibles: [PromiseConvertible<Leaf.Observer<C>>, "and" | "or"][] = [
+    [{ next: async () => ({}) }, "and"]
   ];
 
   const observerChain: Leaf.ObserverChain<C> = {
     and: convertible => {
-      convertibles.push([convertible, 'and']);
+      convertibles.push([convertible, "and"]);
       return observerChain;
     },
     andNext: next => observerChain.and({ next }),
     or: convertible => {
-      convertibles.push([convertible, 'or']);
+      convertibles.push([convertible, "or"]);
       return observerChain;
     },
     orNext: next => observerChain.or({ next }),
@@ -108,7 +108,7 @@ export function createObserverChain<C>(): Leaf.ObserverChain<C> {
       const observers = await mapSeries(
         convertibles,
         async ([convertible, type]): Promise<
-          [Leaf.Observer<C>, 'and' | 'or']
+          [Leaf.Observer<C>, "and" | "or"]
         > => [await toPromise(convertible), type]
       );
 
@@ -123,11 +123,11 @@ export function createObserverChain<C>(): Leaf.ObserverChain<C> {
             result = await currentObserver.next(input);
 
             switch (type) {
-              case 'and':
+              case "and":
                 if (isNullOrUndefined(result)) return result;
                 break;
 
-              case 'or':
+              case "or":
                 if (isDefinedAndNotNull(result)) return result;
                 break;
             }

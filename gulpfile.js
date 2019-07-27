@@ -8,7 +8,7 @@ async function build() {
 }
 
 function watch() {
-  gulp.watch(['./src/**/*', 'rollup*'], build);
+  gulp.watch(['./src/**/*'], build);
 }
 
 exports.default = gulp.series(build, watch);

@@ -1,5 +1,5 @@
-import { SupportedPlatform } from './messenger';
-import { GenericRequest } from './request';
+import { SupportedPlatform } from "./messenger";
+import { GenericRequest } from "./request";
 
 export type KV<V> = Readonly<{ [K: string]: V | null | undefined }>;
 

@@ -1,14 +1,14 @@
-import { Omit } from 'ts-essentials';
+import { Omit } from "ts-essentials";
 import {
   DEFAULT_COORDINATES,
   formatTelegramError,
   isType
-} from '../common/utils';
-import { Transformer } from '../type/common';
-import { Leaf } from '../type/leaf';
-import { Telegram as TL } from '../type/telegram';
-import { VisualContent } from '../type/visual-content';
-import { createMessenger } from './generic-messenger';
+} from "../common/utils";
+import { Transformer } from "../type/common";
+import { Leaf } from "../type/leaf";
+import { Telegram as TL } from "../type/telegram";
+import { VisualContent } from "../type/visual-content";
+import { createMessenger } from "./generic-messenger";
 
 /**
  * Map platform request to generic request for generic processing.
@@ -16,15 +16,15 @@ import { createMessenger } from './generic-messenger';
  */
 function createTelegramRequest<C>(
   webhook: TL.PlatformRequest,
-  targetPlatform: 'telegram'
+  targetPlatform: "telegram"
 ): readonly TL.GenericRequest<C>[] {
   function processMessageRequest({
     message: { from: user, ...restMessage }
   }: TL.PlatformRequest.Message):
-    | [TL.User, TL.GenericRequest<C>['input']]
+    | [TL.User, TL.GenericRequest<C>["input"]]
     | undefined {
     if (
-      isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, 'text')
+      isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, "text")
     ) {
       return [
         user,
@@ -32,7 +32,7 @@ function createTelegramRequest<C>(
           {
             targetPlatform,
             inputText: restMessage.text,
-            inputImageURL: '',
+            inputImageURL: "",
             inputCoordinate: DEFAULT_COORDINATES
           }
         ]
@@ -45,7 +45,7 @@ function createTelegramRequest<C>(
   function processCallbackRequest({
     callback_query: { data, from: user }
   }: TL.PlatformRequest.Callback):
-    | [TL.User, TL.GenericRequest<C>['input']]
+    | [TL.User, TL.GenericRequest<C>["input"]]
     | undefined {
     return [
       user,
@@ -53,7 +53,7 @@ function createTelegramRequest<C>(
         {
           targetPlatform,
           inputText: data,
-          inputImageURL: '',
+          inputImageURL: "",
           inputCoordinate: DEFAULT_COORDINATES
         }
       ]
@@ -62,14 +62,14 @@ function createTelegramRequest<C>(
 
   function processRequest(
     request: TL.PlatformRequest
-  ): [TL.User, TL.GenericRequest<C>['input']] {
-    let result: [TL.User, TL.GenericRequest<C>['input']] | undefined;
+  ): [TL.User, TL.GenericRequest<C>["input"]] {
+    let result: [TL.User, TL.GenericRequest<C>["input"]] | undefined;
 
-    if (isType<TL.PlatformRequest.Message>(request, 'message')) {
+    if (isType<TL.PlatformRequest.Message>(request, "message")) {
       result = processMessageRequest(request);
     }
 
-    if (isType<TL.PlatformRequest.Callback>(request, 'callback_query')) {
+    if (isType<TL.PlatformRequest.Callback>(request, "callback_query")) {
       result = processCallbackRequest(request);
     }
 
@@ -104,8 +104,8 @@ function createTelegramResponse<C>({
   function createTextResponse(
     targetID: string,
     { text }: VisualContent.MainContent.Text
-  ): Omit<TL.PlatformResponse.SendMessage, 'reply_markup'> {
-    return { text, action: 'sendMessage', chat_id: targetID };
+  ): Omit<TL.PlatformResponse.SendMessage, "reply_markup"> {
+    return { text, action: "sendMessage", chat_id: targetID };
   }
 
   /** Only certain quick reply types supports inline markups. */
@@ -118,10 +118,10 @@ function createTelegramResponse<C>({
           const { text } = qr;
 
           switch (qr.type) {
-            case 'postback':
+            case "postback":
               return { text, callback_data: qr.payload };
 
-            case 'text':
+            case "text":
               return { text, callback_data: text };
           }
         })
@@ -139,21 +139,21 @@ function createTelegramResponse<C>({
           const { text } = qr;
 
           switch (qr.type) {
-            case 'location':
+            case "location":
               return {
                 text,
                 request_contact: undefined,
                 request_location: true
               };
 
-            case 'contact':
+            case "contact":
               return {
                 text,
                 request_contact: true,
                 request_location: undefined
               };
 
-            case 'text':
+            case "text":
               return {
                 text,
                 request_contact: undefined,
@@ -175,7 +175,7 @@ function createTelegramResponse<C>({
     const shouldBeReplyMarkup = quickReplies.every(
       (qrs: TL.VisualContent.QuickReplies[number]) =>
         qrs.every(({ type }: TL.VisualContent.QuickReplies[number][number]) => {
-          return type === 'location';
+          return type === "location";
         })
     );
 
@@ -192,12 +192,12 @@ function createTelegramResponse<C>({
 
   function createPlatformResponse(
     targetID: string,
-    { quickReplies, content }: TL.GenericResponse<C>['output'][number]
+    { quickReplies, content }: TL.GenericResponse<C>["output"][number]
   ): TL.PlatformResponse {
     const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
     switch (content.type) {
-      case 'text':
+      case "text":
         return {
           ...createTextResponse(targetID, content),
           reply_markup: tlQuickReplies
@@ -230,8 +230,8 @@ export async function createTelegramMessenger<C>(
     {
       leafSelector,
       communicator,
-      targetPlatform: 'telegram',
-      mapRequest: async req => createTelegramRequest(req, 'telegram'),
+      targetPlatform: "telegram",
+      mapRequest: async req => createTelegramRequest(req, "telegram"),
       mapResponse: async res => {
         return createTelegramResponse(res as TL.GenericResponse<C>);
       }

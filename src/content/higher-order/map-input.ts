@@ -1,5 +1,5 @@
-import { DefaultContext } from '../../type/common';
-import { Leaf } from '../../type/leaf';
+import { DefaultContext } from "../../type/common";
+import { Leaf } from "../../type/leaf";
 
 /**
  * Map one input type to another.

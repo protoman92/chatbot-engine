@@ -1,19 +1,19 @@
-import expectJs from 'expect.js';
-import { beforeEach, describe } from 'mocha';
-import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { DEFAULT_COORDINATES } from '../common/utils';
-import { createLeafWithObserver } from './leaf';
-import { createLeafSelector } from './leaf-selector';
-import { Leaf } from '../type/leaf';
+import expectJs from "expect.js";
+import { beforeEach, describe } from "mocha";
+import { anything, instance, spy, verify, when } from "ts-mockito";
+import { DEFAULT_COORDINATES } from "../common/utils";
+import { createLeafWithObserver } from "./leaf";
+import { createLeafSelector } from "./leaf-selector";
+import { Leaf } from "../type/leaf";
 
 type TestLeafSelector = ReturnType<
-  typeof import('./leaf-selector')['createLeafSelector']
+  typeof import("./leaf-selector")["createLeafSelector"]
 >;
 
-const targetID = 'target-id';
-const targetPlatform = 'facebook';
+const targetID = "target-id";
+const targetPlatform = "facebook";
 
-describe('Leaf selector', () => {
+describe("Leaf selector", () => {
   interface Context {}
 
   let currentLeaf: Leaf<Context>;
@@ -22,17 +22,17 @@ describe('Leaf selector', () => {
   beforeEach(async () => {
     currentLeaf = spy<Leaf<Context>>(
       await createLeafWithObserver(async () => ({
-        checkTextConditions: () => Promise.reject(''),
-        checkContextConditions: () => Promise.reject(''),
-        next: () => Promise.reject(''),
-        complete: () => Promise.reject('')
+        checkTextConditions: () => Promise.reject(""),
+        checkContextConditions: () => Promise.reject(""),
+        next: () => Promise.reject(""),
+        complete: () => Promise.reject("")
       }))
     );
 
     selector = spy<TestLeafSelector>(createLeafSelector({}));
   });
 
-  it('Selecting leaf should stop at first leaf that passes', async () => {
+  it("Selecting leaf should stop at first leaf that passes", async () => {
     // Setup
     const iteration = 1000;
     const validLeafID = 500;
@@ -59,10 +59,10 @@ describe('Leaf selector', () => {
     await instance(selector).next({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     // Then
@@ -71,7 +71,7 @@ describe('Leaf selector', () => {
     );
   });
 
-  it('Completing stream should trigger complete from all leaves', async () => {
+  it("Completing stream should trigger complete from all leaves", async () => {
     // Setup
     let completedCount = 0;
 
@@ -98,7 +98,7 @@ describe('Leaf selector', () => {
     expectJs(completedCount).to.equal(enumeratedLeaves.length);
   });
 
-  it('Subscribing to response should merge leaf observables', async () => {
+  it("Subscribing to response should merge leaf observables", async () => {
     // Setup
     const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
       ...Array(1000).keys()
@@ -118,7 +118,7 @@ describe('Leaf selector', () => {
     verify(currentLeaf.subscribe(anything())).times(enumeratedLeaves.length);
   });
 
-  it('Should throw error if no enumerated leaves found', async () => {
+  it("Should throw error if no enumerated leaves found", async () => {
     // Setup
     when(selector.enumerateLeaves()).thenResolve([]);
     when(selector.triggerLeafContent(anything(), anything())).thenResolve({});
@@ -128,14 +128,14 @@ describe('Leaf selector', () => {
       await instance(selector).next({
         targetID,
         targetPlatform,
-        inputText: '',
-        inputImageURL: '',
+        inputText: "",
+        inputImageURL: "",
         inputCoordinate: DEFAULT_COORDINATES,
-        stickerID: ''
+        stickerID: ""
       });
 
       // Then
-      throw new Error('Never should have come here');
+      throw new Error("Never should have come here");
     } catch {}
   });
 });

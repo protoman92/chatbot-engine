@@ -1,6 +1,6 @@
-import { createCompositeSubscription } from '../../stream/stream';
-import { ErrorContext } from '../../type/common';
-import { Leaf } from '../../type/leaf';
+import { createCompositeSubscription } from "../../stream/stream";
+import { ErrorContext } from "../../type/common";
+import { Leaf } from "../../type/leaf";
 
 /**
  * If a leaf throws error while producing content, switch to fallback leaf.

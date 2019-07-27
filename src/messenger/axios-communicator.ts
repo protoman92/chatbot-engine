@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { HTTPCommunicator } from '../type/communicator';
+import axios, { AxiosInstance } from "axios";
+import { HTTPCommunicator } from "../type/communicator";
 
 /** Create a default HTTP communicator using axios. */
 export function createAxiosCommunicator(axiosInstance: AxiosInstance = axios) {
@@ -9,10 +9,10 @@ export function createAxiosCommunicator(axiosInstance: AxiosInstance = axios) {
 
       const { data } = await (function() {
         switch (request.method) {
-          case 'GET':
+          case "GET":
             return axiosInstance.get(url, { headers, params });
 
-          case 'POST':
+          case "POST":
             return axiosInstance.post(url, request.body, { headers, params });
         }
       })();

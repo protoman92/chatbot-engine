@@ -1,22 +1,24 @@
-import expectJs from 'expect.js';
-import { describe, it } from 'mocha';
-import { instance, spy, when } from 'ts-mockito';
-import { createFacebookCommunicator, Facebook, HTTPCommunicator } from '..';
+import expectJs from "expect.js";
+import { describe, it } from "mocha";
+import { instance, spy, when } from "ts-mockito";
+import { HTTPCommunicator } from "../type/communicator";
+import { Facebook } from "../type/facebook";
+import { createFacebookCommunicator } from "./facebook-communicator";
 
-describe('Facebook communicator', () => {
+describe("Facebook communicator", () => {
   let communicator: HTTPCommunicator;
   let configs: Facebook.Configs;
   let fbCommunicator: Facebook.Communicator;
 
   beforeEach(async () => {
     communicator = spy<HTTPCommunicator>({
-      communicate: () => Promise.reject('')
+      communicate: () => Promise.reject("")
     });
 
     configs = spy<Facebook.Configs>({
-      apiVersion: '',
-      pageToken: '',
-      verifyToken: ''
+      apiVersion: "",
+      pageToken: "",
+      verifyToken: ""
     });
 
     fbCommunicator = createFacebookCommunicator(
@@ -25,52 +27,52 @@ describe('Facebook communicator', () => {
     );
   });
 
-  it('Should resolve hub challenge if token matches', async () => {
+  it("Should resolve hub challenge if token matches", async () => {
     // Setup
-    const verifyToken = 'verify-token';
+    const verifyToken = "verify-token";
     const hubChallenge = 1000;
     when(configs.verifyToken).thenReturn(verifyToken);
 
     // When
     const challenge = await fbCommunicator.resolveVerifyChallenge({
-      'hub.mode': 'subscribe',
-      'hub.challenge': hubChallenge,
-      'hub.verify_token': verifyToken
+      "hub.mode": "subscribe",
+      "hub.challenge": hubChallenge,
+      "hub.verify_token": verifyToken
     });
 
     // Then
     expectJs(challenge).to.equal(hubChallenge);
   });
 
-  it('Should fail hub challenge if hub mode is wrong', async () => {
+  it("Should fail hub challenge if hub mode is wrong", async () => {
     // Setup
-    const verifyToken = 'verify-token';
+    const verifyToken = "verify-token";
     when(configs.verifyToken).thenReturn(verifyToken);
 
     try {
       // When && Then
       await fbCommunicator.resolveVerifyChallenge({
-        'hub.challenge': 1000,
-        'hub.verify_token': verifyToken
+        "hub.challenge": 1000,
+        "hub.verify_token": verifyToken
       });
 
-      throw new Error('Never should have come here');
+      throw new Error("Never should have come here");
     } catch {}
   });
 
-  it('Should fail hub challenge if token does not match', async () => {
+  it("Should fail hub challenge if token does not match", async () => {
     // Setup
     const hubChallenge = 1000;
-    when(configs.verifyToken).thenReturn('verify-token');
+    when(configs.verifyToken).thenReturn("verify-token");
 
     try {
       // When && Then
       await fbCommunicator.resolveVerifyChallenge({
-        'hub.mode': 'subscribe',
-        'hub.challenge': hubChallenge
+        "hub.mode": "subscribe",
+        "hub.challenge": hubChallenge
       });
 
-      throw new Error('Never should have come here');
+      throw new Error("Never should have come here");
     } catch {}
   });
 });

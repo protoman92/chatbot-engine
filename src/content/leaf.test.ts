@@ -1,63 +1,65 @@
-import expectJs from 'expect.js';
-import { describe, it } from 'mocha';
-import { Omit } from 'ts-essentials';
-import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { Facebook, Telegram, VisualContent } from '..';
-import { DEFAULT_COORDINATES, isType } from '../common/utils';
+import expectJs from "expect.js";
+import { describe, it } from "mocha";
+import { Omit } from "ts-essentials";
+import { anything, instance, spy, verify, when } from "ts-mockito";
+import { DEFAULT_COORDINATES, isType } from "../common/utils";
+import { bridgeEmission } from "../stream/stream";
+import { Facebook } from "../type/facebook";
+import { Leaf } from "../type/leaf";
+import { Telegram } from "../type/telegram";
+import { VisualContent } from "../type/visual-content";
 import {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
   createLeafWithObserver,
   createObserverChain
-} from './leaf';
-import { bridgeEmission } from '../stream/stream';
-import { Leaf } from '../type/leaf';
+} from "./leaf";
 
-const targetID = 'target-id';
-const targetPlatform = 'facebook';
+const targetID = "target-id";
+const targetPlatform = "facebook";
 
-describe('Default error leaf', () => {
-  it('Should work correctly', async () => {
+describe("Default error leaf", () => {
+  it("Should work correctly", async () => {
     // Setup
     const errorLeaf = await createDefaultErrorLeaf();
-    const error = new Error('some-error');
+    const error = new Error("some-error");
 
     // When
     const { output: visualContents } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
       error,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
     // Then
     expectJs(visualContents).to.have.length(1);
     const [{ content: response }] = visualContents;
 
-    if (isType<VisualContent.MainContent.Text>(response, 'text')) {
+    if (isType<VisualContent.MainContent.Text>(response, "text")) {
       expectJs(response.text).to.contain(error.message);
     } else {
-      throw new Error('Never should have come here');
+      throw new Error("Never should have come here");
     }
   });
 });
 
-describe('Leaf for platforms', () => {
-  let fbLeaf: Omit<Facebook.Leaf<{}>, 'subscribe'>;
-  let tlLeaf: Omit<Telegram.Leaf<{}>, 'subscribe'>;
+describe("Leaf for platforms", () => {
+  let fbLeaf: Omit<Facebook.Leaf<{}>, "subscribe">;
+  let tlLeaf: Omit<Telegram.Leaf<{}>, "subscribe">;
   let platformLeaf: Leaf<{}>;
 
   beforeEach(async () => {
-    fbLeaf = spy<Omit<Facebook.Leaf<{}>, 'subscribe'>>({
-      next: () => Promise.reject(''),
-      complete: () => Promise.reject('')
+    fbLeaf = spy<Omit<Facebook.Leaf<{}>, "subscribe">>({
+      next: () => Promise.reject(""),
+      complete: () => Promise.reject("")
     });
 
-    tlLeaf = spy<Omit<Telegram.Leaf<{}>, 'subscribe'>>({
-      next: () => Promise.reject(''),
-      complete: () => Promise.reject('')
+    tlLeaf = spy<Omit<Telegram.Leaf<{}>, "subscribe">>({
+      next: () => Promise.reject(""),
+      complete: () => Promise.reject("")
     });
 
     platformLeaf = await createLeafWithObserver(() => {
@@ -68,7 +70,7 @@ describe('Leaf for platforms', () => {
     });
   });
 
-  it('Should work for different platforms', async () => {
+  it("Should work for different platforms", async () => {
     // Setup
     when(fbLeaf.next(anything())).thenResolve({});
     when(fbLeaf.complete!()).thenResolve({});
@@ -78,18 +80,18 @@ describe('Leaf for platforms', () => {
     // When
     await platformLeaf.next({
       targetID,
-      targetPlatform: 'facebook',
-      inputText: '',
-      inputImageURL: '',
+      targetPlatform: "facebook",
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     await platformLeaf.next({
       targetID,
-      targetPlatform: 'telegram',
-      inputText: '',
-      inputImageURL: '',
+      targetPlatform: "telegram",
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES
     });
 
@@ -104,8 +106,8 @@ describe('Leaf for platforms', () => {
   });
 });
 
-describe('Leaf observer chain', () => {
-  it('Observer chain should work', async () => {
+describe("Leaf observer chain", () => {
+  it("Observer chain should work", async () => {
     // Setup
     let nextCount = 0;
 
@@ -132,10 +134,10 @@ describe('Leaf observer chain', () => {
     const result = await observer.next({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     // Then
@@ -143,7 +145,7 @@ describe('Leaf observer chain', () => {
     expectJs(result).to.eql({});
   });
 
-  it('Observer chain should terminate early with invalid and', async () => {
+  it("Observer chain should terminate early with invalid and", async () => {
     // Setup
     let nextCount = 0;
 
@@ -170,10 +172,10 @@ describe('Leaf observer chain', () => {
     const result = await observer.next({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     // Then
@@ -181,7 +183,7 @@ describe('Leaf observer chain', () => {
     expectJs(result).to.not.be.ok();
   });
 
-  it('Observer chain should terminate early with valid or', async () => {
+  it("Observer chain should terminate early with valid or", async () => {
     // Setup
     let nextCount = 0;
 
@@ -208,10 +210,10 @@ describe('Leaf observer chain', () => {
     const result = await observer.next({
       targetID,
       targetPlatform,
-      inputText: '',
-      inputImageURL: '',
+      inputText: "",
+      inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ''
+      stickerID: ""
     });
 
     // Then

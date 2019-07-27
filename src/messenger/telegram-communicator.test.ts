@@ -1,19 +1,21 @@
-import expectJs from 'expect.js';
-import { beforeEach, describe, it } from 'mocha';
-import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { createTelegramCommunicator, HTTPCommunicator, Telegram } from '..';
+import expectJs from "expect.js";
+import { beforeEach, describe, it } from "mocha";
+import { anything, instance, spy, verify, when } from "ts-mockito";
+import { HTTPCommunicator } from "../type/communicator";
+import { Telegram } from "../type/telegram";
+import { createTelegramCommunicator } from "./telegram-communicator";
 
-describe('Telegram communicator', () => {
+describe("Telegram communicator", () => {
   let communicator: HTTPCommunicator;
   let configs: Telegram.Configs;
   let tlCommunicator: Telegram.Communicator;
 
   beforeEach(() => {
     communicator = spy<HTTPCommunicator>({
-      communicate: () => Promise.reject('')
+      communicate: () => Promise.reject("")
     });
 
-    configs = spy<Telegram.Configs>({ authToken: '', webhookURL: '' });
+    configs = spy<Telegram.Configs>({ authToken: "", webhookURL: "" });
 
     tlCommunicator = createTelegramCommunicator(
       instance(communicator),
@@ -21,21 +23,21 @@ describe('Telegram communicator', () => {
     );
   });
 
-  it('Should return result if ok is true', async () => {
+  it("Should return result if ok is true", async () => {
     // Setup
     const result = 10000;
 
     when(communicator.communicate(anything())).thenResolve({
       result,
-      description: 'some-description',
+      description: "some-description",
       ok: true
     });
 
     // When
     const apiResponse = await tlCommunicator.sendResponse({
-      action: 'sendMessage',
-      chat_id: '',
-      text: 'Hey',
+      action: "sendMessage",
+      chat_id: "",
+      text: "Hey",
       reply_markup: undefined
     });
 
@@ -43,9 +45,9 @@ describe('Telegram communicator', () => {
     expectJs(apiResponse).to.eql(result);
   });
 
-  it('Should throw error if ok is false', async () => {
+  it("Should throw error if ok is false", async () => {
     // Setup
-    const description = 'some-error';
+    const description = "some-error";
 
     when(communicator.communicate(anything())).thenResolve({
       description,
@@ -55,21 +57,21 @@ describe('Telegram communicator', () => {
     try {
       // When
       await tlCommunicator.sendResponse({
-        action: 'sendMessage',
-        chat_id: '',
-        text: 'Hey',
+        action: "sendMessage",
+        chat_id: "",
+        text: "Hey",
         reply_markup: undefined
       });
 
-      throw new Error('Never should have come here');
+      throw new Error("Never should have come here");
     } catch ({ message }) {
       expectJs(message).to.eql(description);
     }
   });
 
-  it('Should not send typing action if setting to false', async () => {
+  it("Should not send typing action if setting to false", async () => {
     // Setup && When
-    await tlCommunicator.setTypingIndicator('', false);
+    await tlCommunicator.setTypingIndicator("", false);
 
     // Then
     verify(communicator.communicate(anything())).never();

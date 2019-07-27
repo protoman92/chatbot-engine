@@ -1,6 +1,6 @@
-import { isNullOrUndefined } from 'util';
-import { Leaf } from '../../type/leaf';
-import { WitCommunicator, WitContext } from '../../type/wit';
+import { isNullOrUndefined } from "util";
+import { Leaf } from "../../type/leaf";
+import { WitCommunicator, WitContext } from "../../type/wit";
 
 /**
  * Retry a failing message with wit, by running the input text through wit

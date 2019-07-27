@@ -1,7 +1,7 @@
-import { Transformer } from '../type/common';
-import { ContextDAO } from '../type/context-dao';
-import { Facebook } from '../type/facebook';
-import { saveUserForTargetID } from './messenger-transform';
+import { Transformer } from "../type/common";
+import { ContextDAO } from "../type/context-dao";
+import { Facebook } from "../type/facebook";
+import { saveUserForTargetID } from "./messenger-transform";
 
 /** Save a Facebook user when there is no target ID in the context. */
 export function saveFacebookUser<C>(

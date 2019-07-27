@@ -1,47 +1,47 @@
-import { beforeEach, describe } from 'mocha';
-import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import { Telegram } from '..';
-import { compose } from '../common/utils';
+import { beforeEach, describe } from "mocha";
+import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
+import { compose } from "../common/utils";
+import { PlatformCommunicator } from "../type/communicator";
+import { ContextDAO } from "../type/context-dao";
+import { Messenger } from "../type/messenger";
+import { GenericRequest } from "../type/request";
+import { GenericResponse } from "../type/response";
+import { Telegram } from "../type/telegram";
 import {
   injectContextOnReceive,
   saveContextOnSend,
   saveUserForTargetID,
   setTypingIndicator
-} from './messenger-transform';
-import { saveTelegramUser } from './telegram-transform';
-import { PlatformCommunicator } from '../type/communicator';
-import { ContextDAO } from '../type/context-dao';
-import { Messenger } from '../type/messenger';
-import { GenericRequest } from '../type/request';
-import { GenericResponse } from '../type/response';
+} from "./messenger-transform";
+import { saveTelegramUser } from "./telegram-transform";
 
-const targetID = 'target-id';
-const targetPlatform = 'facebook';
+const targetID = "target-id";
+const targetPlatform = "facebook";
 let messenger: Messenger<{}, unknown, GenericRequest<{}>>;
 let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<{}>;
 
 beforeEach(async () => {
   messenger = spy<Messenger<{}, unknown, GenericRequest<{}>>>({
-    generalizeRequest: () => Promise.reject(''),
-    receiveRequest: () => Promise.reject(''),
-    sendResponse: () => Promise.reject('')
+    generalizeRequest: () => Promise.reject(""),
+    receiveRequest: () => Promise.reject(""),
+    sendResponse: () => Promise.reject("")
   });
 
   communicator = spy<PlatformCommunicator<unknown>>({
-    sendResponse: () => Promise.reject(''),
-    setTypingIndicator: () => Promise.reject('')
+    sendResponse: () => Promise.reject(""),
+    setTypingIndicator: () => Promise.reject("")
   });
 
   contextDAO = spy<ContextDAO<{}>>({
-    getContext: () => Promise.reject(''),
-    appendContext: () => Promise.reject(''),
-    resetContext: () => Promise.reject('')
+    getContext: () => Promise.reject(""),
+    appendContext: () => Promise.reject(""),
+    resetContext: () => Promise.reject("")
   });
 });
 
-describe('Save context on send', () => {
-  it('Should save context on send', async () => {
+describe("Save context on send", () => {
+  it("Should save context on send", async () => {
     // Setup
     const oldContext: {} = { a: 1, b: 2 };
     when(contextDAO.getContext(targetID)).thenResolve(oldContext);
@@ -74,8 +74,8 @@ describe('Save context on send', () => {
   });
 });
 
-describe('Inject context on receive', () => {
-  it('Should inject context on receive', async () => {
+describe("Inject context on receive", () => {
+  it("Should inject context on receive", async () => {
     // Setup
     const expectedContext = { a: 1, b: 2 };
 
@@ -113,8 +113,8 @@ describe('Inject context on receive', () => {
   });
 });
 
-describe('Save user for target ID', () => {
-  it('Should save user when no user ID is present in context', async () => {
+describe("Save user for target ID", () => {
+  it("Should save user when no user ID is present in context", async () => {
     // Setup
     when(contextDAO.appendContext(anything(), anything())).thenResolve({});
 
@@ -151,18 +151,18 @@ describe('Save user for target ID', () => {
   });
 });
 
-describe('Save Telegram user for target ID', () => {
+describe("Save Telegram user for target ID", () => {
   let tlMessenger: Telegram.Messenger<{}>;
 
   beforeEach(() => {
     tlMessenger = spy<Telegram.Messenger<{}>>({
-      generalizeRequest: () => Promise.reject(''),
-      receiveRequest: () => Promise.reject(''),
-      sendResponse: () => Promise.reject('')
+      generalizeRequest: () => Promise.reject(""),
+      receiveRequest: () => Promise.reject(""),
+      sendResponse: () => Promise.reject("")
     });
   });
 
-  it('Should save user when no user ID is present in context', async () => {
+  it("Should save user when no user ID is present in context", async () => {
     // Setup
     when(contextDAO.appendContext(anything(), anything())).thenResolve({});
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
@@ -177,13 +177,13 @@ describe('Save Telegram user for target ID', () => {
       targetID,
       telegramUser: {
         id: 0,
-        first_name: '',
-        last_name: '',
-        username: '',
-        language_code: 'en' as const,
+        first_name: "",
+        last_name: "",
+        username: "",
+        language_code: "en" as const,
         is_bot: false
       },
-      targetPlatform: 'telegram',
+      targetPlatform: "telegram",
       oldContext: {},
       input: []
     });
@@ -193,8 +193,8 @@ describe('Save Telegram user for target ID', () => {
   });
 });
 
-describe('Set typing indicator', () => {
-  it('Should set typing indicator when response is being sent', async () => {
+describe("Set typing indicator", () => {
+  it("Should set typing indicator when response is being sent", async () => {
     // Setup
     when(messenger.sendResponse(anything())).thenResolve();
     when(communicator.setTypingIndicator(targetID, anything())).thenResolve();

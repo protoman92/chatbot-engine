@@ -1,34 +1,34 @@
-import { DeepReadonly, Omit } from 'ts-essentials';
-import { DefaultContext as RootDefaultContext } from './common';
-import { PlatformCommunicator } from './communicator';
-import { Leaf as RootLeaf } from './leaf';
-import { Messenger as RootMessenger } from './messenger';
-import { GenericRequest as RootGenericRequest } from './request';
-import { GenericResponse as RootGenericResponse } from './response';
-import { VisualContent as RootVisualContent } from './visual-content';
+import { DeepReadonly, Omit } from "ts-essentials";
+import { DefaultContext as RootDefaultContext } from "./common";
+import { PlatformCommunicator } from "./communicator";
+import { Leaf as RootLeaf } from "./leaf";
+import { Messenger as RootMessenger } from "./messenger";
+import { GenericRequest as RootGenericRequest } from "./request";
+import { GenericResponse as RootGenericResponse } from "./response";
+import { VisualContent as RootVisualContent } from "./visual-content";
 
 export namespace Telegram {
   namespace GenericRequest {
     interface Input extends RootGenericRequest.Base.Input {
-      readonly targetPlatform: 'telegram';
+      readonly targetPlatform: "telegram";
     }
   }
 
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
-    readonly targetPlatform: 'telegram';
+    readonly targetPlatform: "telegram";
     readonly telegramUser: User;
     readonly input: readonly GenericRequest.Input[];
   }
 
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
-    readonly targetPlatform: 'telegram';
+    readonly targetPlatform: "telegram";
     readonly output: readonly VisualContent[];
   }
 
   namespace VisualContent {
     namespace QuickReply {
       interface Contact extends RootVisualContent.Base.QuickReply {
-        readonly type: 'contact';
+        readonly type: "contact";
       }
 
       type InlineMarkup =
@@ -65,8 +65,8 @@ export namespace Telegram {
         readonly message_id: number;
         readonly from: User;
 
-        readonly chat: Omit<User, 'language_code' | 'is_bot'> &
-          Readonly<{ type: 'private' }>;
+        readonly chat: Omit<User, "language_code" | "is_bot"> &
+          Readonly<{ type: "private" }>;
       }
     }
 
@@ -156,7 +156,7 @@ export namespace Telegram {
     }
 
     interface SendMessage extends HasReplyMarkup {
-      readonly action: 'sendMessage';
+      readonly action: "sendMessage";
       readonly chat_id: string;
       readonly text: string;
     }
@@ -170,7 +170,7 @@ export namespace Telegram {
     readonly last_name: string;
     readonly username: string;
     readonly is_bot: boolean;
-    readonly language_code: 'en';
+    readonly language_code: "en";
   }
 
   /** Represents Telegram configurations. */

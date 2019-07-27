@@ -1,27 +1,27 @@
-import { DeepReadonly, Omit } from 'ts-essentials';
-import { DefaultContext as RootDefaultContext } from './common';
-import { PlatformCommunicator } from './communicator';
-import { Leaf as RootLeaf } from './leaf';
-import { Messenger as RootMessenger } from './messenger';
-import { GenericRequest as RootGenericRequest } from './request';
-import { GenericResponse as RootGenericResponse } from './response';
-import { VisualContent as RootVisualContent } from './visual-content';
+import { DeepReadonly, Omit } from "ts-essentials";
+import { DefaultContext as RootDefaultContext } from "./common";
+import { PlatformCommunicator } from "./communicator";
+import { Leaf as RootLeaf } from "./leaf";
+import { Messenger as RootMessenger } from "./messenger";
+import { GenericRequest as RootGenericRequest } from "./request";
+import { GenericResponse as RootGenericResponse } from "./response";
+import { VisualContent as RootVisualContent } from "./visual-content";
 
 export namespace Facebook {
   namespace GenericRequest {
     interface Input extends RootGenericRequest.Base.Input {
-      readonly targetPlatform: 'facebook';
+      readonly targetPlatform: "facebook";
       readonly stickerID: string;
     }
   }
 
   interface GenericRequest<C> extends RootGenericRequest.Base<C> {
-    readonly targetPlatform: 'facebook';
+    readonly targetPlatform: "facebook";
     readonly input: readonly GenericRequest.Input[];
   }
 
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
-    readonly targetPlatform: 'facebook';
+    readonly targetPlatform: "facebook";
     readonly output: readonly VisualContent[];
   }
 
@@ -66,7 +66,7 @@ export namespace Facebook {
 
       namespace Attachment {
         interface Image {
-          readonly type: 'image';
+          readonly type: "image";
           readonly payload: Readonly<{ url: string }>;
         }
 
@@ -75,7 +75,7 @@ export namespace Facebook {
         }
 
         interface Location {
-          readonly type: 'location';
+          readonly type: "location";
           readonly title: string;
           readonly url: string;
           readonly payload: DeepReadonly<{
@@ -110,7 +110,7 @@ export namespace Facebook {
 
   /** Represents a webhook request. */
   interface PlatformRequest {
-    readonly object: 'page';
+    readonly object: "page";
     readonly entry:
       | Readonly<{ messaging: readonly PlatformRequest.Input[] }>[]
       | undefined
@@ -132,19 +132,19 @@ export namespace Facebook {
   namespace PlatformResponse {
     interface QuickReply {
       readonly title: string;
-      readonly content_type: 'location' | 'text';
+      readonly content_type: "location" | "text";
       readonly payload: string;
     }
 
     namespace SubContent {
       namespace Button {
         interface Postback extends Base.SubContent.Button {
-          readonly type: 'postback';
+          readonly type: "postback";
           readonly payload: string;
         }
 
         interface URL extends Base.SubContent.Button {
-          readonly type: 'web_url';
+          readonly type: "web_url";
           readonly url: string;
         }
       }
@@ -155,13 +155,13 @@ export namespace Facebook {
     namespace Content {
       type Button = Base.Content &
         DeepReadonly<{
-          messaging_type: 'RESPONSE';
+          messaging_type: "RESPONSE";
           message: {
             attachment: {
-              type: 'template';
+              type: "template";
               payload: {
                 buttons: readonly SubContent.Button[];
-                template_type: 'button';
+                template_type: "button";
                 text: string;
               };
             };
@@ -179,13 +179,13 @@ export namespace Facebook {
 
       type Carousel = Base.Content &
         DeepReadonly<{
-          messaging_type: 'RESPONSE';
+          messaging_type: "RESPONSE";
           message: {
             attachment: {
-              type: 'template';
+              type: "template";
               payload: {
                 elements: readonly Carousel.Element[];
-                template_type: 'generic';
+                template_type: "generic";
               };
             };
           };
@@ -201,16 +201,16 @@ export namespace Facebook {
 
       type List = Base.Content &
         DeepReadonly<{
-          messaging_type: 'RESPONSE';
+          messaging_type: "RESPONSE";
           message: {
             attachment: {
               payload: {
                 buttons: readonly SubContent.Button[] | undefined;
                 elements: readonly List.Element[];
-                template_type: 'list';
-                top_element_style: 'compact';
+                template_type: "list";
+                top_element_style: "compact";
               };
-              type: 'template';
+              type: "template";
             };
           };
         }>;
@@ -219,14 +219,14 @@ export namespace Facebook {
         DeepReadonly<{
           message: {
             attachment: {
-              type: 'image' | 'video';
+              type: "image" | "video";
               payload: { is_reusable: boolean; url: string };
             };
           };
         }>;
 
       type Text = Base.Content &
-        DeepReadonly<{ messaging_type: 'RESPONSE'; message: { text: string } }>;
+        DeepReadonly<{ messaging_type: "RESPONSE"; message: { text: string } }>;
     }
 
     type Output =
@@ -237,12 +237,12 @@ export namespace Facebook {
       | Content.Text;
   }
 
-  type PlatformResponse = Omit<PlatformResponse.Output, 'message'> &
+  type PlatformResponse = Omit<PlatformResponse.Output, "message"> &
     DeepReadonly<{
       recipient: { id: string };
       message: {
         quick_replies: readonly PlatformResponse.QuickReply[] | undefined;
-      } & PlatformResponse.Output['message'];
+      } & PlatformResponse.Output["message"];
     }>;
 
   /** Represents a Facebook user. */
@@ -268,9 +268,9 @@ export namespace Facebook {
     /** Resolve Facebook hub challenge to establish connection with chatbot. */
     resolveVerifyChallenge(
       requestQuery: Readonly<{
-        'hub.mode'?: string;
-        'hub.challenge'?: number;
-        'hub.verify_token'?: string;
+        "hub.mode"?: string;
+        "hub.challenge"?: number;
+        "hub.verify_token"?: string;
       }>
     ): Promise<number>;
   }

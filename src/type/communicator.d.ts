@@ -1,4 +1,4 @@
-import { KV } from './common';
+import { KV } from "./common";
 
 declare namespace HTTPRequest {
   interface Base {
@@ -8,11 +8,11 @@ declare namespace HTTPRequest {
   }
 
   interface GET extends Base {
-    readonly method: 'GET';
+    readonly method: "GET";
   }
 
   interface POST extends Base {
-    readonly method: 'POST';
+    readonly method: "POST";
     readonly body: unknown;
   }
 }

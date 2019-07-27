@@ -1,12 +1,12 @@
-import { Facebook } from './facebook';
-import { GenericRequest } from './request';
-import { GenericResponse } from './response';
-import { Telegram } from './telegram';
-import { Leaf } from './leaf';
-import { PlatformCommunicator } from './communicator';
+import { Facebook } from "./facebook";
+import { GenericRequest } from "./request";
+import { GenericResponse } from "./response";
+import { Telegram } from "./telegram";
+import { Leaf } from "./leaf";
+import { PlatformCommunicator } from "./communicator";
 
 /** Represents all supported platform identifiers. */
-export type SupportedPlatform = 'facebook' | 'telegram';
+export type SupportedPlatform = "facebook" | "telegram";
 
 declare namespace Messenger {
   /**
@@ -25,7 +25,7 @@ declare namespace Messenger {
     readonly targetPlatform: SupportedPlatform;
     readonly leafSelector: Leaf<C>;
     readonly communicator: PlatformCommunicator<PResponse>;
-    readonly mapRequest: Messenger<C, PRequest, GRequest>['generalizeRequest'];
+    readonly mapRequest: Messenger<C, PRequest, GRequest>["generalizeRequest"];
     mapResponse: (res: GenericResponse<C>) => Promise<readonly PResponse[]>;
   }
 }

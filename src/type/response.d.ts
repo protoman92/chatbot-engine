@@ -1,7 +1,7 @@
-import { Facebook } from './facebook';
-import { SupportedPlatform } from './messenger';
-import { Telegram } from './telegram';
-import { VisualContent } from './visual-content';
+import { Facebook } from "./facebook";
+import { SupportedPlatform } from "./messenger";
+import { Telegram } from "./telegram";
+import { VisualContent } from "./visual-content";
 
 declare namespace GenericResponse {
   export interface Base<C> {

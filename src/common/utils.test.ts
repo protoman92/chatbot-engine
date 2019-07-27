@@ -1,9 +1,9 @@
-import expectJs from 'expect.js';
-import { describe, it } from 'mocha';
-import { mapSeries, requireKeys } from './utils';
+import expectJs from "expect.js";
+import { describe, it } from "mocha";
+import { mapSeries, requireKeys } from "./utils";
 
-describe('Common utilities', () => {
-  it('Map series should maintain order', async function() {
+describe("Common utilities", () => {
+  it("Map series should maintain order", async function() {
     // Setup
     this.timeout(5000);
     const data = [...Array(5).keys()];
@@ -25,7 +25,7 @@ describe('Common utilities', () => {
     expectJs(mappedData).to.eql(data);
   });
 
-  it('Require keys should work', () => {
+  it("Require keys should work", () => {
     // Setup
     interface A {
       readonly a?: number | undefined;
@@ -41,6 +41,6 @@ describe('Common utilities', () => {
     };
 
     // When
-    expectJs(() => requireKeys(a, 'a', 'b', 'c')).to.throwError();
+    expectJs(() => requireKeys(a, "a", "b", "c")).to.throwError();
   });
 });

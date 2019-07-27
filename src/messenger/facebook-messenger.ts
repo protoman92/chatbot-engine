@@ -2,12 +2,12 @@ import {
   DEFAULT_COORDINATES,
   formatFacebookError,
   isType
-} from '../common/utils';
-import { Transformer } from '../type/common';
-import { Facebook as FB } from '../type/facebook';
-import { Leaf } from '../type/leaf';
-import { VisualContent } from '../type/visual-content';
-import { createMessenger } from './generic-messenger';
+} from "../common/utils";
+import { Transformer } from "../type/common";
+import { Facebook as FB } from "../type/facebook";
+import { Leaf } from "../type/leaf";
+import { VisualContent } from "../type/visual-content";
+import { createMessenger } from "./generic-messenger";
 
 /**
  * Map platform request to generic request for generic processing.
@@ -15,7 +15,7 @@ import { createMessenger } from './generic-messenger';
  */
 function createFacebookRequest<C>(
   webhook: FB.PlatformRequest,
-  targetPlatform: 'facebook'
+  targetPlatform: "facebook"
 ): readonly FB.GenericRequest<C>[] {
   const { object, entry } = webhook;
 
@@ -35,68 +35,68 @@ function createFacebookRequest<C>(
 
   function processRequest(
     request: FB.PlatformRequest.Input,
-    targetPlatform: 'facebook'
-  ): FB.GenericRequest<C>['input'] {
-    if (isType<FB.PlatformRequest.Input.Postback>(request, 'postback')) {
+    targetPlatform: "facebook"
+  ): FB.GenericRequest<C>["input"] {
+    if (isType<FB.PlatformRequest.Input.Postback>(request, "postback")) {
       return [
         {
           targetPlatform,
           inputText: request.postback.payload,
-          inputImageURL: '',
+          inputImageURL: "",
           inputCoordinate: DEFAULT_COORDINATES,
-          stickerID: ''
+          stickerID: ""
         }
       ];
     }
 
-    if (isType<FB.PlatformRequest.Input.Message>(request, 'message')) {
+    if (isType<FB.PlatformRequest.Input.Message>(request, "message")) {
       const { message } = request;
 
       if (
         isType<FB.PlatformRequest.Input.Message.QuickReply>(
           message,
-          'quick_reply'
+          "quick_reply"
         )
       ) {
         return [
           {
             targetPlatform,
             inputText: message.quick_reply.payload,
-            inputImageURL: '',
+            inputImageURL: "",
             inputCoordinate: DEFAULT_COORDINATES,
-            stickerID: ''
+            stickerID: ""
           }
         ];
       }
 
       if (
-        isType<FB.PlatformRequest.Input.Message.Text['message']>(
+        isType<FB.PlatformRequest.Input.Message.Text["message"]>(
           message,
-          'text'
+          "text"
         )
       ) {
         return [
           {
             targetPlatform,
             inputText: message.text,
-            inputImageURL: '',
+            inputImageURL: "",
             inputCoordinate: DEFAULT_COORDINATES,
-            stickerID: ''
+            stickerID: ""
           }
         ];
       }
 
       if (
-        isType<FB.PlatformRequest.Input.Message.Attachment['message']>(
+        isType<FB.PlatformRequest.Input.Message.Attachment["message"]>(
           message,
-          'attachments'
+          "attachments"
         )
       ) {
         const { attachments } = message;
 
         return attachments.map(attachment => {
           switch (attachment.type) {
-            case 'image':
+            case "image":
               return {
                 targetPlatform,
                 inputText: attachment.payload.url,
@@ -106,26 +106,26 @@ function createFacebookRequest<C>(
                   if (
                     isType<FB.PlatformRequest.Input.Attachment.StickerImage>(
                       attachment.payload,
-                      'sticker_id'
+                      "sticker_id"
                     )
                   ) {
                     return `${attachment.payload.sticker_id}`;
                   }
 
-                  return '';
+                  return "";
                 })()
               };
 
-            case 'location':
+            case "location":
               const { lat, long } = attachment.payload.coordinates;
               const coordinates = { lat, lng: long };
 
               return {
                 targetPlatform,
                 inputText: JSON.stringify(coordinates),
-                inputImageURL: '',
+                inputImageURL: "",
                 inputCoordinate: coordinates,
-                stickerID: ''
+                stickerID: ""
               };
           }
         });
@@ -138,7 +138,7 @@ function createFacebookRequest<C>(
   }
 
   switch (object) {
-    case 'page':
+    case "page":
       if (entry !== undefined && entry !== null) {
         const allRequests = entry
           .map(({ messaging }) => messaging)
@@ -149,7 +149,7 @@ function createFacebookRequest<C>(
 
         return Object.entries(groupedRequests).map(([targetID, requests]) => ({
           targetID,
-          targetPlatform: 'facebook',
+          targetPlatform: "facebook",
           oldContext: {} as any,
           input: requests
             .map(req => processRequest(req, targetPlatform))
@@ -180,11 +180,11 @@ function createFacebookResponse<C>({
     const { text: title } = action;
 
     switch (action.type) {
-      case 'postback':
-        return { title, type: 'postback', payload: action.payload };
+      case "postback":
+        return { title, type: "postback", payload: action.payload };
 
-      case 'url':
-        return { title, type: 'web_url', url: action.url };
+      case "url":
+        return { title, type: "web_url", url: action.url };
     }
   }
 
@@ -193,13 +193,13 @@ function createFacebookResponse<C>({
     actions
   }: VisualContent.MainContent.Button): FB.PlatformResponse.Content.Button {
     return {
-      messaging_type: 'RESPONSE',
+      messaging_type: "RESPONSE",
       message: {
         attachment: {
-          type: 'template',
+          type: "template",
           payload: {
             text,
-            template_type: 'button',
+            template_type: "button",
             buttons: actions.map(a => createSingleAction(a))
           }
         }
@@ -211,20 +211,20 @@ function createFacebookResponse<C>({
     items
   }: VisualContent.MainContent.Carousel): FB.PlatformResponse.Content.Carousel {
     if (!items.length) {
-      throw Error(formatFacebookError('Not enough carousel items'));
+      throw Error(formatFacebookError("Not enough carousel items"));
     }
 
     return {
-      messaging_type: 'RESPONSE',
+      messaging_type: "RESPONSE",
       message: {
         attachment: {
-          type: 'template',
+          type: "template",
           payload: {
             elements: items
               .slice(0, MAX_GENERIC_ELEMENT_COUNT)
               .map(
                 ({
-                  title = '',
+                  title = "",
                   description,
                   // tslint:disable-next-line:variable-name
                   mediaURL,
@@ -239,7 +239,7 @@ function createFacebookResponse<C>({
                       : undefined
                 })
               ),
-            template_type: 'generic'
+            template_type: "generic"
           }
         }
       }
@@ -259,20 +259,20 @@ function createFacebookResponse<C>({
       return createCarouselResponse({
         ...content,
         items: items.map(item => ({ ...item, mediaURL: undefined })),
-        type: 'carousel'
+        type: "carousel"
       }) as any;
     }
 
     return {
-      messaging_type: 'RESPONSE',
+      messaging_type: "RESPONSE",
       message: {
         attachment: {
-          type: 'template',
+          type: "template",
           payload: {
             elements: items
               .slice(0, MAX_LIST_ELEMENT_COUNT)
               .map(
-                ({ title = '', description, actions: itemButtons = [] }) => ({
+                ({ title = "", description, actions: itemButtons = [] }) => ({
                   title,
                   subtitle: description || undefined,
                   buttons:
@@ -281,8 +281,8 @@ function createFacebookResponse<C>({
                       : undefined
                 })
               ),
-            template_type: 'list',
-            top_element_style: 'compact',
+            template_type: "list",
+            top_element_style: "compact",
             buttons:
               !!listActions && listActions.length
                 ? listActions.map(a => createSingleAction(a))
@@ -301,11 +301,11 @@ function createFacebookResponse<C>({
         attachment: {
           type: (() => {
             switch (type) {
-              case 'image':
-                return 'image';
+              case "image":
+                return "image";
 
-              case 'video':
-                return 'video';
+              case "video":
+                return "video";
             }
           })(),
           payload: { url, is_reusable: true }
@@ -317,26 +317,26 @@ function createFacebookResponse<C>({
   function createTextResponse({
     text
   }: VisualContent.MainContent.Text): FB.PlatformResponse.Content.Text {
-    return { messaging_type: 'RESPONSE', message: { text } };
+    return { messaging_type: "RESPONSE", message: { text } };
   }
 
   function createResponse(
-    content: FB.GenericResponse<C>['output'][number]['content']
+    content: FB.GenericResponse<C>["output"][number]["content"]
   ): FB.PlatformResponse.Output {
     switch (content.type) {
-      case 'button':
+      case "button":
         return createButtonResponse(content);
 
-      case 'carousel':
+      case "carousel":
         return createCarouselResponse(content);
 
-      case 'list':
+      case "list":
         return createListResponse(content);
 
-      case 'media':
+      case "media":
         return createMediaResponse(content);
 
-      case 'text':
+      case "text":
         return createTextResponse(content);
     }
   }
@@ -348,24 +348,24 @@ function createFacebookResponse<C>({
     const { text } = quickReply;
 
     switch (quickReply.type) {
-      case 'location':
-        return { title: text, content_type: 'location', payload: text };
+      case "location":
+        return { title: text, content_type: "location", payload: text };
 
-      case 'postback':
+      case "postback":
         return {
           title: text,
-          content_type: 'text',
+          content_type: "text",
           payload: quickReply.payload
         };
 
-      case 'text':
-        return { title: text, content_type: 'text', payload: text };
+      case "text":
+        return { title: text, content_type: "text", payload: text };
     }
   }
 
   function createPlatformResponse(
     targetID: string,
-    { content, quickReplies = [] }: FB.GenericResponse<C>['output'][number]
+    { content, quickReplies = [] }: FB.GenericResponse<C>["output"][number]
   ): FB.PlatformResponse {
     const fbQuickReplies = quickReplies.map(qr => createQuickReply(qr));
     const fbResponse = createResponse(content);
@@ -397,10 +397,10 @@ export async function createFacebookMessenger<C>(
     {
       leafSelector,
       communicator,
-      targetPlatform: 'facebook',
+      targetPlatform: "facebook",
       mapRequest: async req => {
-        if (isType<FB.PlatformRequest>(req, 'object', 'entry')) {
-          return createFacebookRequest(req, 'facebook');
+        if (isType<FB.PlatformRequest>(req, "object", "entry")) {
+          return createFacebookRequest(req, "facebook");
         }
 
         throw new Error(

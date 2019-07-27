@@ -1,6 +1,6 @@
-import { DefaultContext, Transformer } from '../type/common';
-import { ContextDAO } from '../type/context-dao';
-import { Telegram } from '../type/telegram';
+import { DefaultContext, Transformer } from "../type/common";
+import { ContextDAO } from "../type/context-dao";
+import { Telegram } from "../type/telegram";
 
 /**
  * Save a Telegram user in backend if targetID is not found in context.
@@ -15,7 +15,7 @@ export function saveTelegramUser<C>(
       ...messenger,
       receiveRequest: async request => {
         const { targetID, telegramUser, oldContext } = request;
-        const sidKey: keyof DefaultContext = 'targetID';
+        const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           await saveUser(telegramUser);

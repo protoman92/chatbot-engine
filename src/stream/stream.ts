@@ -1,10 +1,10 @@
-import { mapSeries } from '../common/utils';
+import { mapSeries } from "../common/utils";
 import {
   ContentObservable,
   ContentObserver,
   ContentSubject,
   ContentSubscription
-} from '../type/stream';
+} from "../type/stream";
 
 /** Create a subscription with custom unsubscribe logic. */
 export function createSubscription(

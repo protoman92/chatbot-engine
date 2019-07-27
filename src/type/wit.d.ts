@@ -1,5 +1,5 @@
-import { DeepReadonly } from 'ts-essentials';
-import { KV } from './common';
+import { DeepReadonly } from "ts-essentials";
+import { KV } from "./common";
 
 export interface WitConfigs {
   readonly authorizationToken: string;
@@ -8,7 +8,7 @@ export interface WitConfigs {
 export interface WitEntity {
   readonly confidence: number;
   readonly value: string;
-  readonly type: 'value';
+  readonly type: "value";
 }
 
 export interface WitResponse<Entities extends string = string> {

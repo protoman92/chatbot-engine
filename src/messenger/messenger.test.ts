@@ -1,5 +1,5 @@
-import expectJs from 'expect.js';
-import { beforeEach, describe } from 'mocha';
+import expectJs from "expect.js";
+import { beforeEach, describe } from "mocha";
 import {
   anything,
   capture,
@@ -8,42 +8,42 @@ import {
   spy,
   verify,
   when
-} from 'ts-mockito';
+} from "ts-mockito";
+import { PlatformCommunicator } from "../type/communicator";
+import { Facebook } from "../type/facebook";
+import { Leaf } from "../type/leaf";
 import {
   CrossPlatformMessengerConfigs,
-  Facebook,
-  GenericRequest,
-  SupportedPlatform,
-  Telegram
-} from '..';
+  SupportedPlatform
+} from "../type/messenger";
+import { GenericRequest } from "../type/request";
+import { GenericResponse } from "../type/response";
+import { Telegram } from "../type/telegram";
 import {
   createCrossPlatformBatchMessenger,
   createMessenger
-} from './generic-messenger';
-import { PlatformCommunicator } from '../type/communicator';
-import { Leaf } from '../type/leaf';
-import { GenericResponse } from '../type/response';
+} from "./generic-messenger";
 
-const targetID = 'target-id';
-const targetPlatform = 'facebook' as const;
+const targetID = "target-id";
+const targetPlatform = "facebook" as const;
 
-describe('Generic unit messenger', () => {
+describe("Generic unit messenger", () => {
   let leafSelector: Leaf<{}>;
   let communicator: PlatformCommunicator<unknown>;
 
   beforeEach(async () => {
     leafSelector = spy<Leaf<{}>>({
-      next: () => Promise.reject(''),
-      subscribe: () => Promise.reject('')
+      next: () => Promise.reject(""),
+      subscribe: () => Promise.reject("")
     });
 
     communicator = spy<PlatformCommunicator<unknown>>({
-      sendResponse: () => Promise.reject(''),
-      setTypingIndicator: () => Promise.reject('')
+      sendResponse: () => Promise.reject(""),
+      setTypingIndicator: () => Promise.reject("")
     });
   });
 
-  it('Should trigger send with valid response', async () => {
+  it("Should trigger send with valid response", async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(communicator.sendResponse(anything())).thenResolve();
@@ -79,7 +79,7 @@ describe('Generic unit messenger', () => {
     });
   });
 
-  it('Should not trigger send without matching target platform', async () => {
+  it("Should not trigger send without matching target platform", async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(communicator.sendResponse(anything())).thenResolve();
@@ -88,7 +88,7 @@ describe('Generic unit messenger', () => {
     // When
     const unitMessenger = spy(
       await createMessenger({
-        targetPlatform: 'telegram',
+        targetPlatform: "telegram",
         leafSelector: instance(leafSelector),
         communicator: instance(communicator),
         mapRequest: async () => [],
@@ -110,7 +110,7 @@ describe('Generic unit messenger', () => {
     verify(unitMessenger.sendResponse(anything())).never();
   });
 
-  it('Should process input when receiving request', async () => {
+  it("Should process input when receiving request", async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
@@ -119,17 +119,17 @@ describe('Generic unit messenger', () => {
     const input: readonly Facebook.GenericRequest.Input[] = [
       {
         targetPlatform,
-        inputText: 'text-1',
-        inputImageURL: 'image-1',
+        inputText: "text-1",
+        inputImageURL: "image-1",
         inputCoordinate: { lat: 0, lng: 0 },
-        stickerID: ''
+        stickerID: ""
       },
       {
         targetPlatform,
-        inputText: 'text-2',
-        inputImageURL: 'image-2',
+        inputText: "text-2",
+        inputImageURL: "image-2",
         inputCoordinate: { lat: 1, lng: 1 },
-        stickerID: ''
+        stickerID: ""
       }
     ];
 
@@ -160,7 +160,7 @@ describe('Generic unit messenger', () => {
   });
 });
 
-describe('Cross platform unit messenger', () => {
+describe("Cross platform unit messenger", () => {
   let fbMessenger: Facebook.Messenger<{}>;
   let tlMessenger: Telegram.Messenger<{}>;
   let messengers: CrossPlatformMessengerConfigs<{}>;
@@ -188,12 +188,12 @@ describe('Cross platform unit messenger', () => {
       .reduce((acc, item) => ({ ...acc, ...item })) as typeof messengers;
   });
 
-  it('Should invoke correct messenger', async () => {
+  it("Should invoke correct messenger", async () => {
     // Setup
     when(fbMessenger.generalizeRequest(anything())).thenResolve([
       {
         targetID,
-        targetPlatform: 'facebook',
+        targetPlatform: "facebook",
         oldContext: {},
         input: []
       }
@@ -202,15 +202,15 @@ describe('Cross platform unit messenger', () => {
     when(tlMessenger.generalizeRequest(anything())).thenResolve([
       {
         targetID,
-        targetPlatform: 'telegram' as const,
+        targetPlatform: "telegram" as const,
         oldContext: {},
         input: [],
         telegramUser: {
           id: 0,
-          first_name: '',
-          last_name: '',
-          username: '',
-          language_code: 'en' as const,
+          first_name: "",
+          last_name: "",
+          username: "",
+          language_code: "en" as const,
           is_bot: false
         }
       }

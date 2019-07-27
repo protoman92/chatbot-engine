@@ -1,6 +1,6 @@
-import { GenericResponse } from '../../type/response';
-import { Leaf } from '../../type/leaf';
-import { createLeafWithObserver } from '../leaf';
+import { GenericResponse } from "../../type/response";
+import { Leaf } from "../../type/leaf";
+import { createLeafWithObserver } from "../leaf";
 
 /**
  * Map output of a leaf to another output.
