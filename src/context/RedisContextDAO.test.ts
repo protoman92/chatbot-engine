@@ -2,9 +2,9 @@ import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { RedisClient } from 'redis';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { joinObjects } from '../../src/common/utils';
-import { createRedisContextDAO } from '../../src/context/RedisContextDAO';
-import { ContextDAO } from '../../src/type/context-dao';
+import { joinObjects } from '../common/utils';
+import { createRedisContextDAO } from './RedisContextDAO';
+import { ContextDAO } from '../type/context-dao';
 
 const targetID = 'target-id';
 

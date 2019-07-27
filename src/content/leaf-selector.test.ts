@@ -1,13 +1,13 @@
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { DEFAULT_COORDINATES } from '../../src/common/utils';
-import { createLeafWithObserver } from '../../src/content/leaf';
-import { createLeafSelector } from '../../src/content/leaf-selector';
-import { Leaf } from '../../src/type/leaf';
+import { DEFAULT_COORDINATES } from '../common/utils';
+import { createLeafWithObserver } from './leaf';
+import { createLeafSelector } from './leaf-selector';
+import { Leaf } from '../type/leaf';
 
 type TestLeafSelector = ReturnType<
-  typeof import('../../src/content/leaf-selector')['createLeafSelector']
+  typeof import('./leaf-selector')['createLeafSelector']
 >;
 
 const targetID = 'target-id';

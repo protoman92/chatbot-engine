@@ -1,19 +1,19 @@
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import { Telegram } from '../../src';
-import { compose } from '../../src/common/utils';
+import { Telegram } from '..';
+import { compose } from '../common/utils';
 import {
   injectContextOnReceive,
   saveContextOnSend,
   saveUserForTargetID,
   setTypingIndicator
-} from '../../src/messenger/messenger-transform';
-import { saveTelegramUser } from '../../src/messenger/telegram-transform';
-import { PlatformCommunicator } from '../../src/type/communicator';
-import { ContextDAO } from '../../src/type/context-dao';
-import { Messenger } from '../../src/type/messenger';
-import { GenericRequest } from '../../src/type/request';
-import { GenericResponse } from '../../src/type/response';
+} from './messenger-transform';
+import { saveTelegramUser } from './telegram-transform';
+import { PlatformCommunicator } from '../type/communicator';
+import { ContextDAO } from '../type/context-dao';
+import { Messenger } from '../type/messenger';
+import { GenericRequest } from '../type/request';
+import { GenericResponse } from '../type/response';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook';

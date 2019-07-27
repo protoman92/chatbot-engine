@@ -1,17 +1,17 @@
 import { HTTPCommunicator } from '../type/communicator';
-import { WitCommunicator, WitResponse, WitConfigs } from '../type/wit';
+import { WitCommunicator, WitConfigs, WitResponse } from '../type/wit';
 
 /** Create a default wit communicator. */
 export function createWitCommunicator(
-  comm: HTTPCommunicator,
-  { authorizationToken }: WitConfigs
+  communicator: HTTPCommunicator,
+  configs: WitConfigs
 ): WitCommunicator {
   return {
     validate: message =>
-      comm.communicate<WitResponse>({
+      communicator.communicate<WitResponse>({
         method: 'GET',
         url: `https://api.wit.ai/message?q=${message}`,
-        headers: { Authorization: `Bearer ${authorizationToken}` }
+        headers: { Authorization: `Bearer ${configs.authorizationToken}` }
       })
   };
 }

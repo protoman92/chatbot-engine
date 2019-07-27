@@ -15,14 +15,14 @@ import {
   GenericRequest,
   SupportedPlatform,
   Telegram
-} from '../../src';
+} from '..';
 import {
   createCrossPlatformBatchMessenger,
   createMessenger
-} from '../../src/messenger/generic-messenger';
-import { PlatformCommunicator } from '../../src/type/communicator';
-import { Leaf } from '../../src/type/leaf';
-import { GenericResponse } from '../../src/type/response';
+} from './generic-messenger';
+import { PlatformCommunicator } from '../type/communicator';
+import { Leaf } from '../type/leaf';
+import { GenericResponse } from '../type/response';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook' as const;

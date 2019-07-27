@@ -2,16 +2,16 @@ import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { Omit } from 'ts-essentials';
 import { anything, instance, spy, verify, when } from 'ts-mockito';
-import { Facebook, Telegram, VisualContent } from '../../src';
-import { DEFAULT_COORDINATES, isType } from '../../src/common/utils';
+import { Facebook, Telegram, VisualContent } from '..';
+import { DEFAULT_COORDINATES, isType } from '../common/utils';
 import {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
   createLeafWithObserver,
   createObserverChain
-} from '../../src/content/leaf';
-import { bridgeEmission } from '../../src/stream/stream';
-import { Leaf } from '../../src/type/leaf';
+} from './leaf';
+import { bridgeEmission } from '../stream/stream';
+import { Leaf } from '../type/leaf';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook';

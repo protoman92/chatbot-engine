@@ -3,8 +3,8 @@ import axiosStatic, { AxiosInstance, AxiosResponse } from 'axios';
 import expectJs from 'expect.js';
 import { beforeEach, describe } from 'mocha';
 import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import { createAxiosCommunicator } from '../../src/messenger/axios-communicator';
-import { HTTPCommunicator } from '../../src/type/communicator';
+import { createAxiosCommunicator } from './axios-communicator';
+import { HTTPCommunicator } from '../type/communicator';
 
 describe('Axios communicator', () => {
   let axios: AxiosInstance;

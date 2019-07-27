@@ -1,8 +1,16 @@
 import { beforeEach, describe, it } from 'mocha';
-import { anything, deepEqual, instance, spy, verify, when } from 'ts-mockito';
-import { createWitCommunicator } from '../../src/messenger/wit-communicator';
-import { HTTPCommunicator } from '../../src/type/communicator';
-import { WitCommunicator, WitConfigs } from '../../src/type/wit';
+import {
+  anything,
+  deepEqual,
+  instance,
+  spy,
+  verify,
+  when,
+  capture
+} from 'ts-mockito';
+import { HTTPCommunicator } from '../type/communicator';
+import { WitCommunicator, WitConfigs } from '../type/wit';
+import { createWitCommunicator } from './wit-communicator';
 
 describe('Wit communicator', () => {
   let comm: HTTPCommunicator;
@@ -30,6 +38,7 @@ describe('Wit communicator', () => {
     await witCommunicator.validate(message);
 
     // Then
+    console.log(capture<any>(comm.communicate));
     verify(
       comm.communicate(
         deepEqual({

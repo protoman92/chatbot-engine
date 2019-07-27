@@ -6,8 +6,8 @@ import {
   WitCommunicator,
   WitContext,
   WitResponse
-} from '../../src';
-import { DEFAULT_COORDINATES } from '../../src/common/utils';
+} from '../..';
+import { DEFAULT_COORDINATES } from '../../common/utils';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook' as const;

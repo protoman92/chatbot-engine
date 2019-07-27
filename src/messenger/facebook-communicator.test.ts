@@ -1,11 +1,7 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
 import { instance, spy, when } from 'ts-mockito';
-import {
-  createFacebookCommunicator,
-  Facebook,
-  HTTPCommunicator
-} from '../../src';
+import { createFacebookCommunicator, Facebook, HTTPCommunicator } from '..';
 
 describe('Facebook communicator', () => {
   let communicator: HTTPCommunicator;

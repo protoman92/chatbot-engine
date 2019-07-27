@@ -1,6 +1,6 @@
 import expectJs from 'expect.js';
 import { describe, it } from 'mocha';
-import { mapSeries, requireKeys } from '../../src/common/utils';
+import { mapSeries, requireKeys } from './utils';
 
 describe('Common utilities', () => {
   it('Map series should maintain order', async function() {

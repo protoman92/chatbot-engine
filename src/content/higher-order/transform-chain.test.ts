@@ -16,9 +16,9 @@ import {
   higherOrderRequireInputKeys,
   Leaf,
   WitContext
-} from '../../src';
-import { DEFAULT_COORDINATES } from '../../src/common/utils';
-import { bridgeEmission, createSubscription } from '../../src/stream/stream';
+} from '../..';
+import { DEFAULT_COORDINATES } from '../../common/utils';
+import { bridgeEmission, createSubscription } from '../../stream/stream';
 
 const targetID = 'target-id';
 const targetPlatform = 'facebook' as const;
