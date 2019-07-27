@@ -12,7 +12,7 @@ import { anyTransformer } from "./any-transformer";
 import { catchError } from "./catch-error";
 import { compactMapInput, filterInput, mapInput } from "./map-input";
 import { mapOutput } from "./map-output";
-import { higherOrderRequireInputKeys } from "./require-keys";
+import { requireInputKeys } from "./require-keys";
 import { createTransformChain } from "./transform-chain";
 
 const targetID = "target-id";
@@ -240,9 +240,7 @@ describe("Transform chain", () => {
     );
 
     // When
-    const resultLeaf = await higherOrderRequireInputKeys<Context1, "a">("a")(
-      originalLeaf
-    );
+    const resultLeaf = await requireInputKeys<Context1, "a">("a")(originalLeaf);
 
     const {
       output: [{ quickReplies: [{ text }] = [{ text: "" }] }]

@@ -1,0 +1,10 @@
+export { createAxiosCommunicator } from "./axios-communicator";
+export { createFacebookCommunicator } from "./facebook-communicator";
+export { createFacebookMessenger } from "./facebook-messenger";
+export { saveFacebookUser } from "./facebook-transform";
+export { createCrossPlatformBatchMessenger } from "./generic-messenger";
+export { transformMessengersByDefault } from "./messenger-transform";
+export { createTelegramCommunicator } from "./telegram-communicator";
+export { createTelegramMessenger } from "./telegram-messenger";
+export { saveTelegramUser } from "./telegram-transform";
+export { createWitCommunicator } from "./wit-communicator";
