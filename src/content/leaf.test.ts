@@ -25,7 +25,7 @@ describe("Default error leaf", () => {
     const error = new Error("some-error");
 
     // When
-    const { output: visualContents } = await bridgeEmission(errorLeaf)({
+    const { output } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
       error,
@@ -35,8 +35,8 @@ describe("Default error leaf", () => {
       stickerID: ""
     });
     // Then
-    expectJs(visualContents).to.have.length(1);
-    const [{ content: response }] = visualContents;
+    expectJs(output).to.have.length(1);
+    const [{ content: response }] = output;
 
     if (isType<VisualContent.MainContent.Text>(response, "text")) {
       expectJs(response.text).to.contain(error.message);
@@ -90,6 +90,7 @@ describe("Leaf for platforms", () => {
     await platformLeaf.next({
       targetID,
       targetPlatform: "telegram",
+      inputCommand: "",
       inputText: "",
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES

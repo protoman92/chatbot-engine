@@ -11,16 +11,16 @@ export function createTelegramCommunicator(
     return `https://api.telegram.org/bot${authToken}/${action}?${qs}`;
   }
 
-  async function communicate(
+  async function communicate<Result>(
     ...params: Parameters<HTTPCommunicator["communicate"]>
-  ): Promise<unknown> {
+  ): Promise<Result> {
     const response = await communicator.communicate<
       Telegram.Communicator.APIResponse
     >(...params);
 
     switch (response.ok) {
       case true:
-        return response.result;
+        return response.result as Result;
 
       case false:
         throw new Error(response.description);
@@ -28,6 +28,8 @@ export function createTelegramCommunicator(
   }
 
   return {
+    getCurrentBot: () =>
+      communicate<Telegram.Bot>({ url: formatURL("getMe"), method: "GET" }),
     sendResponse: ({ action, ...payload }) => {
       return communicate({
         url: formatURL(action),

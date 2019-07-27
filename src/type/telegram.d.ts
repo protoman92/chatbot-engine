@@ -10,6 +10,7 @@ import { VisualContent as RootVisualContent } from "./visual-content";
 export namespace Telegram {
   namespace GenericRequest {
     interface Input extends RootGenericRequest.Base.Input {
+      readonly inputCommand: string;
       readonly targetPlatform: "telegram";
     }
   }
@@ -180,12 +181,16 @@ export namespace Telegram {
 
   type PlatformResponse = PlatformResponse.SendMessage;
 
-  interface User {
+  interface Bot {
     readonly id: number;
     readonly first_name: string;
-    readonly last_name: string;
     readonly username: string;
     readonly is_bot: boolean;
+  }
+
+  interface User extends Bot {
+    readonly last_name: string;
+
     readonly language_code: "en";
   }
 
@@ -220,6 +225,9 @@ export namespace Telegram {
 
   /** A Telegram-specific communicator. */
   interface Communicator extends PlatformCommunicator<PlatformResponse> {
+    /** Get the current chatbot. */
+    getCurrentBot(): Promise<Bot>;
+
     /** Set webhook to start receiving message updates. */
     setWebhook(): Promise<unknown>;
   }

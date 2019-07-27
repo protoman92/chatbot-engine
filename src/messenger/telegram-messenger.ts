@@ -11,12 +11,30 @@ import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
 
 /**
+ * Extract an input command from an input text. For example:
+ * /start @abcbot 123
+ * should give [start, 123], i.e. the command and the instruction. If the
+ * command does not exist, fallback to the base input text for instruction.
+ */
+export function extractInputCommand(
+  username: string,
+  inputText: string
+): [string, string] {
+  const [, command = "", text = inputText] =
+    inputText.match(
+      new RegExp(`^\\/\(\\w*\)\\s*@${username}\\s*\(\(.|\\s\)*\)$`, "im")
+    ) || [];
+
+  return [command.trim(), text.trim()];
+}
+
+/**
  * Map platform request to generic request for generic processing.
  * @template C The context used by the current chatbot.
  */
 function createTelegramRequest<C>(
   webhook: TL.PlatformRequest,
-  targetPlatform: "telegram"
+  { username }: TL.Bot
 ): readonly TL.GenericRequest<C>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage }
@@ -30,13 +48,19 @@ function createTelegramRequest<C>(
     if (
       isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, "text")
     ) {
+      const [inputCommand, inputText] = extractInputCommand(
+        username,
+        restMessage.text
+      );
+
       return [
         user,
         chat,
         [
           {
-            targetPlatform,
-            inputText: restMessage.text,
+            inputCommand,
+            inputText,
+            targetPlatform: "telegram",
             inputImageURL: "",
             inputCoordinate: DEFAULT_COORDINATES
           }
@@ -61,7 +85,8 @@ function createTelegramRequest<C>(
       undefined,
       [
         {
-          targetPlatform,
+          targetPlatform: "telegram",
+          inputCommand: "",
           inputText: data,
           inputImageURL: "",
           inputCoordinate: DEFAULT_COORDINATES
@@ -98,7 +123,7 @@ function createTelegramRequest<C>(
 
   return [
     {
-      targetPlatform,
+      targetPlatform: "telegram",
       telegramUser,
       input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
@@ -113,7 +138,7 @@ function createTelegramRequest<C>(
  */
 function createTelegramResponse<C>({
   targetID,
-  output: visualContents
+  output
 }: TL.GenericResponse<C>): readonly TL.PlatformResponse[] {
   function createTextResponse(
     targetID: string,
@@ -224,9 +249,7 @@ function createTelegramResponse<C>({
     }
   }
 
-  return visualContents.map(visualContent => {
-    return createPlatformResponse(targetID, visualContent);
-  });
+  return output.map(o => createPlatformResponse(targetID, o));
 }
 
 /**
@@ -239,13 +262,14 @@ export async function createTelegramMessenger<C>(
   ...transformers: readonly Transformer<TL.Messenger<C>>[]
 ): Promise<TL.Messenger<C>> {
   await communicator.setWebhook();
+  const bot = await communicator.getCurrentBot();
 
   return createMessenger(
     {
       leafSelector,
       communicator,
       targetPlatform: "telegram",
-      mapRequest: async req => createTelegramRequest(req, "telegram"),
+      mapRequest: async req => createTelegramRequest(req, bot),
       mapResponse: async res => {
         return createTelegramResponse(res as TL.GenericResponse<C>);
       }

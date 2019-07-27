@@ -169,7 +169,7 @@ function createFacebookRequest<C>(
  */
 function createFacebookResponse<C>({
   targetID,
-  output: visualContents
+  output
 }: FB.GenericResponse<C>): readonly FB.PlatformResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
@@ -379,9 +379,7 @@ function createFacebookResponse<C>({
     return { ...fbResponse, message, recipient: { id: targetID } };
   }
 
-  return visualContents.map(visualContent => {
-    return createPlatformResponse(targetID, visualContent);
-  });
+  return output.map(o => createPlatformResponse(targetID, o));
 }
 
 /**
