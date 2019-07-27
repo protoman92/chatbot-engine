@@ -61,12 +61,16 @@ export namespace Telegram {
 
   namespace PlatformRequest {
     namespace Base {
+      namespace Message {
+        interface Chat {
+          readonly id: number;
+        }
+      }
+
       interface Message {
         readonly message_id: number;
         readonly from: User;
-
-        readonly chat: Omit<User, "language_code" | "is_bot"> &
-          Readonly<{ type: "private" }>;
+        readonly chat: SubContent.Message.Chat;
       }
     }
 
@@ -78,6 +82,18 @@ export namespace Telegram {
   namespace PlatformRequest {
     namespace SubContent {
       namespace Message {
+        namespace Chat {
+          interface Private extends Base.Message.Chat {
+            readonly type: "private";
+          }
+
+          interface Group extends Base.Message.Chat {
+            readonly type: "group";
+          }
+        }
+
+        type Chat = Chat.Group | Chat.Private;
+
         interface Text extends Base.Message {
           readonly text: string;
         }

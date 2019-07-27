@@ -19,15 +19,20 @@ function createTelegramRequest<C>(
   targetPlatform: "telegram"
 ): readonly TL.GenericRequest<C>[] {
   function processMessageRequest({
-    message: { from: user, ...restMessage }
+    message: { chat, from: user, ...restMessage }
   }: TL.PlatformRequest.Message):
-    | [TL.User, TL.GenericRequest<C>["input"]]
+    | [
+        TL.User,
+        TL.PlatformRequest.SubContent.Message.Chat,
+        TL.GenericRequest<C>["input"]
+      ]
     | undefined {
     if (
       isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, "text")
     ) {
       return [
         user,
+        chat,
         [
           {
             targetPlatform,
@@ -45,10 +50,15 @@ function createTelegramRequest<C>(
   function processCallbackRequest({
     callback_query: { data, from: user }
   }: TL.PlatformRequest.Callback):
-    | [TL.User, TL.GenericRequest<C>["input"]]
+    | [
+        TL.User,
+        TL.PlatformRequest.SubContent.Message.Chat | undefined,
+        TL.GenericRequest<C>["input"]
+      ]
     | undefined {
     return [
       user,
+      undefined,
       [
         {
           targetPlatform,
@@ -62,8 +72,12 @@ function createTelegramRequest<C>(
 
   function processRequest(
     request: TL.PlatformRequest
-  ): [TL.User, TL.GenericRequest<C>["input"]] {
-    let result: [TL.User, TL.GenericRequest<C>["input"]] | undefined;
+  ): [
+    TL.User,
+    TL.PlatformRequest.SubContent.Message.Chat | undefined,
+    TL.GenericRequest<C>["input"]
+  ] {
+    let result: ReturnType<typeof processRequest> | undefined;
 
     if (isType<TL.PlatformRequest.Message>(request, "message")) {
       result = processMessageRequest(request);
@@ -80,14 +94,14 @@ function createTelegramRequest<C>(
     );
   }
 
-  const [telegramUser, data] = processRequest(webhook);
+  const [telegramUser, chat, data] = processRequest(webhook);
 
   return [
     {
       targetPlatform,
       telegramUser,
       input: data,
-      targetID: `${telegramUser.id}`,
+      targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
       oldContext: {} as C
     }
   ];
