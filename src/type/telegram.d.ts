@@ -11,6 +11,8 @@ export namespace Telegram {
   namespace GenericRequest {
     interface Input extends RootGenericRequest.Base.Input {
       readonly inputCommand: string;
+      readonly leftChatMembers: readonly (Bot | User)[];
+      readonly newChatMembers: readonly (Bot | User)[];
       readonly targetPlatform: "telegram";
     }
   }
@@ -95,12 +97,26 @@ export namespace Telegram {
 
         type Chat = Chat.Group | Chat.Private;
 
+        interface LefChatMember extends Base.Message {
+          left_chat_participant: Bot | User;
+          left_chat_member: Bot | User;
+        }
+
+        interface NewChatMember extends Base.Message {
+          new_chat_participant: Bot | User;
+          new_chat_member: Bot | User;
+          new_chat_members: readonly (Bot | User)[];
+        }
+
         interface Text extends Base.Message {
           readonly text: string;
         }
       }
 
-      type Message = Message.Text;
+      type Message =
+        | Message.LefChatMember
+        | Message.NewChatMember
+        | Message.Text;
     }
 
     /** Payload that includes on message field. */
@@ -190,7 +206,6 @@ export namespace Telegram {
 
   interface User extends Bot {
     readonly last_name: string;
-
     readonly language_code: "en";
   }
 

@@ -48,10 +48,8 @@ function createTelegramRequest<C>(
     if (
       isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, "text")
     ) {
-      const [inputCommand, inputText] = extractInputCommand(
-        username,
-        restMessage.text
-      );
+      const { text } = restMessage;
+      const [inputCommand, inputText] = extractInputCommand(username, text);
 
       return [
         user,
@@ -60,6 +58,58 @@ function createTelegramRequest<C>(
           {
             inputCommand,
             inputText,
+            leftChatMembers: [],
+            newChatMembers: [],
+            targetPlatform: "telegram",
+            inputImageURL: "",
+            inputCoordinate: DEFAULT_COORDINATES
+          }
+        ]
+      ];
+    }
+
+    if (
+      isType<TL.PlatformRequest.SubContent.Message.NewChatMember>(
+        restMessage,
+        "new_chat_members"
+      )
+    ) {
+      const { new_chat_members: newChatMembers } = restMessage;
+
+      return [
+        user,
+        chat,
+        [
+          {
+            newChatMembers,
+            inputCommand: "",
+            inputText: "",
+            leftChatMembers: [],
+            targetPlatform: "telegram",
+            inputImageURL: "",
+            inputCoordinate: DEFAULT_COORDINATES
+          }
+        ]
+      ];
+    }
+
+    if (
+      isType<TL.PlatformRequest.SubContent.Message.LefChatMember>(
+        restMessage,
+        "left_chat_member"
+      )
+    ) {
+      const { left_chat_member } = restMessage;
+
+      return [
+        user,
+        chat,
+        [
+          {
+            inputCommand: "",
+            inputText: "",
+            newChatMembers: [],
+            leftChatMembers: [left_chat_member],
             targetPlatform: "telegram",
             inputImageURL: "",
             inputCoordinate: DEFAULT_COORDINATES
@@ -89,7 +139,9 @@ function createTelegramRequest<C>(
           inputCommand: "",
           inputText: data,
           inputImageURL: "",
-          inputCoordinate: DEFAULT_COORDINATES
+          inputCoordinate: DEFAULT_COORDINATES,
+          leftChatMembers: [],
+          newChatMembers: []
         }
       ]
     ];

@@ -93,7 +93,9 @@ describe("Leaf for platforms", () => {
       inputCommand: "",
       inputText: "",
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES
+      inputCoordinate: DEFAULT_COORDINATES,
+      leftChatMembers: [],
+      newChatMembers: []
     });
 
     await platformLeaf.complete!();
