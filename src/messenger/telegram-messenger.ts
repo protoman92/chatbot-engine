@@ -149,11 +149,13 @@ function createTelegramRequest<C>(
 
   function processRequest(
     request: TL.PlatformRequest
-  ): [
-    TL.User,
-    TL.PlatformRequest.SubContent.Message.Chat | undefined,
-    TL.GenericRequest<C>["input"]
-  ] {
+  ):
+    | [
+        TL.User,
+        TL.PlatformRequest.SubContent.Message.Chat | undefined,
+        TL.GenericRequest<C>["input"]
+      ]
+    | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
     if (isType<TL.PlatformRequest.Message>(request, "message")) {
@@ -164,14 +166,16 @@ function createTelegramRequest<C>(
       result = processCallbackRequest(request);
     }
 
-    if (!!result) return result;
-
-    throw Error(
-      formatTelegramError(`Invalid request ${JSON.stringify(request)}`)
+    console.error(
+      formatTelegramError(`Invalid request: ${JSON.stringify(request)}`)
     );
+
+    return result;
   }
 
-  const [telegramUser, chat, data] = processRequest(webhook);
+  const processed = processRequest(webhook);
+  if (!processed) return [];
+  const [telegramUser, chat, data] = processed;
 
   return [
     {
