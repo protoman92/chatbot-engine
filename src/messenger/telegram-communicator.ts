@@ -30,6 +30,12 @@ export function createTelegramCommunicator(
   return {
     getCurrentBot: () =>
       communicate<Telegram.Bot>({ url: formatURL("getMe"), method: "GET" }),
+    isMember: (chat_id, user_id) =>
+      communicate<{ status: string }>({
+        url: formatURL("getChatMember"),
+        method: "GET",
+        query: { chat_id, user_id }
+      }).then(({ status }) => status === "member"),
     sendResponse: ({ action, ...payload }) => {
       return communicate({
         url: formatURL(action),

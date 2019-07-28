@@ -1,4 +1,4 @@
-import { DeepReadonly, Omit } from "ts-essentials";
+import { DeepReadonly } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
@@ -242,6 +242,9 @@ export namespace Telegram {
   interface Communicator extends PlatformCommunicator<PlatformResponse> {
     /** Get the current chatbot. */
     getCurrentBot(): Promise<Bot>;
+
+    /** Check if a bot is a member of a group. */
+    isMember(chatID: string, botID: string): Promise<boolean>;
 
     /** Set webhook to start receiving message updates. */
     setWebhook(): Promise<unknown>;

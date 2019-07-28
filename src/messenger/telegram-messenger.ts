@@ -166,15 +166,19 @@ function createTelegramRequest<C>(
       result = processCallbackRequest(request);
     }
 
-    console.error(
-      formatTelegramError(`Invalid request: ${JSON.stringify(request)}`)
-    );
-
     return result;
   }
 
   const processed = processRequest(webhook);
-  if (!processed) return [];
+
+  if (!processed) {
+    console.error(
+      formatTelegramError(`Invalid request: ${JSON.stringify(webhook)}`)
+    );
+
+    return [];
+  }
+
   const [telegramUser, chat, data] = processed;
 
   return [
@@ -320,7 +324,7 @@ export async function createTelegramMessenger<C>(
   await communicator.setWebhook();
   const bot = await communicator.getCurrentBot();
 
-  return createMessenger(
+  const baseMessenger = await createMessenger(
     {
       leafSelector,
       communicator,
@@ -332,4 +336,17 @@ export async function createTelegramMessenger<C>(
     },
     ...transformers
   );
+
+  return {
+    ...baseMessenger,
+    sendResponse: async response => {
+      const { targetID } = response;
+
+      if (!!(await communicator.isMember(targetID, `${bot.id}`))) {
+        return baseMessenger.sendResponse(response);
+      }
+
+      return {};
+    }
+  };
 }
