@@ -2,18 +2,6 @@ import { Facebook } from "./facebook";
 import { Telegram } from "./telegram";
 
 declare namespace VisualContent {
-  namespace Base {
-    interface QuickReply {
-      readonly text: string;
-    }
-
-    namespace SubContent {
-      interface Action {
-        readonly text: string;
-      }
-    }
-  }
-
   interface Base {
     readonly content: VisualContent.MainContent;
   }
@@ -21,29 +9,34 @@ declare namespace VisualContent {
 
 declare namespace VisualContent {
   namespace QuickReply {
-    interface Location extends Base.QuickReply {
+    interface Location {
+      readonly text: string;
       readonly type: "location";
     }
 
-    interface Postback extends Base.QuickReply {
+    interface Postback {
       readonly payload: string;
+      readonly text: string;
       readonly type: "postback";
     }
 
-    interface Text extends Base.QuickReply {
+    interface Text {
+      readonly text: string;
       readonly type: "text";
     }
   }
 
   namespace SubContent {
     namespace Action {
-      interface Postback extends Base.SubContent.Action {
+      interface Postback {
         readonly payload: string;
+        readonly text: string;
         readonly type: "postback";
       }
 
-      interface URL extends Base.SubContent.Action {
+      interface URL {
         readonly url: string;
+        readonly text: string;
         readonly type: "url";
       }
     }

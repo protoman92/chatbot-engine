@@ -30,7 +30,8 @@ export namespace Telegram {
 
   namespace VisualContent {
     namespace QuickReply {
-      interface Contact extends RootVisualContent.Base.QuickReply {
+      interface Contact {
+        readonly text: string;
         readonly type: "contact";
       }
 
@@ -43,15 +44,17 @@ export namespace Telegram {
         | RootVisualContent.QuickReply.Text
         | QuickReply.Contact;
 
-      type InlineMarkups = readonly (readonly InlineMarkup[])[];
-      type ReplyMarkups = readonly (readonly ReplyMarkup[])[];
+      type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
+      type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
     }
 
-    type QuickReplies = QuickReply.InlineMarkups | QuickReply.ReplyMarkups;
+    type QuickReplyMatrix =
+      | QuickReply.InlineMarkupMatrix
+      | QuickReply.ReplyMarkupMatrix;
   }
 
   interface VisualContent extends RootVisualContent.Base {
-    readonly quickReplies?: VisualContent.QuickReplies;
+    readonly quickReplies?: VisualContent.QuickReplyMatrix;
   }
 
   type DefaultContext = RootDefaultContext & GenericRequest.Input;
