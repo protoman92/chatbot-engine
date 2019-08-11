@@ -45,88 +45,89 @@ export namespace Facebook {
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {
-    namespace Base {
-      interface Input {
-        readonly sender: Readonly<{ id: string }>;
-        readonly recipient: Readonly<{ id: string }>;
-        readonly timestamp: number;
+    namespace Entry {
+      namespace Messaging {
+        interface Postback {
+          readonly postback: Readonly<{ payload: string; title: string }>;
+          readonly sender: Readonly<{ id: string }>;
+          readonly recipient: Readonly<{ id: string }>;
+          readonly timestamp: number;
+        }
+
+        namespace Message {
+          namespace Attachment {
+            namespace Attachment {
+              interface Image {
+                readonly type: "image";
+                readonly payload: Readonly<{ url: string }>;
+              }
+
+              interface StickerImage extends Image {
+                readonly sticker_id: number;
+              }
+
+              interface Location {
+                readonly type: "location";
+                readonly title: string;
+                readonly url: string;
+                readonly payload: DeepReadonly<{
+                  coordinates: { lat: number; long: number };
+                }>;
+              }
+            }
+
+            type Attachment =
+              | Attachment.Image
+              | Attachment.StickerImage
+              | Attachment.Location;
+          }
+
+          interface Attachment {
+            readonly message: Readonly<{
+              attachments: readonly Attachment.Attachment[];
+              message: Readonly<{ mid: string; seq: number }>;
+            }>;
+
+            readonly sender: Readonly<{ id: string }>;
+            readonly recipient: Readonly<{ id: string }>;
+            readonly timestamp: number;
+          }
+
+          interface QuickReply {
+            readonly quick_reply: Readonly<{ payload: string }>;
+            readonly message: Readonly<{ mid: string; seq: number }>;
+            readonly sender: Readonly<{ id: string }>;
+            readonly recipient: Readonly<{ id: string }>;
+            readonly timestamp: number;
+          }
+
+          interface Text {
+            readonly message: Readonly<{
+              text: string;
+              message: Readonly<{ mid: string; seq: number }>;
+            }>;
+
+            readonly sender: Readonly<{ id: string }>;
+            readonly recipient: Readonly<{ id: string }>;
+            readonly timestamp: number;
+          }
+        }
+
+        type Message = Message.Attachment | Message.Text | Message.QuickReply;
       }
 
-      interface Message extends Input {
-        readonly message: Readonly<{ mid: string; seq: number }>;
-      }
+      /** Represents possible combinations of Facebook requests. */
+      type Messaging = Messaging.Message | Messaging.Postback;
     }
-  }
-
-  namespace PlatformRequest {
-    namespace Input {
-      interface Postback extends Base.Input {
-        readonly postback: Readonly<{ payload: string; title: string }>;
-      }
-
-      namespace Attachment {
-        interface Image {
-          readonly type: "image";
-          readonly payload: Readonly<{ url: string }>;
-        }
-
-        interface StickerImage extends Image {
-          readonly sticker_id: number;
-        }
-
-        interface Location {
-          readonly type: "location";
-          readonly title: string;
-          readonly url: string;
-          readonly payload: DeepReadonly<{
-            coordinates: { lat: number; long: number };
-          }>;
-        }
-      }
-
-      type Attachment =
-        | Attachment.Image
-        | Attachment.StickerImage
-        | Attachment.Location;
-
-      namespace Message {
-        type Attachment = Base.Message &
-          DeepReadonly<{
-            message: { attachments: readonly Input.Attachment[] };
-          }>;
-
-        type QuickReply = Base.Message &
-          DeepReadonly<{ quick_reply: { payload: string } }>;
-
-        type Text = Base.Message & DeepReadonly<{ message: { text: string } }>;
-      }
-
-      type Message = Message.Attachment | Message.Text | Message.QuickReply;
-    }
-
-    /** Represents possible combinations of Facebook requests. */
-    type Input = Input.Message.Text | Input.Message.Attachment | Input.Postback;
   }
 
   /** Represents a webhook request. */
   interface PlatformRequest {
     readonly object: "page";
     readonly entry:
-      | Readonly<{ messaging: readonly PlatformRequest.Input[] }>[]
+      | Readonly<{ messaging: readonly PlatformRequest.Entry.Messaging[] }>[]
       | undefined
       | null;
-  }
-
-  namespace PlatformResponse {
-    namespace Base {
-      namespace SubContent {
-        interface Button {
-          readonly title: string;
-        }
-      }
-
-      interface Content {}
-    }
   }
 
   namespace PlatformResponse {
@@ -136,113 +137,113 @@ export namespace Facebook {
       readonly payload: string;
     }
 
-    namespace SubContent {
+    namespace Message {
       namespace Button {
-        interface Postback extends Base.SubContent.Button {
-          readonly type: "postback";
-          readonly payload: string;
+        namespace Button {
+          interface Postback {
+            readonly payload: string;
+            readonly title: string;
+            readonly type: "postback";
+          }
+
+          interface URL {
+            readonly title: string;
+            readonly type: "web_url";
+            readonly url: string;
+          }
         }
 
-        interface URL extends Base.SubContent.Button {
-          readonly type: "web_url";
-          readonly url: string;
-        }
+        type Button = Button.Postback | Button.URL;
       }
 
-      type Button = Button.Postback | Button.URL;
-    }
-
-    namespace Content {
-      type Button = Base.Content &
-        DeepReadonly<{
-          messaging_type: "RESPONSE";
-          message: {
-            attachment: {
-              type: "template";
-              payload: {
-                buttons: readonly SubContent.Button[];
-                template_type: "button";
-                text: string;
-              };
+      interface Button {
+        readonly messaging_type: "RESPONSE";
+        readonly message: DeepReadonly<{
+          attachment: {
+            type: "template";
+            payload: {
+              buttons: readonly Button.Button[];
+              template_type: "button";
+              text: string;
             };
           };
         }>;
+      }
 
       namespace Carousel {
         interface Element {
           readonly title: string;
           readonly subtitle: string | undefined;
           readonly image_url: string | undefined;
-          readonly buttons: readonly SubContent.Button[] | undefined;
+          readonly buttons: readonly Button.Button[] | undefined;
         }
       }
 
-      type Carousel = Base.Content &
-        DeepReadonly<{
-          messaging_type: "RESPONSE";
-          message: {
-            attachment: {
-              type: "template";
-              payload: {
-                elements: readonly Carousel.Element[];
-                template_type: "generic";
-              };
+      interface Carousel {
+        readonly messaging_type: "RESPONSE";
+        readonly message: DeepReadonly<{
+          attachment: {
+            type: "template";
+            payload: {
+              elements: readonly Carousel.Element[];
+              template_type: "generic";
             };
           };
         }>;
+      }
 
       namespace List {
         interface Element {
           readonly title: string;
           readonly subtitle: string | undefined;
-          readonly buttons: readonly SubContent.Button[] | undefined;
+          readonly buttons: readonly Button.Button[] | undefined;
         }
       }
 
-      type List = Base.Content &
-        DeepReadonly<{
-          messaging_type: "RESPONSE";
-          message: {
-            attachment: {
-              payload: {
-                buttons: readonly SubContent.Button[] | undefined;
-                elements: readonly List.Element[];
-                template_type: "list";
-                top_element_style: "compact";
-              };
-              type: "template";
+      interface List {
+        readonly messaging_type: "RESPONSE";
+        readonly message: DeepReadonly<{
+          attachment: {
+            payload: {
+              buttons: readonly Button.Button[] | undefined;
+              elements: readonly List.Element[];
+              template_type: "list";
+              top_element_style: "compact";
             };
+            type: "template";
           };
         }>;
+      }
 
-      type Media = Base.Content &
-        DeepReadonly<{
-          message: {
-            attachment: {
-              type: "image" | "video";
-              payload: { is_reusable: boolean; url: string };
-            };
+      interface Media {
+        readonly message: DeepReadonly<{
+          attachment: {
+            type: "image" | "video";
+            payload: { is_reusable: boolean; url: string };
           };
         }>;
+      }
 
-      type Text = Base.Content &
-        DeepReadonly<{ messaging_type: "RESPONSE"; message: { text: string } }>;
+      interface Text {
+        readonly messaging_type: "RESPONSE";
+        readonly message: Readonly<{ text: string }>;
+      }
     }
 
-    type Output =
-      | Content.Button
-      | Content.Carousel
-      | Content.List
-      | Content.Media
-      | Content.Text;
+    type Message =
+      | Message.Button
+      | Message.Carousel
+      | Message.List
+      | Message.Media
+      | Message.Text;
   }
 
-  type PlatformResponse = Omit<PlatformResponse.Output, "message"> &
+  type PlatformResponse = Omit<PlatformResponse.Message, "message"> &
     DeepReadonly<{
       recipient: { id: string };
       message: {
         quick_replies: readonly PlatformResponse.QuickReply[] | undefined;
-      } & PlatformResponse.Output["message"];
+      } & PlatformResponse.Message["message"];
     }>;
 
   /** Represents a Facebook user. */

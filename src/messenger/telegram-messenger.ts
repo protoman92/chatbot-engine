@@ -1,8 +1,8 @@
 import { Omit } from "ts-essentials";
-import { DEFAULT_COORDINATES, telegramError, isType } from "../common/utils";
+import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
 import { Leaf } from "../type/leaf";
-import { Telegram as TL } from "../type/telegram";
+import { Telegram } from "../type/telegram";
 import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
 
@@ -29,20 +29,20 @@ export function extractInputCommand(
  * @template C The context used by the current chatbot.
  */
 function createTelegramRequest<C>(
-  webhook: TL.PlatformRequest,
-  { username }: TL.Bot
-): readonly TL.GenericRequest<C>[] {
+  webhook: Telegram.PlatformRequest,
+  { username }: Telegram.Bot
+): readonly Telegram.GenericRequest<C>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage }
-  }: TL.PlatformRequest.Message):
+  }: Telegram.PlatformRequest.Message):
     | [
-        TL.User,
-        TL.PlatformRequest.SubContent.Message.Chat,
-        TL.GenericRequest<C>["input"]
+        Telegram.User,
+        Telegram.PlatformRequest.Message.Message.Chat.Chat,
+        Telegram.GenericRequest<C>["input"]
       ]
     | undefined {
     if (
-      isType<TL.PlatformRequest.SubContent.Message.Text>(restMessage, "text")
+      isType<Telegram.PlatformRequest.Message.Message.Text>(restMessage, "text")
     ) {
       const { text } = restMessage;
       const [inputCommand, inputText] = extractInputCommand(username, text);
@@ -65,7 +65,7 @@ function createTelegramRequest<C>(
     }
 
     if (
-      isType<TL.PlatformRequest.SubContent.Message.NewChatMember>(
+      isType<Telegram.PlatformRequest.Message.Message.NewChatMember>(
         restMessage,
         "new_chat_members"
       )
@@ -90,7 +90,7 @@ function createTelegramRequest<C>(
     }
 
     if (
-      isType<TL.PlatformRequest.SubContent.Message.LefChatMember>(
+      isType<Telegram.PlatformRequest.Message.Message.LeftChatMember>(
         restMessage,
         "left_chat_member"
       )
@@ -119,11 +119,11 @@ function createTelegramRequest<C>(
 
   function processCallbackRequest({
     callback_query: { data, from: user }
-  }: TL.PlatformRequest.Callback):
+  }: Telegram.PlatformRequest.Callback):
     | [
-        TL.User,
-        TL.PlatformRequest.SubContent.Message.Chat | undefined,
-        TL.GenericRequest<C>["input"]
+        Telegram.User,
+        Telegram.PlatformRequest.Message.Message.Chat.Chat | undefined,
+        Telegram.GenericRequest<C>["input"]
       ]
     | undefined {
     return [
@@ -144,21 +144,21 @@ function createTelegramRequest<C>(
   }
 
   function processRequest(
-    request: TL.PlatformRequest
+    request: Telegram.PlatformRequest
   ):
     | [
-        TL.User,
-        TL.PlatformRequest.SubContent.Message.Chat | undefined,
-        TL.GenericRequest<C>["input"]
+        Telegram.User,
+        Telegram.PlatformRequest.Message.Message.Chat.Chat | undefined,
+        Telegram.GenericRequest<C>["input"]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
-    if (isType<TL.PlatformRequest.Message>(request, "message")) {
+    if (isType<Telegram.PlatformRequest.Message>(request, "message")) {
       result = processMessageRequest(request);
     }
 
-    if (isType<TL.PlatformRequest.Callback>(request, "callback_query")) {
+    if (isType<Telegram.PlatformRequest.Callback>(request, "callback_query")) {
       result = processCallbackRequest(request);
     }
 
@@ -192,18 +192,18 @@ function createTelegramRequest<C>(
 function createTelegramResponse<C>({
   targetID,
   output
-}: TL.GenericResponse<C>): readonly TL.PlatformResponse[] {
+}: Telegram.GenericResponse<C>): readonly Telegram.PlatformResponse[] {
   function createTextResponse(
     targetID: string,
     { text }: VisualContent.MainContent.Text
-  ): Omit<TL.PlatformResponse.SendMessage, "reply_markup"> {
+  ): Omit<Telegram.PlatformResponse.SendMessage, "reply_markup"> {
     return { text, action: "sendMessage", chat_id: targetID };
   }
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    quickReplies: TL.VisualContent.QuickReply.InlineMarkups
-  ): TL.PlatformResponse.InlineKeyboardMarkup {
+    quickReplies: Telegram.VisualContent.QuickReply.InlineMarkups
+  ): Telegram.PlatformResponse.SendMessage.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: quickReplies.map(qrs =>
         qrs.map(qr => {
@@ -223,8 +223,8 @@ function createTelegramResponse<C>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    quickReplies: TL.VisualContent.QuickReply.ReplyMarkups
-  ): TL.PlatformResponse.ReplyKeyboardMarkup {
+    quickReplies: Telegram.VisualContent.QuickReply.ReplyMarkups
+  ): Telegram.PlatformResponse.SendMessage.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: quickReplies.map(qrs =>
         qrs.map(qr => {
@@ -262,30 +262,32 @@ function createTelegramResponse<C>({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReplies: TL.VisualContent.QuickReplies
-  ): TL.PlatformResponse.ReplyMarkup {
+    quickReplies: Telegram.VisualContent.QuickReplies
+  ): Telegram.PlatformResponse.SendMessage.ReplyMarkup {
     const shouldBeReplyMarkup = quickReplies.every(
-      (qrs: TL.VisualContent.QuickReplies[number]) =>
-        qrs.every(({ type }: TL.VisualContent.QuickReplies[number][number]) => {
-          return type === "location";
-        })
+      (qrs: Telegram.VisualContent.QuickReplies[number]) =>
+        qrs.every(
+          ({ type }: Telegram.VisualContent.QuickReplies[number][number]) => {
+            return type === "location";
+          }
+        )
     );
 
     if (shouldBeReplyMarkup) {
       return createReplyMarkups(
-        quickReplies as TL.VisualContent.QuickReply.ReplyMarkups
+        quickReplies as Telegram.VisualContent.QuickReply.ReplyMarkups
       );
     }
 
     return createInlineMarkups(
-      quickReplies as TL.VisualContent.QuickReply.InlineMarkups
+      quickReplies as Telegram.VisualContent.QuickReply.InlineMarkups
     );
   }
 
   function createPlatformResponse(
     targetID: string,
-    { quickReplies, content }: TL.GenericResponse<C>["output"][number]
-  ): TL.PlatformResponse {
+    { quickReplies, content }: Telegram.GenericResponse<C>["output"][number]
+  ): Telegram.PlatformResponse {
     const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
     switch (content.type) {
@@ -309,9 +311,9 @@ function createTelegramResponse<C>({
  */
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
-  communicator: TL.Communicator,
-  ...transformers: readonly Transformer<TL.Messenger<C>>[]
-): Promise<TL.Messenger<C>> {
+  communicator: Telegram.Communicator,
+  ...transformers: readonly Transformer<Telegram.Messenger<C>>[]
+): Promise<Telegram.Messenger<C>> {
   await communicator.setWebhook();
   const bot = await communicator.getCurrentBot();
 
@@ -322,7 +324,7 @@ export async function createTelegramMessenger<C>(
       targetPlatform: "telegram",
       mapRequest: async req => createTelegramRequest(req, bot),
       mapResponse: async res => {
-        return createTelegramResponse(res as TL.GenericResponse<C>);
+        return createTelegramResponse(res as Telegram.GenericResponse<C>);
       }
     },
     ...transformers

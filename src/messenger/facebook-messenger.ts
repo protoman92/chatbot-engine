@@ -1,6 +1,6 @@
 import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook as FB } from "../type/facebook";
+import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
@@ -10,15 +10,17 @@ import { createMessenger } from "./generic-messenger";
  * @template C The context used by the current chatbot.
  */
 function createFacebookRequest<C>(
-  webhook: FB.PlatformRequest,
+  webhook: Facebook.PlatformRequest,
   targetPlatform: "facebook"
-): readonly FB.GenericRequest<C>[] {
+): readonly Facebook.GenericRequest<C>[] {
   const { object, entry } = webhook;
 
   /** Group requests based on target ID. */
-  function groupRequests(reqs: readonly FB.PlatformRequest.Input[]) {
+  function groupRequests(
+    reqs: readonly Facebook.PlatformRequest.Entry.Messaging[]
+  ) {
     const requestMap: {
-      [K: string]: readonly FB.PlatformRequest.Input[];
+      [K: string]: readonly Facebook.PlatformRequest.Entry.Messaging[];
     } = {};
 
     reqs.forEach(req => {
@@ -30,10 +32,15 @@ function createFacebookRequest<C>(
   }
 
   function processRequest(
-    request: FB.PlatformRequest.Input,
+    request: Facebook.PlatformRequest.Entry.Messaging,
     targetPlatform: "facebook"
-  ): FB.GenericRequest<C>["input"] {
-    if (isType<FB.PlatformRequest.Input.Postback>(request, "postback")) {
+  ): Facebook.GenericRequest<C>["input"] {
+    if (
+      isType<Facebook.PlatformRequest.Entry.Messaging.Postback>(
+        request,
+        "postback"
+      )
+    ) {
       return [
         {
           targetPlatform,
@@ -45,11 +52,16 @@ function createFacebookRequest<C>(
       ];
     }
 
-    if (isType<FB.PlatformRequest.Input.Message>(request, "message")) {
+    if (
+      isType<Facebook.PlatformRequest.Entry.Messaging.Message>(
+        request,
+        "message"
+      )
+    ) {
       const { message } = request;
 
       if (
-        isType<FB.PlatformRequest.Input.Message.QuickReply>(
+        isType<Facebook.PlatformRequest.Entry.Messaging.Message.QuickReply>(
           message,
           "quick_reply"
         )
@@ -66,10 +78,9 @@ function createFacebookRequest<C>(
       }
 
       if (
-        isType<FB.PlatformRequest.Input.Message.Text["message"]>(
-          message,
-          "text"
-        )
+        isType<
+          Facebook.PlatformRequest.Entry.Messaging.Message.Text["message"]
+        >(message, "text")
       ) {
         return [
           {
@@ -83,10 +94,9 @@ function createFacebookRequest<C>(
       }
 
       if (
-        isType<FB.PlatformRequest.Input.Message.Attachment["message"]>(
-          message,
-          "attachments"
-        )
+        isType<
+          Facebook.PlatformRequest.Entry.Messaging.Message.Attachment["message"]
+        >(message, "attachments")
       ) {
         const { attachments } = message;
 
@@ -100,10 +110,9 @@ function createFacebookRequest<C>(
                 inputCoordinate: DEFAULT_COORDINATES,
                 stickerID: (() => {
                   if (
-                    isType<FB.PlatformRequest.Input.Attachment.StickerImage>(
-                      attachment.payload,
-                      "sticker_id"
-                    )
+                    isType<
+                      Facebook.PlatformRequest.Entry.Messaging.Message.Attachment.Attachment.StickerImage
+                    >(attachment.payload, "sticker_id")
                   ) {
                     return `${attachment.payload.sticker_id}`;
                   }
@@ -162,13 +171,13 @@ function createFacebookRequest<C>(
 function createFacebookResponse<C>({
   targetID,
   output
-}: FB.GenericResponse<C>): readonly FB.PlatformResponse[] {
+}: Facebook.GenericResponse<C>): readonly Facebook.PlatformResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(
     action: VisualContent.SubContent.Action
-  ): FB.PlatformResponse.SubContent.Button {
+  ): Facebook.PlatformResponse.Message.Button.Button {
     const { text: title } = action;
 
     switch (action.type) {
@@ -183,7 +192,7 @@ function createFacebookResponse<C>({
   function createButtonResponse({
     text,
     actions
-  }: VisualContent.MainContent.Button): FB.PlatformResponse.Content.Button {
+  }: VisualContent.MainContent.Button): Facebook.PlatformResponse.Message.Button {
     return {
       messaging_type: "RESPONSE",
       message: {
@@ -201,7 +210,7 @@ function createFacebookResponse<C>({
 
   function createCarouselResponse({
     items
-  }: VisualContent.MainContent.Carousel): FB.PlatformResponse.Content.Carousel {
+  }: VisualContent.MainContent.Carousel): Facebook.PlatformResponse.Message.Carousel {
     if (!items.length) {
       throw facebookError("Not enough carousel items");
     }
@@ -240,7 +249,7 @@ function createFacebookResponse<C>({
 
   function createListResponse(
     content: VisualContent.MainContent.List
-  ): FB.PlatformResponse.Content.List {
+  ): Facebook.PlatformResponse.Message.List {
     const { items, actions: listActions } = content;
 
     /**
@@ -287,7 +296,7 @@ function createFacebookResponse<C>({
 
   function createMediaResponse({
     media: { type, url }
-  }: VisualContent.MainContent.Media): FB.PlatformResponse.Content.Media {
+  }: VisualContent.MainContent.Media): Facebook.PlatformResponse.Message.Media {
     return {
       message: {
         attachment: {
@@ -308,13 +317,13 @@ function createFacebookResponse<C>({
 
   function createTextResponse({
     text
-  }: VisualContent.MainContent.Text): FB.PlatformResponse.Content.Text {
+  }: VisualContent.MainContent.Text): Facebook.PlatformResponse.Message.Text {
     return { messaging_type: "RESPONSE", message: { text } };
   }
 
   function createResponse(
-    content: FB.GenericResponse<C>["output"][number]["content"]
-  ): FB.PlatformResponse.Output {
+    content: Facebook.GenericResponse<C>["output"][number]["content"]
+  ): Facebook.PlatformResponse.Message {
     switch (content.type) {
       case "button":
         return createButtonResponse(content);
@@ -335,8 +344,8 @@ function createFacebookResponse<C>({
 
   /** Create a Facebook quick reply from a generic quick reply. */
   function createQuickReply(
-    quickReply: FB.VisualContent.QuickReply
-  ): FB.PlatformResponse.QuickReply {
+    quickReply: Facebook.VisualContent.QuickReply
+  ): Facebook.PlatformResponse.QuickReply {
     const { text } = quickReply;
 
     switch (quickReply.type) {
@@ -357,8 +366,11 @@ function createFacebookResponse<C>({
 
   function createPlatformResponse(
     targetID: string,
-    { content, quickReplies = [] }: FB.GenericResponse<C>["output"][number]
-  ): FB.PlatformResponse {
+    {
+      content,
+      quickReplies = []
+    }: Facebook.GenericResponse<C>["output"][number]
+  ): Facebook.PlatformResponse {
     const fbQuickReplies = quickReplies.map(qr => createQuickReply(qr));
     const fbResponse = createResponse(content);
     const { message: baseMessage } = fbResponse;
@@ -380,23 +392,23 @@ function createFacebookResponse<C>({
  */
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
-  communicator: FB.Communicator,
-  ...transformers: readonly Transformer<FB.Messenger<C>>[]
-): Promise<FB.Messenger<C>> {
+  communicator: Facebook.Communicator,
+  ...transformers: readonly Transformer<Facebook.Messenger<C>>[]
+): Promise<Facebook.Messenger<C>> {
   return createMessenger(
     {
       leafSelector,
       communicator,
       targetPlatform: "facebook",
       mapRequest: async req => {
-        if (isType<FB.PlatformRequest>(req, "object", "entry")) {
+        if (isType<Facebook.PlatformRequest>(req, "object", "entry")) {
           return createFacebookRequest(req, "facebook");
         }
 
         throw facebookError(`Invalid webhook ${JSON.stringify(req)}`);
       },
       mapResponse: async res => {
-        return createFacebookResponse(res as FB.GenericResponse<C>);
+        return createFacebookResponse(res as Facebook.GenericResponse<C>);
       }
     },
     ...transformers

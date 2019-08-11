@@ -63,57 +63,58 @@ export namespace Telegram {
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
 
   namespace PlatformRequest {
-    namespace Base {
-      interface Message {
-        readonly message_id: number;
-        readonly from: User;
-        readonly chat: SubContent.Message.Chat;
-      }
-    }
-  }
-
-  namespace PlatformRequest {
-    namespace SubContent {
+    namespace Message {
       namespace Message {
         namespace Chat {
-          interface Private {
-            readonly id: number;
-            readonly type: "private";
+          namespace Chat {
+            interface Private {
+              readonly id: number;
+              readonly type: "private";
+            }
+
+            interface Group {
+              readonly id: number;
+              readonly type: "group";
+            }
           }
 
-          interface Group {
-            readonly id: number;
-            readonly type: "group";
-          }
+          type Chat = Chat.Group | Chat.Private;
         }
 
-        type Chat = Chat.Group | Chat.Private;
-
-        interface LefChatMember extends Base.Message {
-          left_chat_participant: Bot | User;
-          left_chat_member: Bot | User;
+        interface LeftChatMember {
+          readonly chat: PlatformRequest.Message.Message.Chat.Chat;
+          readonly from: User;
+          readonly message_id: number;
+          readonly left_chat_participant: Bot | User;
+          readonly left_chat_member: Bot | User;
         }
 
-        interface NewChatMember extends Base.Message {
-          new_chat_participant: Bot | User;
-          new_chat_member: Bot | User;
-          new_chat_members: readonly (Bot | User)[];
+        interface NewChatMember {
+          readonly chat: PlatformRequest.Message.Message.Chat.Chat;
+          readonly from: User;
+          readonly message_id: number;
+          readonly new_chat_participant: Bot | User;
+          readonly new_chat_member: Bot | User;
+          readonly new_chat_members: readonly (Bot | User)[];
         }
 
-        interface Text extends Base.Message {
+        interface Text {
+          readonly chat: PlatformRequest.Message.Message.Chat.Chat;
+          readonly from: User;
+          readonly message_id: number;
           readonly text: string;
         }
       }
 
       type Message =
-        | Message.LefChatMember
+        | Message.LeftChatMember
         | Message.NewChatMember
         | Message.Text;
     }
 
     /** Payload that includes on message field. */
     interface Message {
-      readonly message: SubContent.Message;
+      readonly message: Message.Message;
       readonly update_id: number;
     }
 
@@ -122,7 +123,7 @@ export namespace Telegram {
       readonly callback_query: DeepReadonly<{
         id: string;
         from: User;
-        message: SubContent.Message;
+        message: Message.Message;
         chat_instance: string;
         data: string;
       }>;
@@ -134,58 +135,53 @@ export namespace Telegram {
   type PlatformRequest = PlatformRequest.Message | PlatformRequest.Callback;
 
   namespace PlatformResponse {
-    namespace Base {
-      namespace InlineKeyboardMarkup {
-        interface Button {
-          readonly text: string;
-        }
-      }
-    }
-  }
-
-  namespace PlatformResponse {
-    namespace ReplyKeyboardMarkup {
-      interface Button {
-        readonly text: string;
-        readonly request_contact: boolean | undefined;
-        readonly request_location: boolean | undefined;
-      }
-    }
-
-    interface ReplyKeyboardMarkup {
-      readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
-      readonly resize_keyboard: boolean | undefined;
-      readonly one_time_keyboard: boolean | undefined;
-      readonly selective: boolean | undefined;
-    }
-
-    namespace InlineKeyboardMarkup {
-      namespace Button {
-        interface Postback extends Base.InlineKeyboardMarkup.Button {
-          readonly callback_data: string;
+    namespace SendMessage {
+      namespace ReplyMarkup {
+        namespace ReplyKeyboardMarkup {
+          interface Button {
+            readonly text: string;
+            readonly request_contact: boolean | undefined;
+            readonly request_location: boolean | undefined;
+          }
         }
 
-        interface URL extends Base.InlineKeyboardMarkup.Button {
-          readonly url: string;
+        interface ReplyKeyboardMarkup {
+          readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
+          readonly resize_keyboard: boolean | undefined;
+          readonly one_time_keyboard: boolean | undefined;
+          readonly selective: boolean | undefined;
+        }
+
+        namespace InlineKeyboardMarkup {
+          namespace Button {
+            interface Postback {
+              readonly callback_data: string;
+              readonly text: string;
+            }
+
+            interface URL {
+              readonly url: string;
+              readonly text: string;
+            }
+          }
+
+          type Button = Button.Postback | Button.URL;
+        }
+
+        interface InlineKeyboardMarkup {
+          readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
         }
       }
 
-      type Button = Button.Postback | Button.URL;
+      type ReplyMarkup =
+        | ReplyMarkup.ReplyKeyboardMarkup
+        | ReplyMarkup.InlineKeyboardMarkup;
     }
 
-    interface InlineKeyboardMarkup {
-      readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
-    }
-
-    type ReplyMarkup = ReplyKeyboardMarkup | InlineKeyboardMarkup;
-
-    interface HasReplyMarkup {
-      readonly reply_markup: ReplyMarkup | undefined;
-    }
-
-    interface SendMessage extends HasReplyMarkup {
+    interface SendMessage {
       readonly action: "sendMessage";
       readonly chat_id: string;
+      readonly reply_markup: SendMessage.ReplyMarkup | undefined;
       readonly text: string;
     }
   }
@@ -211,21 +207,15 @@ export namespace Telegram {
   }
 
   namespace Communicator {
-    namespace Base {
-      interface APIResponse {
-        readonly description: string;
-      }
-    }
-  }
-
-  namespace Communicator {
     namespace APIResponse {
-      interface Success extends Base.APIResponse {
+      interface Success {
+        readonly description: string;
         readonly ok: true;
         readonly result: unknown;
       }
 
-      interface Failure extends Base.APIResponse {
+      interface Failure {
+        readonly description: string;
         readonly ok: false;
       }
     }

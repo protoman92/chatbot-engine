@@ -5,14 +5,14 @@ import {
   mapSeries
 } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook as FB } from "../type/facebook";
+import { Facebook } from "../type/facebook";
 import {
   BatchMessenger,
   Messenger,
   SupportedPlatform
 } from "../type/messenger";
 import { GenericRequest } from "../type/request";
-import { Telegram as TL } from "../type/telegram";
+import { Telegram } from "../type/telegram";
 
 /**
  * Create a generic messenger.
@@ -45,8 +45,8 @@ export async function createMessenger<
       receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
         return mapSeries(
           input as readonly (
-            | FB.GenericRequest.Input
-            | TL.GenericRequest.Input)[],
+            | Facebook.GenericRequest.Input
+            | Telegram.GenericRequest.Input)[],
           datum => {
             return leafSelector.next({
               ...datum,
@@ -113,8 +113,8 @@ export function createCrossPlatformBatchMessenger<C>(
     facebook,
     telegram
   }: Readonly<{
-    facebook?: FB.Messenger<C>;
-    telegram?: TL.Messenger<C>;
+    facebook?: Facebook.Messenger<C>;
+    telegram?: Telegram.Messenger<C>;
   }>,
   getPlatform: (platformReq: unknown) => SupportedPlatform = getRequestPlatform
 ): BatchMessenger<unknown, unknown> {
@@ -124,8 +124,8 @@ export function createCrossPlatformBatchMessenger<C>(
       facebookCallback,
       telegramCallback
     }: Readonly<{
-      facebookCallback: (messenger: FB.Messenger<C>) => Promise<FBR>;
-      telegramCallback: (messenger: TL.Messenger<C>) => Promise<TLR>;
+      facebookCallback: (messenger: Facebook.Messenger<C>) => Promise<FBR>;
+      telegramCallback: (messenger: Telegram.Messenger<C>) => Promise<TLR>;
     }>
   ) {
     switch (platform) {
@@ -147,17 +147,17 @@ export function createCrossPlatformBatchMessenger<C>(
 
       return switchPlatform(targetPlatform, {
         facebookCallback: messenger =>
-          messenger.generalizeRequest(platformReq as FB.PlatformRequest),
+          messenger.generalizeRequest(platformReq as Facebook.PlatformRequest),
         telegramCallback: messenger =>
-          messenger.generalizeRequest(platformReq as TL.PlatformRequest)
+          messenger.generalizeRequest(platformReq as Telegram.PlatformRequest)
       });
     },
     receiveRequest: async request => {
       return switchPlatform(request.targetPlatform, {
         facebookCallback: messenger =>
-          messenger.receiveRequest(request as FB.GenericRequest<C>),
+          messenger.receiveRequest(request as Facebook.GenericRequest<C>),
         telegramCallback: messenger =>
-          messenger.receiveRequest(request as TL.GenericRequest<C>)
+          messenger.receiveRequest(request as Telegram.GenericRequest<C>)
       });
     },
     sendResponse: async response => {
