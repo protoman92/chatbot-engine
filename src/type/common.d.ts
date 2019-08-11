@@ -10,9 +10,9 @@ export interface Coordinates {
 
 export type DefaultContext = GenericRequest.Input &
   Readonly<{
-    readonly activeBranch?: string;
-    readonly targetID: string;
-    readonly targetPlatform: SupportedPlatform;
+    activeBranch?: string;
+    targetID: string;
+    targetPlatform: SupportedPlatform;
   }>;
 
 export interface ErrorContext {

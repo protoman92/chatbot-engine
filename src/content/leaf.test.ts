@@ -3,7 +3,7 @@ import { describe, it } from "mocha";
 import { Omit } from "ts-essentials";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES, isType } from "../common/utils";
-import { bridgeEmission } from "../stream/stream";
+import { bridgeEmission } from "../stream";
 import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { Telegram } from "../type/telegram";

@@ -2,7 +2,7 @@ import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { DEFAULT_COORDINATES } from "../../common/utils";
-import { bridgeEmission, createSubscription } from "../../stream/stream";
+import { bridgeEmission, createSubscription } from "../../stream";
 import { ErrorContext } from "../../type/common";
 import { Facebook } from "../../type/facebook";
 import { Leaf } from "../../type/leaf";

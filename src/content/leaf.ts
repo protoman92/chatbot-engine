@@ -6,7 +6,7 @@ import {
   mapSeries,
   toPromise
 } from "../common/utils";
-import { createContentSubject } from "../stream/stream";
+import { createContentSubject } from "../stream";
 import { ErrorContext, PromiseConvertible } from "../type/common";
 import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";

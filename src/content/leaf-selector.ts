@@ -1,5 +1,5 @@
 import { deepClone, mapSeries } from "../common/utils";
-import { mergeObservables } from "../stream/stream";
+import { mergeObservables } from "../stream";
 import { Branch } from "../type/branch";
 import { DefaultContext, KV } from "../type/common";
 import { Leaf } from "../type/leaf";

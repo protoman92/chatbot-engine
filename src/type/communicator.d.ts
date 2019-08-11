@@ -2,9 +2,9 @@ import { KV } from "./common";
 
 declare namespace HTTPRequest {
   interface Base {
-    url: string;
-    headers?: Readonly<{ [K: string]: unknown }>;
-    query?: KV<unknown>;
+    readonly url: string;
+    readonly headers?: Readonly<{ [K: string]: unknown }>;
+    readonly query?: KV<unknown>;
   }
 
   interface GET extends Base {

@@ -1,5 +1,5 @@
 import { mapSeries } from "../../common/utils";
-import { createCompositeSubscription } from "../../stream/stream";
+import { createCompositeSubscription } from "../../stream";
 import { Leaf } from "../../type/leaf";
 
 /**
