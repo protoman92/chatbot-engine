@@ -1,14 +1,18 @@
-import { compose, getRequestPlatform, mapSeries } from "../common/utils";
+import {
+  compose,
+  genericError,
+  getRequestPlatform,
+  mapSeries
+} from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook } from "../type/facebook";
+import { Facebook as FB } from "../type/facebook";
 import {
   BatchMessenger,
-  CrossPlatformMessengerConfigs,
   Messenger,
   SupportedPlatform
 } from "../type/messenger";
 import { GenericRequest } from "../type/request";
-import { Telegram } from "../type/telegram";
+import { Telegram as TL } from "../type/telegram";
 
 /**
  * Create a generic messenger.
@@ -41,8 +45,8 @@ export async function createMessenger<
       receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
         return mapSeries(
           input as readonly (
-            | Facebook.GenericRequest.Input
-            | Telegram.GenericRequest.Input)[],
+            | FB.GenericRequest.Input
+            | TL.GenericRequest.Input)[],
           datum => {
             return leafSelector.next({
               ...datum,
@@ -105,46 +109,62 @@ export function createBatchMessenger<
  * @template C The context used by the current chatbot.
  */
 export function createCrossPlatformBatchMessenger<C>(
-  messengers: CrossPlatformMessengerConfigs<C>,
+  {
+    facebook,
+    telegram
+  }: Readonly<{
+    facebook?: FB.Messenger<C>;
+    telegram?: TL.Messenger<C>;
+  }>,
   getPlatform: (platformReq: unknown) => SupportedPlatform = getRequestPlatform
 ): BatchMessenger<unknown, unknown> {
+  function switchPlatform<FBR, TLR>(
+    platform: SupportedPlatform,
+    {
+      facebookCallback,
+      telegramCallback
+    }: Readonly<{
+      facebookCallback: (messenger: FB.Messenger<C>) => Promise<FBR>;
+      telegramCallback: (messenger: TL.Messenger<C>) => Promise<TLR>;
+    }>
+  ) {
+    switch (platform) {
+      case "facebook":
+        if (!facebook) break;
+        return facebookCallback(facebook);
+
+      case "telegram":
+        if (!telegram) break;
+        return telegramCallback(telegram);
+    }
+
+    throw genericError(`Unsupported platform ${platform}`);
+  }
+
   return createBatchMessenger<C, unknown, unknown, GenericRequest<C>>({
     generalizeRequest: async platformReq => {
       const targetPlatform = getPlatform(platformReq);
 
-      switch (targetPlatform) {
-        case "facebook":
-          return messengers.facebook.generalizeRequest(
-            platformReq as Facebook.PlatformRequest
-          );
-
-        case "telegram":
-          return messengers.telegram.generalizeRequest(
-            platformReq as Telegram.PlatformRequest
-          );
-      }
+      return switchPlatform(targetPlatform, {
+        facebookCallback: messenger =>
+          messenger.generalizeRequest(platformReq as FB.PlatformRequest),
+        telegramCallback: messenger =>
+          messenger.generalizeRequest(platformReq as TL.PlatformRequest)
+      });
     },
     receiveRequest: async request => {
-      switch (request.targetPlatform) {
-        case "facebook":
-          return messengers.facebook.receiveRequest(
-            request as Facebook.GenericRequest<C>
-          );
-
-        case "telegram":
-          return messengers.telegram.receiveRequest(
-            request as Telegram.GenericRequest<C>
-          );
-      }
+      return switchPlatform(request.targetPlatform, {
+        facebookCallback: messenger =>
+          messenger.receiveRequest(request as FB.GenericRequest<C>),
+        telegramCallback: messenger =>
+          messenger.receiveRequest(request as TL.GenericRequest<C>)
+      });
     },
     sendResponse: async response => {
-      switch (response.targetPlatform) {
-        case "facebook":
-          return messengers.facebook.sendResponse(response);
-
-        case "telegram":
-          return messengers.telegram.sendResponse(response);
-      }
+      return switchPlatform(response.targetPlatform, {
+        facebookCallback: messenger => messenger.sendResponse(response),
+        telegramCallback: messenger => messenger.sendResponse(response)
+      });
     }
   });
 }

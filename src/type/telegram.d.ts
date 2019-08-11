@@ -64,21 +64,11 @@ export namespace Telegram {
 
   namespace PlatformRequest {
     namespace Base {
-      namespace Message {
-        interface Chat {
-          readonly id: number;
-        }
-      }
-
       interface Message {
         readonly message_id: number;
         readonly from: User;
         readonly chat: SubContent.Message.Chat;
       }
-    }
-
-    interface Base {
-      readonly update_id: number;
     }
   }
 
@@ -86,11 +76,13 @@ export namespace Telegram {
     namespace SubContent {
       namespace Message {
         namespace Chat {
-          interface Private extends Base.Message.Chat {
+          interface Private {
+            readonly id: number;
             readonly type: "private";
           }
 
-          interface Group extends Base.Message.Chat {
+          interface Group {
+            readonly id: number;
             readonly type: "group";
           }
         }
@@ -120,12 +112,13 @@ export namespace Telegram {
     }
 
     /** Payload that includes on message field. */
-    interface Message extends Base {
+    interface Message {
       readonly message: SubContent.Message;
+      readonly update_id: number;
     }
 
     /** Payload that includes callback field, usually for quick replies. */
-    interface Callback extends Base {
+    interface Callback {
       readonly callback_query: DeepReadonly<{
         id: string;
         from: User;
@@ -133,6 +126,8 @@ export namespace Telegram {
         chat_instance: string;
         data: string;
       }>;
+
+      readonly update_id: number;
     }
   }
 

@@ -1,9 +1,5 @@
 import { Omit } from "ts-essentials";
-import {
-  DEFAULT_COORDINATES,
-  formatTelegramError,
-  isType
-} from "../common/utils";
+import { DEFAULT_COORDINATES, telegramError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import { Leaf } from "../type/leaf";
 import { Telegram as TL } from "../type/telegram";
@@ -172,10 +168,7 @@ function createTelegramRequest<C>(
   const processed = processRequest(webhook);
 
   if (!processed) {
-    console.error(
-      formatTelegramError(`Invalid request: ${JSON.stringify(webhook)}`)
-    );
-
+    console.error(telegramError(`Invalid request: ${JSON.stringify(webhook)}`));
     return [];
   }
 
@@ -303,9 +296,7 @@ function createTelegramResponse<C>({
         };
 
       default:
-        throw new Error(
-          formatTelegramError(`Unsupported content ${JSON.stringify(content)}`)
-        );
+        throw telegramError(`Unsupported content ${JSON.stringify(content)}`);
     }
   }
 

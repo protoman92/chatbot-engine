@@ -14,13 +14,6 @@ declare namespace Leaf {
   interface Base<C, E> extends Base.Observer<C, E>, Base.Observable<C> {}
   interface Observer<C> extends Base.Observer<C, DefaultContext> {}
 
-  namespace Platform {
-    interface Observer<C> {
-      readonly facebook: Facebook.Leaf.Observer<C>;
-      readonly telegram: Telegram.Leaf.Observer<C>;
-    }
-  }
-
   /**
    * Represents a collection of leaf information that is derived from
    * enumerating all possibilities in a key-value branch object.

@@ -1,8 +1,4 @@
-import {
-  DEFAULT_COORDINATES,
-  formatFacebookError,
-  isType
-} from "../common/utils";
+import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import { Facebook as FB } from "../type/facebook";
 import { Leaf } from "../type/leaf";
@@ -132,9 +128,7 @@ function createFacebookRequest<C>(
       }
     }
 
-    throw Error(
-      formatFacebookError(`Invalid request ${JSON.stringify(request)}`)
-    );
+    throw facebookError(`Invalid request ${JSON.stringify(request)}`);
   }
 
   switch (object) {
@@ -158,9 +152,7 @@ function createFacebookRequest<C>(
       }
   }
 
-  throw new Error(
-    formatFacebookError(`Invalid webhook: ${JSON.stringify(webhook)}`)
-  );
+  throw facebookError(`Invalid webhook: ${JSON.stringify(webhook)}`);
 }
 
 /**
@@ -211,7 +203,7 @@ function createFacebookResponse<C>({
     items
   }: VisualContent.MainContent.Carousel): FB.PlatformResponse.Content.Carousel {
     if (!items.length) {
-      throw Error(formatFacebookError("Not enough carousel items"));
+      throw facebookError("Not enough carousel items");
     }
 
     return {
@@ -401,9 +393,7 @@ export async function createFacebookMessenger<C>(
           return createFacebookRequest(req, "facebook");
         }
 
-        throw new Error(
-          formatFacebookError(`Invalid webhook ${JSON.stringify(req)}`)
-        );
+        throw facebookError(`Invalid webhook ${JSON.stringify(req)}`);
       },
       mapResponse: async res => {
         return createFacebookResponse(res as FB.GenericResponse<C>);

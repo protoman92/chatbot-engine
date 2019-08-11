@@ -107,6 +107,41 @@ describe("Leaf for platforms", () => {
     verify(tlLeaf.next(anything())).once();
     verify(tlLeaf.complete!()).once();
   });
+
+  it("Should throw error if platform is not available", async () => {
+    // Setup
+    const platformObserver = await createLeafObserverForPlatforms({});
+
+    // When && Then: Facebook
+    try {
+      await platformObserver.next({
+        targetID,
+        targetPlatform: "facebook",
+        inputCoordinate: DEFAULT_COORDINATES,
+        inputImageURL: "",
+        inputText: "",
+        stickerID: ""
+      });
+
+      throw new Error("Never should have come here");
+    } catch (e) {}
+
+    // When && Then: Telegram
+    try {
+      await platformObserver.next({
+        targetID,
+        targetPlatform: "telegram",
+        leftChatMembers: [],
+        inputCommand: "",
+        inputCoordinate: DEFAULT_COORDINATES,
+        inputImageURL: "",
+        inputText: "",
+        newChatMembers: []
+      });
+
+      throw new Error("Never should have come here");
+    } catch (e) {}
+  });
 });
 
 describe("Leaf observer chain", () => {

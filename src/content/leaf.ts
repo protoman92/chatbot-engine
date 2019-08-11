@@ -1,18 +1,25 @@
 import { Omit } from "ts-essentials";
+import { isNullOrUndefined } from "util";
+import {
+  genericError,
+  isDefinedAndNotNull,
+  mapSeries,
+  toPromise
+} from "../common/utils";
 import { createContentSubject } from "../stream/stream";
 import { ErrorContext, PromiseConvertible } from "../type/common";
+import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { GenericResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
-import { toPromise, mapSeries, isDefinedAndNotNull } from "../common/utils";
-import { isNullOrUndefined } from "util";
+import { Telegram } from "../type/telegram";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
  * contents.
  * @template C The context used by the current chatbot.
  */
-export async function createLeafWithObserver<C>(
+export async function createLeafWithObserver<C = {}>(
   fn: (
     observer: NextContentObserver<GenericResponse<C>>
   ) => Promise<Omit<Leaf<C>, "subscribe">>
@@ -35,7 +42,7 @@ export async function createLeafWithObserver<C>(
  * other leaf can handle the error.
  * @template C The context used by the current chatbot.
  */
-export function createDefaultErrorLeaf<C>(
+export function createDefaultErrorLeaf<C = {}>(
   fn?: (e: Error) => Promise<unknown>
 ): Promise<Leaf<C & ErrorContext>> {
   return createLeafWithObserver(async observer => ({
@@ -63,23 +70,30 @@ export function createDefaultErrorLeaf<C>(
  * on the leaf input.
  * @template C The context used by the current chatbot.
  */
-export async function createLeafObserverForPlatforms<C>({
+export async function createLeafObserverForPlatforms<C = {}>({
   facebook,
   telegram
-}: Leaf.Platform.Observer<C>): Promise<Leaf.Observer<C>> {
+}: Readonly<{
+  facebook?: Facebook.Leaf.Observer<C>;
+  telegram?: Telegram.Leaf.Observer<C>;
+}>): Promise<Leaf.Observer<C>> {
   return {
     next: async input => {
       switch (input.targetPlatform) {
         case "facebook":
+          if (!facebook) break;
           return facebook.next(input);
 
         case "telegram":
+          if (!telegram) break;
           return telegram.next(input);
       }
+
+      throw genericError(`Unhandled platform ${input.targetPlatform}`);
     },
     complete: async () => {
-      !!facebook.complete && (await facebook.complete());
-      !!telegram.complete && (await telegram.complete());
+      !!facebook && !!facebook.complete && (await facebook.complete());
+      !!telegram && !!telegram.complete && (await telegram.complete());
     }
   };
 }
@@ -88,7 +102,7 @@ export async function createLeafObserverForPlatforms<C>({
  * Create an observer chain from multiple observers.
  * @template C The context used by the current chatbot.
  */
-export function createObserverChain<C>(): Leaf.ObserverChain<C> {
+export function createObserverChain<C = {}>(): Leaf.ObserverChain<C> {
   const convertibles: [PromiseConvertible<Leaf.Observer<C>>, "and" | "or"][] = [
     [{ next: async () => ({}) }, "and"]
   ];

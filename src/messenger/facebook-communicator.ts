@@ -1,4 +1,4 @@
-import { formatFacebookError } from "../common/utils";
+import { facebookError } from "../common/utils";
 import { HTTPCommunicator } from "../type/communicator";
 import { Facebook } from "../type/facebook";
 
@@ -44,7 +44,7 @@ export function createFacebookCommunicator(
         return challenge;
       }
 
-      throw new Error(formatFacebookError("Invalid mode or verify token"));
+      throw facebookError("Invalid mode or verify token");
     },
     sendResponse: data => {
       return post(data, "me", "messages");

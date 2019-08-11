@@ -64,9 +64,3 @@ export interface BatchMessenger<PRequest, PResponse> {
   /** Process a platform request from end-to-end. */
   processPlatformRequest(req: PRequest): Promise<unknown>;
 }
-
-/** Configuration for cross-platform batch messenger. */
-export interface CrossPlatformMessengerConfigs<C> {
-  readonly facebook: Facebook.Messenger<C>;
-  readonly telegram: Telegram.Messenger<C>;
-}

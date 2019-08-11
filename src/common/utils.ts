@@ -213,16 +213,6 @@ export function formatSpecialKey(key: string) {
   return `@//${key}//@`;
 }
 
-/** Format an error for Facebook. */
-export function formatFacebookError(error: string): string {
-  return `FACEBOOK: ${error}`;
-}
-
-/** Format an error for Telegram. */
-export function formatTelegramError(error: string): string {
-  return `TELEGRAM: ${error}`;
-}
-
 /** Get the platform to which a request belongs. */
 export function getRequestPlatform(request: unknown): SupportedPlatform {
   if (isType<Facebook.PlatformRequest>(request, "object", "entry")) {
@@ -234,4 +224,18 @@ export function getRequestPlatform(request: unknown): SupportedPlatform {
   }
 
   throw new Error(`Unsupported platform for ${JSON.stringify(request)}`);
+}
+
+export function genericError(message: string): Error {
+  return new Error(`chatbot-engine: ${message}`);
+}
+
+/** Format an error for Facebook. */
+export function facebookError(error: string): Error {
+  return new Error(`FACEBOOK: ${error}`);
+}
+
+/** Format an error for Telegram. */
+export function telegramError(error: string): Error {
+  return new Error(`TELEGRAM: ${error}`);
 }

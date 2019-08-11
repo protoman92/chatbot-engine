@@ -12,10 +12,7 @@ import {
 import { PlatformCommunicator } from "../type/communicator";
 import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";
-import {
-  CrossPlatformMessengerConfigs,
-  SupportedPlatform
-} from "../type/messenger";
+import { SupportedPlatform } from "../type/messenger";
 import { GenericRequest } from "../type/request";
 import { GenericResponse } from "../type/response";
 import { Telegram } from "../type/telegram";
@@ -163,8 +160,8 @@ describe("Generic unit messenger", () => {
 describe("Cross platform unit messenger", () => {
   let fbMessenger: Facebook.Messenger<{}>;
   let tlMessenger: Telegram.Messenger<{}>;
-  let messengers: CrossPlatformMessengerConfigs<{}>;
-  let messengerInstances: CrossPlatformMessengerConfigs<{}>;
+  let messengers: Parameters<typeof createCrossPlatformBatchMessenger>[0];
+  let messengerInstances: typeof messengers;
 
   beforeEach(() => {
     fbMessenger = spy<Facebook.Messenger<{}>>({
@@ -228,8 +225,25 @@ describe("Cross platform unit messenger", () => {
       await crossMessenger.processPlatformRequest({});
 
       // Then
-      verify(messengers[targetPlatform].generalizeRequest(anything())).once();
-      verify(messengers[targetPlatform].receiveRequest(anything())).once();
+      verify(messengers[targetPlatform]!.generalizeRequest(anything())).once();
+      verify(messengers[targetPlatform]!.receiveRequest(anything())).once();
     }
+  });
+
+  it("Should throw error if platform is not available", async () => {
+    // Setup
+    const platformMessenger = await createCrossPlatformBatchMessenger({});
+
+    // When && Then: Facebook
+    try {
+      await platformMessenger.processPlatformRequest({ object: "", entry: {} });
+      throw new Error("Never should have come here");
+    } catch (e) {}
+
+    // When && Then: Telegram
+    try {
+      await platformMessenger.processPlatformRequest({ update_id: "" });
+      throw new Error("Never should have come here");
+    } catch (e) {}
   });
 });
