@@ -11,7 +11,7 @@
     "build:ts": "rm -rf dist && tsc",
     "build": "npm run build:ts && npm run build:copyfiles && npm run build:cleanup",
     "gulp": "gulp",
-    "test": "mocha --require ts-node/register **/*.test.ts"
+    "test": "nyc mocha --require ts-node/register **/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,8 @@
     "gulp-run": "^1.7.1",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.0",
+    "nyc": "^14.1.1",
+    "source-map-support": "^0.5.13",
     "ts-essentials": "^2.0.7",
     "ts-mockito": "^2.3.1",
     "ts-node": "^8.1.0",
@@ -45,5 +47,28 @@
   "dependencies": {
     "axios": "^0.18.1",
     "redis": "^2.8.0"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.test.*"
+    ],
+    "extension": [
+      ".js",
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "text-summary",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true
   }
 }

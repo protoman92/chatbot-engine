@@ -25,3 +25,4 @@ yarn-error.log
 .env*
 .nyc*/*
 .rpt2_cache
+.nyc_output
