@@ -1,9 +1,4 @@
-import {
-  Coordinates,
-  PromiseConvertible,
-  StringKeys,
-  Transformer
-} from "../type/common";
+import { Coordinates, Transformer } from "../type/common";
 import { Facebook } from "../type/facebook";
 import { SupportedPlatform } from "../type/messenger";
 import { Telegram } from "../type/telegram";
@@ -11,24 +6,14 @@ import { Telegram } from "../type/telegram";
 export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
 /**
- * Guard check if an object is both defined and not-null.
- * @template T The type of object to check for.
- */
-export function isDefinedAndNotNull<T>(
-  object?: T | undefined | null
-): object is NonNullable<T> {
-  return object !== undefined && object !== null;
-}
-
-/**
  * Check if an object is of a certain type.
  * @template T The type of object to check for.
  * @template K The keys of the type to check for.
  */
-export function isType<T, K extends StringKeys<T> = StringKeys<T>>(
-  object: any,
-  ...keys: readonly K[]
-): object is T {
+export function isType<
+  T,
+  K extends Extract<keyof T, string> = Extract<keyof T, string>
+>(object: any, ...keys: readonly K[]): object is T {
   if (!object) return false;
   const objectKeySet = new Set(Object.keys(object));
   return keys.every(key => objectKeySet.has(key));
@@ -65,25 +50,6 @@ export async function compose<T>(
  */
 export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
   return Object.assign({}, oldObject, newObject);
-}
-
-/**
- * Join the path components of a branch to produce the full path.
- */
-export function joinPaths(...pathComponents: readonly string[]) {
-  return pathComponents.join(".");
-}
-
-/**
- * Extract the current leaf ID from active branch.
- */
-export function getCurrentLeafID(activeBranch?: string): string | undefined {
-  if (!activeBranch) return undefined;
-  const branchPaths = activeBranch.split(".");
-
-  return branchPaths.length > 0
-    ? branchPaths[branchPaths.length - 1]
-    : undefined;
 }
 
 /**
@@ -196,7 +162,9 @@ export function toArray<T>(value: T | readonly T[]): readonly T[] {
  * Transform a promise-convertible to a promise.
  * @template T The promise result type.
  */
-export async function toPromise<T>(convertible: PromiseConvertible<T>) {
+export async function toPromise<T>(
+  convertible: T | Promise<T> | (() => Promise<T>)
+) {
   if (typeof convertible === "function") {
     return (convertible as Function)();
   }
@@ -206,11 +174,6 @@ export async function toPromise<T>(convertible: PromiseConvertible<T>) {
   }
 
   return convertible;
-}
-
-/** Format a special key. */
-export function formatSpecialKey(key: string) {
-  return `@//${key}//@`;
 }
 
 /** Get the platform to which a request belongs. */

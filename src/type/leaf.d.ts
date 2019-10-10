@@ -38,20 +38,18 @@ declare namespace Leaf {
    */
   interface MonoTransformer<C> extends Transformer<C, C> {}
 
-  interface BaseTransformChain<CI, CO> {
-    transform: Transformer<CI, CO>;
-
-    /** This is only used for debugging, and serves no production purposes. */
-    checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;
-  }
-
   /**
    * Represents a chain of transformer higher-order functions that transforms a
    * leaf instance declaratively .
    * @template CI The original context type.
    * @template CO The target context type.
    */
-  interface TransformChain<CI, CO> extends BaseTransformChain<CI, CO> {
+  interface TransformChain<CI, CO> {
+    transform: Transformer<CI, CO>;
+
+    /** This is only used for debugging, and serves no production purposes. */
+    checkThis(test?: (inContext: CI, outContext: CO) => unknown): this;
+
     /**
      * Apply post-transformers on the base leaf.
      * @template CO1 The target context type.
