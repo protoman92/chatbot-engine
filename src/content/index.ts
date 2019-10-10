@@ -1,7 +1,6 @@
 export {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
-  createLeafWithObserver,
-  createObserverChain
+  createLeafWithObserver
 } from "./leaf";
 export { createLeafSelector } from "./leaf-selector";

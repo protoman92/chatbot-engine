@@ -1,9 +1,7 @@
 import { Branch } from "./branch";
-import { DefaultContext, PromiseConvertible } from "./common";
-import { Facebook } from "./facebook";
+import { DefaultContext } from "./common";
 import { GenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
-import { Telegram } from "./telegram";
 
 declare namespace Leaf {
   namespace Base {
@@ -55,12 +53,6 @@ declare namespace Leaf {
    */
   interface TransformChain<CI, CO> extends BaseTransformChain<CI, CO> {
     /**
-     * Apply pre-transformers like wrapping layers on the base leaf.
-     * @template CI1 The target context type.
-     */
-    compose<CI1>(fn: Transformer<CI1, CI>): TransformChain<CI1, CO>;
-
-    /**
      * Apply post-transformers on the base leaf.
      * @template CO1 The target context type.
      */
@@ -68,28 +60,6 @@ declare namespace Leaf {
 
     /** This is only used for debugging, and serves no production purposes. */
     forContextOfType<C>(ctx?: C): TransformChain<C, C>;
-  }
-
-  interface ObserverChain<C> {
-    /**
-     * Make sure that the chain only succeeds if the existing chain and the
-     * new observer both produce valid next result.
-     */
-    and(convertible: PromiseConvertible<Observer<C>>): ObserverChain<C>;
-
-    /** Same as and, but convert the next function into an observer. */
-    andNext(nextFn: Observer<C>["next"]): ObserverChain<C>;
-
-    /**
-     * Make sure that the chain succeeds if either the existing chain or the
-     * new observer produces valid next result.
-     */
-    or(convertible: PromiseConvertible<Observer<C>>): ObserverChain<C>;
-
-    /** Same as or, but convert the next function into an observer. */
-    orNext(nextFn: Observer<C>["next"]): ObserverChain<C>;
-
-    toObserver(): Promise<Observer<C>>;
   }
 }
 

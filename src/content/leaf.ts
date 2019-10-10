@@ -1,13 +1,7 @@
 import { Omit } from "ts-essentials";
-import { isNullOrUndefined } from "util";
-import {
-  genericError,
-  isDefinedAndNotNull,
-  mapSeries,
-  toPromise
-} from "../common/utils";
+import { genericError } from "../common/utils";
 import { createContentSubject } from "../stream";
-import { ErrorContext, PromiseConvertible } from "../type/common";
+import { ErrorContext } from "../type/common";
 import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { GenericResponse } from "../type/response";
@@ -96,68 +90,4 @@ export async function createLeafObserverForPlatforms<C = {}>({
       !!telegram && !!telegram.complete && (await telegram.complete());
     }
   };
-}
-
-/**
- * Create an observer chain from multiple observers.
- * @template C The context used by the current chatbot.
- */
-export function createObserverChain<C = {}>(): Leaf.ObserverChain<C> {
-  const convertibles: [PromiseConvertible<Leaf.Observer<C>>, "and" | "or"][] = [
-    [{ next: async () => ({}) }, "and"]
-  ];
-
-  const observerChain: Leaf.ObserverChain<C> = {
-    and: convertible => {
-      convertibles.push([convertible, "and"]);
-      return observerChain;
-    },
-    andNext: next => observerChain.and({ next }),
-    or: convertible => {
-      convertibles.push([convertible, "or"]);
-      return observerChain;
-    },
-    orNext: next => observerChain.or({ next }),
-    toObserver: async () => {
-      const observers = await mapSeries(
-        convertibles,
-        async ([convertible, type]): Promise<
-          [Leaf.Observer<C>, "and" | "or"]
-        > => [await toPromise(convertible), type]
-      );
-
-      let currentObserver: Leaf.Observer<C> = { next: async () => ({}) };
-
-      return {
-        next: async input => {
-          let result = await currentObserver.next(input);
-
-          for (const [observer, type] of observers) {
-            currentObserver = observer;
-            result = await currentObserver.next(input);
-
-            switch (type) {
-              case "and":
-                if (isNullOrUndefined(result)) return result;
-                break;
-
-              case "or":
-                if (isDefinedAndNotNull(result)) return result;
-                break;
-            }
-          }
-
-          return result;
-        },
-        complete: async () => {
-          return mapSeries(
-            observers,
-            async ([observer]) => !!observer.complete && observer.complete()
-          );
-        }
-      };
-    }
-  };
-
-  return observerChain;
 }

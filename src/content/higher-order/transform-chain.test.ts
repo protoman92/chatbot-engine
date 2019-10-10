@@ -30,7 +30,7 @@ describe("Transform chain", () => {
     });
 
     const transformed = await createTransformChain()
-      .compose(catchError(instance(fallbackLeaf)))
+      .pipe(catchError(instance(fallbackLeaf)))
       .transform(instance(errorLeaf));
 
     // When
@@ -42,7 +42,8 @@ describe("Transform chain", () => {
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
       a: 1,
-      b: 2
+      b: 2,
+      error: new Error("")
     };
 
     const nextResult = await transformed.next(input);
