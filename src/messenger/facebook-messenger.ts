@@ -1,6 +1,10 @@
 import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook, GenericFacebookRequest } from "../type/facebook";
+import {
+  Facebook,
+  GenericFacebookRequest,
+  GenericFacebookResponse
+} from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
@@ -171,7 +175,7 @@ function createFacebookRequest<C>(
 function createFacebookResponse<C>({
   targetID,
   output
-}: Facebook.GenericResponse<C>): readonly Facebook.PlatformResponse[] {
+}: GenericFacebookResponse<C>): readonly Facebook.PlatformResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
@@ -322,7 +326,7 @@ function createFacebookResponse<C>({
   }
 
   function createResponse(
-    content: Facebook.GenericResponse<C>["output"][number]["content"]
+    content: GenericFacebookResponse<C>["output"][number]["content"]
   ): Facebook.PlatformResponse.Message {
     switch (content.type) {
       case "button":
@@ -366,10 +370,7 @@ function createFacebookResponse<C>({
 
   function createPlatformResponse(
     targetID: string,
-    {
-      content,
-      quickReplies = []
-    }: Facebook.GenericResponse<C>["output"][number]
+    { content, quickReplies = [] }: GenericFacebookResponse<C>["output"][number]
   ): Facebook.PlatformResponse {
     const fbQuickReplies = quickReplies.map(qr => createQuickReply(qr));
     const fbResponse = createResponse(content);
@@ -408,7 +409,7 @@ export async function createFacebookMessenger<C>(
         throw facebookError(`Invalid webhook ${JSON.stringify(req)}`);
       },
       mapResponse: async res => {
-        return createFacebookResponse(res as Facebook.GenericResponse<C>);
+        return createFacebookResponse(res as GenericFacebookResponse<C>);
       }
     },
     ...transformers

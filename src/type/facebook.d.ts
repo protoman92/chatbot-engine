@@ -3,12 +3,8 @@ import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
 import { Messenger as RootMessenger } from "./messenger";
-import {
-  GenericRequest,
-  RootGenericRequest,
-  RootGenericRequestInput
-} from "./request";
-import { GenericResponse as RootGenericResponse } from "./response";
+import { RootGenericRequest, RootGenericRequestInput } from "./request";
+import { RootGenericResponse } from "./response";
 import { VisualContent as RootVisualContent } from "./visual-content";
 
 export interface GenericFacebookRequestInput extends RootGenericRequestInput {
@@ -21,12 +17,12 @@ export interface GenericFacebookRequest<C> extends RootGenericRequest<C> {
   readonly input: readonly GenericFacebookRequestInput[];
 }
 
-export namespace Facebook {
-  interface GenericResponse<C> extends RootGenericResponse.Base<C> {
-    readonly targetPlatform: "facebook";
-    readonly output: readonly VisualContent[];
-  }
+export interface GenericFacebookResponse<C> extends RootGenericResponse<C> {
+  readonly targetPlatform: "facebook";
+  readonly output: readonly Facebook.VisualContent[];
+}
 
+export namespace Facebook {
   namespace VisualContent {
     type QuickReply =
       | RootVisualContent.QuickReply.Location

@@ -2,7 +2,11 @@ import { Omit } from "ts-essentials";
 import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
 import { Leaf } from "../type/leaf";
-import { GenericTelegramRequest, Telegram } from "../type/telegram";
+import {
+  GenericTelegramRequest,
+  GenericTelegramResponse,
+  Telegram
+} from "../type/telegram";
 import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
 
@@ -192,7 +196,7 @@ function createTelegramRequest<C>(
 function createTelegramResponse<C>({
   targetID,
   output
-}: Telegram.GenericResponse<C>): readonly Telegram.PlatformResponse[] {
+}: GenericTelegramResponse<C>): readonly Telegram.PlatformResponse[] {
   function createTextResponse(
     targetID: string,
     { text }: VisualContent.MainContent.Text
@@ -288,7 +292,7 @@ function createTelegramResponse<C>({
 
   function createPlatformResponse(
     targetID: string,
-    { quickReplies, content }: Telegram.GenericResponse<C>["output"][number]
+    { quickReplies, content }: GenericTelegramResponse<C>["output"][number]
   ): Telegram.PlatformResponse {
     const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
@@ -326,7 +330,7 @@ export async function createTelegramMessenger<C>(
       targetPlatform: "telegram",
       mapRequest: async req => createTelegramRequest(req, bot),
       mapResponse: async res => {
-        return createTelegramResponse(res as Telegram.GenericResponse<C>);
+        return createTelegramResponse(res as GenericTelegramResponse<C>);
       }
     },
     ...transformers

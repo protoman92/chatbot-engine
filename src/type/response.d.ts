@@ -1,15 +1,13 @@
-import { Facebook } from "./facebook";
+import { GenericFacebookResponse } from "./facebook";
 import { SupportedPlatform } from "./messenger";
-import { Telegram } from "./telegram";
+import { GenericTelegramResponse } from "./telegram";
 import { VisualContent } from "./visual-content";
 
-declare namespace GenericResponse {
-  export interface Base<C> {
-    readonly targetID: string;
-    readonly targetPlatform: SupportedPlatform;
-    readonly additionalContext?: Partial<C>;
-    readonly output: readonly VisualContent.Base[];
-  }
+export interface RootGenericResponse<C> {
+  readonly targetID: string;
+  readonly targetPlatform: SupportedPlatform;
+  readonly additionalContext?: Partial<C>;
+  readonly output: readonly VisualContent.Base[];
 }
 
 /**
@@ -19,6 +17,6 @@ declare namespace GenericResponse {
  * @template C The context used by the current chatbot.
  */
 export type GenericResponse<C> =
-  | GenericResponse.Base<C>
-  | Facebook.GenericResponse<C>
-  | Telegram.GenericResponse<C>;
+  | RootGenericResponse<C>
+  | GenericFacebookResponse<C>
+  | GenericTelegramResponse<C>;

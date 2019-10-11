@@ -3,12 +3,8 @@ import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
 import { Messenger as RootMessenger } from "./messenger";
-import {
-  GenericRequest,
-  RootGenericRequest,
-  RootGenericRequestInput
-} from "./request";
-import { GenericResponse as RootGenericResponse } from "./response";
+import { RootGenericRequest, RootGenericRequestInput } from "./request";
+import { RootGenericResponse } from "./response";
 import { VisualContent as RootVisualContent } from "./visual-content";
 
 export interface GenericTelegramRequestInput extends RootGenericRequestInput {
@@ -24,12 +20,12 @@ export interface GenericTelegramRequest<C> extends RootGenericRequest<C> {
   readonly input: readonly GenericTelegramRequestInput[];
 }
 
-export namespace Telegram {
-  interface GenericResponse<C> extends RootGenericResponse.Base<C> {
-    readonly targetPlatform: "telegram";
-    readonly output: readonly VisualContent[];
-  }
+export interface GenericTelegramResponse<C> extends RootGenericResponse<C> {
+  readonly targetPlatform: "telegram";
+  readonly output: readonly Telegram.VisualContent[];
+}
 
+export namespace Telegram {
   namespace VisualContent {
     namespace QuickReply {
       interface Contact {
