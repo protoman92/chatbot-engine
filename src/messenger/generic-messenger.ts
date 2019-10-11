@@ -5,14 +5,14 @@ import {
   mapSeries
 } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook } from "../type/facebook";
+import { Facebook, GenericFacebookRequest } from "../type/facebook";
 import {
   BatchMessenger,
   Messenger,
   SupportedPlatform
 } from "../type/messenger";
-import { GenericRequest } from "../type/request";
-import { Telegram } from "../type/telegram";
+import { GenericRequest, GenericRequestInput } from "../type/request";
+import { GenericTelegramRequest, Telegram } from "../type/telegram";
 
 /**
  * Create a generic messenger.
@@ -43,19 +43,14 @@ export async function createMessenger<
     {
       generalizeRequest: platformReq => mapRequest(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
-        return mapSeries(
-          input as readonly (
-            | Facebook.GenericRequest.Input
-            | Telegram.GenericRequest.Input)[],
-          datum => {
-            return leafSelector.next({
-              ...datum,
-              ...oldContext,
-              targetID,
-              targetPlatform
-            });
-          }
-        );
+        return mapSeries(input as readonly GenericRequestInput[], datum => {
+          return leafSelector.next({
+            ...datum,
+            ...oldContext,
+            targetID,
+            targetPlatform
+          });
+        });
       },
       sendResponse: async response => {
         const data = await mapResponse(response);
@@ -155,9 +150,9 @@ export function createCrossPlatformBatchMessenger<C>(
     receiveRequest: async request => {
       return switchPlatform(request.targetPlatform, {
         facebookCallback: messenger =>
-          messenger.receiveRequest(request as Facebook.GenericRequest<C>),
+          messenger.receiveRequest(request as GenericFacebookRequest<C>),
         telegramCallback: messenger =>
-          messenger.receiveRequest(request as Telegram.GenericRequest<C>)
+          messenger.receiveRequest(request as GenericTelegramRequest<C>)
       });
     },
     sendResponse: async response => {

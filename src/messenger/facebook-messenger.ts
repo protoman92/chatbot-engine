@@ -1,6 +1,6 @@
 import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook } from "../type/facebook";
+import { Facebook, GenericFacebookRequest } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
@@ -12,7 +12,7 @@ import { createMessenger } from "./generic-messenger";
 function createFacebookRequest<C>(
   webhook: Facebook.PlatformRequest,
   targetPlatform: "facebook"
-): readonly Facebook.GenericRequest<C>[] {
+): readonly GenericFacebookRequest<C>[] {
   const { object, entry } = webhook;
 
   /** Group requests based on target ID. */
@@ -34,7 +34,7 @@ function createFacebookRequest<C>(
   function processRequest(
     request: Facebook.PlatformRequest.Entry.Messaging,
     targetPlatform: "facebook"
-  ): Facebook.GenericRequest<C>["input"] {
+  ): GenericFacebookRequest<C>["input"] {
     if (
       isType<Facebook.PlatformRequest.Entry.Messaging.Postback>(
         request,

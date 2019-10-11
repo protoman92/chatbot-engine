@@ -3,23 +3,25 @@ import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
 import { Messenger as RootMessenger } from "./messenger";
-import { GenericRequest as RootGenericRequest } from "./request";
+import {
+  GenericRequest,
+  RootGenericRequest,
+  RootGenericRequestInput
+} from "./request";
 import { GenericResponse as RootGenericResponse } from "./response";
 import { VisualContent as RootVisualContent } from "./visual-content";
 
+export interface GenericFacebookRequestInput extends RootGenericRequestInput {
+  readonly targetPlatform: "facebook";
+  readonly stickerID: string;
+}
+
+export interface GenericFacebookRequest<C> extends RootGenericRequest<C> {
+  readonly targetPlatform: "facebook";
+  readonly input: readonly GenericFacebookRequestInput[];
+}
+
 export namespace Facebook {
-  namespace GenericRequest {
-    interface Input extends RootGenericRequest.Base.Input {
-      readonly targetPlatform: "facebook";
-      readonly stickerID: string;
-    }
-  }
-
-  interface GenericRequest<C> extends RootGenericRequest.Base<C> {
-    readonly targetPlatform: "facebook";
-    readonly input: readonly GenericRequest.Input[];
-  }
-
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
     readonly targetPlatform: "facebook";
     readonly output: readonly VisualContent[];
@@ -36,7 +38,7 @@ export namespace Facebook {
     readonly quickReplies?: readonly VisualContent.QuickReply[];
   }
 
-  type DefaultContext = RootDefaultContext & GenericRequest.Input;
+  type DefaultContext = RootDefaultContext & GenericFacebookRequestInput;
 
   namespace Leaf {
     type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
@@ -281,5 +283,5 @@ export namespace Facebook {
    * @template C The context used by the current chatbot.
    */
   interface Messenger<C>
-    extends RootMessenger<C, PlatformRequest, GenericRequest<C>> {}
+    extends RootMessenger<C, PlatformRequest, GenericFacebookRequest<C>> {}
 }

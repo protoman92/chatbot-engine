@@ -2,7 +2,7 @@ import { Omit } from "ts-essentials";
 import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
 import { Leaf } from "../type/leaf";
-import { Telegram } from "../type/telegram";
+import { GenericTelegramRequest, Telegram } from "../type/telegram";
 import { VisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
 
@@ -31,14 +31,14 @@ export function extractInputCommand(
 function createTelegramRequest<C>(
   webhook: Telegram.PlatformRequest,
   { username }: Telegram.Bot
-): readonly Telegram.GenericRequest<C>[] {
+): readonly GenericTelegramRequest<C>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage }
   }: Telegram.PlatformRequest.Message):
     | [
         Telegram.User,
         Telegram.PlatformRequest.Message.Message.Chat.Chat,
-        Telegram.GenericRequest<C>["input"]
+        GenericTelegramRequest<C>["input"]
       ]
     | undefined {
     if (
@@ -123,7 +123,7 @@ function createTelegramRequest<C>(
     | [
         Telegram.User,
         Telegram.PlatformRequest.Message.Message.Chat.Chat | undefined,
-        Telegram.GenericRequest<C>["input"]
+        GenericTelegramRequest<C>["input"]
       ]
     | undefined {
     return [
@@ -149,7 +149,7 @@ function createTelegramRequest<C>(
     | [
         Telegram.User,
         Telegram.PlatformRequest.Message.Message.Chat.Chat | undefined,
-        Telegram.GenericRequest<C>["input"]
+        GenericTelegramRequest<C>["input"]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;

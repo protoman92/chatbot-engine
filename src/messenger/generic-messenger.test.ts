@@ -10,7 +10,7 @@ import {
   when
 } from "ts-mockito";
 import { PlatformCommunicator } from "../type/communicator";
-import { Facebook } from "../type/facebook";
+import { Facebook, GenericFacebookRequestInput } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { SupportedPlatform } from "../type/messenger";
 import { GenericRequest } from "../type/request";
@@ -113,7 +113,7 @@ describe("Generic unit messenger", () => {
     when(leafSelector.next(anything())).thenResolve();
     const oldContext = { a: 1, b: 2 };
 
-    const input: readonly Facebook.GenericRequest.Input[] = [
+    const input: readonly GenericFacebookRequestInput[] = [
       {
         targetPlatform,
         inputText: "text-1",

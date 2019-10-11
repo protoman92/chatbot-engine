@@ -3,26 +3,28 @@ import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
 import { Messenger as RootMessenger } from "./messenger";
-import { GenericRequest as RootGenericRequest } from "./request";
+import {
+  GenericRequest,
+  RootGenericRequest,
+  RootGenericRequestInput
+} from "./request";
 import { GenericResponse as RootGenericResponse } from "./response";
 import { VisualContent as RootVisualContent } from "./visual-content";
 
+export interface GenericTelegramRequestInput extends RootGenericRequestInput {
+  readonly inputCommand: string;
+  readonly leftChatMembers: readonly (Telegram.Bot | Telegram.User)[];
+  readonly newChatMembers: readonly (Telegram.Bot | Telegram.User)[];
+  readonly targetPlatform: "telegram";
+}
+
+export interface GenericTelegramRequest<C> extends RootGenericRequest<C> {
+  readonly targetPlatform: "telegram";
+  readonly telegramUser: Telegram.User;
+  readonly input: readonly GenericTelegramRequestInput[];
+}
+
 export namespace Telegram {
-  namespace GenericRequest {
-    interface Input extends RootGenericRequest.Base.Input {
-      readonly inputCommand: string;
-      readonly leftChatMembers: readonly (Bot | User)[];
-      readonly newChatMembers: readonly (Bot | User)[];
-      readonly targetPlatform: "telegram";
-    }
-  }
-
-  interface GenericRequest<C> extends RootGenericRequest.Base<C> {
-    readonly targetPlatform: "telegram";
-    readonly telegramUser: User;
-    readonly input: readonly GenericRequest.Input[];
-  }
-
   interface GenericResponse<C> extends RootGenericResponse.Base<C> {
     readonly targetPlatform: "telegram";
     readonly output: readonly VisualContent[];
@@ -57,7 +59,7 @@ export namespace Telegram {
     readonly quickReplies?: VisualContent.QuickReplyMatrix;
   }
 
-  type DefaultContext = RootDefaultContext & GenericRequest.Input;
+  type DefaultContext = RootDefaultContext & GenericTelegramRequestInput;
 
   namespace Leaf {
     type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
@@ -243,5 +245,5 @@ export namespace Telegram {
    * @template C The context used by the current chatbot.
    */
   interface Messenger<C>
-    extends RootMessenger<C, PlatformRequest, GenericRequest<C>> {}
+    extends RootMessenger<C, PlatformRequest, GenericTelegramRequest<C>> {}
 }
