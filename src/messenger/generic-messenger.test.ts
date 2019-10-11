@@ -20,7 +20,7 @@ import { GenericRequest } from "../type/request";
 import { GenericResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
 import {
-  createCrossPlatformBatchMessenger,
+  createCrossPlatformMessenger,
   createMessageProcessor
 } from "./generic-messenger";
 
@@ -160,37 +160,37 @@ describe("Generic message processor", () => {
   });
 });
 
-describe("Cross platform unit messenger", () => {
-  let fbMessenger: FacebookMessageProcessor<{}>;
-  let tlMessenger: TelegramMessageProcessor<{}>;
-  let messengers: Parameters<typeof createCrossPlatformBatchMessenger>[0];
-  let messengerInstances: typeof messengers;
+describe("Cross platform messenger", () => {
+  let fbProcessor: FacebookMessageProcessor<{}>;
+  let tlProcessor: TelegramMessageProcessor<{}>;
+  let processors: Parameters<typeof createCrossPlatformMessenger>[0];
+  let processorInstances: typeof processors;
 
   beforeEach(() => {
-    fbMessenger = spy<FacebookMessageProcessor<{}>>({
+    fbProcessor = spy<FacebookMessageProcessor<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    tlMessenger = spy<TelegramMessageProcessor<{}>>({
+    tlProcessor = spy<TelegramMessageProcessor<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    messengers = { facebook: fbMessenger, telegram: tlMessenger };
+    processors = { facebook: fbProcessor, telegram: tlProcessor };
 
-    messengerInstances = Object.entries(messengers)
+    processorInstances = Object.entries(processors)
       .map(([key, value]) => ({
         [key]: instance(value)
       }))
-      .reduce((acc, item) => ({ ...acc, ...item })) as typeof messengers;
+      .reduce((acc, item) => ({ ...acc, ...item })) as typeof processors;
   });
 
-  it("Should invoke correct messenger", async () => {
+  it("Should invoke correct message processor", async () => {
     // Setup
-    when(fbMessenger.generalizeRequest(anything())).thenResolve([
+    when(fbProcessor.generalizeRequest(anything())).thenResolve([
       {
         targetID,
         targetPlatform: "facebook",
@@ -199,7 +199,7 @@ describe("Cross platform unit messenger", () => {
       }
     ]);
 
-    when(tlMessenger.generalizeRequest(anything())).thenResolve([
+    when(tlProcessor.generalizeRequest(anything())).thenResolve([
       {
         targetID,
         targetPlatform: "telegram" as const,
@@ -216,26 +216,26 @@ describe("Cross platform unit messenger", () => {
       }
     ]);
 
-    const platforms = Object.keys(messengers) as readonly SupportedPlatform[];
+    const platforms = Object.keys(processors) as readonly SupportedPlatform[];
 
     // When
     for (const targetPlatform of platforms) {
-      const crossMessenger = createCrossPlatformBatchMessenger(
-        messengerInstances,
+      const crossMessenger = createCrossPlatformMessenger(
+        processorInstances,
         () => targetPlatform
       );
 
       await crossMessenger.processPlatformRequest({});
 
       // Then
-      verify(messengers[targetPlatform]!.generalizeRequest(anything())).once();
-      verify(messengers[targetPlatform]!.receiveRequest(anything())).once();
+      verify(processors[targetPlatform]!.generalizeRequest(anything())).once();
+      verify(processors[targetPlatform]!.receiveRequest(anything())).once();
     }
   });
 
   it("Should throw error if platform is not available", async () => {
     // Setup
-    const platformMessenger = await createCrossPlatformBatchMessenger({});
+    const platformMessenger = await createCrossPlatformMessenger({});
 
     // When && Then: Facebook
     try {

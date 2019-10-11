@@ -85,9 +85,9 @@ const leafSelector = await createTransformChain()
   .transform(createLeafSelector(branches));
 ```
 
-### Set up platform messengers
+### Set up platform message processors
 
-The platform messengers are responsible for receiving platform requests and sending platform responses. They are capable of:
+The platform message processors are responsible for receiving platform requests and sending platform responses. They are capable of:
 
 - Process raw platform requests (which differ from platform to another) into generic requests.
 - Pass generic requests to leaf selector to produce generic resposnes.
@@ -95,25 +95,25 @@ The platform messengers are responsible for receiving platform requests and send
 - Use platform communicators to send platform responses to the respective platform.
 
 ```javascript
-const fbMessenger = await createFacebookMessenger(
+const fbMessageProcessor = await createFacebookMessageProcessor(
   leafSelector,
   fbCommunicator,
-  transformMessengersByDefault(fbContextDAO, fbCommunicator)
+  transformMessageProcessorsDefault(fbContextDAO, fbCommunicator)
 );
 
-const tlMessenger = await createTelegramMessenger(
+const tlMessageProcessor = await createTelegramMessageProcessor(
   leafSelector,
   tlCommunicator,
-  transformMessengersByDefault(tlContextDAO, tlCommunicator)
+  transformMessageProcessorsDefault(tlContextDAO, tlCommunicator)
 );
 ```
 
-### Set up a master cross-platform batch messenger
+### Set up a master cross-platform messenger
 
-A batch messenger is an abstraction that uses platform messengers under the hood. A cross-platform batch messenger allows platforms to send messages to each other using `targetPlatform` variable in the request input:
+A messenger is an abstraction that uses platform message processors under the hood. A cross-platform messenger allows platforms to send messages to each other using `targetPlatform` variable in the request input:
 
 ```javascript
-const crossMessenger = createCrossPlatformBatchMessenger({
+const crossMessenger = createCrossPlatformMessenger({
   facebook: fbMessenger,
   telegram: tlMessenger
 });

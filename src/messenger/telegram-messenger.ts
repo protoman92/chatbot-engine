@@ -327,7 +327,7 @@ export async function createTelegramMessageProcessor<C>(
   await communicator.setWebhook();
   const bot = await communicator.getCurrentBot();
 
-  const baseMessenger = await createMessageProcessor(
+  const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
       communicator,
@@ -341,12 +341,12 @@ export async function createTelegramMessageProcessor<C>(
   );
 
   return {
-    ...baseMessenger,
+    ...baseProcessor,
     sendResponse: async response => {
       const { targetID } = response;
 
       if (!!(await communicator.isMember(targetID, `${bot.id}`))) {
-        return baseMessenger.sendResponse(response);
+        return baseProcessor.sendResponse(response);
       }
 
       return {};

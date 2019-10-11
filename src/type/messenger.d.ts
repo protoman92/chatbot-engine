@@ -66,7 +66,7 @@ export interface RootMessageProcessor<
  * @template PRequest The platform-specific request.
  * @template PResponse The platform-specific response.
  */
-export interface BatchMessenger<PRequest, PResponse> {
+export interface Messenger<PRequest, PResponse> {
   /** Process a platform request from end-to-end. */
   processPlatformRequest(req: PRequest): Promise<unknown>;
 }

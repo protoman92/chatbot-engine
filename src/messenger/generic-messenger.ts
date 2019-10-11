@@ -11,7 +11,7 @@ import {
   GenericFacebookRequest
 } from "../type/facebook";
 import {
-  BatchMessenger,
+  Messenger,
   RootMessageProcessor,
   SupportedPlatform
 } from "../type/messenger";
@@ -94,14 +94,14 @@ export async function createMessageProcessor<
  * @template PResponse The platform-specific response.
  * @template GRequest The platform-specific generic request.
  */
-export function createBatchMessenger<
+export function createMessenger<
   C,
   PRequest,
   PResponse,
   GRequest extends GenericRequest<C>
 >(
   processor: RootMessageProcessor<C, PRequest, GRequest>
-): BatchMessenger<PRequest, PResponse> {
+): Messenger<PRequest, PResponse> {
   return {
     processPlatformRequest: async platformReq => {
       const genericReq = await processor.generalizeRequest(platformReq);
@@ -112,10 +112,10 @@ export function createBatchMessenger<
 
 /**
  * Create a cross-platform batch messenger that delegates to the appropriate
- * platform-specific messenger when a request arrives.
+ * platform-specific message processor when a request arrives.
  * @template C The context used by the current chatbot.
  */
-export function createCrossPlatformBatchMessenger<C>(
+export function createCrossPlatformMessenger<C>(
   {
     facebook,
     telegram
@@ -124,7 +124,7 @@ export function createCrossPlatformBatchMessenger<C>(
     telegram?: TelegramMessageProcessor<C>;
   }>,
   getPlatform: (platformReq: unknown) => SupportedPlatform = getRequestPlatform
-): BatchMessenger<unknown, unknown> {
+): Messenger<unknown, unknown> {
   function switchPlatform<FBR, TLR>(
     platform: SupportedPlatform,
     {
@@ -152,7 +152,7 @@ export function createCrossPlatformBatchMessenger<C>(
     throw genericError(`Unsupported platform ${platform}`);
   }
 
-  return createBatchMessenger<C, unknown, unknown, GenericRequest<C>>({
+  return createMessenger<C, unknown, unknown, GenericRequest<C>>({
     generalizeRequest: async platformReq => {
       const targetPlatform = getPlatform(platformReq);
 
@@ -173,8 +173,8 @@ export function createCrossPlatformBatchMessenger<C>(
     },
     sendResponse: async response => {
       return switchPlatform(response.targetPlatform, {
-        facebookCallback: messenger => messenger.sendResponse(response),
-        telegramCallback: messenger => messenger.sendResponse(response)
+        facebookCallback: processor => processor.sendResponse(response),
+        telegramCallback: processor => processor.sendResponse(response)
       });
     }
   });

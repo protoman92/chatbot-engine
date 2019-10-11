@@ -139,7 +139,7 @@ export function setTypingIndicator<
  * @template PResponse The platform-specific response.
  * @template GRequest The platform-specific generic request.
  */
-export function transformMessengersByDefault<
+export function transformMessageProcessorsDefault<
   C,
   PRequest,
   PResponse,
