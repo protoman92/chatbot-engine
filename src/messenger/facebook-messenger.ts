@@ -2,6 +2,7 @@ import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   Facebook,
+  FacebookMessenger,
   FacebookPlatformRequest,
   FacebookPlatformResponse,
   FacebookVisualContent,
@@ -398,8 +399,8 @@ function createFacebookResponse<C>({
 export async function createFacebookMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: Facebook.Communicator,
-  ...transformers: readonly Transformer<Facebook.Messenger<C>>[]
-): Promise<Facebook.Messenger<C>> {
+  ...transformers: readonly Transformer<FacebookMessenger<C>>[]
+): Promise<FacebookMessenger<C>> {
   return createMessenger(
     {
       leafSelector,

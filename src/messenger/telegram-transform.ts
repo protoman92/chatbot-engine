@@ -1,6 +1,6 @@
 import { DefaultContext, Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
-import { Telegram } from "../type/telegram";
+import { Telegram, TelegramMessenger } from "../type/telegram";
 
 /**
  * Save a Telegram user in backend if targetID is not found in context.
@@ -9,7 +9,7 @@ import { Telegram } from "../type/telegram";
 export function saveTelegramUser<C>(
   contextDAO: ContextDAO<C>,
   saveUser: (user: Telegram.User) => Promise<unknown>
-): Transformer<Telegram.Messenger<C>> {
+): Transformer<TelegramMessenger<C>> {
   return async messenger => {
     return {
       ...messenger,

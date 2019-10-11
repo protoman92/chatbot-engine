@@ -2,7 +2,7 @@ import { compose, deepClone } from "../common/utils";
 import { DefaultContext, Transformer } from "../type/common";
 import { PlatformCommunicator } from "../type/communicator";
 import { ContextDAO } from "../type/context-dao";
-import { Messenger } from "../type/messenger";
+import { RootMessenger } from "../type/messenger";
 import { GenericRequest } from "../type/request";
 
 /**
@@ -19,7 +19,7 @@ export function saveContextOnSend<
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">
-): Transformer<Messenger<C, PRequest, GRequest>> {
+): Transformer<RootMessenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -50,7 +50,7 @@ export function injectContextOnReceive<
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext">
-): Transformer<Messenger<C, PRequest, GRequest>> {
+): Transformer<RootMessenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -81,7 +81,7 @@ export function saveUserForTargetID<
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<Messenger<C, PRequest, GRequest>> {
+): Transformer<RootMessenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -117,7 +117,7 @@ export function setTypingIndicator<
   GRequest extends GenericRequest<C>
 >(
   communicator: PlatformCommunicator<PResponse>
-): Transformer<Messenger<C, PRequest, GRequest>> {
+): Transformer<RootMessenger<C, PRequest, GRequest>> {
   return async messenger => {
     return {
       ...messenger,
@@ -147,7 +147,7 @@ export function transformMessengersByDefault<
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">,
   communicator: PlatformCommunicator<PResponse>
-): Transformer<Messenger<C, PRequest, GRequest>> {
+): Transformer<RootMessenger<C, PRequest, GRequest>> {
   return messenger =>
     compose(
       messenger,

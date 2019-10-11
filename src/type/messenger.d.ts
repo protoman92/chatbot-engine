@@ -1,14 +1,12 @@
-import { Facebook } from "./facebook";
+import { PlatformCommunicator } from "./communicator";
+import { Leaf } from "./leaf";
 import { GenericRequest } from "./request";
 import { GenericResponse } from "./response";
-import { Telegram } from "./telegram";
-import { Leaf } from "./leaf";
-import { PlatformCommunicator } from "./communicator";
 
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = "facebook" | "telegram";
 
-declare namespace Messenger {
+declare namespace RootMessenger {
   /**
    * Configurations to set up a generic messenger.
    * @template C The context used by the current chatbot.
@@ -25,7 +23,11 @@ declare namespace Messenger {
     readonly targetPlatform: SupportedPlatform;
     readonly leafSelector: Leaf<C>;
     readonly communicator: PlatformCommunicator<PResponse>;
-    readonly mapRequest: Messenger<C, PRequest, GRequest>["generalizeRequest"];
+    readonly mapRequest: RootMessenger<
+      C,
+      PRequest,
+      GRequest
+    >["generalizeRequest"];
     mapResponse: (res: GenericResponse<C>) => Promise<readonly PResponse[]>;
   }
 }
@@ -42,7 +44,11 @@ declare namespace Messenger {
  * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  */
-export interface Messenger<C, PRequest, GRequest extends GenericRequest<C>> {
+export interface RootMessenger<
+  C,
+  PRequest,
+  GRequest extends GenericRequest<C>
+> {
   /** Generalize a platform request into a generic request. */
   generalizeRequest(request: PRequest): Promise<readonly GRequest[]>;
 

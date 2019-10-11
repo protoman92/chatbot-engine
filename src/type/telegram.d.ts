@@ -2,7 +2,7 @@ import { DeepReadonly } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
-import { Messenger as RootMessenger } from "./messenger";
+import { RootMessenger } from "./messenger";
 import { RootGenericRequest, RootGenericRequestInput } from "./request";
 import { RootGenericResponse } from "./response";
 import { RootVisualContent } from "./visual-content";
@@ -182,6 +182,17 @@ declare namespace TelegramPlatformResponse {
 
 export type TelegramPlatformResponse = TelegramPlatformResponse.SendMessage;
 
+/**
+ * Represents a Telegram-specific messenger.
+ * @template C The context used by the current chatbot.
+ */
+export interface TelegramMessenger<C>
+  extends RootMessenger<
+    C,
+    TelegramPlatformRequest,
+    GenericTelegramRequest<C>
+  > {}
+
 export namespace Telegram {
   type DefaultContext = RootDefaultContext & GenericTelegramRequestInput;
 
@@ -238,15 +249,4 @@ export namespace Telegram {
     /** Set webhook to start receiving message updates. */
     setWebhook(): Promise<unknown>;
   }
-
-  /**
-   * Represents a Telegram-specific messenger.
-   * @template C The context used by the current chatbot.
-   */
-  interface Messenger<C>
-    extends RootMessenger<
-      C,
-      TelegramPlatformRequest,
-      GenericTelegramRequest<C>
-    > {}
 }

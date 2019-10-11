@@ -6,19 +6,19 @@ import {
 } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
-  Facebook,
+  FacebookMessenger,
   FacebookPlatformRequest,
   GenericFacebookRequest
 } from "../type/facebook";
 import {
   BatchMessenger,
-  Messenger,
+  RootMessenger,
   SupportedPlatform
 } from "../type/messenger";
 import { GenericRequest, GenericRequestInput } from "../type/request";
 import {
   GenericTelegramRequest,
-  Telegram,
+  TelegramMessenger,
   TelegramPlatformRequest
 } from "../type/telegram";
 
@@ -41,13 +41,13 @@ export async function createMessenger<
     communicator,
     mapRequest,
     mapResponse
-  }: Messenger.Configs<C, PRequest, PResponse, GRequest>,
-  ...transformers: readonly Transformer<Messenger<C, PRequest, GRequest>>[]
-): Promise<Messenger<C, PRequest, GRequest>> {
+  }: RootMessenger.Configs<C, PRequest, PResponse, GRequest>,
+  ...transformers: readonly Transformer<RootMessenger<C, PRequest, GRequest>>[]
+): Promise<RootMessenger<C, PRequest, GRequest>> {
   const reversedTransformers = [...transformers];
   reversedTransformers.reverse();
 
-  const messenger: Messenger<C, PRequest, GRequest> = await compose(
+  const messenger: RootMessenger<C, PRequest, GRequest> = await compose(
     {
       generalizeRequest: platformReq => mapRequest(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
@@ -71,7 +71,10 @@ export async function createMessenger<
   await leafSelector.subscribe({
     next: async ({ targetPlatform: pf, ...restInput }) => {
       if (pf === targetPlatform) {
-        return messenger.sendResponse({ ...restInput, targetPlatform: pf });
+        return messenger.sendResponse({
+          ...restInput,
+          targetPlatform: pf
+        });
       }
 
       return undefined;
@@ -96,7 +99,7 @@ export function createBatchMessenger<
   PResponse,
   GRequest extends GenericRequest<C>
 >(
-  messenger: Messenger<C, PRequest, GRequest>
+  messenger: RootMessenger<C, PRequest, GRequest>
 ): BatchMessenger<PRequest, PResponse> {
   return {
     processPlatformRequest: async platformReq => {
@@ -116,8 +119,8 @@ export function createCrossPlatformBatchMessenger<C>(
     facebook,
     telegram
   }: Readonly<{
-    facebook?: Facebook.Messenger<C>;
-    telegram?: Telegram.Messenger<C>;
+    facebook?: FacebookMessenger<C>;
+    telegram?: TelegramMessenger<C>;
   }>,
   getPlatform: (platformReq: unknown) => SupportedPlatform = getRequestPlatform
 ): BatchMessenger<unknown, unknown> {
@@ -127,8 +130,8 @@ export function createCrossPlatformBatchMessenger<C>(
       facebookCallback,
       telegramCallback
     }: Readonly<{
-      facebookCallback: (messenger: Facebook.Messenger<C>) => Promise<FBR>;
-      telegramCallback: (messenger: Telegram.Messenger<C>) => Promise<TLR>;
+      facebookCallback: (messenger: FacebookMessenger<C>) => Promise<FBR>;
+      telegramCallback: (messenger: TelegramMessenger<C>) => Promise<TLR>;
     }>
   ) {
     switch (platform) {

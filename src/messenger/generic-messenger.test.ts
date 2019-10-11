@@ -10,12 +10,15 @@ import {
   when
 } from "ts-mockito";
 import { PlatformCommunicator } from "../type/communicator";
-import { Facebook, GenericFacebookRequestInput } from "../type/facebook";
+import {
+  FacebookMessenger,
+  GenericFacebookRequestInput
+} from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { SupportedPlatform } from "../type/messenger";
 import { GenericRequest } from "../type/request";
 import { GenericResponse } from "../type/response";
-import { Telegram } from "../type/telegram";
+import { TelegramMessenger } from "../type/telegram";
 import {
   createCrossPlatformBatchMessenger,
   createMessenger
@@ -158,19 +161,19 @@ describe("Generic unit messenger", () => {
 });
 
 describe("Cross platform unit messenger", () => {
-  let fbMessenger: Facebook.Messenger<{}>;
-  let tlMessenger: Telegram.Messenger<{}>;
+  let fbMessenger: FacebookMessenger<{}>;
+  let tlMessenger: TelegramMessenger<{}>;
   let messengers: Parameters<typeof createCrossPlatformBatchMessenger>[0];
   let messengerInstances: typeof messengers;
 
   beforeEach(() => {
-    fbMessenger = spy<Facebook.Messenger<{}>>({
+    fbMessenger = spy<FacebookMessenger<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    tlMessenger = spy<Telegram.Messenger<{}>>({
+    tlMessenger = spy<TelegramMessenger<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})

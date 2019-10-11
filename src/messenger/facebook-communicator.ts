@@ -63,7 +63,7 @@ export function createFacebookCommunicator(
   };
 }
 
-export default (function() {
+export default function() {
   const {
     FACEBOOK_API_VERSION: apiVersion,
     FACEBOOK_PAGE_TOKEN: pageToken,
@@ -76,4 +76,4 @@ export default (function() {
     defaultAxiosCommunicator,
     requireAllTruthy(config)
   );
-})();
+}

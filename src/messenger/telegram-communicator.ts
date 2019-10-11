@@ -1,5 +1,5 @@
-import { requireAllTruthy } from "common/utils";
 import { stringify } from "querystring";
+import { requireAllTruthy } from "../common/utils";
 import { HTTPCommunicator } from "../type/communicator";
 import { Telegram } from "../type/telegram";
 import defaultAxiosCommunicator from "./axios-communicator";
@@ -69,7 +69,7 @@ export function createTelegramCommunicator(
   };
 }
 
-export default (function() {
+export default function() {
   const {
     TELEGRAM_AUTH_TOKEN: authToken,
     TELEGRAM_WEBHOOK_URL: webhookURL
@@ -81,4 +81,4 @@ export default (function() {
     defaultAxiosCommunicator,
     requireAllTruthy(config)
   );
-})();
+}

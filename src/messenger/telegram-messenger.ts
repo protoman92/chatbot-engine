@@ -6,6 +6,7 @@ import {
   GenericTelegramRequest,
   GenericTelegramResponse,
   Telegram,
+  TelegramMessenger,
   TelegramPlatformRequest,
   TelegramPlatformResponse,
   TelegramVisualContent
@@ -321,8 +322,8 @@ function createTelegramResponse<C>({
 export async function createTelegramMessenger<C>(
   leafSelector: Leaf<C>,
   communicator: Telegram.Communicator,
-  ...transformers: readonly Transformer<Telegram.Messenger<C>>[]
-): Promise<Telegram.Messenger<C>> {
+  ...transformers: readonly Transformer<TelegramMessenger<C>>[]
+): Promise<TelegramMessenger<C>> {
   await communicator.setWebhook();
   const bot = await communicator.getCurrentBot();
 
