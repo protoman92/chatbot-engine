@@ -7,7 +7,7 @@ import { bridgeEmission } from "../stream";
 import { Facebook } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { Telegram } from "../type/telegram";
-import { VisualContent } from "../type/visual-content";
+import { RootVisualContent } from "../type/visual-content";
 import {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
@@ -37,7 +37,7 @@ describe("Default error leaf", () => {
     expectJs(output).to.have.length(1);
     const [{ content: response }] = output;
 
-    if (isType<VisualContent.MainContent.Text>(response, "text")) {
+    if (isType<RootVisualContent.MainContent.Text>(response, "text")) {
       expectJs(response.text).to.contain(error.message);
     } else {
       throw new Error("Never should have come here");

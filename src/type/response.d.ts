@@ -1,13 +1,13 @@
 import { GenericFacebookResponse } from "./facebook";
 import { SupportedPlatform } from "./messenger";
 import { GenericTelegramResponse } from "./telegram";
-import { VisualContent } from "./visual-content";
+import { RootVisualContent } from "./visual-content";
 
 export interface RootGenericResponse<C> {
   readonly targetID: string;
   readonly targetPlatform: SupportedPlatform;
   readonly additionalContext?: Partial<C>;
-  readonly output: readonly VisualContent.Base[];
+  readonly output: readonly RootVisualContent[];
 }
 
 /**

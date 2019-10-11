@@ -5,7 +5,7 @@ import { Leaf as RootLeaf } from "./leaf";
 import { Messenger as RootMessenger } from "./messenger";
 import { RootGenericRequest, RootGenericRequestInput } from "./request";
 import { RootGenericResponse } from "./response";
-import { VisualContent as RootVisualContent } from "./visual-content";
+import { RootVisualContent } from "./visual-content";
 
 export interface GenericTelegramRequestInput extends RootGenericRequestInput {
   readonly inputCommand: string;
@@ -22,39 +22,39 @@ export interface GenericTelegramRequest<C> extends RootGenericRequest<C> {
 
 export interface GenericTelegramResponse<C> extends RootGenericResponse<C> {
   readonly targetPlatform: "telegram";
-  readonly output: readonly Telegram.VisualContent[];
+  readonly output: readonly TelegramVisualContent[];
+}
+
+declare namespace TelegramVisualContent {
+  namespace QuickReply {
+    interface Contact {
+      readonly text: string;
+      readonly type: "contact";
+    }
+
+    type InlineMarkup =
+      | RootVisualContent.QuickReply.Postback
+      | RootVisualContent.QuickReply.Text;
+
+    type ReplyMarkup =
+      | RootVisualContent.QuickReply.Location
+      | RootVisualContent.QuickReply.Text
+      | QuickReply.Contact;
+
+    type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
+    type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
+  }
+
+  type QuickReplyMatrix =
+    | QuickReply.InlineMarkupMatrix
+    | QuickReply.ReplyMarkupMatrix;
+}
+
+interface TelegramVisualContent extends RootVisualContent {
+  readonly quickReplies?: TelegramVisualContent.QuickReplyMatrix;
 }
 
 export namespace Telegram {
-  namespace VisualContent {
-    namespace QuickReply {
-      interface Contact {
-        readonly text: string;
-        readonly type: "contact";
-      }
-
-      type InlineMarkup =
-        | RootVisualContent.QuickReply.Postback
-        | RootVisualContent.QuickReply.Text;
-
-      type ReplyMarkup =
-        | RootVisualContent.QuickReply.Location
-        | RootVisualContent.QuickReply.Text
-        | QuickReply.Contact;
-
-      type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
-      type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
-    }
-
-    type QuickReplyMatrix =
-      | QuickReply.InlineMarkupMatrix
-      | QuickReply.ReplyMarkupMatrix;
-  }
-
-  interface VisualContent extends RootVisualContent.Base {
-    readonly quickReplies?: VisualContent.QuickReplyMatrix;
-  }
-
   type DefaultContext = RootDefaultContext & GenericTelegramRequestInput;
 
   namespace Leaf {

@@ -5,9 +5,10 @@ import { Leaf } from "../type/leaf";
 import {
   GenericTelegramRequest,
   GenericTelegramResponse,
-  Telegram
+  Telegram,
+  TelegramVisualContent
 } from "../type/telegram";
-import { VisualContent } from "../type/visual-content";
+import { RootVisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
 
 /**
@@ -199,14 +200,14 @@ function createTelegramResponse<C>({
 }: GenericTelegramResponse<C>): readonly Telegram.PlatformResponse[] {
   function createTextResponse(
     targetID: string,
-    { text }: VisualContent.MainContent.Text
+    { text }: RootVisualContent.MainContent.Text
   ): Omit<Telegram.PlatformResponse.SendMessage, "reply_markup"> {
     return { text, action: "sendMessage", chat_id: targetID };
   }
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    quickReplies: Telegram.VisualContent.QuickReply.InlineMarkupMatrix
+    quickReplies: TelegramVisualContent.QuickReply.InlineMarkupMatrix
   ): Telegram.PlatformResponse.SendMessage.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: quickReplies.map(qrs =>
@@ -227,7 +228,7 @@ function createTelegramResponse<C>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    quickReplyMatrix: Telegram.VisualContent.QuickReply.ReplyMarkupMatrix
+    quickReplyMatrix: TelegramVisualContent.QuickReply.ReplyMarkupMatrix
   ): Telegram.PlatformResponse.SendMessage.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: quickReplyMatrix.map(quickReplies =>
@@ -266,14 +267,14 @@ function createTelegramResponse<C>({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReplyMatrix: Telegram.VisualContent.QuickReplyMatrix
+    quickReplyMatrix: TelegramVisualContent.QuickReplyMatrix
   ): Telegram.PlatformResponse.SendMessage.ReplyMarkup {
     const shouldBeReplyMarkup = quickReplyMatrix.every(
-      (quickReplies: Telegram.VisualContent.QuickReplyMatrix[number]) =>
+      (quickReplies: TelegramVisualContent.QuickReplyMatrix[number]) =>
         quickReplies.every(
           ({
             type
-          }: Telegram.VisualContent.QuickReplyMatrix[number][number]) => {
+          }: TelegramVisualContent.QuickReplyMatrix[number][number]) => {
             return type === "location";
           }
         )
@@ -281,12 +282,12 @@ function createTelegramResponse<C>({
 
     if (shouldBeReplyMarkup) {
       return createReplyMarkups(
-        quickReplyMatrix as Telegram.VisualContent.QuickReply.ReplyMarkupMatrix
+        quickReplyMatrix as TelegramVisualContent.QuickReply.ReplyMarkupMatrix
       );
     }
 
     return createInlineMarkups(
-      quickReplyMatrix as Telegram.VisualContent.QuickReply.InlineMarkupMatrix
+      quickReplyMatrix as TelegramVisualContent.QuickReply.InlineMarkupMatrix
     );
   }
 

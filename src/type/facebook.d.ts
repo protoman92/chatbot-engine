@@ -5,7 +5,7 @@ import { Leaf as RootLeaf } from "./leaf";
 import { Messenger as RootMessenger } from "./messenger";
 import { RootGenericRequest, RootGenericRequestInput } from "./request";
 import { RootGenericResponse } from "./response";
-import { VisualContent as RootVisualContent } from "./visual-content";
+import { RootVisualContent } from "./visual-content";
 
 export interface GenericFacebookRequestInput extends RootGenericRequestInput {
   readonly targetPlatform: "facebook";
@@ -19,21 +19,21 @@ export interface GenericFacebookRequest<C> extends RootGenericRequest<C> {
 
 export interface GenericFacebookResponse<C> extends RootGenericResponse<C> {
   readonly targetPlatform: "facebook";
-  readonly output: readonly Facebook.VisualContent[];
+  readonly output: readonly FacebookVisualContent[];
+}
+
+declare namespace FacebookVisualContent {
+  type QuickReply =
+    | RootVisualContent.QuickReply.Location
+    | RootVisualContent.QuickReply.Postback
+    | RootVisualContent.QuickReply.Text;
+}
+
+export interface FacebookVisualContent extends RootVisualContent {
+  readonly quickReplies?: readonly FacebookVisualContent.QuickReply[];
 }
 
 export namespace Facebook {
-  namespace VisualContent {
-    type QuickReply =
-      | RootVisualContent.QuickReply.Location
-      | RootVisualContent.QuickReply.Postback
-      | RootVisualContent.QuickReply.Text;
-  }
-
-  interface VisualContent extends RootVisualContent.Base {
-    readonly quickReplies?: readonly VisualContent.QuickReply[];
-  }
-
   type DefaultContext = RootDefaultContext & GenericFacebookRequestInput;
 
   namespace Leaf {

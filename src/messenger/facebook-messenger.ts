@@ -2,11 +2,12 @@ import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   Facebook,
+  FacebookVisualContent,
   GenericFacebookRequest,
   GenericFacebookResponse
 } from "../type/facebook";
 import { Leaf } from "../type/leaf";
-import { VisualContent } from "../type/visual-content";
+import { RootVisualContent } from "../type/visual-content";
 import { createMessenger } from "./generic-messenger";
 
 /**
@@ -180,7 +181,7 @@ function createFacebookResponse<C>({
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(
-    action: VisualContent.SubContent.Action
+    action: RootVisualContent.SubContent.Action
   ): Facebook.PlatformResponse.Message.Button.Button {
     const { text: title } = action;
 
@@ -196,7 +197,7 @@ function createFacebookResponse<C>({
   function createButtonResponse({
     text,
     actions
-  }: VisualContent.MainContent.Button): Facebook.PlatformResponse.Message.Button {
+  }: RootVisualContent.MainContent.Button): Facebook.PlatformResponse.Message.Button {
     return {
       messaging_type: "RESPONSE",
       message: {
@@ -214,7 +215,7 @@ function createFacebookResponse<C>({
 
   function createCarouselResponse({
     items
-  }: VisualContent.MainContent.Carousel): Facebook.PlatformResponse.Message.Carousel {
+  }: RootVisualContent.MainContent.Carousel): Facebook.PlatformResponse.Message.Carousel {
     if (!items.length) {
       throw facebookError("Not enough carousel items");
     }
@@ -252,7 +253,7 @@ function createFacebookResponse<C>({
   }
 
   function createListResponse(
-    content: VisualContent.MainContent.List
+    content: RootVisualContent.MainContent.List
   ): Facebook.PlatformResponse.Message.List {
     const { items, actions: listActions } = content;
 
@@ -300,7 +301,7 @@ function createFacebookResponse<C>({
 
   function createMediaResponse({
     media: { type, url }
-  }: VisualContent.MainContent.Media): Facebook.PlatformResponse.Message.Media {
+  }: RootVisualContent.MainContent.Media): Facebook.PlatformResponse.Message.Media {
     return {
       message: {
         attachment: {
@@ -321,7 +322,7 @@ function createFacebookResponse<C>({
 
   function createTextResponse({
     text
-  }: VisualContent.MainContent.Text): Facebook.PlatformResponse.Message.Text {
+  }: RootVisualContent.MainContent.Text): Facebook.PlatformResponse.Message.Text {
     return { messaging_type: "RESPONSE", message: { text } };
   }
 
@@ -348,7 +349,7 @@ function createFacebookResponse<C>({
 
   /** Create a Facebook quick reply from a generic quick reply. */
   function createQuickReply(
-    quickReply: Facebook.VisualContent.QuickReply
+    quickReply: FacebookVisualContent.QuickReply
   ): Facebook.PlatformResponse.QuickReply {
     const { text } = quickReply;
 
