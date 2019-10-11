@@ -132,6 +132,21 @@ export function promisify2<
 }
 
 /**
+ * Request all values of an object to be truthy, and throw an error otherwise.
+ * @template T The type of the object being checked.
+ * @param args The object to check for truthiness.
+ */
+export function requireAllTruthy<T>(
+  args: T
+): Readonly<{ [x in keyof T]: NonNullable<T[x]> }> {
+  Object.entries(args).forEach(([key, value]) => {
+    if (!value) throw new Error(`Falsy value ${key}`);
+  });
+
+  return args as any;
+}
+
+/**
  * Require some keys for an object. This makes sure the specified keys do not
  * point to undefined or null values.
  * @template T The object type to receive key requirements.

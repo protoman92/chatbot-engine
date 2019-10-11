@@ -23,3 +23,5 @@ export function createAxiosCommunicator(axiosInstance: AxiosInstance = axios) {
 
   return communicator;
 }
+
+export default createAxiosCommunicator();

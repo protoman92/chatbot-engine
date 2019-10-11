@@ -1,6 +1,7 @@
-import { facebookError } from "../common/utils";
+import { facebookError, requireAllTruthy } from "../common/utils";
 import { HTTPCommunicator } from "../type/communicator";
 import { Facebook } from "../type/facebook";
+import defaultAxiosCommunicator from "./axios-communicator";
 
 /** Create a platform communicator for Facebook. */
 export function createFacebookCommunicator(
@@ -61,3 +62,18 @@ export function createFacebookCommunicator(
     }
   };
 }
+
+export default (function() {
+  const {
+    FACEBOOK_API_VERSION: apiVersion,
+    FACEBOOK_PAGE_TOKEN: pageToken,
+    FACEBOOK_VERIFY_TOKEN: verifyToken
+  } = process.env;
+
+  const config = { apiVersion, pageToken, verifyToken };
+
+  return createFacebookCommunicator(
+    defaultAxiosCommunicator,
+    requireAllTruthy(config)
+  );
+})();
