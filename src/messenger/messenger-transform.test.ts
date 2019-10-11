@@ -3,10 +3,10 @@ import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose } from "../common/utils";
 import { PlatformCommunicator } from "../type/communicator";
 import { ContextDAO } from "../type/context-dao";
-import { RootMessenger } from "../type/messenger";
+import { RootMessageProcessor } from "../type/messenger";
 import { GenericRequest } from "../type/request";
 import { GenericResponse } from "../type/response";
-import { TelegramMessenger } from "../type/telegram";
+import { TelegramMessageProcessor } from "../type/telegram";
 import {
   injectContextOnReceive,
   saveContextOnSend,
@@ -17,12 +17,12 @@ import { saveTelegramUser } from "./telegram-transform";
 
 const targetID = "target-id";
 const targetPlatform = "facebook";
-let messenger: RootMessenger<{}, unknown, GenericRequest<{}>>;
+let messenger: RootMessageProcessor<{}, unknown, GenericRequest<{}>>;
 let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<{}>;
 
 beforeEach(async () => {
-  messenger = spy<RootMessenger<{}, unknown, GenericRequest<{}>>>({
+  messenger = spy<RootMessageProcessor<{}, unknown, GenericRequest<{}>>>({
     generalizeRequest: () => Promise.reject(""),
     receiveRequest: () => Promise.reject(""),
     sendResponse: () => Promise.reject("")
@@ -152,10 +152,10 @@ describe("Save user for target ID", () => {
 });
 
 describe("Save Telegram user for target ID", () => {
-  let tlMessenger: TelegramMessenger<{}>;
+  let tlMessenger: TelegramMessageProcessor<{}>;
 
   beforeEach(() => {
-    tlMessenger = spy<TelegramMessenger<{}>>({
+    tlMessenger = spy<TelegramMessageProcessor<{}>>({
       generalizeRequest: () => Promise.reject(""),
       receiveRequest: () => Promise.reject(""),
       sendResponse: () => Promise.reject("")

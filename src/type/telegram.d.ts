@@ -2,7 +2,7 @@ import { DeepReadonly } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
-import { RootMessenger } from "./messenger";
+import { RootMessageProcessor } from "./messenger";
 import { RootGenericRequest, RootGenericRequestInput } from "./request";
 import { RootGenericResponse } from "./response";
 import { RootVisualContent } from "./visual-content";
@@ -183,11 +183,11 @@ declare namespace TelegramPlatformResponse {
 export type TelegramPlatformResponse = TelegramPlatformResponse.SendMessage;
 
 /**
- * Represents a Telegram-specific messenger.
+ * Represents a Telegram-specific message processor.
  * @template C The context used by the current chatbot.
  */
-export interface TelegramMessenger<C>
-  extends RootMessenger<
+export interface TelegramMessageProcessor<C>
+  extends RootMessageProcessor<
     C,
     TelegramPlatformRequest,
     GenericTelegramRequest<C>

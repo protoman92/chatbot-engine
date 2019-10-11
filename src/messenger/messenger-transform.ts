@@ -2,7 +2,7 @@ import { compose, deepClone } from "../common/utils";
 import { DefaultContext, Transformer } from "../type/common";
 import { PlatformCommunicator } from "../type/communicator";
 import { ContextDAO } from "../type/context-dao";
-import { RootMessenger } from "../type/messenger";
+import { RootMessageProcessor } from "../type/messenger";
 import { GenericRequest } from "../type/request";
 
 /**
@@ -19,13 +19,13 @@ export function saveContextOnSend<
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">
-): Transformer<RootMessenger<C, PRequest, GRequest>> {
-  return async messenger => {
+): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
+  return async processor => {
     return {
-      ...messenger,
+      ...processor,
       sendResponse: async response => {
         const { targetID, additionalContext } = response;
-        const result = await messenger.sendResponse(response);
+        const result = await processor.sendResponse(response);
 
         if (!!additionalContext) {
           await contextDAO.appendContext(targetID, additionalContext);
@@ -50,14 +50,14 @@ export function injectContextOnReceive<
   GRequest extends GenericRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext">
-): Transformer<RootMessenger<C, PRequest, GRequest>> {
-  return async messenger => {
+): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
+  return async processor => {
     return {
-      ...messenger,
+      ...processor,
       receiveRequest: async request => {
         let oldContext = await contextDAO.getContext(request.targetID);
         oldContext = deepClone({ ...request.oldContext, ...oldContext });
-        return messenger.receiveRequest({ ...request, oldContext });
+        return processor.receiveRequest({ ...request, oldContext });
       }
     };
   };
@@ -81,10 +81,10 @@ export function saveUserForTargetID<
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<RootMessenger<C, PRequest, GRequest>> {
-  return async messenger => {
+): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
+  return async processor => {
     return {
-      ...messenger,
+      ...processor,
       receiveRequest: async request => {
         const { oldContext, targetID } = request;
         const sidKey: keyof DefaultContext = "targetID";
@@ -96,7 +96,7 @@ export function saveUserForTargetID<
           await contextDAO.appendContext(targetID, additionalContext);
         }
 
-        return messenger.receiveRequest({ ...request, oldContext });
+        return processor.receiveRequest({ ...request, oldContext });
       }
     };
   };
@@ -117,14 +117,14 @@ export function setTypingIndicator<
   GRequest extends GenericRequest<C>
 >(
   communicator: PlatformCommunicator<PResponse>
-): Transformer<RootMessenger<C, PRequest, GRequest>> {
-  return async messenger => {
+): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
+  return async processor => {
     return {
-      ...messenger,
+      ...processor,
       sendResponse: async response => {
         const { targetID } = response;
         await communicator.setTypingIndicator(targetID, true);
-        const result = await messenger.sendResponse(response);
+        const result = await processor.sendResponse(response);
         await communicator.setTypingIndicator(targetID, false);
         return result;
       }
@@ -133,7 +133,7 @@ export function setTypingIndicator<
 }
 
 /**
- * Create default messenger transformers that all messengers should use.
+ * Create default transformers that all message processors should use.
  * @template C The context used by the current chatbot.
  * @template PRequest The platform-specific request.
  * @template PResponse The platform-specific response.
@@ -147,10 +147,10 @@ export function transformMessengersByDefault<
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">,
   communicator: PlatformCommunicator<PResponse>
-): Transformer<RootMessenger<C, PRequest, GRequest>> {
-  return messenger =>
+): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
+  return processor =>
     compose(
-      messenger,
+      processor,
       injectContextOnReceive(contextDAO),
       saveContextOnSend(contextDAO),
       setTypingIndicator(communicator)

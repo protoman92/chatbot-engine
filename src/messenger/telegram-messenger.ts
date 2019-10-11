@@ -6,13 +6,13 @@ import {
   GenericTelegramRequest,
   GenericTelegramResponse,
   Telegram,
-  TelegramMessenger,
+  TelegramMessageProcessor,
   TelegramPlatformRequest,
   TelegramPlatformResponse,
   TelegramVisualContent
 } from "../type/telegram";
 import { RootVisualContent } from "../type/visual-content";
-import { createMessenger } from "./generic-messenger";
+import { createMessageProcessor } from "./generic-messenger";
 
 /**
  * Extract an input command from an input text. For example:
@@ -316,18 +316,18 @@ function createTelegramResponse<C>({
 }
 
 /**
- * Create a Telegram messenger.
+ * Create a Telegram message processor.
  * @template C The context used by the current chatbot.
  */
-export async function createTelegramMessenger<C>(
+export async function createTelegramMessageProcessor<C>(
   leafSelector: Leaf<C>,
   communicator: Telegram.Communicator,
-  ...transformers: readonly Transformer<TelegramMessenger<C>>[]
-): Promise<TelegramMessenger<C>> {
+  ...transformers: readonly Transformer<TelegramMessageProcessor<C>>[]
+): Promise<TelegramMessageProcessor<C>> {
   await communicator.setWebhook();
   const bot = await communicator.getCurrentBot();
 
-  const baseMessenger = await createMessenger(
+  const baseMessenger = await createMessageProcessor(
     {
       leafSelector,
       communicator,

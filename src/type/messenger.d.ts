@@ -6,7 +6,7 @@ import { GenericResponse } from "./response";
 /** Represents all supported platform identifiers. */
 export type SupportedPlatform = "facebook" | "telegram";
 
-declare namespace RootMessenger {
+declare namespace RootMessageProcessor {
   /**
    * Configurations to set up a generic messenger.
    * @template C The context used by the current chatbot.
@@ -23,7 +23,7 @@ declare namespace RootMessenger {
     readonly targetPlatform: SupportedPlatform;
     readonly leafSelector: Leaf<C>;
     readonly communicator: PlatformCommunicator<PResponse>;
-    readonly mapRequest: RootMessenger<
+    readonly mapRequest: RootMessageProcessor<
       C,
       PRequest,
       GRequest
@@ -33,10 +33,10 @@ declare namespace RootMessenger {
 }
 
 /**
- * Represents a messenger that can process incoming request (including parsing,
- * validating and sending data). Note that this messenger only handles one
- * message at a time, so if there are multiple messenges coming in we need to
- * resolve them one by one.
+ * Represents a message processor that can process incoming request (including
+ * parsing, validating and sending data). Note that this processor only handles
+ * one message at a time, so if there are multiple messenges coming in we need
+ * to resolve them one by one.
  *
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
@@ -44,7 +44,7 @@ declare namespace RootMessenger {
  * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  */
-export interface RootMessenger<
+export interface RootMessageProcessor<
   C,
   PRequest,
   GRequest extends GenericRequest<C>

@@ -11,23 +11,23 @@ import {
 } from "ts-mockito";
 import { PlatformCommunicator } from "../type/communicator";
 import {
-  FacebookMessenger,
+  FacebookMessageProcessor,
   GenericFacebookRequestInput
 } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { SupportedPlatform } from "../type/messenger";
 import { GenericRequest } from "../type/request";
 import { GenericResponse } from "../type/response";
-import { TelegramMessenger } from "../type/telegram";
+import { TelegramMessageProcessor } from "../type/telegram";
 import {
   createCrossPlatformBatchMessenger,
-  createMessenger
+  createMessageProcessor
 } from "./generic-messenger";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
-describe("Generic unit messenger", () => {
+describe("Generic message processor", () => {
   let leafSelector: Leaf<{}>;
   let communicator: PlatformCommunicator<unknown>;
 
@@ -50,8 +50,8 @@ describe("Generic unit messenger", () => {
     const platformResponses = [{ a: 1 }, { b: 2 }];
 
     // When
-    const unitMessenger = spy(
-      await createMessenger({
+    const messageProcessor = spy(
+      await createMessageProcessor({
         targetPlatform,
         leafSelector: instance(leafSelector),
         communicator: instance(communicator),
@@ -72,7 +72,7 @@ describe("Generic unit messenger", () => {
 
     // Then
     expectJs(complete).to.be.ok();
-    verify(unitMessenger.sendResponse(deepEqual(response))).once();
+    verify(messageProcessor.sendResponse(deepEqual(response))).once();
 
     platformResponses.forEach(response => {
       verify(communicator.sendResponse(deepEqual(response))).once();
@@ -86,8 +86,8 @@ describe("Generic unit messenger", () => {
     const platformResponses = [{ a: 1 }, { b: 2 }];
 
     // When
-    const unitMessenger = spy(
-      await createMessenger({
+    const messageProcessor = spy(
+      await createMessageProcessor({
         targetPlatform: "telegram",
         leafSelector: instance(leafSelector),
         communicator: instance(communicator),
@@ -107,7 +107,7 @@ describe("Generic unit messenger", () => {
     // Then
     expectJs(nextResult).to.eql(undefined);
     expectJs(complete).to.be.ok();
-    verify(unitMessenger.sendResponse(anything())).never();
+    verify(messageProcessor.sendResponse(anything())).never();
   });
 
   it("Should process input when receiving request", async () => {
@@ -134,7 +134,7 @@ describe("Generic unit messenger", () => {
     ];
 
     // When
-    const unitMessenger = await createMessenger({
+    const messageProcessor = await createMessageProcessor({
       targetPlatform,
       leafSelector: instance(leafSelector),
       communicator: instance(communicator),
@@ -142,7 +142,7 @@ describe("Generic unit messenger", () => {
       mapResponse: async () => []
     });
 
-    await unitMessenger.receiveRequest({
+    await messageProcessor.receiveRequest({
       targetID,
       targetPlatform,
       oldContext,
@@ -161,19 +161,19 @@ describe("Generic unit messenger", () => {
 });
 
 describe("Cross platform unit messenger", () => {
-  let fbMessenger: FacebookMessenger<{}>;
-  let tlMessenger: TelegramMessenger<{}>;
+  let fbMessenger: FacebookMessageProcessor<{}>;
+  let tlMessenger: TelegramMessageProcessor<{}>;
   let messengers: Parameters<typeof createCrossPlatformBatchMessenger>[0];
   let messengerInstances: typeof messengers;
 
   beforeEach(() => {
-    fbMessenger = spy<FacebookMessenger<{}>>({
+    fbMessenger = spy<FacebookMessageProcessor<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})
     });
 
-    tlMessenger = spy<TelegramMessenger<{}>>({
+    tlMessenger = spy<TelegramMessageProcessor<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({})

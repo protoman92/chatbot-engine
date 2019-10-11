@@ -2,7 +2,7 @@ import { DeepReadonly, Omit } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
-import { RootMessenger } from "./messenger";
+import { RootMessageProcessor } from "./messenger";
 import { RootGenericRequest, RootGenericRequestInput } from "./request";
 import { RootGenericResponse } from "./response";
 import { RootVisualContent } from "./visual-content";
@@ -244,8 +244,8 @@ export type FacebookPlatformResponse = Omit<
  * Represents a Facebook-specific messenger.
  * @template C The context used by the current chatbot.
  */
-export interface FacebookMessenger<C>
-  extends RootMessenger<
+export interface FacebookMessageProcessor<C>
+  extends RootMessageProcessor<
     C,
     FacebookPlatformRequest,
     GenericFacebookRequest<C>

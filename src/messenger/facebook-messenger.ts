@@ -2,7 +2,7 @@ import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   Facebook,
-  FacebookMessenger,
+  FacebookMessageProcessor,
   FacebookPlatformRequest,
   FacebookPlatformResponse,
   FacebookVisualContent,
@@ -11,7 +11,7 @@ import {
 } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { RootVisualContent } from "../type/visual-content";
-import { createMessenger } from "./generic-messenger";
+import { createMessageProcessor } from "./generic-messenger";
 
 /**
  * Map platform request to generic request for generic processing.
@@ -393,15 +393,15 @@ function createFacebookResponse<C>({
 }
 
 /**
- * Create a Facebook messenger.
+ * Create a Facebook message processor.
  * @template C The context used by the current chatbot.
  */
-export async function createFacebookMessenger<C>(
+export async function createFacebookMessageProcessor<C>(
   leafSelector: Leaf<C>,
   communicator: Facebook.Communicator,
-  ...transformers: readonly Transformer<FacebookMessenger<C>>[]
-): Promise<FacebookMessenger<C>> {
-  return createMessenger(
+  ...transformers: readonly Transformer<FacebookMessageProcessor<C>>[]
+): Promise<FacebookMessageProcessor<C>> {
+  return createMessageProcessor(
     {
       leafSelector,
       communicator,
