@@ -5,14 +5,22 @@ import {
   mapSeries
 } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Facebook, GenericFacebookRequest } from "../type/facebook";
+import {
+  Facebook,
+  FacebookPlatformRequest,
+  GenericFacebookRequest
+} from "../type/facebook";
 import {
   BatchMessenger,
   Messenger,
   SupportedPlatform
 } from "../type/messenger";
 import { GenericRequest, GenericRequestInput } from "../type/request";
-import { GenericTelegramRequest, Telegram } from "../type/telegram";
+import {
+  GenericTelegramRequest,
+  Telegram,
+  TelegramPlatformRequest
+} from "../type/telegram";
 
 /**
  * Create a generic messenger.
@@ -142,9 +150,9 @@ export function createCrossPlatformBatchMessenger<C>(
 
       return switchPlatform(targetPlatform, {
         facebookCallback: messenger =>
-          messenger.generalizeRequest(platformReq as Facebook.PlatformRequest),
+          messenger.generalizeRequest(platformReq as FacebookPlatformRequest),
         telegramCallback: messenger =>
-          messenger.generalizeRequest(platformReq as Telegram.PlatformRequest)
+          messenger.generalizeRequest(platformReq as TelegramPlatformRequest)
       });
     },
     receiveRequest: async request => {

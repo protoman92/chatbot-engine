@@ -1,7 +1,7 @@
 import { Coordinates, Transformer } from "../type/common";
-import { Facebook } from "../type/facebook";
+import { FacebookPlatformRequest } from "../type/facebook";
 import { SupportedPlatform } from "../type/messenger";
-import { Telegram } from "../type/telegram";
+import { TelegramPlatformRequest } from "../type/telegram";
 
 export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
@@ -178,11 +178,11 @@ export async function toPromise<T>(
 
 /** Get the platform to which a request belongs. */
 export function getRequestPlatform(request: unknown): SupportedPlatform {
-  if (isType<Facebook.PlatformRequest>(request, "object", "entry")) {
+  if (isType<FacebookPlatformRequest>(request, "object", "entry")) {
     return "facebook";
   }
 
-  if (isType<Telegram.PlatformRequest>(request, "update_id")) {
+  if (isType<TelegramPlatformRequest>(request, "update_id")) {
     return "telegram";
   }
 

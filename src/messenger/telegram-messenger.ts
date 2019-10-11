@@ -6,6 +6,8 @@ import {
   GenericTelegramRequest,
   GenericTelegramResponse,
   Telegram,
+  TelegramPlatformRequest,
+  TelegramPlatformResponse,
   TelegramVisualContent
 } from "../type/telegram";
 import { RootVisualContent } from "../type/visual-content";
@@ -34,20 +36,20 @@ export function extractInputCommand(
  * @template C The context used by the current chatbot.
  */
 function createTelegramRequest<C>(
-  webhook: Telegram.PlatformRequest,
+  webhook: TelegramPlatformRequest,
   { username }: Telegram.Bot
 ): readonly GenericTelegramRequest<C>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage }
-  }: Telegram.PlatformRequest.Message):
+  }: TelegramPlatformRequest.Message):
     | [
         Telegram.User,
-        Telegram.PlatformRequest.Message.Message.Chat.Chat,
+        TelegramPlatformRequest.Message.Message.Chat.Chat,
         GenericTelegramRequest<C>["input"]
       ]
     | undefined {
     if (
-      isType<Telegram.PlatformRequest.Message.Message.Text>(restMessage, "text")
+      isType<TelegramPlatformRequest.Message.Message.Text>(restMessage, "text")
     ) {
       const { text } = restMessage;
       const [inputCommand, inputText] = extractInputCommand(username, text);
@@ -70,7 +72,7 @@ function createTelegramRequest<C>(
     }
 
     if (
-      isType<Telegram.PlatformRequest.Message.Message.NewChatMember>(
+      isType<TelegramPlatformRequest.Message.Message.NewChatMember>(
         restMessage,
         "new_chat_members"
       )
@@ -95,7 +97,7 @@ function createTelegramRequest<C>(
     }
 
     if (
-      isType<Telegram.PlatformRequest.Message.Message.LeftChatMember>(
+      isType<TelegramPlatformRequest.Message.Message.LeftChatMember>(
         restMessage,
         "left_chat_member"
       )
@@ -124,10 +126,10 @@ function createTelegramRequest<C>(
 
   function processCallbackRequest({
     callback_query: { data, from: user }
-  }: Telegram.PlatformRequest.Callback):
+  }: TelegramPlatformRequest.Callback):
     | [
         Telegram.User,
-        Telegram.PlatformRequest.Message.Message.Chat.Chat | undefined,
+        TelegramPlatformRequest.Message.Message.Chat.Chat | undefined,
         GenericTelegramRequest<C>["input"]
       ]
     | undefined {
@@ -149,21 +151,21 @@ function createTelegramRequest<C>(
   }
 
   function processRequest(
-    request: Telegram.PlatformRequest
+    request: TelegramPlatformRequest
   ):
     | [
         Telegram.User,
-        Telegram.PlatformRequest.Message.Message.Chat.Chat | undefined,
+        TelegramPlatformRequest.Message.Message.Chat.Chat | undefined,
         GenericTelegramRequest<C>["input"]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
-    if (isType<Telegram.PlatformRequest.Message>(request, "message")) {
+    if (isType<TelegramPlatformRequest.Message>(request, "message")) {
       result = processMessageRequest(request);
     }
 
-    if (isType<Telegram.PlatformRequest.Callback>(request, "callback_query")) {
+    if (isType<TelegramPlatformRequest.Callback>(request, "callback_query")) {
       result = processCallbackRequest(request);
     }
 
@@ -197,18 +199,18 @@ function createTelegramRequest<C>(
 function createTelegramResponse<C>({
   targetID,
   output
-}: GenericTelegramResponse<C>): readonly Telegram.PlatformResponse[] {
+}: GenericTelegramResponse<C>): readonly TelegramPlatformResponse[] {
   function createTextResponse(
     targetID: string,
     { text }: RootVisualContent.MainContent.Text
-  ): Omit<Telegram.PlatformResponse.SendMessage, "reply_markup"> {
+  ): Omit<TelegramPlatformResponse.SendMessage, "reply_markup"> {
     return { text, action: "sendMessage", chat_id: targetID };
   }
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
     quickReplies: TelegramVisualContent.QuickReply.InlineMarkupMatrix
-  ): Telegram.PlatformResponse.SendMessage.ReplyMarkup.InlineKeyboardMarkup {
+  ): TelegramPlatformResponse.SendMessage.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: quickReplies.map(qrs =>
         qrs.map(qr => {
@@ -229,7 +231,7 @@ function createTelegramResponse<C>({
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
     quickReplyMatrix: TelegramVisualContent.QuickReply.ReplyMarkupMatrix
-  ): Telegram.PlatformResponse.SendMessage.ReplyMarkup.ReplyKeyboardMarkup {
+  ): TelegramPlatformResponse.SendMessage.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: quickReplyMatrix.map(quickReplies =>
         quickReplies.map(quickReply => {
@@ -268,7 +270,7 @@ function createTelegramResponse<C>({
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
     quickReplyMatrix: TelegramVisualContent.QuickReplyMatrix
-  ): Telegram.PlatformResponse.SendMessage.ReplyMarkup {
+  ): TelegramPlatformResponse.SendMessage.ReplyMarkup {
     const shouldBeReplyMarkup = quickReplyMatrix.every(
       (quickReplies: TelegramVisualContent.QuickReplyMatrix[number]) =>
         quickReplies.every(
@@ -294,7 +296,7 @@ function createTelegramResponse<C>({
   function createPlatformResponse(
     targetID: string,
     { quickReplies, content }: GenericTelegramResponse<C>["output"][number]
-  ): Telegram.PlatformResponse {
+  ): TelegramPlatformResponse {
     const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
     switch (content.type) {

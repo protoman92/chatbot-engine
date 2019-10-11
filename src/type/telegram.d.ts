@@ -50,9 +50,137 @@ declare namespace TelegramVisualContent {
     | QuickReply.ReplyMarkupMatrix;
 }
 
-interface TelegramVisualContent extends RootVisualContent {
+export interface TelegramVisualContent extends RootVisualContent {
   readonly quickReplies?: TelegramVisualContent.QuickReplyMatrix;
 }
+
+declare namespace TelegramPlatformRequest {
+  namespace Message {
+    namespace Message {
+      namespace Chat {
+        namespace Chat {
+          interface Private {
+            readonly id: number;
+            readonly type: "private";
+          }
+
+          interface Group {
+            readonly id: number;
+            readonly type: "group";
+          }
+        }
+
+        type Chat = Chat.Group | Chat.Private;
+      }
+
+      interface LeftChatMember {
+        readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
+        readonly from: Telegram.User;
+        readonly message_id: number;
+        readonly left_chat_participant: Telegram.Bot | Telegram.User;
+        readonly left_chat_member: Telegram.Bot | Telegram.User;
+      }
+
+      interface NewChatMember {
+        readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
+        readonly from: Telegram.User;
+        readonly message_id: number;
+        readonly new_chat_participant: Telegram.Bot | Telegram.User;
+        readonly new_chat_member: Telegram.Bot | Telegram.User;
+        readonly new_chat_members: readonly (Telegram.Bot | Telegram.User)[];
+      }
+
+      interface Text {
+        readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
+        readonly from: Telegram.User;
+        readonly message_id: number;
+        readonly text: string;
+      }
+    }
+
+    type Message =
+      | Message.LeftChatMember
+      | Message.NewChatMember
+      | Message.Text;
+  }
+
+  /** Payload that includes on message field. */
+  interface Message {
+    readonly message: Message.Message;
+    readonly update_id: number;
+  }
+
+  /** Payload that includes callback field, usually for quick replies. */
+  interface Callback {
+    readonly callback_query: DeepReadonly<{
+      id: string;
+      from: Telegram.User;
+      message: Message.Message;
+      chat_instance: string;
+      data: string;
+    }>;
+
+    readonly update_id: number;
+  }
+}
+
+export type TelegramPlatformRequest =
+  | TelegramPlatformRequest.Message
+  | TelegramPlatformRequest.Callback;
+
+declare namespace TelegramPlatformResponse {
+  namespace SendMessage {
+    namespace ReplyMarkup {
+      namespace ReplyKeyboardMarkup {
+        interface Button {
+          readonly text: string;
+          readonly request_contact: boolean | undefined;
+          readonly request_location: boolean | undefined;
+        }
+      }
+
+      interface ReplyKeyboardMarkup {
+        readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
+        readonly resize_keyboard: boolean | undefined;
+        readonly one_time_keyboard: boolean | undefined;
+        readonly selective: boolean | undefined;
+      }
+
+      namespace InlineKeyboardMarkup {
+        namespace Button {
+          interface Postback {
+            readonly callback_data: string;
+            readonly text: string;
+          }
+
+          interface URL {
+            readonly url: string;
+            readonly text: string;
+          }
+        }
+
+        type Button = Button.Postback | Button.URL;
+      }
+
+      interface InlineKeyboardMarkup {
+        readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
+      }
+    }
+
+    type ReplyMarkup =
+      | ReplyMarkup.ReplyKeyboardMarkup
+      | ReplyMarkup.InlineKeyboardMarkup;
+  }
+
+  interface SendMessage {
+    readonly action: "sendMessage";
+    readonly chat_id: string;
+    readonly reply_markup: SendMessage.ReplyMarkup | undefined;
+    readonly text: string;
+  }
+}
+
+export type TelegramPlatformResponse = TelegramPlatformResponse.SendMessage;
 
 export namespace Telegram {
   type DefaultContext = RootDefaultContext & GenericTelegramRequestInput;
@@ -62,132 +190,6 @@ export namespace Telegram {
   }
 
   type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
-
-  namespace PlatformRequest {
-    namespace Message {
-      namespace Message {
-        namespace Chat {
-          namespace Chat {
-            interface Private {
-              readonly id: number;
-              readonly type: "private";
-            }
-
-            interface Group {
-              readonly id: number;
-              readonly type: "group";
-            }
-          }
-
-          type Chat = Chat.Group | Chat.Private;
-        }
-
-        interface LeftChatMember {
-          readonly chat: PlatformRequest.Message.Message.Chat.Chat;
-          readonly from: User;
-          readonly message_id: number;
-          readonly left_chat_participant: Bot | User;
-          readonly left_chat_member: Bot | User;
-        }
-
-        interface NewChatMember {
-          readonly chat: PlatformRequest.Message.Message.Chat.Chat;
-          readonly from: User;
-          readonly message_id: number;
-          readonly new_chat_participant: Bot | User;
-          readonly new_chat_member: Bot | User;
-          readonly new_chat_members: readonly (Bot | User)[];
-        }
-
-        interface Text {
-          readonly chat: PlatformRequest.Message.Message.Chat.Chat;
-          readonly from: User;
-          readonly message_id: number;
-          readonly text: string;
-        }
-      }
-
-      type Message =
-        | Message.LeftChatMember
-        | Message.NewChatMember
-        | Message.Text;
-    }
-
-    /** Payload that includes on message field. */
-    interface Message {
-      readonly message: Message.Message;
-      readonly update_id: number;
-    }
-
-    /** Payload that includes callback field, usually for quick replies. */
-    interface Callback {
-      readonly callback_query: DeepReadonly<{
-        id: string;
-        from: User;
-        message: Message.Message;
-        chat_instance: string;
-        data: string;
-      }>;
-
-      readonly update_id: number;
-    }
-  }
-
-  type PlatformRequest = PlatformRequest.Message | PlatformRequest.Callback;
-
-  namespace PlatformResponse {
-    namespace SendMessage {
-      namespace ReplyMarkup {
-        namespace ReplyKeyboardMarkup {
-          interface Button {
-            readonly text: string;
-            readonly request_contact: boolean | undefined;
-            readonly request_location: boolean | undefined;
-          }
-        }
-
-        interface ReplyKeyboardMarkup {
-          readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
-          readonly resize_keyboard: boolean | undefined;
-          readonly one_time_keyboard: boolean | undefined;
-          readonly selective: boolean | undefined;
-        }
-
-        namespace InlineKeyboardMarkup {
-          namespace Button {
-            interface Postback {
-              readonly callback_data: string;
-              readonly text: string;
-            }
-
-            interface URL {
-              readonly url: string;
-              readonly text: string;
-            }
-          }
-
-          type Button = Button.Postback | Button.URL;
-        }
-
-        interface InlineKeyboardMarkup {
-          readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
-        }
-      }
-
-      type ReplyMarkup =
-        | ReplyMarkup.ReplyKeyboardMarkup
-        | ReplyMarkup.InlineKeyboardMarkup;
-    }
-
-    interface SendMessage {
-      readonly action: "sendMessage";
-      readonly chat_id: string;
-      readonly reply_markup: SendMessage.ReplyMarkup | undefined;
-      readonly text: string;
-    }
-  }
-
-  type PlatformResponse = PlatformResponse.SendMessage;
 
   interface Bot {
     readonly id: number;
@@ -225,7 +227,8 @@ export namespace Telegram {
   }
 
   /** A Telegram-specific communicator. */
-  interface Communicator extends PlatformCommunicator<PlatformResponse> {
+  interface Communicator
+    extends PlatformCommunicator<TelegramPlatformResponse> {
     /** Get the current chatbot. */
     getCurrentBot(): Promise<Bot>;
 
@@ -241,5 +244,9 @@ export namespace Telegram {
    * @template C The context used by the current chatbot.
    */
   interface Messenger<C>
-    extends RootMessenger<C, PlatformRequest, GenericTelegramRequest<C>> {}
+    extends RootMessenger<
+      C,
+      TelegramPlatformRequest,
+      GenericTelegramRequest<C>
+    > {}
 }
