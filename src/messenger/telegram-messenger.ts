@@ -5,10 +5,12 @@ import { Leaf } from "../type/leaf";
 import {
   GenericTelegramRequest,
   GenericTelegramResponse,
-  Telegram,
+  TelegramBot,
+  TelegramCommunicator,
   TelegramMessageProcessor,
   TelegramPlatformRequest,
   TelegramPlatformResponse,
+  TelegramUser,
   TelegramVisualContent
 } from "../type/telegram";
 import { RootVisualContent } from "../type/visual-content";
@@ -38,13 +40,13 @@ export function extractInputCommand(
  */
 function createTelegramRequest<C>(
   webhook: TelegramPlatformRequest,
-  { username }: Telegram.Bot
+  { username }: TelegramBot
 ): readonly GenericTelegramRequest<C>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage }
   }: TelegramPlatformRequest.Message):
     | [
-        Telegram.User,
+        TelegramUser,
         TelegramPlatformRequest.Message.Message.Chat.Chat,
         GenericTelegramRequest<C>["input"]
       ]
@@ -129,7 +131,7 @@ function createTelegramRequest<C>(
     callback_query: { data, from: user }
   }: TelegramPlatformRequest.Callback):
     | [
-        Telegram.User,
+        TelegramUser,
         TelegramPlatformRequest.Message.Message.Chat.Chat | undefined,
         GenericTelegramRequest<C>["input"]
       ]
@@ -155,7 +157,7 @@ function createTelegramRequest<C>(
     request: TelegramPlatformRequest
   ):
     | [
-        Telegram.User,
+        TelegramUser,
         TelegramPlatformRequest.Message.Message.Chat.Chat | undefined,
         GenericTelegramRequest<C>["input"]
       ]
@@ -321,7 +323,7 @@ function createTelegramResponse<C>({
  */
 export async function createTelegramMessageProcessor<C>(
   leafSelector: Leaf<C>,
-  communicator: Telegram.Communicator,
+  communicator: TelegramCommunicator,
   ...transformers: readonly Transformer<TelegramMessageProcessor<C>>[]
 ): Promise<TelegramMessageProcessor<C>> {
   await communicator.setWebhook();

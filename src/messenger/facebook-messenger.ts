@@ -1,7 +1,7 @@
 import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
-  Facebook,
+  FacebookCommunicator,
   FacebookMessageProcessor,
   FacebookPlatformRequest,
   FacebookPlatformResponse,
@@ -398,7 +398,7 @@ function createFacebookResponse<C>({
  */
 export async function createFacebookMessageProcessor<C>(
   leafSelector: Leaf<C>,
-  communicator: Facebook.Communicator,
+  communicator: FacebookCommunicator,
   ...transformers: readonly Transformer<FacebookMessageProcessor<C>>[]
 ): Promise<FacebookMessageProcessor<C>> {
   return createMessageProcessor(

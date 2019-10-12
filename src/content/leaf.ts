@@ -2,11 +2,11 @@ import { Omit } from "ts-essentials";
 import { genericError } from "../common/utils";
 import { createContentSubject } from "../stream";
 import { ErrorContext } from "../type/common";
-import { Facebook } from "../type/facebook";
+import { FacebookLeaf } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { GenericResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
-import { Telegram } from "../type/telegram";
+import { TelegramLeaf } from "../type/telegram";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -68,8 +68,8 @@ export async function createLeafObserverForPlatforms<C = {}>({
   facebook,
   telegram
 }: Readonly<{
-  facebook?: Facebook.Leaf.Observer<C>;
-  telegram?: Telegram.Leaf.Observer<C>;
+  facebook?: FacebookLeaf.Observer<C>;
+  telegram?: TelegramLeaf.Observer<C>;
 }>): Promise<Leaf.Observer<C>> {
   return {
     next: async input => {

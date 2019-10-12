@@ -9,14 +9,14 @@ import { RootVisualContent } from "./visual-content";
 
 export interface GenericTelegramRequestInput extends RootGenericRequestInput {
   readonly inputCommand: string;
-  readonly leftChatMembers: readonly (Telegram.Bot | Telegram.User)[];
-  readonly newChatMembers: readonly (Telegram.Bot | Telegram.User)[];
+  readonly leftChatMembers: readonly (TelegramBot | TelegramUser)[];
+  readonly newChatMembers: readonly (TelegramBot | TelegramUser)[];
   readonly targetPlatform: "telegram";
 }
 
 export interface GenericTelegramRequest<C> extends RootGenericRequest<C> {
   readonly targetPlatform: "telegram";
-  readonly telegramUser: Telegram.User;
+  readonly telegramUser: TelegramUser;
   readonly input: readonly GenericTelegramRequestInput[];
 }
 
@@ -75,24 +75,24 @@ declare namespace TelegramPlatformRequest {
 
       interface LeftChatMember {
         readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
-        readonly from: Telegram.User;
+        readonly from: TelegramUser;
         readonly message_id: number;
-        readonly left_chat_participant: Telegram.Bot | Telegram.User;
-        readonly left_chat_member: Telegram.Bot | Telegram.User;
+        readonly left_chat_participant: TelegramBot | TelegramUser;
+        readonly left_chat_member: TelegramBot | TelegramUser;
       }
 
       interface NewChatMember {
         readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
-        readonly from: Telegram.User;
+        readonly from: TelegramUser;
         readonly message_id: number;
-        readonly new_chat_participant: Telegram.Bot | Telegram.User;
-        readonly new_chat_member: Telegram.Bot | Telegram.User;
-        readonly new_chat_members: readonly (Telegram.Bot | Telegram.User)[];
+        readonly new_chat_participant: TelegramBot | TelegramUser;
+        readonly new_chat_member: TelegramBot | TelegramUser;
+        readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
       }
 
       interface Text {
         readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
-        readonly from: Telegram.User;
+        readonly from: TelegramUser;
         readonly message_id: number;
         readonly text: string;
       }
@@ -114,7 +114,7 @@ declare namespace TelegramPlatformRequest {
   interface Callback {
     readonly callback_query: DeepReadonly<{
       id: string;
-      from: Telegram.User;
+      from: TelegramUser;
       message: Message.Message;
       chat_instance: string;
       data: string;
@@ -193,60 +193,59 @@ export interface TelegramMessageProcessor<C>
     GenericTelegramRequest<C>
   > {}
 
-export namespace Telegram {
-  type DefaultContext = RootDefaultContext & GenericTelegramRequestInput;
+export type TelegramDefaultContext = RootDefaultContext &
+  GenericTelegramRequestInput;
 
-  namespace Leaf {
-    type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
-  }
+declare namespace TelegramLeaf {
+  type Observer<C> = RootLeaf.Base.Observer<C, TelegramDefaultContext>;
+}
 
-  type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
+export type TelegramLeaf<C> = RootLeaf.Base<C, TelegramDefaultContext>;
 
-  interface Bot {
-    readonly id: number;
-    readonly first_name: string;
-    readonly username: string;
-    readonly is_bot: boolean;
-  }
+export interface TelegramBot {
+  readonly id: number;
+  readonly first_name: string;
+  readonly username: string;
+  readonly is_bot: boolean;
+}
 
-  interface User extends Bot {
-    readonly last_name: string;
-    readonly language_code: "en";
-  }
+export interface TelegramUser extends TelegramBot {
+  readonly last_name: string;
+  readonly language_code: "en";
+}
 
-  /** Represents Telegram configurations. */
-  interface Configs {
-    readonly authToken: string;
-    readonly webhookURL: string;
-  }
+/** Represents Telegram configurations. */
+export interface TelegramConfigs {
+  readonly authToken: string;
+  readonly webhookURL: string;
+}
 
-  namespace Communicator {
-    namespace APIResponse {
-      interface Success {
-        readonly description: string;
-        readonly ok: true;
-        readonly result: unknown;
-      }
-
-      interface Failure {
-        readonly description: string;
-        readonly ok: false;
-      }
+declare namespace TelegramCommunicator {
+  namespace APIResponse {
+    interface Success {
+      readonly description: string;
+      readonly ok: true;
+      readonly result: unknown;
     }
 
-    type APIResponse = APIResponse.Success | APIResponse.Failure;
+    interface Failure {
+      readonly description: string;
+      readonly ok: false;
+    }
   }
 
-  /** A Telegram-specific communicator. */
-  interface Communicator
-    extends PlatformCommunicator<TelegramPlatformResponse> {
-    /** Get the current chatbot. */
-    getCurrentBot(): Promise<Bot>;
+  type APIResponse = APIResponse.Success | APIResponse.Failure;
+}
 
-    /** Check if a bot is a member of a group. */
-    isMember(chatID: string, botID: string): Promise<boolean>;
+/** A Telegram-specific communicator. */
+export interface TelegramCommunicator
+  extends PlatformCommunicator<TelegramPlatformResponse> {
+  /** Get the current chatbot. */
+  getCurrentBot(): Promise<TelegramBot>;
 
-    /** Set webhook to start receiving message updates. */
-    setWebhook(): Promise<unknown>;
-  }
+  /** Check if a bot is a member of a group. */
+  isMember(chatID: string, botID: string): Promise<boolean>;
+
+  /** Set webhook to start receiving message updates. */
+  setWebhook(): Promise<unknown>;
 }

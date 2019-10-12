@@ -251,43 +251,42 @@ export interface FacebookMessageProcessor<C>
     GenericFacebookRequest<C>
   > {}
 
-export namespace Facebook {
-  type DefaultContext = RootDefaultContext & GenericFacebookRequestInput;
+export type FacebookDefaultContext = RootDefaultContext &
+  GenericFacebookRequestInput;
 
-  namespace Leaf {
-    type Observer<C> = RootLeaf.Base.Observer<C, DefaultContext>;
-  }
+declare namespace FacebookLeaf {
+  type Observer<C> = RootLeaf.Base.Observer<C, FacebookDefaultContext>;
+}
 
-  type Leaf<C> = RootLeaf.Base<C, DefaultContext>;
+export type FacebookLeaf<C> = RootLeaf.Base<C, FacebookDefaultContext>;
 
-  /** Represents a Facebook user. */
-  interface User {
-    readonly first_name?: string;
-    readonly last_name?: string;
-    readonly profile_pic?: string;
-    readonly id: string;
-  }
+/** Represents a Facebook user. */
+export interface FacebookUser {
+  readonly first_name?: string;
+  readonly last_name?: string;
+  readonly profile_pic?: string;
+  readonly id: string;
+}
 
-  /** Represents Facebook configurations. */
-  interface Configs {
-    readonly apiVersion: string;
-    readonly pageToken: string;
-    readonly verifyToken: string;
-  }
+/** Represents Facebook configurations. */
+export interface FacebookConfigs {
+  readonly apiVersion: string;
+  readonly pageToken: string;
+  readonly verifyToken: string;
+}
 
-  /** Represents a Facebook-specific communicator. */
-  interface Communicator
-    extends PlatformCommunicator<FacebookPlatformResponse> {
-    /** Get the user associated with a sender ID. */
-    getUser(targetID: string): Promise<User>;
+/** Represents a Facebook-specific communicator. */
+export interface FacebookCommunicator
+  extends PlatformCommunicator<FacebookPlatformResponse> {
+  /** Get the user associated with a sender ID. */
+  getUser(targetID: string): Promise<FacebookUser>;
 
-    /** Resolve Facebook hub challenge to establish connection with chatbot. */
-    resolveVerifyChallenge(
-      requestQuery: Readonly<{
-        "hub.mode"?: string;
-        "hub.challenge"?: number;
-        "hub.verify_token"?: string;
-      }>
-    ): Promise<number>;
-  }
+  /** Resolve Facebook hub challenge to establish connection with chatbot. */
+  resolveVerifyChallenge(
+    requestQuery: Readonly<{
+      "hub.mode"?: string;
+      "hub.challenge"?: number;
+      "hub.verify_token"?: string;
+    }>
+  ): Promise<number>;
 }

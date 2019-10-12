@@ -1,13 +1,17 @@
 import { stringify } from "querystring";
 import { requireAllTruthy } from "../common/utils";
 import { HTTPCommunicator } from "../type/communicator";
-import { Telegram } from "../type/telegram";
+import {
+  TelegramBot,
+  TelegramCommunicator,
+  TelegramConfigs
+} from "../type/telegram";
 import defaultAxiosCommunicator from "./axios-communicator";
 
 export function createTelegramCommunicator(
   communicator: HTTPCommunicator,
-  { authToken, webhookURL }: Telegram.Configs
-): Telegram.Communicator {
+  { authToken, webhookURL }: TelegramConfigs
+): TelegramCommunicator {
   function formatURL(action: string, query?: {}) {
     const qs = stringify(query);
     return `https://api.telegram.org/bot${authToken}/${action}?${qs}`;
@@ -17,7 +21,7 @@ export function createTelegramCommunicator(
     ...params: Parameters<HTTPCommunicator["communicate"]>
   ): Promise<Result> {
     const response = await communicator.communicate<
-      Telegram.Communicator.APIResponse
+      TelegramCommunicator.APIResponse
     >(...params);
 
     switch (response.ok) {
@@ -31,7 +35,7 @@ export function createTelegramCommunicator(
 
   return {
     getCurrentBot: () =>
-      communicate<Telegram.Bot>({ url: formatURL("getMe"), method: "GET" }),
+      communicate<TelegramBot>({ url: formatURL("getMe"), method: "GET" }),
     isMember: (chat_id, user_id) =>
       communicate<{ status: string }>({
         url: formatURL("getChatMember"),

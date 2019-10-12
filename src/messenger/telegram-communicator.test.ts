@@ -2,20 +2,20 @@ import expectJs from "expect.js";
 import { beforeEach, describe, it } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { HTTPCommunicator } from "../type/communicator";
-import { Telegram } from "../type/telegram";
+import { TelegramCommunicator, TelegramConfigs } from "../type/telegram";
 import { createTelegramCommunicator } from "./telegram-communicator";
 
 describe("Telegram communicator", () => {
   let communicator: HTTPCommunicator;
-  let configs: Telegram.Configs;
-  let tlCommunicator: Telegram.Communicator;
+  let configs: TelegramConfigs;
+  let tlCommunicator: TelegramCommunicator;
 
   beforeEach(() => {
     communicator = spy<HTTPCommunicator>({
       communicate: () => Promise.reject("")
     });
 
-    configs = spy<Telegram.Configs>({ authToken: "", webhookURL: "" });
+    configs = spy<TelegramConfigs>({ authToken: "", webhookURL: "" });
 
     tlCommunicator = createTelegramCommunicator(
       instance(communicator),

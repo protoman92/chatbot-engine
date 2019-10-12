@@ -1,13 +1,13 @@
 import { facebookError, requireAllTruthy } from "../common/utils";
 import { HTTPCommunicator } from "../type/communicator";
-import { Facebook } from "../type/facebook";
+import { FacebookCommunicator, FacebookConfigs } from "../type/facebook";
 import defaultAxiosCommunicator from "./axios-communicator";
 
 /** Create a platform communicator for Facebook. */
 export function createFacebookCommunicator(
   communicator: HTTPCommunicator,
-  configs: Facebook.Configs
-): Facebook.Communicator {
+  configs: FacebookConfigs
+): FacebookCommunicator {
   function formatURL(...additionalPaths: string[]) {
     return `https://graph.facebook.com/v${
       configs.apiVersion

@@ -2,20 +2,20 @@ import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { instance, spy, when } from "ts-mockito";
 import { HTTPCommunicator } from "../type/communicator";
-import { Facebook } from "../type/facebook";
+import { FacebookCommunicator, FacebookConfigs } from "../type/facebook";
 import { createFacebookCommunicator } from "./facebook-communicator";
 
 describe("Facebook communicator", () => {
   let communicator: HTTPCommunicator;
-  let configs: Facebook.Configs;
-  let fbCommunicator: Facebook.Communicator;
+  let configs: FacebookConfigs;
+  let fbCommunicator: FacebookCommunicator;
 
   beforeEach(async () => {
     communicator = spy<HTTPCommunicator>({
       communicate: () => Promise.reject("")
     });
 
-    configs = spy<Facebook.Configs>({
+    configs = spy<FacebookConfigs>({
       apiVersion: "",
       pageToken: "",
       verifyToken: ""

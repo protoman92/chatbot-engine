@@ -1,13 +1,17 @@
 import { Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
-import { Facebook, FacebookMessageProcessor } from "../type/facebook";
+import {
+  FacebookCommunicator,
+  FacebookMessageProcessor,
+  FacebookUser
+} from "../type/facebook";
 import { saveUserForTargetID } from "./messenger-transform";
 
 /** Save a Facebook user when there is no target ID in the context. */
 export function saveFacebookUser<C>(
   contextDAO: ContextDAO<C>,
-  communicator: Facebook.Communicator,
-  saveUser: (facebookUser: Facebook.User) => Promise<unknown>
+  communicator: FacebookCommunicator,
+  saveUser: (facebookUser: FacebookUser) => Promise<unknown>
 ): Transformer<FacebookMessageProcessor<C>> {
   return saveUserForTargetID(
     contextDAO,
