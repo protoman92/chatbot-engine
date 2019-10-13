@@ -74,15 +74,18 @@ export function createTelegramCommunicator(
 }
 
 export default function() {
+  const { TELEGRAM_AUTH_TOKEN = "", TELEGRAM_WEBHOOK_URL = "" } = process.env;
+
   const {
     TELEGRAM_AUTH_TOKEN: authToken,
     TELEGRAM_WEBHOOK_URL: webhookURL
-  } = process.env;
+  } = requireAllTruthy({
+    TELEGRAM_AUTH_TOKEN,
+    TELEGRAM_WEBHOOK_URL
+  });
 
-  const config = { authToken, webhookURL };
-
-  return createTelegramCommunicator(
-    defaultAxiosCommunicator,
-    requireAllTruthy(config)
-  );
+  return createTelegramCommunicator(defaultAxiosCommunicator, {
+    authToken,
+    webhookURL
+  });
 }

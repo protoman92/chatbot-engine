@@ -65,15 +65,24 @@ export function createFacebookCommunicator(
 
 export default function() {
   const {
+    FACEBOOK_API_VERSION = "",
+    FACEBOOK_PAGE_TOKEN = "",
+    FACEBOOK_VERIFY_TOKEN = ""
+  } = process.env;
+
+  const {
     FACEBOOK_API_VERSION: apiVersion,
     FACEBOOK_PAGE_TOKEN: pageToken,
     FACEBOOK_VERIFY_TOKEN: verifyToken
-  } = process.env;
+  } = requireAllTruthy({
+    FACEBOOK_API_VERSION,
+    FACEBOOK_PAGE_TOKEN,
+    FACEBOOK_VERIFY_TOKEN
+  });
 
-  const config = { apiVersion, pageToken, verifyToken };
-
-  return createFacebookCommunicator(
-    defaultAxiosCommunicator,
-    requireAllTruthy(config)
-  );
+  return createFacebookCommunicator(defaultAxiosCommunicator, {
+    apiVersion,
+    pageToken,
+    verifyToken
+  });
 }

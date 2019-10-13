@@ -109,16 +109,16 @@ export function createDynamoDBContextDAO<C>(
   };
 }
 
-export default function() {
-  return (tableName: string, platform: SupportedPlatform) => {
-    const { DYNAMO_DB_ENDPOINT: dynamoDBEndpoint } = process.env;
-    requireAllTruthy({ dynamoDBEndpoint });
+export default function<C>() {
+  return (platform: SupportedPlatform) => {
+    const { DYNAMO_DB_ENDPOINT = "", DYNAMO_DB_TABLE_NAME = "" } = process.env;
+    requireAllTruthy({ DYNAMO_DB_ENDPOINT, DYNAMO_DB_TABLE_NAME });
 
     const ddb = new DynamoDB({
       apiVersion: "latest",
-      endpoint: dynamoDBEndpoint
+      endpoint: DYNAMO_DB_ENDPOINT
     });
 
-    return createDynamoDBContextDAO(ddb, tableName, platform);
+    return createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME, platform);
   };
 }

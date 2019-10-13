@@ -38,22 +38,17 @@ export function createRedisContextDAO<C>(
   return contextDAO;
 }
 
-export default function() {
+export default function<C>() {
   return (platform: SupportedPlatform) => {
-    const {
-      REDIS_HOST: redisHost,
-      REDIS_PORT: redisPort,
-      REDIS_URI: redisURI
-    } = process.env;
-
-    requireAllTruthy({ redisHost, redisPort, redisURI });
+    const { REDIS_HOST = "", REDIS_PORT = "", REDIS_URI = "" } = process.env;
+    requireAllTruthy({ REDIS_HOST, REDIS_PORT, REDIS_URI });
 
     const redisClient = createClient({
-      host: redisHost,
-      port: parseInt(redisPort || "", undefined),
-      url: redisURI
+      host: REDIS_HOST,
+      port: parseInt(REDIS_PORT || "", undefined),
+      url: REDIS_URI
     });
 
-    return createRedisContextDAO(redisClient, platform);
+    return createRedisContextDAO<C>(redisClient, platform);
   };
 }
