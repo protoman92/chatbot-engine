@@ -18,7 +18,7 @@ export function createDynamoDBContextDAO<C>(
 
     const attributes = contextEntries.map(([key, value]) => [
       { [`#${key}`]: key },
-      { [`:${key}`]: value }
+      { [`:${key}`]: { S: value } }
     ]);
 
     return {
@@ -123,5 +123,6 @@ export default function<C>() {
     region: DYNAMO_DB_REGION
   });
 
-  return createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME);
+  const contextDAO = createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME);
+  return { contextDAO, dynamoDBClient: ddb };
 }

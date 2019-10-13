@@ -51,5 +51,6 @@ export default function<C>() {
     url: REDIS_URI
   });
 
-  return createRedisContextDAO<C>(redisClient);
+  const contextDAO = createRedisContextDAO<C>(redisClient);
+  return { contextDAO, redisClient };
 }

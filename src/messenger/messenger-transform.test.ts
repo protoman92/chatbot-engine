@@ -210,11 +210,7 @@ describe("Save Telegram user for target ID", () => {
 
     // Then
     verify(
-      contextDAO.appendContext(
-        targetID,
-        targetPlatform,
-        deepEqual({ targetID })
-      )
+      contextDAO.appendContext(targetID, "telegram", deepEqual({ targetID }))
     ).once();
   });
 });
