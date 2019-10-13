@@ -35,6 +35,7 @@
     "fs-extra": "^8.1.0",
     "gulp": "^4.0.2",
     "gulp-run": "^1.7.1",
+    "husky": "^3.0.9",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.0",
     "nyc": "^14.1.1",
@@ -71,5 +72,10 @@
     ],
     "sourceMap": true,
     "instrument": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run build"
+    }
   }
 }
