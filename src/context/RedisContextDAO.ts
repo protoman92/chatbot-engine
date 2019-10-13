@@ -1,5 +1,10 @@
-import { RedisClient } from "redis";
-import { joinObjects, promisify1, promisify2 } from "../common/utils";
+import { createClient, RedisClient } from "redis";
+import {
+  joinObjects,
+  promisify1,
+  promisify2,
+  requireAllTruthy
+} from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
 import { SupportedPlatform } from "../type/messenger";
 
@@ -31,4 +36,24 @@ export function createRedisContextDAO<C>(
   };
 
   return contextDAO;
+}
+
+export default function() {
+  return (platform: SupportedPlatform) => {
+    const {
+      REDIS_HOST: redisHost,
+      REDIS_PORT: redisPort,
+      REDIS_URI: redisURI
+    } = process.env;
+
+    requireAllTruthy({ redisHost, redisPort, redisURI });
+
+    const redisClient = createClient({
+      host: redisHost,
+      port: parseInt(redisPort || "", undefined),
+      url: redisURI
+    });
+
+    return createRedisContextDAO(redisClient, platform);
+  };
 }

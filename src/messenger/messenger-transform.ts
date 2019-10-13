@@ -76,12 +76,13 @@ export function saveUserForTargetID<
   C,
   PRequest,
   GRequest extends GenericRequest<C>,
+  Messenger extends RootMessageProcessor<C, PRequest, GRequest>,
   PUser
 >(
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
-): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
+): Transformer<Messenger> {
   return async processor => {
     return {
       ...processor,

@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/protoman92/chatbot-engine#readme",
   "devDependencies": {
+    "@types/aws-sdk": "^2.7.0",
     "@types/expect.js": "^0.3.29",
     "@types/gulp": "^4.0.6",
     "@types/mocha": "^5.2.6",
@@ -44,6 +45,7 @@
     "typescript": "^3.4.5"
   },
   "dependencies": {
+    "aws-sdk": "^2.548.0",
     "axios": "^0.18.1",
     "redis": "^2.8.0"
   },
