@@ -1,27 +1,25 @@
+import { joinObjects } from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
 import { SupportedPlatform } from "../type/messenger";
-import { joinObjects } from "../common/utils";
 
 /**
  * Create an in-memory context DAO store. This is useful for debugging.
  * @template C The context used by the current chatbot.
  */
-export function createInMemoryContextDAO<C>(
-  platform: SupportedPlatform
-): ContextDAO<C> {
+export function createInMemoryContextDAO<C>(): ContextDAO<C> {
   const storage: { [K: string]: C } = {};
 
-  function getCacheKey(targetID: string) {
-    return `${platform}-${targetID}`;
+  function getCacheKey(targetID: string, targetPlatform: SupportedPlatform) {
+    return `${targetPlatform}-${targetID}`;
   }
 
   return {
-    getContext: async targetID => {
-      const cacheKey = getCacheKey(targetID);
+    getContext: async (targetID, targetPlatform) => {
+      const cacheKey = getCacheKey(targetID, targetPlatform);
       return storage[cacheKey] || ({} as C);
     },
-    appendContext: async (targetID, context) => {
-      const cacheKey = getCacheKey(targetID);
+    appendContext: async (targetID, targetPlatform, context) => {
+      const cacheKey = getCacheKey(targetID, targetPlatform);
       storage[cacheKey] = joinObjects(storage[cacheKey], context);
     },
     resetContext: async () => {

@@ -14,13 +14,18 @@ export function saveTelegramUser<C>(
     return {
       ...processor,
       receiveRequest: async request => {
-        const { targetID, telegramUser, oldContext } = request;
+        const { targetID, targetPlatform, telegramUser, oldContext } = request;
         const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           await saveUser(telegramUser);
           const additionalContext: {} = { targetID };
-          await contextDAO.appendContext(targetID, additionalContext);
+
+          await contextDAO.appendContext(
+            targetID,
+            targetPlatform,
+            additionalContext
+          );
         }
 
         return processor.receiveRequest(request);

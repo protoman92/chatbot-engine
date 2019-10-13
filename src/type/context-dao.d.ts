@@ -1,3 +1,5 @@
+import { SupportedPlatform } from "./messenger";
+
 /**
  * Represents a DAO object that performs CRUD operations for a chatbot's
  * context. We can usually use Redis for this purpose, but there is no required
@@ -6,11 +8,15 @@
  */
 export interface ContextDAO<C> {
   /** Get the whole context in storage. */
-  getContext(targetID: string): Promise<C>;
+  getContext(targetID: string, platform: SupportedPlatform): Promise<C>;
 
   /** Append to the current context in storage. */
-  appendContext(targetID: string, context: Partial<C>): Promise<unknown>;
+  appendContext(
+    targetID: string,
+    platform: SupportedPlatform,
+    context: Partial<C>
+  ): Promise<unknown>;
 
   /** Reset all context to factory. */
-  resetContext(targetID: string): Promise<unknown>;
+  resetContext(targetID: string, platform: SupportedPlatform): Promise<unknown>;
 }

@@ -24,11 +24,15 @@ export function saveContextOnSend<
     return {
       ...processor,
       sendResponse: async response => {
-        const { targetID, additionalContext } = response;
+        const { targetID, targetPlatform, additionalContext } = response;
         const result = await processor.sendResponse(response);
 
         if (!!additionalContext) {
-          await contextDAO.appendContext(targetID, additionalContext);
+          await contextDAO.appendContext(
+            targetID,
+            targetPlatform,
+            additionalContext
+          );
         }
 
         return result;
@@ -55,7 +59,8 @@ export function injectContextOnReceive<
     return {
       ...processor,
       receiveRequest: async request => {
-        let oldContext = await contextDAO.getContext(request.targetID);
+        const { targetID, targetPlatform } = request;
+        let oldContext = await contextDAO.getContext(targetID, targetPlatform);
         oldContext = deepClone({ ...request.oldContext, ...oldContext });
         return processor.receiveRequest({ ...request, oldContext });
       }
@@ -87,14 +92,19 @@ export function saveUserForTargetID<
     return {
       ...processor,
       receiveRequest: async request => {
-        const { oldContext, targetID } = request;
+        const { oldContext, targetID, targetPlatform } = request;
         const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           const platformUser = await getUser(targetID);
           await saveUser(platformUser);
           const additionalContext: {} = { [sidKey]: targetID };
-          await contextDAO.appendContext(targetID, additionalContext);
+
+          await contextDAO.appendContext(
+            targetID,
+            targetPlatform,
+            additionalContext
+          );
         }
 
         return processor.receiveRequest({ ...request, oldContext });

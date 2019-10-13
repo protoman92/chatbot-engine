@@ -3,10 +3,11 @@ import { beforeEach, describe } from "mocha";
 import { RedisClient } from "redis";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { joinObjects } from "../common/utils";
-import { createRedisContextDAO } from "./RedisContextDAO";
 import { ContextDAO } from "../type/context-dao";
+import { createRedisContextDAO } from "./RedisContextDAO";
 
 const targetID = "target-id";
+const targetPlatform = "facebook" as const;
 
 describe("Redis context DAO", () => {
   let redis: Pick<RedisClient, "get" | "set" | "del">;
@@ -23,7 +24,7 @@ describe("Redis context DAO", () => {
       del: () => false
     });
 
-    contextDAO = createRedisContextDAO(instance(redis), "facebook");
+    contextDAO = createRedisContextDAO(instance(redis));
   });
 
   it("Should return context on get call", async () => {
@@ -35,7 +36,7 @@ describe("Redis context DAO", () => {
     });
 
     // When
-    const storedContext = await contextDAO.getContext(targetID);
+    const storedContext = await contextDAO.getContext(targetID, targetPlatform);
 
     // Then
     verify(redis.get(getCacheKey(targetID), anything())).once();
@@ -56,7 +57,11 @@ describe("Redis context DAO", () => {
     );
 
     // When
-    const result = await contextDAO.appendContext(targetID, additionalContext);
+    const result = await contextDAO.appendContext(
+      targetID,
+      targetPlatform,
+      additionalContext
+    );
 
     // Then
     const finalContext = joinObjects<{}>(oldContext, additionalContext);
@@ -75,7 +80,7 @@ describe("Redis context DAO", () => {
     });
 
     // When
-    const result = await contextDAO.resetContext(targetID);
+    const result = await contextDAO.resetContext(targetID, targetPlatform);
 
     // Then
     verify(redis.del(getCacheKey(targetID), anything())).once();

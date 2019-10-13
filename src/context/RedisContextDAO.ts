@@ -9,29 +9,32 @@ import { ContextDAO } from "../type/context-dao";
 import { SupportedPlatform } from "../type/messenger";
 
 export function createRedisContextDAO<C>(
-  redis: Pick<RedisClient, "get" | "set" | "del">,
-  platform: SupportedPlatform
+  redis: Pick<RedisClient, "get" | "set" | "del">
 ): ContextDAO<C> {
-  function getCacheKey(targetID: string) {
-    return `${platform}-${targetID}`;
+  function getCacheKey(targetID: string, targetPlatform: SupportedPlatform) {
+    return `${targetPlatform}-${targetID}`;
   }
 
-  const promisifiedGet = promisify1(redis.get).bind(redis);
-  const promisifiedSet = promisify2(redis.set).bind(redis);
-  const promisifiedDel = promisify1(redis.del).bind(redis);
+  const get = promisify1(redis.get).bind(redis);
+  const set = promisify2(redis.set).bind(redis);
+  const del = promisify1(redis.del).bind(redis);
 
   const contextDAO: ContextDAO<C> = {
-    getContext: async targetID => {
-      const context = await promisifiedGet(getCacheKey(targetID));
+    getContext: async (targetID, targetPlatform) => {
+      const context = await get(getCacheKey(targetID, targetPlatform));
       return JSON.parse(context);
     },
-    appendContext: async (targetID, context) => {
-      const oldContext = await contextDAO.getContext(targetID);
+    appendContext: async (targetID, targetPlatform, context) => {
+      const oldContext = await contextDAO.getContext(targetID, targetPlatform);
       const newContext = joinObjects(oldContext, context);
-      return promisifiedSet(getCacheKey(targetID), JSON.stringify(newContext));
+
+      return set(
+        getCacheKey(targetID, targetPlatform),
+        JSON.stringify(newContext)
+      );
     },
-    resetContext: targetID => {
-      return promisifiedDel(getCacheKey(targetID));
+    resetContext: (targetID, targetPlatform) => {
+      return del(getCacheKey(targetID, targetPlatform));
     }
   };
 
@@ -39,16 +42,14 @@ export function createRedisContextDAO<C>(
 }
 
 export default function<C>() {
-  return (platform: SupportedPlatform) => {
-    const { REDIS_HOST = "", REDIS_PORT = "", REDIS_URI = "" } = process.env;
-    requireAllTruthy({ REDIS_HOST, REDIS_PORT, REDIS_URI });
+  const { REDIS_HOST = "", REDIS_PORT = "", REDIS_URI = "" } = process.env;
+  requireAllTruthy({ REDIS_HOST, REDIS_PORT, REDIS_URI });
 
-    const redisClient = createClient({
-      host: REDIS_HOST,
-      port: parseInt(REDIS_PORT || "", undefined),
-      url: REDIS_URI
-    });
+  const redisClient = createClient({
+    host: REDIS_HOST,
+    port: parseInt(REDIS_PORT || "", undefined),
+    url: REDIS_URI
+  });
 
-    return createRedisContextDAO<C>(redisClient, platform);
-  };
+  return createRedisContextDAO<C>(redisClient);
 }

@@ -1,20 +1,15 @@
 import { DynamoDB } from "aws-sdk";
-import { requireAllTruthy } from "common/utils";
+import { requireAllTruthy } from "../common/utils";
 import { ContextDAO, SupportedPlatform } from "../type";
 
 export function createDynamoDBContextDAO<C>(
   ddb: DynamoDB,
-  tableName: string,
-  platform: SupportedPlatform
+  tableName: string
 ): ContextDAO<C> {
-  function getCacheKey(targetID: string) {
-    return `${platform}-${targetID}`;
-  }
-
-  function getTableKey(targetID: string) {
+  function getTableKey(targetID: string, targetPlatform: SupportedPlatform) {
     return {
-      platform: { S: platform },
-      targetID: { S: getCacheKey(targetID) }
+      targetID: { S: targetID },
+      targetPlatform: { S: targetPlatform }
     };
   }
 
@@ -42,11 +37,11 @@ export function createDynamoDBContextDAO<C>(
   }
 
   return {
-    getContext: targetID =>
+    getContext: (targetID, targetPlatform) =>
       new Promise((resolve, reject) => {
         ddb.getItem(
           {
-            Key: getTableKey(targetID),
+            Key: getTableKey(targetID, targetPlatform),
             TableName: tableName
           },
           (err, data) => {
@@ -69,11 +64,11 @@ export function createDynamoDBContextDAO<C>(
           }
         );
       }),
-    appendContext: (targetID, context) =>
+    appendContext: (targetID, targetPlatform, context) =>
       new Promise((resolve, reject) => {
         ddb.updateItem(
           {
-            Key: getTableKey(targetID),
+            Key: getTableKey(targetID, targetPlatform),
             ReturnValues: "NONE",
             TableName: tableName,
             ...getUpdateExpression(context)
@@ -88,11 +83,11 @@ export function createDynamoDBContextDAO<C>(
           }
         );
       }),
-    resetContext: targetID =>
+    resetContext: (targetID, targetPlatform) =>
       new Promise((resolve, reject) => {
         ddb.deleteItem(
           {
-            Key: getTableKey(targetID),
+            Key: getTableKey(targetID, targetPlatform),
             ReturnValues: "NONE",
             TableName: tableName
           },
@@ -110,15 +105,23 @@ export function createDynamoDBContextDAO<C>(
 }
 
 export default function<C>() {
-  return (platform: SupportedPlatform) => {
-    const { DYNAMO_DB_ENDPOINT = "", DYNAMO_DB_TABLE_NAME = "" } = process.env;
-    requireAllTruthy({ DYNAMO_DB_ENDPOINT, DYNAMO_DB_TABLE_NAME });
+  const {
+    DYNAMO_DB_ENDPOINT = "",
+    DYNAMO_DB_REGION = "",
+    DYNAMO_DB_TABLE_NAME = ""
+  } = process.env;
 
-    const ddb = new DynamoDB({
-      apiVersion: "latest",
-      endpoint: DYNAMO_DB_ENDPOINT
-    });
+  requireAllTruthy({
+    DYNAMO_DB_ENDPOINT,
+    DYNAMO_DB_REGION,
+    DYNAMO_DB_TABLE_NAME
+  });
 
-    return createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME, platform);
-  };
+  const ddb = new DynamoDB({
+    apiVersion: "latest",
+    endpoint: DYNAMO_DB_ENDPOINT,
+    region: DYNAMO_DB_REGION
+  });
+
+  return createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME);
 }
