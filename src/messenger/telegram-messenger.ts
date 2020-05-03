@@ -6,7 +6,7 @@ import {
   TelegramRequest,
   TelegramResponse,
   TelegramBot,
-  TelegramCommunicator,
+  TelegramClient,
   TelegramMessageProcessor,
   TelegramRawRequest,
   TelegramRawResponse,
@@ -321,16 +321,16 @@ function createTelegramResponse<C>({
  */
 export async function createTelegramMessageProcessor<C>(
   leafSelector: Leaf<C>,
-  communicator: TelegramCommunicator,
+  client: TelegramClient,
   ...transformers: readonly Transformer<TelegramMessageProcessor<C>>[]
 ): Promise<TelegramMessageProcessor<C>> {
-  await communicator.setWebhook();
-  const bot = await communicator.getCurrentBot();
+  await client.setWebhook();
+  const bot = await client.getCurrentBot();
 
   const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
-      communicator,
+      client,
       targetPlatform: "telegram",
       mapRequest: async (req) => createTelegramRequest(req, bot),
       mapResponse: async (res) => {
@@ -345,7 +345,7 @@ export async function createTelegramMessageProcessor<C>(
     sendResponse: async (response) => {
       const { targetID } = response;
 
-      if (!!(await communicator.isMember(targetID, `${bot.id}`))) {
+      if (!!(await client.isMember(targetID, `${bot.id}`))) {
         return baseProcessor.sendResponse(response);
       }
 

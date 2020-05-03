@@ -1,7 +1,7 @@
 import { beforeEach, describe } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose } from "../common/utils";
-import { PlatformCommunicator } from "../type/communicator";
+import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import { BaseMessageProcessor } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
@@ -18,7 +18,7 @@ import { saveTelegramUser } from "./telegram-transform";
 const targetID = "target-id";
 const targetPlatform = "facebook";
 let messenger: BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>;
-let communicator: PlatformCommunicator<unknown>;
+let client: PlatformClient<unknown>;
 let contextDAO: ContextDAO<{}>;
 
 beforeEach(async () => {
@@ -28,7 +28,7 @@ beforeEach(async () => {
     sendResponse: () => Promise.reject(""),
   });
 
-  communicator = spy<PlatformCommunicator<unknown>>({
+  client = spy<PlatformClient<unknown>>({
     sendResponse: () => Promise.reject(""),
     setTypingIndicator: () => Promise.reject(""),
   });
@@ -219,11 +219,11 @@ describe("Set typing indicator", () => {
   it("Should set typing indicator when response is being sent", async () => {
     // Setup
     when(messenger.sendResponse(anything())).thenResolve();
-    when(communicator.setTypingIndicator(targetID, anything())).thenResolve();
+    when(client.setTypingIndicator(targetID, anything())).thenResolve();
 
     const transformed = await compose(
       instance(messenger),
-      setTypingIndicator(instance(communicator))
+      setTypingIndicator(instance(client))
     );
 
     // When
@@ -234,8 +234,8 @@ describe("Set typing indicator", () => {
     });
 
     // Then
-    verify(communicator.setTypingIndicator(targetID, true)).calledBefore(
-      communicator.setTypingIndicator(targetID, false)
+    verify(client.setTypingIndicator(targetID, true)).calledBefore(
+      client.setTypingIndicator(targetID, false)
     );
   });
 });

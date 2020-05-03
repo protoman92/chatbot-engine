@@ -1,28 +1,24 @@
 import { stringify } from "querystring";
 import { requireAllTruthy } from "../common/utils";
-import { HTTPCommunicator } from "../type/communicator";
-import {
-  TelegramBot,
-  TelegramCommunicator,
-  TelegramConfigs
-} from "../type/telegram";
-import defaultAxiosCommunicator from "./axios-communicator";
+import { HTTPClient } from "../type/client";
+import { TelegramBot, TelegramClient, TelegramConfigs } from "../type/telegram";
+import defaultAxiosClient from "./axios-client";
 
-export function createTelegramCommunicator(
-  communicator: HTTPCommunicator,
+export function createTelegramClient(
+  client: HTTPClient,
   { authToken, webhookURL }: TelegramConfigs
-): TelegramCommunicator {
+): TelegramClient {
   function formatURL(action: string, query?: {}) {
     const qs = stringify(query);
     return `https://api.telegram.org/bot${authToken}/${action}?${qs}`;
   }
 
   async function communicate<Result>(
-    ...params: Parameters<HTTPCommunicator["communicate"]>
+    ...params: Parameters<HTTPClient["communicate"]>
   ): Promise<Result> {
-    const response = await communicator.communicate<
-      TelegramCommunicator.APIResponse
-    >(...params);
+    const response = await client.communicate<TelegramClient.APIResponse>(
+      ...params
+    );
 
     switch (response.ok) {
       case true:
@@ -40,13 +36,13 @@ export function createTelegramCommunicator(
       communicate<{ status: string }>({
         url: formatURL("getChatMember"),
         method: "GET",
-        query: { chat_id, user_id }
+        query: { chat_id, user_id },
       }).then(({ status }) => status === "member"),
     sendResponse: ({ action, ...payload }) => {
       return communicate({
         url: formatURL(action),
         method: "POST",
-        body: payload
+        body: payload,
       });
     },
     // tslint:disable-next-line:variable-name
@@ -60,16 +56,16 @@ export function createTelegramCommunicator(
       return communicate({
         url: formatURL("sendChatAction"),
         method: "POST",
-        body: { chat_id, action: "typing" }
+        body: { chat_id, action: "typing" },
       });
     },
     setWebhook: () => {
       return communicate({
         url: formatURL("setWebhook"),
         method: "GET",
-        query: { url: webhookURL }
+        query: { url: webhookURL },
       });
-    }
+    },
   };
 }
 
@@ -78,14 +74,14 @@ export default function() {
 
   const {
     TELEGRAM_AUTH_TOKEN: authToken,
-    TELEGRAM_WEBHOOK_URL: webhookURL
+    TELEGRAM_WEBHOOK_URL: webhookURL,
   } = requireAllTruthy({
     TELEGRAM_AUTH_TOKEN,
-    TELEGRAM_WEBHOOK_URL
+    TELEGRAM_WEBHOOK_URL,
   });
 
-  return createTelegramCommunicator(defaultAxiosCommunicator, {
+  return createTelegramClient(defaultAxiosClient, {
     authToken,
-    webhookURL
+    webhookURL,
   });
 }

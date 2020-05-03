@@ -1,44 +1,40 @@
 import expectJs from "expect.js";
 import { beforeEach, describe, it } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
-import { HTTPCommunicator } from "../type/communicator";
-import { TelegramCommunicator, TelegramConfigs } from "../type/telegram";
-import { createTelegramCommunicator } from "./telegram-communicator";
+import { HTTPClient } from "../type/client";
+import { TelegramClient, TelegramConfigs } from "../type/telegram";
+import { createTelegramClient } from "./telegram-client";
 
-describe("Telegram communicator", () => {
-  let communicator: HTTPCommunicator;
+describe("Telegram client", () => {
+  let client: HTTPClient;
   let configs: TelegramConfigs;
-  let tlCommunicator: TelegramCommunicator;
+  let tlClient: TelegramClient;
 
   beforeEach(() => {
-    communicator = spy<HTTPCommunicator>({
-      communicate: () => Promise.reject("")
+    client = spy<HTTPClient>({
+      communicate: () => Promise.reject(""),
     });
 
     configs = spy<TelegramConfigs>({ authToken: "", webhookURL: "" });
-
-    tlCommunicator = createTelegramCommunicator(
-      instance(communicator),
-      instance(configs)
-    );
+    tlClient = createTelegramClient(instance(client), instance(configs));
   });
 
   it("Should return result if ok is true", async () => {
     // Setup
     const result = 10000;
 
-    when(communicator.communicate(anything())).thenResolve({
+    when(client.communicate(anything())).thenResolve({
       result,
       description: "some-description",
-      ok: true
+      ok: true,
     });
 
     // When
-    const apiResponse = await tlCommunicator.sendResponse({
+    const apiResponse = await tlClient.sendResponse({
       action: "sendMessage",
       chat_id: "",
       text: "Hey",
-      reply_markup: undefined
+      reply_markup: undefined,
     });
 
     // Then
@@ -49,18 +45,18 @@ describe("Telegram communicator", () => {
     // Setup
     const description = "some-error";
 
-    when(communicator.communicate(anything())).thenResolve({
+    when(client.communicate(anything())).thenResolve({
       description,
-      ok: false
+      ok: false,
     });
 
     try {
       // When
-      await tlCommunicator.sendResponse({
+      await tlClient.sendResponse({
         action: "sendMessage",
         chat_id: "",
         text: "Hey",
-        reply_markup: undefined
+        reply_markup: undefined,
       });
 
       throw new Error("Never should have come here");
@@ -71,9 +67,9 @@ describe("Telegram communicator", () => {
 
   it("Should not send typing action if setting to false", async () => {
     // Setup && When
-    await tlCommunicator.setTypingIndicator("", false);
+    await tlClient.setTypingIndicator("", false);
 
     // Then
-    verify(communicator.communicate(anything())).never();
+    verify(client.communicate(anything())).never();
   });
 });

@@ -1,6 +1,6 @@
 import { DeepReadonly } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
-import { PlatformCommunicator } from "./communicator";
+import { PlatformClient } from "./client";
 import { Leaf as RootLeaf } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
@@ -215,7 +215,7 @@ export interface TelegramConfigs {
   readonly webhookURL: string;
 }
 
-declare namespace TelegramCommunicator {
+declare namespace TelegramClient {
   namespace APIResponse {
     interface Success {
       readonly description: string;
@@ -232,9 +232,8 @@ declare namespace TelegramCommunicator {
   type APIResponse = APIResponse.Success | APIResponse.Failure;
 }
 
-/** A Telegram-specific communicator. */
-export interface TelegramCommunicator
-  extends PlatformCommunicator<TelegramRawResponse> {
+/** A Telegram-specific client. */
+export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
   /** Get the current chatbot. */
   getCurrentBot(): Promise<TelegramBot>;
 

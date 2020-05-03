@@ -1,6 +1,6 @@
 import { isNullOrUndefined } from "util";
 import { Leaf } from "../../type/leaf";
-import { WitCommunicator, WitContext } from "../../type/wit";
+import { WitClient, WitContext } from "../../type/wit";
 
 /**
  * Retry a failing message with wit, by running the input text through wit
@@ -8,11 +8,11 @@ import { WitCommunicator, WitContext } from "../../type/wit";
  * @template C The original input type.
  */
 export function retryWithWit<C>(
-  comm: WitCommunicator
+  comm: WitClient
 ): Leaf.Transformer<C & WitContext, C> {
-  return async leaf => ({
+  return async (leaf) => ({
     ...leaf,
-    next: async input => {
+    next: async (input) => {
       const result = await leaf.next({ ...input, witEntities: {} });
 
       if (isNullOrUndefined(result)) {
@@ -21,6 +21,6 @@ export function retryWithWit<C>(
       }
 
       return result;
-    }
+    },
   });
 }

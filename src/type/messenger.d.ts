@@ -1,4 +1,4 @@
-import { PlatformCommunicator } from "./communicator";
+import { PlatformClient } from "./client";
 import { Leaf } from "./leaf";
 import { AmbiguousRequest } from "./request";
 import { AmbiguousResponse } from "./response";
@@ -22,7 +22,7 @@ declare namespace BaseMessageProcessor {
   > {
     readonly targetPlatform: AmbiguousPlatform;
     readonly leafSelector: Leaf<C>;
-    readonly communicator: PlatformCommunicator<PResponse>;
+    readonly client: PlatformClient<PResponse>;
     readonly mapRequest: BaseMessageProcessor<
       C,
       PRequest,

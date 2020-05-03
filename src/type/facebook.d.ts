@@ -1,6 +1,6 @@
 import { DeepReadonly, Omit } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
-import { PlatformCommunicator } from "./communicator";
+import { PlatformClient } from "./client";
 import { Leaf as RootLeaf } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
@@ -267,9 +267,8 @@ export interface FacebookConfigs {
   readonly verifyToken: string;
 }
 
-/** Represents a Facebook-specific communicator. */
-export interface FacebookCommunicator
-  extends PlatformCommunicator<FacebookRawResponse> {
+/** Represents a Facebook-specific client. */
+export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
   /** Get the user associated with a sender ID. */
   getUser(targetID: string): Promise<FacebookUser>;
 

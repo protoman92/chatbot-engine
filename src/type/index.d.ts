@@ -1,6 +1,6 @@
 export * from "./branch";
 export * from "./common";
-export * from "./communicator";
+export * from "./client";
 export * from "./context-dao";
 export * from "./facebook";
 export * from "./leaf";

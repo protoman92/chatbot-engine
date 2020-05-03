@@ -1,10 +1,10 @@
 import axios, { AxiosInstance } from "axios";
-import { HTTPCommunicator } from "../type/communicator";
+import { HTTPClient } from "../type/client";
 
-/** Create a default HTTP communicator using axios. */
-export function createAxiosCommunicator(axiosInstance: AxiosInstance = axios) {
-  const communicator: HTTPCommunicator = {
-    communicate: async request => {
+/** Create a default HTTP client using axios. */
+export function createAxiosClient(axiosInstance: AxiosInstance = axios) {
+  const client: HTTPClient = {
+    communicate: async (request) => {
       const { url, headers = {}, query: params } = request;
 
       const { data } = await (function() {
@@ -18,10 +18,10 @@ export function createAxiosCommunicator(axiosInstance: AxiosInstance = axios) {
       })();
 
       return data;
-    }
+    },
   };
 
-  return communicator;
+  return client;
 }
 
-export default createAxiosCommunicator();
+export default createAxiosClient();

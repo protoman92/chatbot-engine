@@ -9,7 +9,7 @@ import {
   verify,
   when,
 } from "ts-mockito";
-import { PlatformCommunicator } from "../type/communicator";
+import { PlatformClient } from "../type/client";
 import {
   FacebookMessageProcessor,
   FacebookRequestInput,
@@ -29,7 +29,7 @@ const targetPlatform = "facebook" as const;
 
 describe("Generic message processor", () => {
   let leafSelector: Leaf<{}>;
-  let communicator: PlatformCommunicator<unknown>;
+  let client: PlatformClient<unknown>;
 
   beforeEach(async () => {
     leafSelector = spy<Leaf<{}>>({
@@ -37,7 +37,7 @@ describe("Generic message processor", () => {
       subscribe: () => Promise.reject(""),
     });
 
-    communicator = spy<PlatformCommunicator<unknown>>({
+    client = spy<PlatformClient<unknown>>({
       sendResponse: () => Promise.reject(""),
       setTypingIndicator: () => Promise.reject(""),
     });
@@ -46,7 +46,7 @@ describe("Generic message processor", () => {
   it("Should trigger send with valid response", async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
-    when(communicator.sendResponse(anything())).thenResolve();
+    when(client.sendResponse(anything())).thenResolve();
     const platformResponses = [{ a: 1 }, { b: 2 }];
 
     // When
@@ -54,7 +54,7 @@ describe("Generic message processor", () => {
       await createMessageProcessor({
         targetPlatform,
         leafSelector: instance(leafSelector),
-        communicator: instance(communicator),
+        client: instance(client),
         mapRequest: async () => [],
         mapResponse: async () => platformResponses,
       })
@@ -75,14 +75,14 @@ describe("Generic message processor", () => {
     verify(messageProcessor.sendResponse(deepEqual(response))).once();
 
     platformResponses.forEach((response) => {
-      verify(communicator.sendResponse(deepEqual(response))).once();
+      verify(client.sendResponse(deepEqual(response))).once();
     });
   });
 
   it("Should not trigger send without matching target platform", async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
-    when(communicator.sendResponse(anything())).thenResolve();
+    when(client.sendResponse(anything())).thenResolve();
     const platformResponses = [{ a: 1 }, { b: 2 }];
 
     // When
@@ -90,7 +90,7 @@ describe("Generic message processor", () => {
       await createMessageProcessor({
         targetPlatform: "telegram",
         leafSelector: instance(leafSelector),
-        communicator: instance(communicator),
+        client: instance(client),
         mapRequest: async () => [],
         mapResponse: async () => platformResponses,
       })
@@ -137,7 +137,7 @@ describe("Generic message processor", () => {
     const messageProcessor = await createMessageProcessor({
       targetPlatform,
       leafSelector: instance(leafSelector),
-      communicator: instance(communicator),
+      client: instance(client),
       mapRequest: async () => [] as readonly AmbiguousRequest<{}>[],
       mapResponse: async () => [],
     });

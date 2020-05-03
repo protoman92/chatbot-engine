@@ -3,16 +3,16 @@ import axiosStatic, { AxiosInstance, AxiosResponse } from "axios";
 import expectJs from "expect.js";
 import { beforeEach, describe } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { createAxiosCommunicator } from "./axios-communicator";
-import { HTTPCommunicator } from "../type/communicator";
+import { createAxiosClient } from "./axios-client";
+import { HTTPClient } from "../type/client";
 
-describe("Axios communicator", () => {
+describe("Axios client", () => {
   let axios: AxiosInstance;
-  let communicator: HTTPCommunicator;
+  let client: HTTPClient;
 
   beforeEach(() => {
     axios = spy<AxiosInstance>(axiosStatic);
-    communicator = createAxiosCommunicator(instance(axios));
+    client = createAxiosClient(instance(axios));
   });
 
   it("Should call correct axios methods", async () => {
@@ -24,7 +24,7 @@ describe("Axios communicator", () => {
       status: 200,
       statusText: "123",
       headers: {},
-      config: {}
+      config: {},
     };
 
     when(axios.get(anything(), anything())).thenResolve(response);
@@ -35,19 +35,19 @@ describe("Axios communicator", () => {
     const headers = { a: 1, b: 2 };
     const query = { a: 1, b: 2 };
 
-    const getData = await communicator.communicate({
+    const getData = await client.communicate({
       url,
       headers,
       query,
-      method: "GET"
+      method: "GET",
     });
 
-    const postData = await communicator.communicate({
+    const postData = await client.communicate({
       url,
       body,
       headers,
       query,
-      method: "POST"
+      method: "POST",
     });
 
     // Then
@@ -66,11 +66,11 @@ describe("Axios communicator", () => {
 
     // When
     try {
-      await communicator.communicate({
+      await client.communicate({
         url,
         headers: {},
         query: {},
-        method: "GET"
+        method: "GET",
       });
 
       throw new Error("Never should have come here");

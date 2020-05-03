@@ -38,7 +38,7 @@ export async function createMessageProcessor<
   {
     targetPlatform,
     leafSelector,
-    communicator,
+    client,
     mapRequest,
     mapResponse,
   }: BaseMessageProcessor.Configs<C, PRequest, PResponse, GRequest>,
@@ -64,7 +64,7 @@ export async function createMessageProcessor<
       },
       sendResponse: async (response) => {
         const data = await mapResponse(response);
-        return mapSeries(data, (datum) => communicator.sendResponse(datum));
+        return mapSeries(data, (datum) => client.sendResponse(datum));
       },
     },
     ...reversedTransformers

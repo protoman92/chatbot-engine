@@ -1,30 +1,27 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { instance, spy, when } from "ts-mockito";
-import { HTTPCommunicator } from "../type/communicator";
-import { FacebookCommunicator, FacebookConfigs } from "../type/facebook";
-import { createFacebookCommunicator } from "./facebook-communicator";
+import { HTTPClient } from "../type/client";
+import { FacebookClient, FacebookConfigs } from "../type/facebook";
+import { createFacebookClient } from "./facebook-client";
 
-describe("Facebook communicator", () => {
-  let communicator: HTTPCommunicator;
+describe("Facebook client", () => {
+  let client: HTTPClient;
   let configs: FacebookConfigs;
-  let fbCommunicator: FacebookCommunicator;
+  let fbClient: FacebookClient;
 
   beforeEach(async () => {
-    communicator = spy<HTTPCommunicator>({
-      communicate: () => Promise.reject("")
+    client = spy<HTTPClient>({
+      communicate: () => Promise.reject(""),
     });
 
     configs = spy<FacebookConfigs>({
       apiVersion: "",
       pageToken: "",
-      verifyToken: ""
+      verifyToken: "",
     });
 
-    fbCommunicator = createFacebookCommunicator(
-      instance(communicator),
-      instance(configs)
-    );
+    fbClient = createFacebookClient(instance(client), instance(configs));
   });
 
   it("Should resolve hub challenge if token matches", async () => {
@@ -34,10 +31,10 @@ describe("Facebook communicator", () => {
     when(configs.verifyToken).thenReturn(verifyToken);
 
     // When
-    const challenge = await fbCommunicator.resolveVerifyChallenge({
+    const challenge = await fbClient.resolveVerifyChallenge({
       "hub.mode": "subscribe",
       "hub.challenge": hubChallenge,
-      "hub.verify_token": verifyToken
+      "hub.verify_token": verifyToken,
     });
 
     // Then
@@ -51,9 +48,9 @@ describe("Facebook communicator", () => {
 
     try {
       // When && Then
-      await fbCommunicator.resolveVerifyChallenge({
+      await fbClient.resolveVerifyChallenge({
         "hub.challenge": 1000,
-        "hub.verify_token": verifyToken
+        "hub.verify_token": verifyToken,
       });
 
       throw new Error("Never should have come here");
@@ -67,9 +64,9 @@ describe("Facebook communicator", () => {
 
     try {
       // When && Then
-      await fbCommunicator.resolveVerifyChallenge({
+      await fbClient.resolveVerifyChallenge({
         "hub.mode": "subscribe",
-        "hub.challenge": hubChallenge
+        "hub.challenge": hubChallenge,
       });
 
       throw new Error("Never should have come here");

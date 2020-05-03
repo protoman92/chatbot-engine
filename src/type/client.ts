@@ -20,17 +20,17 @@ declare namespace HTTPRequest {
 export type HTTPRequest = HTTPRequest.GET | HTTPRequest.POST;
 
 /** Handle HTTP communication. */
-export interface HTTPCommunicator {
+export interface HTTPClient {
   communicate<T>(request: HTTPRequest): Promise<T>;
 }
 
 /**
- * Represents an object that handles the communicator to/from the relevant
- * platform. For example, a Facebook platform communicator should be able to
+ * Represents an object that handles the client to/from the relevant
+ * platform. For example, a Facebook platform client should be able to
  * handle all methods specified here.
  * @template PResponse The platform-specific response.
  */
-export interface PlatformCommunicator<PResponse> {
+export interface PlatformClient<PResponse> {
   /** Send a response to the related platform. */
   sendResponse(data: PResponse): Promise<unknown>;
 

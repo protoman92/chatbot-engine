@@ -2,22 +2,22 @@ import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES } from "../../common/utils";
 import { Leaf } from "../../type/leaf";
-import { WitCommunicator, WitContext, WitResponse } from "../../type/wit";
+import { WitClient, WitContext, WitResponse } from "../../type/wit";
 import { retryWithWit } from "./wit";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("Wit higher order function", () => {
-  let comm: WitCommunicator;
+  let comm: WitClient;
   let rootLeaf: Leaf<WitContext>;
 
   beforeEach(() => {
-    comm = spy<WitCommunicator>({ validate: () => Promise.reject("") });
+    comm = spy<WitClient>({ validate: () => Promise.reject("") });
 
     rootLeaf = spy<Leaf<WitContext>>({
       next: () => Promise.reject(""),
-      subscribe: () => Promise.reject("")
+      subscribe: () => Promise.reject(""),
     });
   });
 
@@ -33,7 +33,7 @@ describe("Wit higher order function", () => {
       inputText: "some-text",
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ""
+      stickerID: "",
     };
 
     await transformed.next(input);
@@ -45,7 +45,7 @@ describe("Wit higher order function", () => {
   it("Wit engine should intercept errors", async () => {
     // Setup
     const witEntities: WitResponse["entities"] = {
-      a: [{ confidence: 1, value: "some-value", type: "value" }]
+      a: [{ confidence: 1, value: "some-value", type: "value" }],
     };
 
     const inputText = "some-text";
@@ -61,7 +61,7 @@ describe("Wit higher order function", () => {
     when(comm.validate(anything())).thenResolve({
       entities: witEntities,
       _text: inputText,
-      msg_id: ""
+      msg_id: "",
     });
 
     const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
@@ -73,7 +73,7 @@ describe("Wit higher order function", () => {
       inputText,
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ""
+      stickerID: "",
     };
 
     await transformed.next(input);

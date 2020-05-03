@@ -6,7 +6,7 @@ Experimental chatbot engine to build cross-platform chatbots.
 
 ### Receive platform request
 
-Request is received from a supported platform, and mapped to an `Array` of `GenericRequest`. A `GenericRequest` contains the `senderID`, `oldContext` and supported data.
+Request is received from a supported platform, and mapped to an `Array` of `AmbiguousRequest`. A `AmbiguousRequest` contains the `senderID`, `oldContext` and supported data.
 
 ### Feed generic request to leaf selector
 
@@ -34,16 +34,16 @@ import { createClient as createRedisClient } from "redis";
 const redisClient = createRedisClient({
   host: process.env.REDIS_HOST,
   port: parseInt(process.env.REDIS_PORT || "", undefined),
-  url: process.env.REDIS_URL
+  url: process.env.REDIS_URL,
 });
 
 const fbContextDAO = createRedisContextDAO(redisClient, "facebook");
 const tlContextDAO = createRedisContextDAO(redisClient, "telegram");
 ```
 
-### Set up the platform communicator
+### Set up the platform client
 
-Platform communicators are HTTP communicators that serve specific platforms. It requires a base communicator that supports basic HTTP verbs (such as one supported by axios).
+Platform clients are HTTP clients that serve specific platforms. It requires a base client that supports basic HTTP verbs (such as one supported by axios).
 
 They are capable of (but not restricted to):
 
@@ -52,17 +52,17 @@ They are capable of (but not restricted to):
 - Get current user.
 
 ```javascript
-const communicator = createAxiosCommunicator();
+const client = createAxiosClient();
 
-const fbCommunicator = createFacebookCommunicator(communicator, {
+const fbClient = createFacebookClient(client, {
   apiVersion: process.env.FACEBOOK_API_VERSION,
   pageToken: process.env.FACEBOOK_PAGE_TOKEN,
-  verifyToken: process.env.FACEBOOK_VERIFY_TOKEN
+  verifyToken: process.env.FACEBOOK_VERIFY_TOKEN,
 });
 
-const tlCommunicator = createTelegramCommunicator(communicator, {
+const tlClient = createTelegramClient(client, {
   authToken: process.env.TELEGRAM_AUTH_TOKEN,
-  webhookURL: `${process.env.TELEGRAM_WEBHOOK_URL}/api/telegram`
+  webhookURL: `${process.env.TELEGRAM_WEBHOOK_URL}/api/telegram`,
 });
 ```
 
@@ -92,19 +92,19 @@ The platform message processors are responsible for receiving platform requests 
 - Process raw platform requests (which differ from platform to another) into generic requests.
 - Pass generic requests to leaf selector to produce generic resposnes.
 - Process generic responses to platform responses.
-- Use platform communicators to send platform responses to the respective platform.
+- Use platform clients to send platform responses to the respective platform.
 
 ```javascript
 const fbMessageProcessor = await createFacebookMessageProcessor(
   leafSelector,
-  fbCommunicator,
-  transformMessageProcessorsDefault(fbContextDAO, fbCommunicator)
+  fbClient,
+  transformMessageProcessorsDefault(fbContextDAO, fbClient)
 );
 
 const tlMessageProcessor = await createTelegramMessageProcessor(
   leafSelector,
-  tlCommunicator,
-  transformMessageProcessorsDefault(tlContextDAO, tlCommunicator)
+  tlClient,
+  transformMessageProcessorsDefault(tlContextDAO, tlClient)
 );
 ```
 
@@ -115,7 +115,7 @@ A messenger is an abstraction that uses platform message processors under the ho
 ```javascript
 const crossMessenger = createCrossPlatformMessenger({
   facebook: fbMessenger,
-  telegram: tlMessenger
+  telegram: tlMessenger,
 });
 ```
 
@@ -128,7 +128,7 @@ const app = express();
 app.use(json());
 
 app.get("/api/facebook", async ({ query }, res) => {
-  const challenge = await fbCommunicator.resolveVerifyChallenge(query);
+  const challenge = await fbClient.resolveVerifyChallenge(query);
   res.status(200).send(challenge);
 });
 
@@ -150,5 +150,5 @@ app.post("/api/telegram", async ({ body }, res) => {
 });
 
 const port = process.env.PORT || 8000;
-await new Promise(resolve => app.listen(port, resolve));
+await new Promise((resolve) => app.listen(port, resolve));
 ```

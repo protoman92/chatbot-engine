@@ -1,22 +1,18 @@
 import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { HTTPCommunicator } from "../type/communicator";
-import { WitCommunicator, WitConfigs } from "../type/wit";
-import { createWitCommunicator } from "./wit-communicator";
+import { HTTPClient } from "../type/client";
+import { WitClient, WitConfigs } from "../type/wit";
+import { createWitClient } from "./wit-client";
 
-describe("Wit communicator", () => {
-  let comm: HTTPCommunicator;
+describe("Wit client", () => {
+  let comm: HTTPClient;
   let witConfig: WitConfigs;
-  let witCommunicator: WitCommunicator;
+  let witClient: WitClient;
 
   beforeEach(() => {
-    comm = spy<HTTPCommunicator>({ communicate: () => Promise.reject("") });
+    comm = spy<HTTPClient>({ communicate: () => Promise.reject("") });
     witConfig = spy<WitConfigs>({ authorizationToken: "" });
-
-    witCommunicator = createWitCommunicator(
-      instance(comm),
-      instance(witConfig)
-    );
+    witClient = createWitClient(instance(comm), instance(witConfig));
   });
 
   it("Should communicate with wit API correctly", async () => {
@@ -27,7 +23,7 @@ describe("Wit communicator", () => {
 
     // When
     const message = "some-message";
-    await witCommunicator.validate(message);
+    await witClient.validate(message);
 
     // Then
     verify(
@@ -35,7 +31,7 @@ describe("Wit communicator", () => {
         deepEqual({
           method: "GET",
           url: `https://api.wit.ai/message?q=${message}`,
-          headers: { Authorization: `Bearer ${authorizationToken}` }
+          headers: { Authorization: `Bearer ${authorizationToken}` },
         })
       )
     ).once();

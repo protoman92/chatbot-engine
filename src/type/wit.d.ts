@@ -17,8 +17,8 @@ export interface WitResponse<Entities extends string = string> {
   readonly entities: { [K in Entities]?: readonly WitEntity[] };
 }
 
-/** Communicator to access wit APIs. */
-export interface WitCommunicator {
+/** Client to access wit APIs. */
+export interface WitClient {
   /** Validate a query with wit. */
   validate<E extends string>(message: string): Promise<WitResponse<E>>;
 }

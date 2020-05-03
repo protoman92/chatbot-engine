@@ -1,6 +1,6 @@
 import { compose, deepClone } from "../common/utils";
 import { DefaultContext, Transformer } from "../type/common";
-import { PlatformCommunicator } from "../type/communicator";
+import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import { BaseMessageProcessor } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
@@ -127,16 +127,16 @@ export function setTypingIndicator<
   PResponse,
   GRequest extends AmbiguousRequest<C>
 >(
-  communicator: PlatformCommunicator<PResponse>
+  client: PlatformClient<PResponse>
 ): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
   return async (processor) => {
     return {
       ...processor,
       sendResponse: async (response) => {
         const { targetID } = response;
-        await communicator.setTypingIndicator(targetID, true);
+        await client.setTypingIndicator(targetID, true);
         const result = await processor.sendResponse(response);
-        await communicator.setTypingIndicator(targetID, false);
+        await client.setTypingIndicator(targetID, false);
         return result;
       },
     };
@@ -157,13 +157,13 @@ export function transformMessageProcessorsDefault<
   GRequest extends AmbiguousRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">,
-  communicator: PlatformCommunicator<PResponse>
+  client: PlatformClient<PResponse>
 ): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
   return (processor) =>
     compose(
       processor,
       injectContextOnReceive(contextDAO),
       saveContextOnSend(contextDAO),
-      setTypingIndicator(communicator)
+      setTypingIndicator(client)
     );
 }
