@@ -22,7 +22,7 @@
     "gulp": "^4.0.2",
     "gulp-run": "^1.7.1",
     "husky": "^3.0.9",
-    "mocha": "^6.1.4",
+    "mocha": "^7.1.2",
     "nodemon": "^1.19.0",
     "nyc": "^14.1.1",
     "snyk": "^1.316.2",
@@ -76,7 +76,7 @@
   "scripts": {
     "build": "node build.js",
     "gulp": "gulp",
-    "test": "nyc mocha --require ts-node/register **/*.test.ts"
+    "test": "nyc mocha --require ts-node/register src/**/*.test.ts"
   },
   "version": "1.0.0"
 }

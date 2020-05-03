@@ -6,15 +6,15 @@ Experimental chatbot engine to build cross-platform chatbots.
 
 ### Receive platform request
 
-Request is received from a supported platform, and mapped to an `Array` of `AmbiguousRequest`. A `AmbiguousRequest` contains the `senderID`, `oldContext` and supported data.
+Request is received from a supported platform, and mapped to an `Array` of `AmbiguousRequest`. An `AmbiguousRequest` contains the `senderID`, `oldContext` and supported data.
 
-### Feed generic request to leaf selector
+### Feed request to leaf selector
 
 A `LeafSelector` scans through all leaves and picks out the one whose conditions match the request input.
 
-### Map generic responses and send the resulting responses back
+### Map responses and send the resulting raw responses back
 
-The resulting `GenericResponse` instances are then mapped to the payload specified by supported platforms, then sent back to the user.
+The resulting `AmbiguousResponse` instances are then mapped to the payload specified by supported platforms, then sent back to the user.
 
 ## Setting up
 
@@ -68,7 +68,7 @@ const tlClient = createTelegramClient(client, {
 
 ### Set up the leaf selector
 
-The leaf selector receives platform requests and selects the most appropriate leaf that match the requirements of each request (such as those imposed by regex matches, state flags etc):
+The leaf selector receives requests and selects the most appropriate leaf that match the requirements of each request (such as those imposed by regex matches, state flags etc):
 
 ```javascript
 const branches = {
@@ -89,10 +89,10 @@ const leafSelector = await createTransformChain()
 
 The platform message processors are responsible for receiving platform requests and sending platform responses. They are capable of:
 
-- Process raw platform requests (which differ from platform to another) into generic requests.
-- Pass generic requests to leaf selector to produce generic resposnes.
-- Process generic responses to platform responses.
-- Use platform clients to send platform responses to the respective platform.
+- Process raw requests (which differ from one platform to another) into ambiguous requests.
+- Pass ambiguous requests to leaf selector to produce ambiguous resposnes.
+- Process ambiguous responses to raw responses.
+- Use platform clients to send raw responses to the respective platform.
 
 ```javascript
 const fbMessageProcessor = await createFacebookMessageProcessor(
