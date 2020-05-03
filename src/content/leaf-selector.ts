@@ -57,12 +57,13 @@ export function enumerateLeaves<Context>(
  * Said leaf's content will be delivered to the user.
  */
 export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
-  const enumeratedLeaves = enumerateLeaves(allBranches);
+  const _enumeratedLeaves = enumerateLeaves(allBranches);
   let outputObservable: ContentObservable<AmbiguousResponse<Context>>;
+  let _subscribeCount = 0;
 
   const selector = {
-    enumerateLeaves: async () => enumeratedLeaves,
-
+    enumerateLeaves: async () => _enumeratedLeaves,
+    subscribeCount: () => _subscribeCount,
     /**
      * Trigger the production of content for a leaf, but does not guarantee
      * its success.
@@ -105,6 +106,15 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
     subscribe: async (
       observer: ContentObserver<AmbiguousResponse<Context>>
     ) => {
+      _subscribeCount += 1;
+
+      if (selector.subscribeCount() > 1) {
+        throw new Error(
+          "Please do not subscribe to leaf selectors multiple times. " +
+            "Create another one to avoid unepxected behaviours."
+        );
+      }
+
       if (!outputObservable) {
         const enumeratedLeaves = await selector.enumerateLeaves();
 

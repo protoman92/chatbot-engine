@@ -1,17 +1,17 @@
 import { Omit } from "ts-essentials";
 import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
-import { AmbiguousLeaf } from "../type/leaf";
+import { LeafSelector } from "../type/leaf";
 import {
-  TelegramRequest,
-  TelegramResponse,
   TelegramBot,
   TelegramClient,
   TelegramMessageProcessor,
   TelegramRawRequest,
   TelegramRawResponse,
-  TelegramUser,
+  TelegramRequest,
+  TelegramResponse,
   TelegramResponseOutput,
+  TelegramUser,
 } from "../type/telegram";
 import { BaseResponseOutput } from "../type/visual-content";
 import { createMessageProcessor } from "./generic-messenger";
@@ -311,7 +311,7 @@ function createTelegramResponse<Context>({
 
 /** Create a Telegram message processor */
 export async function createTelegramMessageProcessor<Context>(
-  leafSelector: AmbiguousLeaf<Context>,
+  leafSelector: LeafSelector<Context>,
   client: TelegramClient,
   ...transformers: readonly Transformer<TelegramMessageProcessor<Context>>[]
 ): Promise<TelegramMessageProcessor<Context>> {

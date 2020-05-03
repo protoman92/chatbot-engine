@@ -15,7 +15,7 @@ import {
   FacebookMessageProcessor,
   FacebookRequestInput,
 } from "../type/facebook";
-import { AmbiguousLeaf } from "../type/leaf";
+import { LeafSelector } from "../type/leaf";
 import { AmbiguousPlatform } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
@@ -29,11 +29,11 @@ const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("Generic message processor", () => {
-  let leafSelector: AmbiguousLeaf<{}>;
+  let leafSelector: LeafSelector<{}>;
   let client: PlatformClient<unknown>;
 
   beforeEach(async () => {
-    leafSelector = spy<AmbiguousLeaf<{}>>({
+    leafSelector = spy<LeafSelector<{}>>({
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });

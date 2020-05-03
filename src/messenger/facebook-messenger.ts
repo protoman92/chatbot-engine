@@ -5,11 +5,11 @@ import {
   FacebookMessageProcessor,
   FacebookRawRequest,
   FacebookRawResponse,
-  FacebookResponseOutput,
   FacebookRequest,
   FacebookResponse,
+  FacebookResponseOutput,
 } from "../type/facebook";
-import { AmbiguousLeaf } from "../type/leaf";
+import { LeafSelector } from "../type/leaf";
 import { BaseResponseOutput } from "../type/visual-content";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -380,7 +380,7 @@ function createFacebookResponse<Context>({
 
 /** Create a Facebook message processor */
 export async function createFacebookMessageProcessor<Context>(
-  leafSelector: AmbiguousLeaf<Context>,
+  leafSelector: LeafSelector<Context>,
   client: FacebookClient,
   ...transformers: readonly Transformer<FacebookMessageProcessor<Context>>[]
 ): Promise<FacebookMessageProcessor<Context>> {

@@ -1,5 +1,5 @@
 import { PlatformClient } from "./client";
-import { AmbiguousLeaf } from "./leaf";
+import { LeafSelector } from "./leaf";
 import { AmbiguousRequest } from "./request";
 import { AmbiguousResponse } from "./response";
 
@@ -15,7 +15,7 @@ declare namespace BaseMessageProcessor {
     AmbRequest extends AmbiguousRequest<Context>
   > {
     readonly targetPlatform: AmbiguousPlatform;
-    readonly leafSelector: AmbiguousLeaf<Context>;
+    readonly leafSelector: LeafSelector<Context>;
     readonly client: PlatformClient<RawResponse>;
     readonly mapRequest: BaseMessageProcessor<
       Context,

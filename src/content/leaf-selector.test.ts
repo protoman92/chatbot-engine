@@ -119,6 +119,21 @@ describe("Leaf selector", () => {
     verify(currentLeaf.subscribe(anything())).times(enumeratedLeaves.length);
   });
 
+  it("Subscribing should increase subscribe count", async () => {
+    // Setup && When
+    await instance(selector).subscribe({
+      next: async () => NextResult.SUCCESS,
+    });
+
+    try {
+      await instance(selector).subscribe({
+        next: async () => NextResult.SUCCESS,
+      });
+
+      expectJs().fail("Should have failed");
+    } catch {}
+  });
+
   it("Should throw error if no enumerated leaves found", async () => {
     // Setup
     when(selector.enumerateLeaves()).thenResolve([]);

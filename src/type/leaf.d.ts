@@ -69,3 +69,5 @@ export interface BaseLeaf<Context, ExtraContext>
  */
 export interface AmbiguousLeaf<Context>
   extends BaseLeaf<Context, DefaultContext> {}
+
+export interface LeafSelector<Context> extends AmbiguousLeaf<Context> {}
