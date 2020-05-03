@@ -2,7 +2,7 @@ import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { DEFAULT_COORDINATES } from "../../common/utils";
-import { createSubscription } from "../../stream";
+import { createSubscription, NextResult } from "../../stream";
 import { ErrorContext } from "../../type/common";
 import { AmbiguousLeaf } from "../../type/leaf";
 import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
@@ -24,7 +24,7 @@ describe("Transform chain", () => {
     });
 
     const fallbackLeaf = spy<AmbiguousLeaf<ErrorContext>>({
-      next: () => Promise.resolve({}),
+      next: () => Promise.resolve(NextResult.SUCCESS),
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
@@ -47,7 +47,7 @@ describe("Transform chain", () => {
     };
 
     const nextResult = await transformed.next(input);
-    await transformed.subscribe({ next: async () => ({}) });
+    await transformed.subscribe({ next: async () => NextResult.SUCCESS });
     await transformed.complete!();
 
     // Then
@@ -56,45 +56,51 @@ describe("Transform chain", () => {
     verify(fallbackLeaf.subscribe(anything())).once();
     verify(errorLeaf.complete!()).once();
     verify(errorLeaf.subscribe(anything())).once;
-    expectJs(nextResult).to.eql({});
+    expectJs(nextResult).to.eql(NextResult.SUCCESS);
   });
 
   it("Create leaf with pipe chain", async () => {
     // Setup
-    const baseLeaf = await createLeafWithObserver(async (observer) => ({
-      next: async ({ inputText: text, targetID, targetPlatform }) => {
-        return observer.next({
-          targetID,
-          targetPlatform,
-          output: [{ content: { text, type: "text" } }],
-        });
-      },
-    }));
-
-    const trasformed = await createTransformChain()
-      .forContextOfType<{}>()
+    const trasformedLeaf: AmbiguousLeaf<ErrorContext> = await createTransformChain()
       .pipe<{}>(async (leaf) => ({
         ...leaf,
         next: async (input) => {
           const previousResult = await leaf.next(input);
-          if (!!previousResult) throw new Error("some-error");
-          return undefined;
+
+          switch (previousResult) {
+            case NextResult.SUCCESS:
+              return previousResult;
+
+            case NextResult.FAILURE:
+              throw new Error("some-error");
+          }
         },
       }))
       .pipe(catchError(await createDefaultErrorLeaf()))
-      .transform(baseLeaf);
+      .transform(
+        await createLeafWithObserver(async (observer) => ({
+          next: async ({ inputText: text, targetID, targetPlatform }) => {
+            return observer.next({
+              targetID,
+              targetPlatform,
+              output: [{ content: { text, type: "text" } }],
+            });
+          },
+        }))
+      );
 
     // When
     let valueDeliveredCount = 0;
 
-    trasformed.subscribe({
+    trasformedLeaf.subscribe({
       next: async () => {
         valueDeliveredCount += 1;
-        return {};
+        /** Make sure the pipe transformer gets invoked */
+        return NextResult.FAILURE;
       },
     });
 
-    await trasformed.next({
+    await trasformedLeaf.next({
       targetID,
       targetPlatform,
       inputText: "",

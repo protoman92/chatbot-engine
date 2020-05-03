@@ -1,10 +1,10 @@
 import { deepClone, mapSeries } from "../common/utils";
-import { mergeObservables } from "../stream";
+import { mergeObservables, NextResult } from "../stream";
 import { Branch } from "../type/branch";
 import { DefaultContext, KV } from "../type/common";
 import { LeafEnumeration } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
-import { ContentObservable, ContentObserver, NextResult } from "../type/stream";
+import { ContentObservable, ContentObserver } from "../type/stream";
 
 /**
  * Enumerate a key-value branch object to produce the entire list of enumerated
@@ -67,7 +67,7 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
      * Trigger the production of content for a leaf, but does not guarantee
      * its success.
      */
-    triggerLeafContent: (
+    triggerLeaf: (
       { currentLeaf }: LeafEnumeration<Context>,
       input: Context & DefaultContext
     ) => {
@@ -79,12 +79,18 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
       for (const enumeratedLeaf of enumeratedLeaves) {
         const clonedInput = deepClone(input);
 
-        const nextResult = await selector.triggerLeafContent(
+        const nextResult = await selector.triggerLeaf(
           enumeratedLeaf,
           clonedInput
         );
 
-        if (nextResult !== undefined) return nextResult;
+        switch (nextResult) {
+          case NextResult.SUCCESS:
+            return nextResult;
+
+          case NextResult.FAILURE:
+            break;
+        }
       }
 
       throw new Error("This bot has nothing to say");

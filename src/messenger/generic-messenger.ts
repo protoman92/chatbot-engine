@@ -4,6 +4,7 @@ import {
   getRequestPlatform,
   mapSeries,
 } from "../common/utils";
+import { NextResult } from "../stream";
 import { Transformer } from "../type/common";
 import {
   FacebookMessageProcessor,
@@ -11,15 +12,15 @@ import {
   FacebookRequest,
 } from "../type/facebook";
 import {
-  Messenger,
-  BaseMessageProcessor,
   AmbiguousPlatform,
+  BaseMessageProcessor,
+  Messenger,
 } from "../type/messenger";
 import { AmbiguousRequest, AmbiguousRequestInput } from "../type/request";
 import {
-  TelegramRequest,
   TelegramMessageProcessor,
   TelegramRawRequest,
+  TelegramRequest,
 } from "../type/telegram";
 
 /** Create a generic message processor */
@@ -71,13 +72,15 @@ export async function createMessageProcessor<
   await leafSelector.subscribe({
     next: async ({ targetPlatform: pf, ...restInput }) => {
       if (pf === targetPlatform) {
-        return processor.sendResponse({
+        await processor.sendResponse({
           ...restInput,
           targetPlatform: pf,
         });
+
+        return NextResult.SUCCESS;
       }
 
-      return undefined;
+      return NextResult.FAILURE;
     },
     complete: async () => {},
   });

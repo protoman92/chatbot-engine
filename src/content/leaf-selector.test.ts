@@ -2,6 +2,7 @@ import expectJs from "expect.js";
 import { beforeEach, describe } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES } from "../common/utils";
+import { NextResult } from "../stream";
 import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
 import { createLeafWithObserver } from "./leaf";
 import { createLeafSelector } from "./leaf-selector";
@@ -48,10 +49,10 @@ describe("Leaf selector", () => {
 
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
-    when(selector.triggerLeafContent(anything(), anything())).thenCall(
+    when(selector.triggerLeaf(anything(), anything())).thenCall(
       async ({ currentLeafID }) => {
-        if (currentLeafID === `${validLeafID}`) return {};
-        return undefined;
+        if (currentLeafID === `${validLeafID}`) return NextResult.SUCCESS;
+        return NextResult.FAILURE;
       }
     );
 
@@ -66,9 +67,7 @@ describe("Leaf selector", () => {
     });
 
     // Then
-    verify(selector.triggerLeafContent(anything(), anything())).times(
-      validLeafID + 1
-    );
+    verify(selector.triggerLeaf(anything(), anything())).times(validLeafID + 1);
   });
 
   it("Completing stream should trigger complete from all leaves", async () => {
@@ -112,7 +111,9 @@ describe("Leaf selector", () => {
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     // When
-    await instance(selector).subscribe({ next: async () => ({}) });
+    await instance(selector).subscribe({
+      next: async () => NextResult.SUCCESS,
+    });
 
     // Then
     verify(currentLeaf.subscribe(anything())).times(enumeratedLeaves.length);
@@ -121,7 +122,10 @@ describe("Leaf selector", () => {
   it("Should throw error if no enumerated leaves found", async () => {
     // Setup
     when(selector.enumerateLeaves()).thenResolve([]);
-    when(selector.triggerLeafContent(anything(), anything())).thenResolve({});
+
+    when(selector.triggerLeaf(anything(), anything())).thenResolve(
+      NextResult.SUCCESS
+    );
 
     // When
     try {

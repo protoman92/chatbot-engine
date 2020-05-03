@@ -1,7 +1,7 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { mapSeries } from "../common/utils";
-import { createContentSubject, mergeObservables } from ".";
+import { createContentSubject, mergeObservables, NextResult } from ".";
 
 describe("Content stream and subject", () => {
   it("Should receive updates on subscription", async () => {
@@ -12,8 +12,11 @@ describe("Content stream and subject", () => {
 
     // When
     const subscription = await subject.subscribe({
-      next: async () => (nextCount += 1),
-      complete: async () => (completeCount += 1)
+      next: async () => {
+        nextCount += 1;
+        return NextResult.SUCCESS;
+      },
+      complete: async () => (completeCount += 1),
     });
 
     await subject.next(1);
@@ -34,8 +37,11 @@ describe("Content stream and subject", () => {
 
     // When
     await subject.subscribe({
-      next: async () => (nextCount += 1),
-      complete: async () => (completeCount += 1)
+      next: async () => {
+        nextCount += 1;
+        return NextResult.SUCCESS;
+      },
+      complete: async () => (completeCount += 1),
     });
 
     await subject.complete();
@@ -62,8 +68,11 @@ describe("Content stream and subject", () => {
 
     // When
     const subscription = await mergeObservables(...subjects).subscribe({
-      next: async content => receivedValues.push(content),
-      complete: async () => (completedCount += 1)
+      next: async (content) => {
+        receivedValues.push(content);
+        return NextResult.SUCCESS;
+      },
+      complete: async () => (completedCount += 1),
     });
 
     await mapSeries(subjects, (subject, i) => subject.next(i));

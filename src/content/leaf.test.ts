@@ -3,7 +3,7 @@ import { describe, it } from "mocha";
 import { Omit } from "ts-essentials";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES, isType } from "../common/utils";
-import { bridgeEmission } from "../stream";
+import { bridgeEmission, NextResult } from "../stream";
 import { FacebookLeaf } from "../type/facebook";
 import { AmbiguousLeaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
@@ -71,9 +71,9 @@ describe("Leaf for platforms", () => {
 
   it("Should work for different platforms", async () => {
     // Setup
-    when(fbLeaf.next(anything())).thenResolve({});
+    when(fbLeaf.next(anything())).thenResolve(NextResult.SUCCESS);
     when(fbLeaf.complete!()).thenResolve({});
-    when(tlLeaf.next(anything())).thenResolve({});
+    when(tlLeaf.next(anything())).thenResolve(NextResult.SUCCESS);
     when(tlLeaf.complete!()).thenResolve({});
 
     // When
@@ -98,7 +98,7 @@ describe("Leaf for platforms", () => {
     });
 
     await platformLeaf.complete!();
-    await platformLeaf.subscribe({ next: async () => ({}) });
+    await platformLeaf.subscribe({ next: async () => NextResult.SUCCESS });
 
     // Then
     verify(fbLeaf.next(anything())).once();

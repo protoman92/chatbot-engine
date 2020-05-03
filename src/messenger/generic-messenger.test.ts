@@ -9,6 +9,7 @@ import {
   verify,
   when,
 } from "ts-mockito";
+import { NextResult } from "../stream";
 import { PlatformClient } from "../type/client";
 import {
   FacebookMessageProcessor,
@@ -105,7 +106,7 @@ describe("Generic message processor", () => {
     });
 
     // Then
-    expectJs(nextResult).to.eql(undefined);
+    expectJs(nextResult).to.eql(NextResult.FAILURE);
     expectJs(complete).to.be.ok();
     verify(messageProcessor.sendResponse(anything())).never();
   });

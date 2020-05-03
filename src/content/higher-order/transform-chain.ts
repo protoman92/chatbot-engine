@@ -9,7 +9,7 @@ export function createTransformChain<
   const pipeTransformers: LeafTransformer<any, any>[] = [];
 
   const transformChain: LeafTransformChain<InContext, OutContext> = {
-    pipe: <CO1>(fn: LeafTransformer<OutContext, CO1>) => {
+    pipe: <OutContext1>(fn: LeafTransformer<OutContext, OutContext1>) => {
       pipeTransformers.push(fn);
       return transformChain as any;
     },

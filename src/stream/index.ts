@@ -6,6 +6,16 @@ import {
   ContentSubscription,
 } from "../type/stream";
 
+/**
+ * Represents the result of calling next on an observer. This is usually not
+ * particularly useful, unless we want to detect the first successful next
+ * operation.
+ */
+export enum NextResult {
+  SUCCESS = "SUCCESS",
+  FAILURE = "FAILURE",
+}
+
 /** Create a subscription with custom unsubscribe logic. */
 export function createSubscription(
   unsub: () => Promise<unknown>
@@ -52,11 +62,15 @@ export function createContentSubject<T>(): ContentSubject<T> {
       });
     },
     next: async (contents) => {
-      if (isCompleted) return undefined;
+      if (isCompleted) return NextResult.FAILURE;
 
       return mapSeries(Object.entries(observerMap), ([, obs]) => {
         return obs.next(contents);
-      });
+      }).then((results) =>
+        results.every((result) => result === NextResult.SUCCESS)
+          ? NextResult.SUCCESS
+          : NextResult.FAILURE
+      );
     },
     complete: async () => {
       if (isCompleted) return;
@@ -99,7 +113,7 @@ export function bridgeEmission<I, O>(
         next: async (content) => {
           resolve(content);
           await subscription.unsubscribe();
-          return {};
+          return NextResult.SUCCESS;
         },
       });
 
