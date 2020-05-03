@@ -14,13 +14,13 @@ export interface TelegramRequestInput extends BaseRequestInput {
   readonly targetPlatform: "telegram";
 }
 
-export interface TelegramRequest<C> extends BaseRequest<C> {
+export interface TelegramRequest<Context> extends BaseRequest<Context> {
   readonly targetPlatform: "telegram";
   readonly telegramUser: TelegramUser;
   readonly input: readonly TelegramRequestInput[];
 }
 
-export interface TelegramResponse<C> extends BaseResponse<C> {
+export interface TelegramResponse<Context> extends BaseResponse<Context> {
   readonly targetPlatform: "telegram";
   readonly output: readonly TelegramResponseOutput[];
 }
@@ -182,12 +182,13 @@ declare namespace TelegramRawResponse {
 
 export type TelegramRawResponse = TelegramRawResponse.SendMessage;
 
-/**
- * Represents a Telegram-specific message processor.
- * @template C The context used by the current chatbot.
- */
-export interface TelegramMessageProcessor<C>
-  extends BaseMessageProcessor<C, TelegramRawRequest, TelegramRequest<C>> {}
+/** Represents a Telegram-specific message processor */
+export interface TelegramMessageProcessor<Context>
+  extends BaseMessageProcessor<
+    Context,
+    TelegramRawRequest,
+    TelegramRequest<Context>
+  > {}
 
 export type TelegramDefaultContext = RootDefaultContext & TelegramRequestInput;
 

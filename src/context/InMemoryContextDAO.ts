@@ -2,12 +2,9 @@ import { joinObjects } from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
 import { AmbiguousPlatform } from "../type/messenger";
 
-/**
- * Create an in-memory context DAO store. This is useful for debugging.
- * @template C The context used by the current chatbot.
- */
-export function createInMemoryContextDAO<C>(): ContextDAO<C> {
-  const storage: { [K: string]: C } = {};
+/** Create an in-memory context DAO store. This is useful for debugging */
+export function createInMemoryContextDAO<Context>(): ContextDAO<Context> {
+  const storage: { [K: string]: Context } = {};
 
   function getCacheKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return `${targetPlatform}-${targetID}`;
@@ -16,7 +13,7 @@ export function createInMemoryContextDAO<C>(): ContextDAO<C> {
   return {
     getContext: async (targetID, targetPlatform) => {
       const cacheKey = getCacheKey(targetID, targetPlatform);
-      return storage[cacheKey] || ({} as C);
+      return storage[cacheKey] || ({} as Context);
     },
     appendContext: async (targetID, targetPlatform, context) => {
       const cacheKey = getCacheKey(targetID, targetPlatform);

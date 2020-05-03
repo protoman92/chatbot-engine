@@ -6,9 +6,8 @@ import { AmbiguousLeaf } from "./leaf";
  * may follow this structure:
  *
  * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
- * @template C The context used by the current chatbot.
  */
-export interface Branch<C, Leaves = KV<AmbiguousLeaf<C>>> {
-  readonly subBranches?: KV<Branch<C, KV<AmbiguousLeaf<C>>>>;
+export interface Branch<Context, Leaves = KV<AmbiguousLeaf<Context>>> {
+  readonly subBranches?: KV<Branch<Context, KV<AmbiguousLeaf<Context>>>>;
   readonly leaves?: Leaves;
 }

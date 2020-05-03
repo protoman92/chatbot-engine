@@ -22,18 +22,12 @@ import {
   TelegramRawRequest,
 } from "../type/telegram";
 
-/**
- * Create a generic message processor.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template PResponse The platform-specific response.
- * @template GRequest The platform-specific generic request.
- */
+/** Create a generic message processor */
 export async function createMessageProcessor<
-  C,
-  PRequest,
-  PResponse,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  RawResponse,
+  AmbRequest extends AmbiguousRequest<Context>
 >(
   {
     targetPlatform,
@@ -41,15 +35,19 @@ export async function createMessageProcessor<
     client,
     mapRequest,
     mapResponse,
-  }: BaseMessageProcessor.Configs<C, PRequest, PResponse, GRequest>,
+  }: BaseMessageProcessor.Configs<Context, RawRequest, RawResponse, AmbRequest>,
   ...transformers: readonly Transformer<
-    BaseMessageProcessor<C, PRequest, GRequest>
+    BaseMessageProcessor<Context, RawRequest, AmbRequest>
   >[]
-): Promise<BaseMessageProcessor<C, PRequest, GRequest>> {
+): Promise<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
   const reversedTransformers = [...transformers];
   reversedTransformers.reverse();
 
-  const processor: BaseMessageProcessor<C, PRequest, GRequest> = await compose(
+  const processor: BaseMessageProcessor<
+    Context,
+    RawRequest,
+    AmbRequest
+  > = await compose(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
       receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
@@ -87,23 +85,17 @@ export async function createMessageProcessor<
   return processor;
 }
 
-/**
- * Create a messenger.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template PResponse The platform-specific response.
- * @template GRequest The platform-specific generic request.
- */
+/** Create a messenger */
 export function createMessenger<
-  C,
-  PRequest,
-  PResponse,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  RawResponse,
+  AmbRequest extends AmbiguousRequest<Context>
 >(
-  processor: BaseMessageProcessor<C, PRequest, GRequest>
-): Messenger<PRequest, PResponse> {
+  processor: BaseMessageProcessor<Context, RawRequest, AmbRequest>
+): Messenger<RawRequest, RawResponse> {
   return {
-    processPlatformRequest: async (platformReq) => {
+    processRawRequest: async (platformReq) => {
       const genericReq = await processor.generalizeRequest(platformReq);
       return mapSeries(genericReq, (req) => processor.receiveRequest(req));
     },
@@ -113,15 +105,14 @@ export function createMessenger<
 /**
  * Create a cross-platform batch messenger that delegates to the appropriate
  * platform-specific message processor when a request arrives.
- * @template C The context used by the current chatbot.
  */
-export function createCrossPlatformMessenger<C>(
+export function createCrossPlatformMessenger<Context>(
   {
     facebook,
     telegram,
   }: Readonly<{
-    facebook?: FacebookMessageProcessor<C>;
-    telegram?: TelegramMessageProcessor<C>;
+    facebook?: FacebookMessageProcessor<Context>;
+    telegram?: TelegramMessageProcessor<Context>;
   }>,
   getPlatform: (platformReq: unknown) => AmbiguousPlatform = getRequestPlatform
 ): Messenger<unknown, unknown> {
@@ -132,10 +123,10 @@ export function createCrossPlatformMessenger<C>(
       telegramCallback,
     }: Readonly<{
       facebookCallback: (
-        processor: FacebookMessageProcessor<C>
+        processor: FacebookMessageProcessor<Context>
       ) => Promise<FBR>;
       telegramCallback: (
-        processor: TelegramMessageProcessor<C>
+        processor: TelegramMessageProcessor<Context>
       ) => Promise<TLR>;
     }>
   ) {
@@ -152,7 +143,7 @@ export function createCrossPlatformMessenger<C>(
     throw genericError(`Unsupported platform ${platform}`);
   }
 
-  return createMessenger<C, unknown, unknown, AmbiguousRequest<C>>({
+  return createMessenger<Context, unknown, unknown, AmbiguousRequest<Context>>({
     generalizeRequest: async (platformReq) => {
       const targetPlatform = getPlatform(platformReq);
 
@@ -166,9 +157,9 @@ export function createCrossPlatformMessenger<C>(
     receiveRequest: async (request) => {
       return switchPlatform(request.targetPlatform, {
         facebookCallback: (processor) =>
-          processor.receiveRequest(request as FacebookRequest<C>),
+          processor.receiveRequest(request as FacebookRequest<Context>),
         telegramCallback: (processor) =>
-          processor.receiveRequest(request as TelegramRequest<C>),
+          processor.receiveRequest(request as TelegramRequest<Context>),
       });
     },
     sendResponse: async (response) => {

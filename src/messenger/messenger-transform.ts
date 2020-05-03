@@ -9,17 +9,14 @@ import { AmbiguousRequest } from "../type/request";
  * Save the context every time a message group is sent to a target ID. If
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template GRequest The platform-specific generic request.
  */
 export function saveContextOnSend<
-  C,
-  PRequest,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  AmbRequest extends AmbiguousRequest<Context>
 >(
-  contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">
-): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">
+): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
   return async (processor) => {
     return {
       ...processor,
@@ -44,17 +41,14 @@ export function saveContextOnSend<
 /**
  * Inject the relevant context for a target every time a message group is
  * processed.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template GRequest The platform-specific generic request.
  */
 export function injectContextOnReceive<
-  C,
-  PRequest,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  AmbRequest extends AmbiguousRequest<Context>
 >(
-  contextDAO: Pick<ContextDAO<C>, "getContext">
-): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  contextDAO: Pick<ContextDAO<Context>, "getContext">
+): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
   return async (processor) => {
     return {
       ...processor,
@@ -72,21 +66,17 @@ export function injectContextOnReceive<
  * Save user in backend if there is no target ID in context. This usually
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template GRequest The platform-specific generic request.
- * @template PUser The platform user type.
  */
 export function saveUserForTargetID<
-  C,
-  PRequest,
-  GRequest extends AmbiguousRequest<C>,
-  Messenger extends BaseMessageProcessor<C, PRequest, GRequest>,
-  PUser
+  Context,
+  RawRequest,
+  AmbRequest extends AmbiguousRequest<Context>,
+  Messenger extends BaseMessageProcessor<Context, RawRequest, AmbRequest>,
+  RawUser
 >(
-  contextDAO: ContextDAO<C>,
-  getUser: (targetID: string) => Promise<PUser>,
-  saveUser: (platformUser: PUser) => Promise<unknown>
+  contextDAO: ContextDAO<Context>,
+  getUser: (targetID: string) => Promise<RawUser>,
+  saveUser: (platformUser: RawUser) => Promise<unknown>
 ): Transformer<Messenger> {
   return async (processor) => {
     return {
@@ -116,19 +106,15 @@ export function saveUserForTargetID<
 /**
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template PResponse The platform-specific response.
- * @template GRequest The platform-specific generic request.
  */
 export function setTypingIndicator<
-  C,
-  PRequest,
-  PResponse,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  RawResponse,
+  AmbRequest extends AmbiguousRequest<Context>
 >(
-  client: PlatformClient<PResponse>
-): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  client: PlatformClient<RawResponse>
+): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
   return async (processor) => {
     return {
       ...processor,
@@ -143,22 +129,16 @@ export function setTypingIndicator<
   };
 }
 
-/**
- * Create default transformers that all message processors should use.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template PResponse The platform-specific response.
- * @template GRequest The platform-specific generic request.
- */
+/** Create default transformers that all message processors should use */
 export function transformMessageProcessorsDefault<
-  C,
-  PRequest,
-  PResponse,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  RawResponse,
+  AmbRequest extends AmbiguousRequest<Context>
 >(
-  contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">,
-  client: PlatformClient<PResponse>
-): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">,
+  client: PlatformClient<RawResponse>
+): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
   return (processor) =>
     compose(
       processor,

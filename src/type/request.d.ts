@@ -9,13 +9,15 @@ export interface BaseRequestInput {
   readonly inputCoordinate: Coordinates;
 }
 
-export interface BaseRequest<C> {
+export interface BaseRequest<Context> {
   readonly targetID: string;
   readonly targetPlatform: AmbiguousPlatform;
-  readonly oldContext: C;
+  readonly oldContext: Context;
   readonly input: readonly AmbiguousRequestInput[];
 }
 
 export type AmbiguousRequestInput = FacebookRequestInput | TelegramRequestInput;
 
-export type AmbiguousRequest<C> = FacebookRequest<C> | TelegramRequest<C>;
+export type AmbiguousRequest<Context> =
+  | FacebookRequest<Context>
+  | TelegramRequest<Context>;

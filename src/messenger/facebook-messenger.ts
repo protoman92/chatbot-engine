@@ -13,14 +13,11 @@ import { AmbiguousLeaf } from "../type/leaf";
 import { BaseResponseOutput } from "../type/visual-content";
 import { createMessageProcessor } from "./generic-messenger";
 
-/**
- * Map platform request to generic request for generic processing.
- * @template C The context used by the current chatbot.
- */
-function createFacebookRequest<C>(
+/** Map platform request to generic request for generic processing */
+function createFacebookRequest<Context>(
   webhook: FacebookRawRequest,
   targetPlatform: "facebook"
-): readonly FacebookRequest<C>[] {
+): readonly FacebookRequest<Context>[] {
   const { object, entry } = webhook;
 
   /** Group requests based on target ID. */
@@ -40,7 +37,7 @@ function createFacebookRequest<C>(
   function processRequest(
     request: FacebookRawRequest.Entry.Messaging,
     targetPlatform: "facebook"
-  ): FacebookRequest<C>["input"] {
+  ): FacebookRequest<Context>["input"] {
     if (
       isType<FacebookRawRequest.Entry.Messaging.Postback>(request, "postback")
     ) {
@@ -165,14 +162,11 @@ function createFacebookRequest<C>(
   throw facebookError(`Invalid webhook: ${JSON.stringify(webhook)}`);
 }
 
-/**
- * Create a Facebook response from multiple generic responses.
- * @template C The context used by the current chatbot.
- */
-function createFacebookResponse<C>({
+/** Create a Facebook response from multiple generic responses */
+function createFacebookResponse<Context>({
   targetID,
   output,
-}: FacebookResponse<C>): readonly FacebookRawResponse[] {
+}: FacebookResponse<Context>): readonly FacebookRawResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
@@ -323,7 +317,7 @@ function createFacebookResponse<C>({
   }
 
   function createResponse(
-    content: FacebookResponse<C>["output"][number]["content"]
+    content: FacebookResponse<Context>["output"][number]["content"]
   ): FacebookRawResponse.Message {
     switch (content.type) {
       case "button":
@@ -367,7 +361,7 @@ function createFacebookResponse<C>({
 
   function createPlatformResponse(
     targetID: string,
-    { content, quickReplies = [] }: FacebookResponse<C>["output"][number]
+    { content, quickReplies = [] }: FacebookResponse<Context>["output"][number]
   ): FacebookRawResponse {
     const fbQuickReplies = quickReplies.map((qr) => createQuickReply(qr));
     const fbResponse = createResponse(content);
@@ -384,15 +378,12 @@ function createFacebookResponse<C>({
   return output.map((o) => createPlatformResponse(targetID, o));
 }
 
-/**
- * Create a Facebook message processor.
- * @template C The context used by the current chatbot.
- */
-export async function createFacebookMessageProcessor<C>(
-  leafSelector: AmbiguousLeaf<C>,
+/** Create a Facebook message processor */
+export async function createFacebookMessageProcessor<Context>(
+  leafSelector: AmbiguousLeaf<Context>,
   client: FacebookClient,
-  ...transformers: readonly Transformer<FacebookMessageProcessor<C>>[]
-): Promise<FacebookMessageProcessor<C>> {
+  ...transformers: readonly Transformer<FacebookMessageProcessor<Context>>[]
+): Promise<FacebookMessageProcessor<Context>> {
   return createMessageProcessor(
     {
       leafSelector,
@@ -406,7 +397,7 @@ export async function createFacebookMessageProcessor<C>(
         throw facebookError(`Invalid webhook ${JSON.stringify(req)}`);
       },
       mapResponse: async (res) => {
-        return createFacebookResponse(res as FacebookResponse<C>);
+        return createFacebookResponse(res as FacebookResponse<Context>);
       },
     },
     ...transformers

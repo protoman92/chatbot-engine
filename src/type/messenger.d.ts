@@ -7,28 +7,24 @@ import { AmbiguousResponse } from "./response";
 export type AmbiguousPlatform = "facebook" | "telegram";
 
 declare namespace BaseMessageProcessor {
-  /**
-   * Configurations to set up a generic messenger.
-   * @template C The context used by the current chatbot.
-   * @template PRequest The platform-specific request.
-   * @template PResponse The platform-specific response.
-   * @template GRequest The platform-specific generic request.
-   */
+  /** Configurations to set up a generic messenger */
   interface Configs<
-    C,
-    PRequest,
-    PResponse,
-    GRequest extends AmbiguousRequest<C>
+    Context,
+    RawRequest,
+    RawResponse,
+    AmbRequest extends AmbiguousRequest<Context>
   > {
     readonly targetPlatform: AmbiguousPlatform;
-    readonly leafSelector: AmbiguousLeaf<C>;
-    readonly client: PlatformClient<PResponse>;
+    readonly leafSelector: AmbiguousLeaf<Context>;
+    readonly client: PlatformClient<RawResponse>;
     readonly mapRequest: BaseMessageProcessor<
-      C,
-      PRequest,
-      GRequest
+      Context,
+      RawRequest,
+      AmbRequest
     >["generalizeRequest"];
-    mapResponse: (res: AmbiguousResponse<C>) => Promise<readonly PResponse[]>;
+    mapResponse: (
+      res: AmbiguousResponse<Context>
+    ) => Promise<readonly RawResponse[]>;
   }
 }
 
@@ -40,33 +36,28 @@ declare namespace BaseMessageProcessor {
  *
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
- * @template C The context used by the current chatbot.
- * @template PRequest The platform-specific request.
- * @template GRequest The platform-specific generic request.
  */
 export interface BaseMessageProcessor<
-  C,
-  PRequest,
-  GRequest extends AmbiguousRequest<C>
+  Context,
+  RawRequest,
+  AmbRequest extends AmbiguousRequest<Context>
 > {
-  /** Generalize a platform request into a generic request. */
-  generalizeRequest(request: PRequest): Promise<readonly GRequest[]>;
+  /** Generalize a raw request into a generic request. */
+  generalizeRequest(request: RawRequest): Promise<readonly AmbRequest[]>;
 
   /** Receive an incoming generic request. */
-  receiveRequest(request: GRequest): Promise<{}>;
+  receiveRequest(request: AmbRequest): Promise<{}>;
 
   /** Send an outgoing platform response. */
-  sendResponse(response: AmbiguousResponse<C>): Promise<{}>;
+  sendResponse(response: AmbiguousResponse<Context>): Promise<{}>;
 }
 
 /**
  * Represents a messenger that deals with a platform request end-to-end, from
  * handling data to sending response. Note that each generic messenger should
  * have a generic messenger that handles requests one-by-one.
- * @template PRequest The platform-specific request.
- * @template PResponse The platform-specific response.
  */
-export interface Messenger<PRequest, PResponse> {
+export interface Messenger<RawRequest, RawResponse> {
   /** Process a platform request from end-to-end. */
-  processPlatformRequest(req: PRequest): Promise<unknown>;
+  processRawRequest(req: RawRequest): Promise<unknown>;
 }

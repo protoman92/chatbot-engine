@@ -10,16 +10,15 @@ import { ContentObservable, ContentObserver, NextResult } from "../type/stream";
  * Enumerate a key-value branch object to produce the entire list of enumerated
  * leaves.  Each enumerated leaf will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
- * @template C The context used by the current chatbot.
  */
-export function enumerateLeaves<C>(
-  branches: KV<Branch<C>>
-): readonly LeafEnumeration<C>[] {
+export function enumerateLeaves<Context>(
+  branches: KV<Branch<Context>>
+): readonly LeafEnumeration<Context>[] {
   function enumerate(
-    allBranches: KV<Branch<C>>,
+    allBranches: KV<Branch<Context>>,
     prefixPaths?: readonly string[]
-  ): readonly LeafEnumeration<C>[] {
-    let inputs: LeafEnumeration<C>[] = [];
+  ): readonly LeafEnumeration<Context>[] {
+    let inputs: LeafEnumeration<Context>[] = [];
     const branchEntries = Object.entries(allBranches);
 
     for (const [branchID, parentBranch] of branchEntries) {
@@ -56,11 +55,10 @@ export function enumerateLeaves<C>(
  * Create a leaf selector. A leaf selector is a leaf that chooses the most
  * appropriate leaf out of all available leaves, based on the user's input.
  * Said leaf's content will be delivered to the user.
- * @template C The context used by the current chatbot.
  */
-export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
+export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
   const enumeratedLeaves = enumerateLeaves(allBranches);
-  let outputObservable: ContentObservable<AmbiguousResponse<C>>;
+  let outputObservable: ContentObservable<AmbiguousResponse<Context>>;
 
   const selector = {
     enumerateLeaves: async () => enumeratedLeaves,
@@ -70,12 +68,12 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
      * its success.
      */
     triggerLeafContent: (
-      { currentLeaf }: LeafEnumeration<C>,
-      input: C & DefaultContext
+      { currentLeaf }: LeafEnumeration<Context>,
+      input: Context & DefaultContext
     ) => {
       return currentLeaf.next(input);
     },
-    next: async (input: C & DefaultContext): Promise<NextResult> => {
+    next: async (input: Context & DefaultContext): Promise<NextResult> => {
       const enumeratedLeaves = await selector.enumerateLeaves();
 
       for (const enumeratedLeaf of enumeratedLeaves) {
@@ -98,7 +96,9 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
         return !!currentLeaf.complete && currentLeaf.complete();
       });
     },
-    subscribe: async (observer: ContentObserver<AmbiguousResponse<C>>) => {
+    subscribe: async (
+      observer: ContentObserver<AmbiguousResponse<Context>>
+    ) => {
       if (!outputObservable) {
         const enumeratedLeaves = await selector.enumerateLeaves();
 

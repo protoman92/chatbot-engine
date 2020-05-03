@@ -3,10 +3,10 @@ import { AmbiguousPlatform } from "./messenger";
 import { TelegramResponse } from "./telegram";
 import { BaseResponseOutput } from "./visual-content";
 
-export interface BaseResponse<C> {
+export interface BaseResponse<Context> {
   readonly targetID: string;
   readonly targetPlatform: AmbiguousPlatform;
-  readonly additionalContext?: Partial<C>;
+  readonly additionalContext?: Partial<Context>;
   readonly output: readonly BaseResponseOutput[];
 }
 
@@ -14,9 +14,8 @@ export interface BaseResponse<C> {
  * A generic outgoing response. We can specify additional context to add to
  * the existing context in persistence (emphasis on addition, not replacement).
  * This is to prevent stale old context replacing latest one.
- * @template C The context used by the current chatbot.
  */
-export type AmbiguousResponse<C> =
-  | BaseResponse<C>
-  | FacebookResponse<C>
-  | TelegramResponse<C>;
+export type AmbiguousResponse<Context> =
+  | BaseResponse<Context>
+  | FacebookResponse<Context>
+  | TelegramResponse<Context>;

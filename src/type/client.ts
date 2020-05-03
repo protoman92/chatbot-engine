@@ -28,11 +28,10 @@ export interface HTTPClient {
  * Represents an object that handles the client to/from the relevant
  * platform. For example, a Facebook platform client should be able to
  * handle all methods specified here.
- * @template PResponse The platform-specific response.
  */
-export interface PlatformClient<PResponse> {
+export interface PlatformClient<RawResponse> {
   /** Send a response to the related platform. */
-  sendResponse(data: PResponse): Promise<unknown>;
+  sendResponse(data: RawResponse): Promise<unknown>;
 
   /** Toggle typing indicator. */
   setTypingIndicator(targetID: string, enabled: boolean): Promise<unknown>;

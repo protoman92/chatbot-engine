@@ -3,7 +3,7 @@ import {
   ContentObservable,
   ContentObserver,
   ContentSubject,
-  ContentSubscription
+  ContentSubscription,
 } from "../type/stream";
 
 /** Create a subscription with custom unsubscribe logic. */
@@ -18,7 +18,7 @@ export function createSubscription(
         await unsub();
         isUnsubscribed = true;
       }
-    }
+    },
   };
 }
 
@@ -30,22 +30,18 @@ export function createCompositeSubscription(
   ...subs: ContentSubscription[]
 ): ContentSubscription {
   return createSubscription(() => {
-    return mapSeries(subs, sub => sub.unsubscribe());
+    return mapSeries(subs, (sub) => sub.unsubscribe());
   });
 }
 
-/**
- * Create a content subject that broadcasts changes to registered observers.
- * @template T The type of content being observed.
- * @return A content subject instance.
- */
+/** Create a content subject that broadcasts changes to registered observers */
 export function createContentSubject<T>(): ContentSubject<T> {
   const observerMap: { [K: number]: ContentObserver<T> } = {};
   let currentID = 0;
   let isCompleted = false;
 
   return {
-    subscribe: async observer => {
+    subscribe: async (observer) => {
       const observerID = currentID;
       currentID += 1;
       observerMap[observerID] = observer;
@@ -55,7 +51,7 @@ export function createContentSubject<T>(): ContentSubject<T> {
         return !!observer.complete && observer.complete();
       });
     },
-    next: async contents => {
+    next: async (contents) => {
       if (isCompleted) return undefined;
 
       return mapSeries(Object.entries(observerMap), ([, obs]) => {
@@ -71,45 +67,40 @@ export function createContentSubject<T>(): ContentSubject<T> {
       );
 
       isCompleted = true;
-    }
+    },
   };
 }
 
-/**
- * Merge the emissions of an Array of observables.
- * @template T The type of content being observed.
- */
+/** Merge the emissions of an Array of observables */
 export function mergeObservables<T>(
   ...observables: ContentObservable<T>[]
 ): ContentObservable<T> {
   return {
-    subscribe: async observer => {
-      const subscriptions = await mapSeries(observables, observable => {
+    subscribe: async (observer) => {
+      const subscriptions = await mapSeries(observables, (observable) => {
         return observable.subscribe(observer);
       });
 
       return createCompositeSubscription(...subscriptions);
-    }
+    },
   };
 }
 
 /**
  * Bridge input-output to allow async-await. This returns a higher-order
  * function that can accept multiple inputs.
- * @template I The input type.
- * @template O The output type.
  */
 export function bridgeEmission<I, O>(
   source: ContentObserver<I> & ContentObservable<O>
 ): (input: I) => Promise<O> {
-  return input => {
-    return new Promise(async resolve => {
+  return (input) => {
+    return new Promise(async (resolve) => {
       const subscription = await source.subscribe({
-        next: async content => {
+        next: async (content) => {
           resolve(content);
           await subscription.unsubscribe();
           return {};
-        }
+        },
       });
 
       source.next(input);

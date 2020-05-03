@@ -34,21 +34,18 @@ export function extractInputCommand(
   return [command.trim(), text.trim()];
 }
 
-/**
- * Map platform request to generic request for generic processing.
- * @template C The context used by the current chatbot.
- */
-function createTelegramRequest<C>(
+/** Map platform request to generic request for generic processing */
+function createTelegramRequest<Context>(
   webhook: TelegramRawRequest,
   { username }: TelegramBot
-): readonly TelegramRequest<C>[] {
+): readonly TelegramRequest<Context>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage },
   }: TelegramRawRequest.Message):
     | [
         TelegramUser,
         TelegramRawRequest.Message.Message.Chat.Chat,
-        TelegramRequest<C>["input"]
+        TelegramRequest<Context>["input"]
       ]
     | undefined {
     if (isType<TelegramRawRequest.Message.Message.Text>(restMessage, "text")) {
@@ -131,7 +128,7 @@ function createTelegramRequest<C>(
     | [
         TelegramUser,
         TelegramRawRequest.Message.Message.Chat.Chat | undefined,
-        TelegramRequest<C>["input"]
+        TelegramRequest<Context>["input"]
       ]
     | undefined {
     return [
@@ -157,7 +154,7 @@ function createTelegramRequest<C>(
     | [
         TelegramUser,
         TelegramRawRequest.Message.Message.Chat.Chat | undefined,
-        TelegramRequest<C>["input"]
+        TelegramRequest<Context>["input"]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
@@ -188,19 +185,16 @@ function createTelegramRequest<C>(
       telegramUser,
       input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
-      oldContext: {} as C,
+      oldContext: {} as Context,
     },
   ];
 }
 
-/**
- * Create a Telegram response from multiple generic responses.
- * @template C The context used by the current chatbot.
- */
-function createTelegramResponse<C>({
+/** Create a Telegram response from multiple generic responses */
+function createTelegramResponse<Context>({
   targetID,
   output,
-}: TelegramResponse<C>): readonly TelegramRawResponse[] {
+}: TelegramResponse<Context>): readonly TelegramRawResponse[] {
   function createTextResponse(
     targetID: string,
     { text }: BaseResponseOutput.MainContent.Text
@@ -296,7 +290,7 @@ function createTelegramResponse<C>({
 
   function createPlatformResponse(
     targetID: string,
-    { quickReplies, content }: TelegramResponse<C>["output"][number]
+    { quickReplies, content }: TelegramResponse<Context>["output"][number]
   ): TelegramRawResponse {
     const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
 
@@ -315,15 +309,12 @@ function createTelegramResponse<C>({
   return output.map((o) => createPlatformResponse(targetID, o));
 }
 
-/**
- * Create a Telegram message processor.
- * @template C The context used by the current chatbot.
- */
-export async function createTelegramMessageProcessor<C>(
-  leafSelector: AmbiguousLeaf<C>,
+/** Create a Telegram message processor */
+export async function createTelegramMessageProcessor<Context>(
+  leafSelector: AmbiguousLeaf<Context>,
   client: TelegramClient,
-  ...transformers: readonly Transformer<TelegramMessageProcessor<C>>[]
-): Promise<TelegramMessageProcessor<C>> {
+  ...transformers: readonly Transformer<TelegramMessageProcessor<Context>>[]
+): Promise<TelegramMessageProcessor<Context>> {
   await client.setWebhook();
   const bot = await client.getCurrentBot();
 
@@ -334,7 +325,7 @@ export async function createTelegramMessageProcessor<C>(
       targetPlatform: "telegram",
       mapRequest: async (req) => createTelegramRequest(req, bot),
       mapResponse: async (res) => {
-        return createTelegramResponse(res as TelegramResponse<C>);
+        return createTelegramResponse(res as TelegramResponse<Context>);
       },
     },
     ...transformers

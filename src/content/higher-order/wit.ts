@@ -5,11 +5,10 @@ import { WitClient, WitContext } from "../../type/wit";
 /**
  * Retry a failing message with wit, by running the input text through wit
  * engine and injecting entities into leaf input.
- * @template C The original input type.
  */
-export function retryWithWit<C>(
+export function retryWithWit<Context>(
   comm: WitClient
-): LeafTransformer<C & WitContext, C> {
+): LeafTransformer<Context & WitContext, Context> {
   return async (leaf) => ({
     ...leaf,
     next: async (input) => {

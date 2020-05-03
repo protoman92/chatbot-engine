@@ -11,14 +11,13 @@ import { TelegramLeafObserver } from "../type/telegram";
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
  * contents.
- * @template C The context used by the current chatbot.
  */
-export async function createLeafWithObserver<C = {}>(
+export async function createLeafWithObserver<Context = {}>(
   fn: (
-    observer: NextContentObserver<AmbiguousResponse<C>>
-  ) => Promise<Omit<AmbiguousLeaf<C>, "subscribe">>
-): Promise<AmbiguousLeaf<C>> {
-  const subject = createContentSubject<AmbiguousResponse<C>>();
+    observer: NextContentObserver<AmbiguousResponse<Context>>
+  ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
+): Promise<AmbiguousLeaf<Context>> {
+  const subject = createContentSubject<AmbiguousResponse<Context>>();
   const baseLeaf = await fn(subject);
 
   return {
@@ -34,11 +33,10 @@ export async function createLeafWithObserver<C = {}>(
 /**
  * Create an error leaf that will be used to deliver error messages if no
  * other leaf can handle the error.
- * @template C The context used by the current chatbot.
  */
-export function createDefaultErrorLeaf<C = {}>(
+export function createDefaultErrorLeaf<Context = {}>(
   fn?: (e: Error) => Promise<unknown>
-): Promise<AmbiguousLeaf<C & ErrorContext>> {
+): Promise<AmbiguousLeaf<Context & ErrorContext>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ error, ...restInput }) => {
       !!fn && (await fn(error));

@@ -2,10 +2,10 @@ import { DynamoDB } from "aws-sdk";
 import { requireAllTruthy } from "../common/utils";
 import { ContextDAO, AmbiguousPlatform } from "../type";
 
-export function createDynamoDBContextDAO<C>(
+export function createDynamoDBContextDAO<Context>(
   ddb: DynamoDB,
   tableName: string
-): ContextDAO<C> {
+): ContextDAO<Context> {
   function getTableKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return {
       targetID: { S: targetID },
@@ -13,7 +13,7 @@ export function createDynamoDBContextDAO<C>(
     };
   }
 
-  function getUpdateExpression(context: Partial<C>) {
+  function getUpdateExpression(context: Partial<Context>) {
     const contextEntries = Object.entries(context);
 
     const attributes = contextEntries.map(([key, value]) => [
@@ -57,7 +57,7 @@ export function createDynamoDBContextDAO<C>(
                 ...acc,
                 [key]: Object.values(value)[0],
               }),
-              {} as C
+              {} as Context
             );
 
             resolve(resolved);
@@ -104,7 +104,7 @@ export function createDynamoDBContextDAO<C>(
   };
 }
 
-export default function<C>() {
+export default function<Context>() {
   const {
     DYNAMO_DB_ENDPOINT = "",
     DYNAMO_DB_REGION = "",
@@ -123,6 +123,9 @@ export default function<C>() {
     region: DYNAMO_DB_REGION,
   });
 
-  const contextDAO = createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME);
+  const contextDAO = createDynamoDBContextDAO<Context>(
+    ddb,
+    DYNAMO_DB_TABLE_NAME
+  );
   return { contextDAO, dynamoDBClient: ddb };
 }

@@ -225,7 +225,7 @@ describe("Cross platform messenger", () => {
         () => targetPlatform
       );
 
-      await crossMessenger.processPlatformRequest({});
+      await crossMessenger.processRawRequest({});
 
       // Then
       verify(processors[targetPlatform]!.generalizeRequest(anything())).once();
@@ -239,13 +239,13 @@ describe("Cross platform messenger", () => {
 
     // When && Then: Facebook
     try {
-      await platformMessenger.processPlatformRequest({ object: "", entry: {} });
+      await platformMessenger.processRawRequest({ object: "", entry: {} });
       throw new Error("Never should have come here");
     } catch (e) {}
 
     // When && Then: Telegram
     try {
-      await platformMessenger.processPlatformRequest({ update_id: "" });
+      await platformMessenger.processRawRequest({ update_id: "" });
       throw new Error("Never should have come here");
     } catch (e) {}
   });

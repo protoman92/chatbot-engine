@@ -8,9 +8,9 @@ import {
 import { ContextDAO } from "../type/context-dao";
 import { AmbiguousPlatform } from "../type/messenger";
 
-export function createRedisContextDAO<C>(
+export function createRedisContextDAO<Context>(
   redis: Pick<RedisClient, "get" | "set" | "del">
-): ContextDAO<C> {
+): ContextDAO<Context> {
   function getCacheKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return `${targetPlatform}-${targetID}`;
   }
@@ -19,7 +19,7 @@ export function createRedisContextDAO<C>(
   const set = promisify2(redis.set).bind(redis);
   const del = promisify1(redis.del).bind(redis);
 
-  const contextDAO: ContextDAO<C> = {
+  const contextDAO: ContextDAO<Context> = {
     getContext: async (targetID, targetPlatform) => {
       const context = await get(getCacheKey(targetID, targetPlatform));
       return JSON.parse(context);
@@ -41,7 +41,7 @@ export function createRedisContextDAO<C>(
   return contextDAO;
 }
 
-export default function<C>() {
+export default function<Context>() {
   const { REDIS_HOST = "", REDIS_PORT = "", REDIS_URI = "" } = process.env;
   requireAllTruthy({ REDIS_HOST, REDIS_PORT, REDIS_URI });
 
@@ -51,6 +51,6 @@ export default function<C>() {
     url: REDIS_URI,
   });
 
-  const contextDAO = createRedisContextDAO<C>(redisClient);
+  const contextDAO = createRedisContextDAO<Context>(redisClient);
   return { contextDAO, redisClient };
 }

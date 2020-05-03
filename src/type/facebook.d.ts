@@ -12,12 +12,12 @@ export interface FacebookRequestInput extends BaseRequestInput {
   readonly stickerID: string;
 }
 
-export interface FacebookRequest<C> extends BaseRequest<C> {
+export interface FacebookRequest<Context> extends BaseRequest<Context> {
   readonly targetPlatform: "facebook";
   readonly input: readonly FacebookRequestInput[];
 }
 
-export interface FacebookResponse<C> extends BaseResponse<C> {
+export interface FacebookResponse<Context> extends BaseResponse<Context> {
   readonly targetPlatform: "facebook";
   readonly output: readonly FacebookResponseOutput[];
 }
@@ -237,12 +237,13 @@ export type FacebookRawResponse = Omit<FacebookRawResponse.Message, "message"> &
     } & FacebookRawResponse.Message["message"];
   }>;
 
-/**
- * Represents a Facebook-specific messenger.
- * @template C The context used by the current chatbot.
- */
-export interface FacebookMessageProcessor<C>
-  extends BaseMessageProcessor<C, FacebookRawRequest, FacebookRequest<C>> {}
+/** Represents a Facebook-specific messenger */
+export interface FacebookMessageProcessor<Context>
+  extends BaseMessageProcessor<
+    Context,
+    FacebookRawRequest,
+    FacebookRequest<Context>
+  > {}
 
 export type FacebookDefaultContext = RootDefaultContext & FacebookRequestInput;
 
@@ -251,7 +252,7 @@ export type FacebookLeafObserver<Context> = BaseLeafObserver<
   FacebookDefaultContext
 >;
 
-export type FacebookLeaf<C> = BaseLeaf<C, FacebookDefaultContext>;
+export type FacebookLeaf<Context> = BaseLeaf<Context, FacebookDefaultContext>;
 
 /** Represents a Facebook user. */
 export interface FacebookUser {

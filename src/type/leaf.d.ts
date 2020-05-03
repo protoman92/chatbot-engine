@@ -7,10 +7,10 @@ import { ContentObservable, ContentObserver } from "./stream";
  * Represents a collection of leaf information that is derived from
  * enumerating all possibilities in a key-value branch object.
  */
-export interface LeafEnumeration<C> {
-  readonly parentBranch: Branch<C>;
+export interface LeafEnumeration<Context> {
+  readonly parentBranch: Branch<Context>;
   readonly prefixLeafPaths: readonly string[];
-  readonly currentLeaf: AmbiguousLeaf<C>;
+  readonly currentLeaf: AmbiguousLeaf<Context>;
   readonly currentLeafID: string;
 }
 
@@ -42,20 +42,22 @@ export interface LeafTransformChain<InContext, OutContext> {
   ): LeafTransformChain<InContext, OutContext1>;
 
   /** This is only used for debugging, and serves no production purposes. */
-  forContextOfType<C>(ctx?: C): LeafTransformChain<C, C>;
+  forContextOfType<Context>(
+    ctx?: Context
+  ): LeafTransformChain<Context, Context>;
 }
 
-export interface BaseLeafObserver<C, Extra>
-  extends ContentObserver<C & Extra> {}
+export interface BaseLeafObserver<Context, ExtraContext>
+  extends ContentObserver<Context & ExtraContext> {}
 
-export interface BaseLeafObservable<C>
-  extends ContentObservable<AmbiguousResponse<C>> {}
+export interface BaseLeafObservable<Context>
+  extends ContentObservable<AmbiguousResponse<Context>> {}
 
-export interface AmbiguousLeafObserver<C>
-  extends BaseLeafObserver<C, DefaultContext> {}
+export interface AmbiguousLeafObserver<Context>
+  extends BaseLeafObserver<Context, DefaultContext> {}
 
-export interface BaseLeaf<Context, Extra>
-  extends BaseLeafObserver<Context, Extra>,
+export interface BaseLeaf<Context, ExtraContext>
+  extends BaseLeafObserver<Context, ExtraContext>,
     BaseLeafObservable<Context> {}
 
 /**
@@ -65,4 +67,5 @@ export interface BaseLeaf<Context, Extra>
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export interface AmbiguousLeaf<C> extends BaseLeaf<C, DefaultContext> {}
+export interface AmbiguousLeaf<Context>
+  extends BaseLeaf<Context, DefaultContext> {}
