@@ -1,5 +1,5 @@
 import { isNullOrUndefined } from "util";
-import { Leaf } from "../../type/leaf";
+import { LeafTransformer } from "../../type/leaf";
 import { WitClient, WitContext } from "../../type/wit";
 
 /**
@@ -9,7 +9,7 @@ import { WitClient, WitContext } from "../../type/wit";
  */
 export function retryWithWit<C>(
   comm: WitClient
-): Leaf.Transformer<C & WitContext, C> {
+): LeafTransformer<C & WitContext, C> {
   return async (leaf) => ({
     ...leaf,
     next: async (input) => {

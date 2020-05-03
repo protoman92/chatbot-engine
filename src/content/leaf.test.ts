@@ -5,7 +5,7 @@ import { anything, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES, isType } from "../common/utils";
 import { bridgeEmission } from "../stream";
 import { FacebookLeaf } from "../type/facebook";
-import { Leaf } from "../type/leaf";
+import { AmbiguousLeaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
 import { BaseResponseOutput } from "../type/visual-content";
 import {
@@ -48,7 +48,7 @@ describe("Default error leaf", () => {
 describe("Leaf for platforms", () => {
   let fbLeaf: Omit<FacebookLeaf<{}>, "subscribe">;
   let tlLeaf: Omit<TelegramLeaf<{}>, "subscribe">;
-  let platformLeaf: Leaf<{}>;
+  let platformLeaf: AmbiguousLeaf<{}>;
 
   beforeEach(async () => {
     fbLeaf = spy<Omit<FacebookLeaf<{}>, "subscribe">>({

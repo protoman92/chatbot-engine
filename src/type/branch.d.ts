@@ -1,5 +1,5 @@
 import { DefaultContext, KV } from "./common";
-import { Leaf } from "./leaf";
+import { AmbiguousLeaf } from "./leaf";
 
 /**
  * A branch contains zero or more leaves, and zero of more branches. A branch
@@ -8,7 +8,7 @@ import { Leaf } from "./leaf";
  * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
  * @template C The context used by the current chatbot.
  */
-export interface Branch<C, Leaves = KV<Leaf<C>>> {
-  readonly subBranches?: KV<Branch<C, KV<Leaf<C>>>>;
+export interface Branch<C, Leaves = KV<AmbiguousLeaf<C>>> {
+  readonly subBranches?: KV<Branch<C, KV<AmbiguousLeaf<C>>>>;
   readonly leaves?: Leaves;
 }

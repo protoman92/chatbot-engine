@@ -1,7 +1,7 @@
 import { DeepReadonly } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformClient } from "./client";
-import { Leaf as RootLeaf } from "./leaf";
+import { BaseLeaf, BaseLeafObserver } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
 import { BaseResponse } from "./response";
@@ -191,11 +191,12 @@ export interface TelegramMessageProcessor<C>
 
 export type TelegramDefaultContext = RootDefaultContext & TelegramRequestInput;
 
-declare namespace TelegramLeaf {
-  type Observer<C> = RootLeaf.Base.Observer<C, TelegramDefaultContext>;
-}
+export type TelegramLeafObserver<Context> = BaseLeafObserver<
+  Context,
+  TelegramDefaultContext
+>;
 
-export type TelegramLeaf<C> = RootLeaf.Base<C, TelegramDefaultContext>;
+export type TelegramLeaf<Context> = BaseLeaf<Context, TelegramDefaultContext>;
 
 export interface TelegramBot {
   readonly id: number;

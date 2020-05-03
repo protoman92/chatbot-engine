@@ -9,7 +9,7 @@ import {
   FacebookRequest,
   FacebookResponse,
 } from "../type/facebook";
-import { Leaf } from "../type/leaf";
+import { AmbiguousLeaf } from "../type/leaf";
 import { BaseResponseOutput } from "../type/visual-content";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -389,7 +389,7 @@ function createFacebookResponse<C>({
  * @template C The context used by the current chatbot.
  */
 export async function createFacebookMessageProcessor<C>(
-  leafSelector: Leaf<C>,
+  leafSelector: AmbiguousLeaf<C>,
   client: FacebookClient,
   ...transformers: readonly Transformer<FacebookMessageProcessor<C>>[]
 ): Promise<FacebookMessageProcessor<C>> {

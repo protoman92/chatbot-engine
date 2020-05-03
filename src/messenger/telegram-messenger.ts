@@ -1,7 +1,7 @@
 import { Omit } from "ts-essentials";
 import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
-import { Leaf } from "../type/leaf";
+import { AmbiguousLeaf } from "../type/leaf";
 import {
   TelegramRequest,
   TelegramResponse,
@@ -320,7 +320,7 @@ function createTelegramResponse<C>({
  * @template C The context used by the current chatbot.
  */
 export async function createTelegramMessageProcessor<C>(
-  leafSelector: Leaf<C>,
+  leafSelector: AmbiguousLeaf<C>,
   client: TelegramClient,
   ...transformers: readonly Transformer<TelegramMessageProcessor<C>>[]
 ): Promise<TelegramMessageProcessor<C>> {

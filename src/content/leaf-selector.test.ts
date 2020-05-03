@@ -2,9 +2,9 @@ import expectJs from "expect.js";
 import { beforeEach, describe } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES } from "../common/utils";
+import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
 import { createLeafWithObserver } from "./leaf";
 import { createLeafSelector } from "./leaf-selector";
-import { Leaf } from "../type/leaf";
 
 type TestLeafSelector = ReturnType<
   typeof import("./leaf-selector")["createLeafSelector"]
@@ -16,16 +16,16 @@ const targetPlatform = "facebook";
 describe("Leaf selector", () => {
   interface Context {}
 
-  let currentLeaf: Leaf<Context>;
+  let currentLeaf: AmbiguousLeaf<Context>;
   let selector: TestLeafSelector;
 
   beforeEach(async () => {
-    currentLeaf = spy<Leaf<Context>>(
+    currentLeaf = spy<AmbiguousLeaf<Context>>(
       await createLeafWithObserver(async () => ({
         checkTextConditions: () => Promise.reject(""),
         checkContextConditions: () => Promise.reject(""),
         next: () => Promise.reject(""),
-        complete: () => Promise.reject("")
+        complete: () => Promise.reject(""),
       }))
     );
 
@@ -37,13 +37,13 @@ describe("Leaf selector", () => {
     const iteration = 1000;
     const validLeafID = 500;
 
-    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
-      ...Array(iteration).keys()
-    ].map(i => ({
+    const enumeratedLeaves: LeafEnumeration<Context>[] = [
+      ...Array(iteration).keys(),
+    ].map((i) => ({
       currentLeaf: instance(currentLeaf),
       currentLeafID: `${i}`,
       parentBranch: {},
-      prefixLeafPaths: []
+      prefixLeafPaths: [],
     }));
 
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
@@ -62,7 +62,7 @@ describe("Leaf selector", () => {
       inputText: "",
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ""
+      stickerID: "",
     });
 
     // Then
@@ -75,13 +75,13 @@ describe("Leaf selector", () => {
     // Setup
     let completedCount = 0;
 
-    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
-      ...Array(1000).keys()
-    ].map(i => ({
+    const enumeratedLeaves: LeafEnumeration<Context>[] = [
+      ...Array(1000).keys(),
+    ].map((i) => ({
       currentLeaf: instance(currentLeaf),
       currentLeafID: `${i}`,
       parentBranch: {},
-      prefixLeafPaths: []
+      prefixLeafPaths: [],
     }));
 
     !!currentLeaf.complete &&
@@ -100,13 +100,13 @@ describe("Leaf selector", () => {
 
   it("Subscribing to response should merge leaf observables", async () => {
     // Setup
-    const enumeratedLeaves: Leaf.Enumerated<Context>[] = [
-      ...Array(1000).keys()
-    ].map(i => ({
+    const enumeratedLeaves: LeafEnumeration<Context>[] = [
+      ...Array(1000).keys(),
+    ].map((i) => ({
       currentLeaf: instance(currentLeaf),
       currentLeafID: `${i}`,
       parentBranch: {},
-      prefixLeafPaths: []
+      prefixLeafPaths: [],
     }));
 
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
@@ -131,7 +131,7 @@ describe("Leaf selector", () => {
         inputText: "",
         inputImageURL: "",
         inputCoordinate: DEFAULT_COORDINATES,
-        stickerID: ""
+        stickerID: "",
       });
 
       // Then

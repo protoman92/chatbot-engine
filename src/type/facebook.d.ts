@@ -1,7 +1,7 @@
 import { DeepReadonly, Omit } from "ts-essentials";
-import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformClient } from "./client";
-import { Leaf as RootLeaf } from "./leaf";
+import { DefaultContext as RootDefaultContext } from "./common";
+import { BaseLeaf, BaseLeafObserver } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
 import { BaseResponse } from "./response";
@@ -246,11 +246,12 @@ export interface FacebookMessageProcessor<C>
 
 export type FacebookDefaultContext = RootDefaultContext & FacebookRequestInput;
 
-declare namespace FacebookLeaf {
-  type Observer<C> = RootLeaf.Base.Observer<C, FacebookDefaultContext>;
-}
+export type FacebookLeafObserver<Context> = BaseLeafObserver<
+  Context,
+  FacebookDefaultContext
+>;
 
-export type FacebookLeaf<C> = RootLeaf.Base<C, FacebookDefaultContext>;
+export type FacebookLeaf<C> = BaseLeaf<C, FacebookDefaultContext>;
 
 /** Represents a Facebook user. */
 export interface FacebookUser {

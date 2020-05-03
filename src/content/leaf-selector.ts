@@ -2,7 +2,7 @@ import { deepClone, mapSeries } from "../common/utils";
 import { mergeObservables } from "../stream";
 import { Branch } from "../type/branch";
 import { DefaultContext, KV } from "../type/common";
-import { Leaf } from "../type/leaf";
+import { LeafEnumeration } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
 import { ContentObservable, ContentObserver, NextResult } from "../type/stream";
 
@@ -14,12 +14,12 @@ import { ContentObservable, ContentObserver, NextResult } from "../type/stream";
  */
 export function enumerateLeaves<C>(
   branches: KV<Branch<C>>
-): readonly Leaf.Enumerated<C>[] {
+): readonly LeafEnumeration<C>[] {
   function enumerate(
     allBranches: KV<Branch<C>>,
     prefixPaths?: readonly string[]
-  ): readonly Leaf.Enumerated<C>[] {
-    let inputs: Leaf.Enumerated<C>[] = [];
+  ): readonly LeafEnumeration<C>[] {
+    let inputs: LeafEnumeration<C>[] = [];
     const branchEntries = Object.entries(allBranches);
 
     for (const [branchID, parentBranch] of branchEntries) {
@@ -70,7 +70,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
      * its success.
      */
     triggerLeafContent: (
-      { currentLeaf }: Leaf.Enumerated<C>,
+      { currentLeaf }: LeafEnumeration<C>,
       input: C & DefaultContext
     ) => {
       return currentLeaf.next(input);

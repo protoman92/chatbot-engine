@@ -4,7 +4,7 @@ import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { DEFAULT_COORDINATES } from "../../common/utils";
 import { createSubscription } from "../../stream";
 import { ErrorContext } from "../../type/common";
-import { Leaf } from "../../type/leaf";
+import { AmbiguousLeaf } from "../../type/leaf";
 import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
 import { catchError } from "./catch-error";
 import { createTransformChain } from "./transform-chain";
@@ -17,16 +17,16 @@ describe("Transform chain", () => {
     // Setup
     const error = new Error("Something happened");
 
-    const errorLeaf = spy<Leaf<{}>>({
+    const errorLeaf = spy<AmbiguousLeaf<{}>>({
       next: () => Promise.reject(error),
       complete: () => Promise.resolve({}),
-      subscribe: () => Promise.resolve(createSubscription(async () => {}))
+      subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
 
-    const fallbackLeaf = spy<Leaf<ErrorContext>>({
+    const fallbackLeaf = spy<AmbiguousLeaf<ErrorContext>>({
       next: () => Promise.resolve({}),
       complete: () => Promise.resolve({}),
-      subscribe: () => Promise.resolve(createSubscription(async () => {}))
+      subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
 
     const transformed = await createTransformChain()
@@ -43,7 +43,7 @@ describe("Transform chain", () => {
       stickerID: "",
       a: 1,
       b: 2,
-      error: new Error("")
+      error: new Error(""),
     };
 
     const nextResult = await transformed.next(input);
@@ -61,25 +61,25 @@ describe("Transform chain", () => {
 
   it("Create leaf with pipe chain", async () => {
     // Setup
-    const baseLeaf = await createLeafWithObserver(async observer => ({
+    const baseLeaf = await createLeafWithObserver(async (observer) => ({
       next: async ({ inputText: text, targetID, targetPlatform }) => {
         return observer.next({
           targetID,
           targetPlatform,
-          output: [{ content: { text, type: "text" } }]
+          output: [{ content: { text, type: "text" } }],
         });
-      }
+      },
     }));
 
     const trasformed = await createTransformChain()
       .forContextOfType<{}>()
-      .pipe<{}>(async leaf => ({
+      .pipe<{}>(async (leaf) => ({
         ...leaf,
-        next: async input => {
+        next: async (input) => {
           const previousResult = await leaf.next(input);
           if (!!previousResult) throw new Error("some-error");
           return undefined;
-        }
+        },
       }))
       .pipe(catchError(await createDefaultErrorLeaf()))
       .transform(baseLeaf);
@@ -91,7 +91,7 @@ describe("Transform chain", () => {
       next: async () => {
         valueDeliveredCount += 1;
         return {};
-      }
+      },
     });
 
     await trasformed.next({
@@ -101,7 +101,7 @@ describe("Transform chain", () => {
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
-      error: new Error("")
+      error: new Error(""),
     });
 
     // Then

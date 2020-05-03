@@ -1,5 +1,5 @@
 import { PlatformClient } from "./client";
-import { Leaf } from "./leaf";
+import { AmbiguousLeaf } from "./leaf";
 import { AmbiguousRequest } from "./request";
 import { AmbiguousResponse } from "./response";
 
@@ -21,7 +21,7 @@ declare namespace BaseMessageProcessor {
     GRequest extends AmbiguousRequest<C>
   > {
     readonly targetPlatform: AmbiguousPlatform;
-    readonly leafSelector: Leaf<C>;
+    readonly leafSelector: AmbiguousLeaf<C>;
     readonly client: PlatformClient<PResponse>;
     readonly mapRequest: BaseMessageProcessor<
       C,

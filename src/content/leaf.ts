@@ -2,11 +2,11 @@ import { Omit } from "ts-essentials";
 import { genericError } from "../common/utils";
 import { createContentSubject } from "../stream";
 import { ErrorContext } from "../type/common";
-import { FacebookLeaf } from "../type/facebook";
-import { Leaf } from "../type/leaf";
+import { FacebookLeafObserver } from "../type/facebook";
+import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
-import { TelegramLeaf } from "../type/telegram";
+import { TelegramLeafObserver } from "../type/telegram";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -16,8 +16,8 @@ import { TelegramLeaf } from "../type/telegram";
 export async function createLeafWithObserver<C = {}>(
   fn: (
     observer: NextContentObserver<AmbiguousResponse<C>>
-  ) => Promise<Omit<Leaf<C>, "subscribe">>
-): Promise<Leaf<C>> {
+  ) => Promise<Omit<AmbiguousLeaf<C>, "subscribe">>
+): Promise<AmbiguousLeaf<C>> {
   const subject = createContentSubject<AmbiguousResponse<C>>();
   const baseLeaf = await fn(subject);
 
@@ -38,7 +38,7 @@ export async function createLeafWithObserver<C = {}>(
  */
 export function createDefaultErrorLeaf<C = {}>(
   fn?: (e: Error) => Promise<unknown>
-): Promise<Leaf<C & ErrorContext>> {
+): Promise<AmbiguousLeaf<C & ErrorContext>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ error, ...restInput }) => {
       !!fn && (await fn(error));
@@ -62,15 +62,14 @@ export function createDefaultErrorLeaf<C = {}>(
 /**
  * Create a leaf observer that handles content for different platforms, based
  * on the leaf input.
- * @template C The context used by the current chatbot.
  */
-export async function createLeafObserverForPlatforms<C = {}>({
+export async function createLeafObserverForPlatforms<Context = {}>({
   facebook,
   telegram,
 }: Readonly<{
-  facebook?: FacebookLeaf.Observer<C>;
-  telegram?: TelegramLeaf.Observer<C>;
-}>): Promise<Leaf.Observer<C>> {
+  facebook?: FacebookLeafObserver<Context>;
+  telegram?: TelegramLeafObserver<Context>;
+}>): Promise<AmbiguousLeafObserver<Context>> {
   return {
     next: async (input) => {
       switch (input.targetPlatform) {
