@@ -1,15 +1,15 @@
 import { DynamoDB } from "aws-sdk";
 import { requireAllTruthy } from "../common/utils";
-import { ContextDAO, SupportedPlatform } from "../type";
+import { ContextDAO, AmbiguousPlatform } from "../type";
 
 export function createDynamoDBContextDAO<C>(
   ddb: DynamoDB,
   tableName: string
 ): ContextDAO<C> {
-  function getTableKey(targetID: string, targetPlatform: SupportedPlatform) {
+  function getTableKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return {
       targetID: { S: targetID },
-      targetPlatform: { S: targetPlatform }
+      targetPlatform: { S: targetPlatform },
     };
   }
 
@@ -18,7 +18,7 @@ export function createDynamoDBContextDAO<C>(
 
     const attributes = contextEntries.map(([key, value]) => [
       { [`#${key}`]: key },
-      { [`:${key}`]: { S: value } }
+      { [`:${key}`]: { S: value } },
     ]);
 
     return {
@@ -32,7 +32,7 @@ export function createDynamoDBContextDAO<C>(
       ),
       UpdateExpression: "SET ".concat(
         contextEntries.map(([key, value]) => `#${key}=:${value}`).join(",")
-      )
+      ),
     };
   }
 
@@ -42,7 +42,7 @@ export function createDynamoDBContextDAO<C>(
         ddb.getItem(
           {
             Key: getTableKey(targetID, targetPlatform),
-            TableName: tableName
+            TableName: tableName,
           },
           (err, data) => {
             if (!!err) {
@@ -55,7 +55,7 @@ export function createDynamoDBContextDAO<C>(
             const resolved = Object.entries(Item).reduce(
               (acc, [key, value]) => ({
                 ...acc,
-                [key]: Object.values(value)[0]
+                [key]: Object.values(value)[0],
               }),
               {} as C
             );
@@ -71,7 +71,7 @@ export function createDynamoDBContextDAO<C>(
             Key: getTableKey(targetID, targetPlatform),
             ReturnValues: "NONE",
             TableName: tableName,
-            ...getUpdateExpression(context)
+            ...getUpdateExpression(context),
           },
           (err, data) => {
             if (!!err) {
@@ -89,7 +89,7 @@ export function createDynamoDBContextDAO<C>(
           {
             Key: getTableKey(targetID, targetPlatform),
             ReturnValues: "NONE",
-            TableName: tableName
+            TableName: tableName,
           },
           (err, data) => {
             if (!!err) {
@@ -100,7 +100,7 @@ export function createDynamoDBContextDAO<C>(
             resolve(data);
           }
         );
-      })
+      }),
   };
 }
 
@@ -108,19 +108,19 @@ export default function<C>() {
   const {
     DYNAMO_DB_ENDPOINT = "",
     DYNAMO_DB_REGION = "",
-    DYNAMO_DB_TABLE_NAME = ""
+    DYNAMO_DB_TABLE_NAME = "",
   } = process.env;
 
   requireAllTruthy({
     DYNAMO_DB_ENDPOINT,
     DYNAMO_DB_REGION,
-    DYNAMO_DB_TABLE_NAME
+    DYNAMO_DB_TABLE_NAME,
   });
 
   const ddb = new DynamoDB({
     apiVersion: "latest",
     endpoint: DYNAMO_DB_ENDPOINT,
-    region: DYNAMO_DB_REGION
+    region: DYNAMO_DB_REGION,
   });
 
   const contextDAO = createDynamoDBContextDAO<C>(ddb, DYNAMO_DB_TABLE_NAME);

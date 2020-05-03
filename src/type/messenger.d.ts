@@ -1,12 +1,12 @@
 import { PlatformCommunicator } from "./communicator";
 import { Leaf } from "./leaf";
-import { GenericRequest } from "./request";
-import { GenericResponse } from "./response";
+import { AmbiguousRequest } from "./request";
+import { AmbiguousResponse } from "./response";
 
 /** Represents all supported platform identifiers. */
-export type SupportedPlatform = "facebook" | "telegram";
+export type AmbiguousPlatform = "facebook" | "telegram";
 
-declare namespace RootMessageProcessor {
+declare namespace BaseMessageProcessor {
   /**
    * Configurations to set up a generic messenger.
    * @template C The context used by the current chatbot.
@@ -18,17 +18,17 @@ declare namespace RootMessageProcessor {
     C,
     PRequest,
     PResponse,
-    GRequest extends GenericRequest<C>
+    GRequest extends AmbiguousRequest<C>
   > {
-    readonly targetPlatform: SupportedPlatform;
+    readonly targetPlatform: AmbiguousPlatform;
     readonly leafSelector: Leaf<C>;
     readonly communicator: PlatformCommunicator<PResponse>;
-    readonly mapRequest: RootMessageProcessor<
+    readonly mapRequest: BaseMessageProcessor<
       C,
       PRequest,
       GRequest
     >["generalizeRequest"];
-    mapResponse: (res: GenericResponse<C>) => Promise<readonly PResponse[]>;
+    mapResponse: (res: AmbiguousResponse<C>) => Promise<readonly PResponse[]>;
   }
 }
 
@@ -44,10 +44,10 @@ declare namespace RootMessageProcessor {
  * @template PRequest The platform-specific request.
  * @template GRequest The platform-specific generic request.
  */
-export interface RootMessageProcessor<
+export interface BaseMessageProcessor<
   C,
   PRequest,
-  GRequest extends GenericRequest<C>
+  GRequest extends AmbiguousRequest<C>
 > {
   /** Generalize a platform request into a generic request. */
   generalizeRequest(request: PRequest): Promise<readonly GRequest[]>;
@@ -56,7 +56,7 @@ export interface RootMessageProcessor<
   receiveRequest(request: GRequest): Promise<{}>;
 
   /** Send an outgoing platform response. */
-  sendResponse(response: GenericResponse<C>): Promise<{}>;
+  sendResponse(response: AmbiguousResponse<C>): Promise<{}>;
 }
 
 /**

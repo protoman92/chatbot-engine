@@ -1,7 +1,7 @@
-import { FacebookVisualContent } from "./facebook";
-import { TelegramVisualContent } from "./telegram";
+import { FacebookResponseOutput } from "./facebook";
+import { TelegramResponseOutput } from "./telegram";
 
-declare namespace RootVisualContent {
+declare namespace BaseResponseOutput {
   namespace QuickReply {
     interface Location {
       readonly text: string;
@@ -97,9 +97,11 @@ declare namespace RootVisualContent {
     | MainContent.Text;
 }
 
-export interface RootVisualContent {
-  readonly content: RootVisualContent.MainContent;
+export interface BaseResponseOutput {
+  readonly content: BaseResponseOutput.MainContent;
 }
 
 /** Represents content that will go out to the user. */
-export type VisualContent = FacebookVisualContent | TelegramVisualContent;
+export type AmbiguousResponseOutput =
+  | FacebookResponseOutput
+  | TelegramResponseOutput;

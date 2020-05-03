@@ -3,15 +3,15 @@ import {
   joinObjects,
   promisify1,
   promisify2,
-  requireAllTruthy
+  requireAllTruthy,
 } from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
-import { SupportedPlatform } from "../type/messenger";
+import { AmbiguousPlatform } from "../type/messenger";
 
 export function createRedisContextDAO<C>(
   redis: Pick<RedisClient, "get" | "set" | "del">
 ): ContextDAO<C> {
-  function getCacheKey(targetID: string, targetPlatform: SupportedPlatform) {
+  function getCacheKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return `${targetPlatform}-${targetID}`;
   }
 
@@ -35,7 +35,7 @@ export function createRedisContextDAO<C>(
     },
     resetContext: (targetID, targetPlatform) => {
       return del(getCacheKey(targetID, targetPlatform));
-    }
+    },
   };
 
   return contextDAO;
@@ -48,7 +48,7 @@ export default function<C>() {
   const redisClient = createClient({
     host: REDIS_HOST,
     port: parseInt(REDIS_PORT || "", undefined),
-    url: REDIS_URI
+    url: REDIS_URI,
   });
 
   const contextDAO = createRedisContextDAO<C>(redisClient);

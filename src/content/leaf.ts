@@ -4,7 +4,7 @@ import { createContentSubject } from "../stream";
 import { ErrorContext } from "../type/common";
 import { FacebookLeaf } from "../type/facebook";
 import { Leaf } from "../type/leaf";
-import { GenericResponse } from "../type/response";
+import { AmbiguousResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
 import { TelegramLeaf } from "../type/telegram";
 
@@ -15,10 +15,10 @@ import { TelegramLeaf } from "../type/telegram";
  */
 export async function createLeafWithObserver<C = {}>(
   fn: (
-    observer: NextContentObserver<GenericResponse<C>>
+    observer: NextContentObserver<AmbiguousResponse<C>>
   ) => Promise<Omit<Leaf<C>, "subscribe">>
 ): Promise<Leaf<C>> {
-  const subject = createContentSubject<GenericResponse<C>>();
+  const subject = createContentSubject<AmbiguousResponse<C>>();
   const baseLeaf = await fn(subject);
 
   return {
@@ -27,7 +27,7 @@ export async function createLeafWithObserver<C = {}>(
       !!baseLeaf.complete && (await baseLeaf.complete());
       await subject.complete();
     },
-    subscribe: observer => subject.subscribe(observer)
+    subscribe: (observer) => subject.subscribe(observer),
   };
 }
 
@@ -39,7 +39,7 @@ export async function createLeafWithObserver<C = {}>(
 export function createDefaultErrorLeaf<C = {}>(
   fn?: (e: Error) => Promise<unknown>
 ): Promise<Leaf<C & ErrorContext>> {
-  return createLeafWithObserver(async observer => ({
+  return createLeafWithObserver(async (observer) => ({
     next: async ({ error, ...restInput }) => {
       !!fn && (await fn(error));
 
@@ -50,12 +50,12 @@ export function createDefaultErrorLeaf<C = {}>(
           {
             content: {
               type: "text",
-              text: `Encountered an error: '${error.message}'`
-            }
-          }
-        ]
+              text: `Encountered an error: '${error.message}'`,
+            },
+          },
+        ],
       });
-    }
+    },
   }));
 }
 
@@ -66,13 +66,13 @@ export function createDefaultErrorLeaf<C = {}>(
  */
 export async function createLeafObserverForPlatforms<C = {}>({
   facebook,
-  telegram
+  telegram,
 }: Readonly<{
   facebook?: FacebookLeaf.Observer<C>;
   telegram?: TelegramLeaf.Observer<C>;
 }>): Promise<Leaf.Observer<C>> {
   return {
-    next: async input => {
+    next: async (input) => {
       switch (input.targetPlatform) {
         case "facebook":
           if (!facebook) break;
@@ -88,6 +88,6 @@ export async function createLeafObserverForPlatforms<C = {}>({
     complete: async () => {
       !!facebook && !!facebook.complete && (await facebook.complete());
       !!telegram && !!telegram.complete && (await telegram.complete());
-    }
+    },
   };
 }

@@ -2,30 +2,30 @@ import { DeepReadonly } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
-import { RootMessageProcessor } from "./messenger";
-import { RootGenericRequest, RootGenericRequestInput } from "./request";
-import { RootGenericResponse } from "./response";
-import { RootVisualContent } from "./visual-content";
+import { BaseMessageProcessor } from "./messenger";
+import { BaseRequest, BaseRequestInput } from "./request";
+import { BaseResponse } from "./response";
+import { BaseResponseOutput } from "./visual-content";
 
-export interface GenericTelegramRequestInput extends RootGenericRequestInput {
+export interface TelegramRequestInput extends BaseRequestInput {
   readonly inputCommand: string;
   readonly leftChatMembers: readonly (TelegramBot | TelegramUser)[];
   readonly newChatMembers: readonly (TelegramBot | TelegramUser)[];
   readonly targetPlatform: "telegram";
 }
 
-export interface GenericTelegramRequest<C> extends RootGenericRequest<C> {
+export interface TelegramRequest<C> extends BaseRequest<C> {
   readonly targetPlatform: "telegram";
   readonly telegramUser: TelegramUser;
-  readonly input: readonly GenericTelegramRequestInput[];
+  readonly input: readonly TelegramRequestInput[];
 }
 
-export interface GenericTelegramResponse<C> extends RootGenericResponse<C> {
+export interface TelegramResponse<C> extends BaseResponse<C> {
   readonly targetPlatform: "telegram";
-  readonly output: readonly TelegramVisualContent[];
+  readonly output: readonly TelegramResponseOutput[];
 }
 
-declare namespace TelegramVisualContent {
+declare namespace TelegramResponseOutput {
   namespace QuickReply {
     interface Contact {
       readonly text: string;
@@ -33,12 +33,12 @@ declare namespace TelegramVisualContent {
     }
 
     type InlineMarkup =
-      | RootVisualContent.QuickReply.Postback
-      | RootVisualContent.QuickReply.Text;
+      | BaseResponseOutput.QuickReply.Postback
+      | BaseResponseOutput.QuickReply.Text;
 
     type ReplyMarkup =
-      | RootVisualContent.QuickReply.Location
-      | RootVisualContent.QuickReply.Text
+      | BaseResponseOutput.QuickReply.Location
+      | BaseResponseOutput.QuickReply.Text
       | QuickReply.Contact;
 
     type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
@@ -50,11 +50,11 @@ declare namespace TelegramVisualContent {
     | QuickReply.ReplyMarkupMatrix;
 }
 
-export interface TelegramVisualContent extends RootVisualContent {
-  readonly quickReplies?: TelegramVisualContent.QuickReplyMatrix;
+export interface TelegramResponseOutput extends BaseResponseOutput {
+  readonly quickReplies?: TelegramResponseOutput.QuickReplyMatrix;
 }
 
-declare namespace TelegramPlatformRequest {
+declare namespace TelegramRawRequest {
   namespace Message {
     namespace Message {
       namespace Chat {
@@ -74,7 +74,7 @@ declare namespace TelegramPlatformRequest {
       }
 
       interface LeftChatMember {
-        readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
+        readonly chat: TelegramRawRequest.Message.Message.Chat.Chat;
         readonly from: TelegramUser;
         readonly message_id: number;
         readonly left_chat_participant: TelegramBot | TelegramUser;
@@ -82,7 +82,7 @@ declare namespace TelegramPlatformRequest {
       }
 
       interface NewChatMember {
-        readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
+        readonly chat: TelegramRawRequest.Message.Message.Chat.Chat;
         readonly from: TelegramUser;
         readonly message_id: number;
         readonly new_chat_participant: TelegramBot | TelegramUser;
@@ -91,7 +91,7 @@ declare namespace TelegramPlatformRequest {
       }
 
       interface Text {
-        readonly chat: TelegramPlatformRequest.Message.Message.Chat.Chat;
+        readonly chat: TelegramRawRequest.Message.Message.Chat.Chat;
         readonly from: TelegramUser;
         readonly message_id: number;
         readonly text: string;
@@ -124,11 +124,11 @@ declare namespace TelegramPlatformRequest {
   }
 }
 
-export type TelegramPlatformRequest =
-  | TelegramPlatformRequest.Message
-  | TelegramPlatformRequest.Callback;
+export type TelegramRawRequest =
+  | TelegramRawRequest.Message
+  | TelegramRawRequest.Callback;
 
-declare namespace TelegramPlatformResponse {
+declare namespace TelegramRawResponse {
   namespace SendMessage {
     namespace ReplyMarkup {
       namespace ReplyKeyboardMarkup {
@@ -180,21 +180,16 @@ declare namespace TelegramPlatformResponse {
   }
 }
 
-export type TelegramPlatformResponse = TelegramPlatformResponse.SendMessage;
+export type TelegramRawResponse = TelegramRawResponse.SendMessage;
 
 /**
  * Represents a Telegram-specific message processor.
  * @template C The context used by the current chatbot.
  */
 export interface TelegramMessageProcessor<C>
-  extends RootMessageProcessor<
-    C,
-    TelegramPlatformRequest,
-    GenericTelegramRequest<C>
-  > {}
+  extends BaseMessageProcessor<C, TelegramRawRequest, TelegramRequest<C>> {}
 
-export type TelegramDefaultContext = RootDefaultContext &
-  GenericTelegramRequestInput;
+export type TelegramDefaultContext = RootDefaultContext & TelegramRequestInput;
 
 declare namespace TelegramLeaf {
   type Observer<C> = RootLeaf.Base.Observer<C, TelegramDefaultContext>;
@@ -239,7 +234,7 @@ declare namespace TelegramCommunicator {
 
 /** A Telegram-specific communicator. */
 export interface TelegramCommunicator
-  extends PlatformCommunicator<TelegramPlatformResponse> {
+  extends PlatformCommunicator<TelegramRawResponse> {
   /** Get the current chatbot. */
   getCurrentBot(): Promise<TelegramBot>;
 

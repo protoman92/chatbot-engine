@@ -1,13 +1,13 @@
-import { GenericFacebookResponse } from "./facebook";
-import { SupportedPlatform } from "./messenger";
-import { GenericTelegramResponse } from "./telegram";
-import { RootVisualContent } from "./visual-content";
+import { FacebookResponse } from "./facebook";
+import { AmbiguousPlatform } from "./messenger";
+import { TelegramResponse } from "./telegram";
+import { BaseResponseOutput } from "./visual-content";
 
-export interface RootGenericResponse<C> {
+export interface BaseResponse<C> {
   readonly targetID: string;
-  readonly targetPlatform: SupportedPlatform;
+  readonly targetPlatform: AmbiguousPlatform;
   readonly additionalContext?: Partial<C>;
-  readonly output: readonly RootVisualContent[];
+  readonly output: readonly BaseResponseOutput[];
 }
 
 /**
@@ -16,7 +16,7 @@ export interface RootGenericResponse<C> {
  * This is to prevent stale old context replacing latest one.
  * @template C The context used by the current chatbot.
  */
-export type GenericResponse<C> =
-  | RootGenericResponse<C>
-  | GenericFacebookResponse<C>
-  | GenericTelegramResponse<C>;
+export type AmbiguousResponse<C> =
+  | BaseResponse<C>
+  | FacebookResponse<C>
+  | TelegramResponse<C>;

@@ -7,11 +7,11 @@ import { bridgeEmission } from "../stream";
 import { FacebookLeaf } from "../type/facebook";
 import { Leaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
-import { RootVisualContent } from "../type/visual-content";
+import { BaseResponseOutput } from "../type/visual-content";
 import {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
-  createLeafWithObserver
+  createLeafWithObserver,
 } from "./leaf";
 
 const targetID = "target-id";
@@ -31,13 +31,13 @@ describe("Default error leaf", () => {
       inputText: "",
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ""
+      stickerID: "",
     });
     // Then
     expectJs(output).to.have.length(1);
     const [{ content: response }] = output;
 
-    if (isType<RootVisualContent.MainContent.Text>(response, "text")) {
+    if (isType<BaseResponseOutput.MainContent.Text>(response, "text")) {
       expectJs(response.text).to.contain(error.message);
     } else {
       throw new Error("Never should have come here");
@@ -53,18 +53,18 @@ describe("Leaf for platforms", () => {
   beforeEach(async () => {
     fbLeaf = spy<Omit<FacebookLeaf<{}>, "subscribe">>({
       next: () => Promise.reject(""),
-      complete: () => Promise.reject("")
+      complete: () => Promise.reject(""),
     });
 
     tlLeaf = spy<Omit<TelegramLeaf<{}>, "subscribe">>({
       next: () => Promise.reject(""),
-      complete: () => Promise.reject("")
+      complete: () => Promise.reject(""),
     });
 
     platformLeaf = await createLeafWithObserver(() => {
       return createLeafObserverForPlatforms({
         facebook: instance(fbLeaf),
-        telegram: instance(tlLeaf)
+        telegram: instance(tlLeaf),
       });
     });
   });
@@ -83,7 +83,7 @@ describe("Leaf for platforms", () => {
       inputText: "",
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
-      stickerID: ""
+      stickerID: "",
     });
 
     await platformLeaf.next({
@@ -94,7 +94,7 @@ describe("Leaf for platforms", () => {
       inputImageURL: "",
       inputCoordinate: DEFAULT_COORDINATES,
       leftChatMembers: [],
-      newChatMembers: []
+      newChatMembers: [],
     });
 
     await platformLeaf.complete!();
@@ -119,7 +119,7 @@ describe("Leaf for platforms", () => {
         inputCoordinate: DEFAULT_COORDINATES,
         inputImageURL: "",
         inputText: "",
-        stickerID: ""
+        stickerID: "",
       });
 
       throw new Error("Never should have come here");
@@ -135,7 +135,7 @@ describe("Leaf for platforms", () => {
         inputCoordinate: DEFAULT_COORDINATES,
         inputImageURL: "",
         inputText: "",
-        newChatMembers: []
+        newChatMembers: [],
       });
 
       throw new Error("Never should have come here");

@@ -1,5 +1,5 @@
-import { SupportedPlatform } from "./messenger";
-import { GenericRequestInput } from "./request";
+import { AmbiguousPlatform } from "./messenger";
+import { AmbiguousRequestInput } from "./request";
 
 export type KV<V> = Readonly<{ [K: string]: V | null | undefined }>;
 
@@ -8,11 +8,11 @@ export interface Coordinates {
   readonly lng: number;
 }
 
-export type DefaultContext = GenericRequestInput &
+export type DefaultContext = AmbiguousRequestInput &
   Readonly<{
     activeBranch?: string;
     targetID: string;
-    targetPlatform: SupportedPlatform;
+    targetPlatform: AmbiguousPlatform;
   }>;
 
 export interface ErrorContext {

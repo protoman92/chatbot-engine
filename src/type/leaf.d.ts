@@ -1,12 +1,12 @@
 import { Branch } from "./branch";
 import { DefaultContext } from "./common";
-import { GenericResponse } from "./response";
+import { AmbiguousResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 
 declare namespace Leaf {
   namespace Base {
     interface Observer<C, Extra> extends ContentObserver<C & Extra> {}
-    interface Observable<C> extends ContentObservable<GenericResponse<C>> {}
+    interface Observable<C> extends ContentObservable<AmbiguousResponse<C>> {}
   }
 
   interface Base<C, E> extends Base.Observer<C, E>, Base.Observable<C> {}

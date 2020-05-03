@@ -1,6 +1,6 @@
 import { joinObjects } from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
-import { SupportedPlatform } from "../type/messenger";
+import { AmbiguousPlatform } from "../type/messenger";
 
 /**
  * Create an in-memory context DAO store. This is useful for debugging.
@@ -9,7 +9,7 @@ import { SupportedPlatform } from "../type/messenger";
 export function createInMemoryContextDAO<C>(): ContextDAO<C> {
   const storage: { [K: string]: C } = {};
 
-  function getCacheKey(targetID: string, targetPlatform: SupportedPlatform) {
+  function getCacheKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return `${targetPlatform}-${targetID}`;
   }
 
@@ -24,7 +24,7 @@ export function createInMemoryContextDAO<C>(): ContextDAO<C> {
     },
     resetContext: async () => {
       const keys = Object.keys(storage);
-      keys.forEach(key => delete storage[key]);
-    }
+      keys.forEach((key) => delete storage[key]);
+    },
   };
 }

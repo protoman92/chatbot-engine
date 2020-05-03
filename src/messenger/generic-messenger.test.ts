@@ -7,21 +7,21 @@ import {
   instance,
   spy,
   verify,
-  when
+  when,
 } from "ts-mockito";
 import { PlatformCommunicator } from "../type/communicator";
 import {
   FacebookMessageProcessor,
-  GenericFacebookRequestInput
+  FacebookRequestInput,
 } from "../type/facebook";
 import { Leaf } from "../type/leaf";
-import { SupportedPlatform } from "../type/messenger";
-import { GenericRequest } from "../type/request";
-import { GenericResponse } from "../type/response";
+import { AmbiguousPlatform } from "../type/messenger";
+import { AmbiguousRequest } from "../type/request";
+import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
 import {
   createCrossPlatformMessenger,
-  createMessageProcessor
+  createMessageProcessor,
 } from "./generic-messenger";
 
 const targetID = "target-id";
@@ -34,12 +34,12 @@ describe("Generic message processor", () => {
   beforeEach(async () => {
     leafSelector = spy<Leaf<{}>>({
       next: () => Promise.reject(""),
-      subscribe: () => Promise.reject("")
+      subscribe: () => Promise.reject(""),
     });
 
     communicator = spy<PlatformCommunicator<unknown>>({
       sendResponse: () => Promise.reject(""),
-      setTypingIndicator: () => Promise.reject("")
+      setTypingIndicator: () => Promise.reject(""),
     });
   });
 
@@ -56,16 +56,16 @@ describe("Generic message processor", () => {
         leafSelector: instance(leafSelector),
         communicator: instance(communicator),
         mapRequest: async () => [],
-        mapResponse: async () => platformResponses
+        mapResponse: async () => platformResponses,
       })
     );
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
-    const response: GenericResponse<{}> = {
+    const response: AmbiguousResponse<{}> = {
       targetID,
       targetPlatform,
-      output: []
+      output: [],
     };
 
     await next(response);
@@ -74,7 +74,7 @@ describe("Generic message processor", () => {
     expectJs(complete).to.be.ok();
     verify(messageProcessor.sendResponse(deepEqual(response))).once();
 
-    platformResponses.forEach(response => {
+    platformResponses.forEach((response) => {
       verify(communicator.sendResponse(deepEqual(response))).once();
     });
   });
@@ -92,7 +92,7 @@ describe("Generic message processor", () => {
         leafSelector: instance(leafSelector),
         communicator: instance(communicator),
         mapRequest: async () => [],
-        mapResponse: async () => platformResponses
+        mapResponse: async () => platformResponses,
       })
     );
 
@@ -101,7 +101,7 @@ describe("Generic message processor", () => {
     const nextResult = await next({
       targetID,
       targetPlatform,
-      output: []
+      output: [],
     });
 
     // Then
@@ -116,21 +116,21 @@ describe("Generic message processor", () => {
     when(leafSelector.next(anything())).thenResolve();
     const oldContext = { a: 1, b: 2 };
 
-    const input: readonly GenericFacebookRequestInput[] = [
+    const input: readonly FacebookRequestInput[] = [
       {
         targetPlatform,
         inputText: "text-1",
         inputImageURL: "image-1",
         inputCoordinate: { lat: 0, lng: 0 },
-        stickerID: ""
+        stickerID: "",
       },
       {
         targetPlatform,
         inputText: "text-2",
         inputImageURL: "image-2",
         inputCoordinate: { lat: 1, lng: 1 },
-        stickerID: ""
-      }
+        stickerID: "",
+      },
     ];
 
     // When
@@ -138,19 +138,19 @@ describe("Generic message processor", () => {
       targetPlatform,
       leafSelector: instance(leafSelector),
       communicator: instance(communicator),
-      mapRequest: async () => [] as readonly GenericRequest<{}>[],
-      mapResponse: async () => []
+      mapRequest: async () => [] as readonly AmbiguousRequest<{}>[],
+      mapResponse: async () => [],
     });
 
     await messageProcessor.receiveRequest({
       targetID,
       targetPlatform,
       oldContext,
-      input
+      input,
     });
 
     // Then
-    input.forEach(datum =>
+    input.forEach((datum) =>
       verify(
         leafSelector.next(
           deepEqual({ ...datum, ...oldContext, targetID, targetPlatform })
@@ -170,20 +170,20 @@ describe("Cross platform messenger", () => {
     fbProcessor = spy<FacebookMessageProcessor<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
-      sendResponse: () => Promise.resolve({})
+      sendResponse: () => Promise.resolve({}),
     });
 
     tlProcessor = spy<TelegramMessageProcessor<{}>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
-      sendResponse: () => Promise.resolve({})
+      sendResponse: () => Promise.resolve({}),
     });
 
     processors = { facebook: fbProcessor, telegram: tlProcessor };
 
     processorInstances = Object.entries(processors)
       .map(([key, value]) => ({
-        [key]: instance(value)
+        [key]: instance(value),
       }))
       .reduce((acc, item) => ({ ...acc, ...item })) as typeof processors;
   });
@@ -195,8 +195,8 @@ describe("Cross platform messenger", () => {
         targetID,
         targetPlatform: "facebook",
         oldContext: {},
-        input: []
-      }
+        input: [],
+      },
     ]);
 
     when(tlProcessor.generalizeRequest(anything())).thenResolve([
@@ -211,12 +211,12 @@ describe("Cross platform messenger", () => {
           last_name: "",
           username: "",
           language_code: "en" as const,
-          is_bot: false
-        }
-      }
+          is_bot: false,
+        },
+      },
     ]);
 
-    const platforms = Object.keys(processors) as readonly SupportedPlatform[];
+    const platforms = Object.keys(processors) as readonly AmbiguousPlatform[];
 
     // When
     for (const targetPlatform of platforms) {

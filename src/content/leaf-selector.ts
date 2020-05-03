@@ -3,7 +3,7 @@ import { mergeObservables } from "../stream";
 import { Branch } from "../type/branch";
 import { DefaultContext, KV } from "../type/common";
 import { Leaf } from "../type/leaf";
-import { GenericResponse } from "../type/response";
+import { AmbiguousResponse } from "../type/response";
 import { ContentObservable, ContentObserver, NextResult } from "../type/stream";
 
 /**
@@ -36,7 +36,7 @@ export function enumerateLeaves<C>(
             parentBranch,
             currentLeaf,
             currentLeafID,
-            prefixLeafPaths
+            prefixLeafPaths,
           });
         }
       }
@@ -60,7 +60,7 @@ export function enumerateLeaves<C>(
  */
 export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
   const enumeratedLeaves = enumerateLeaves(allBranches);
-  let outputObservable: ContentObservable<GenericResponse<C>>;
+  let outputObservable: ContentObservable<AmbiguousResponse<C>>;
 
   const selector = {
     enumerateLeaves: async () => enumeratedLeaves,
@@ -98,7 +98,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
         return !!currentLeaf.complete && currentLeaf.complete();
       });
     },
-    subscribe: async (observer: ContentObserver<GenericResponse<C>>) => {
+    subscribe: async (observer: ContentObserver<AmbiguousResponse<C>>) => {
       if (!outputObservable) {
         const enumeratedLeaves = await selector.enumerateLeaves();
 
@@ -108,7 +108,7 @@ export function createLeafSelector<C>(allBranches: KV<Branch<C>>) {
       }
 
       return outputObservable.subscribe(observer);
-    }
+    },
   };
 
   return selector;

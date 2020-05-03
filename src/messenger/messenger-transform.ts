@@ -2,8 +2,8 @@ import { compose, deepClone } from "../common/utils";
 import { DefaultContext, Transformer } from "../type/common";
 import { PlatformCommunicator } from "../type/communicator";
 import { ContextDAO } from "../type/context-dao";
-import { RootMessageProcessor } from "../type/messenger";
-import { GenericRequest } from "../type/request";
+import { BaseMessageProcessor } from "../type/messenger";
+import { AmbiguousRequest } from "../type/request";
 
 /**
  * Save the context every time a message group is sent to a target ID. If
@@ -16,14 +16,14 @@ import { GenericRequest } from "../type/request";
 export function saveContextOnSend<
   C,
   PRequest,
-  GRequest extends GenericRequest<C>
+  GRequest extends AmbiguousRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">
-): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
-  return async processor => {
+): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  return async (processor) => {
     return {
       ...processor,
-      sendResponse: async response => {
+      sendResponse: async (response) => {
         const { targetID, targetPlatform, additionalContext } = response;
         const result = await processor.sendResponse(response);
 
@@ -36,7 +36,7 @@ export function saveContextOnSend<
         }
 
         return result;
-      }
+      },
     };
   };
 }
@@ -51,19 +51,19 @@ export function saveContextOnSend<
 export function injectContextOnReceive<
   C,
   PRequest,
-  GRequest extends GenericRequest<C>
+  GRequest extends AmbiguousRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext">
-): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
-  return async processor => {
+): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  return async (processor) => {
     return {
       ...processor,
-      receiveRequest: async request => {
+      receiveRequest: async (request) => {
         const { targetID, targetPlatform } = request;
         let oldContext = await contextDAO.getContext(targetID, targetPlatform);
         oldContext = deepClone({ ...request.oldContext, ...oldContext });
         return processor.receiveRequest({ ...request, oldContext });
-      }
+      },
     };
   };
 }
@@ -80,18 +80,18 @@ export function injectContextOnReceive<
 export function saveUserForTargetID<
   C,
   PRequest,
-  GRequest extends GenericRequest<C>,
-  Messenger extends RootMessageProcessor<C, PRequest, GRequest>,
+  GRequest extends AmbiguousRequest<C>,
+  Messenger extends BaseMessageProcessor<C, PRequest, GRequest>,
   PUser
 >(
   contextDAO: ContextDAO<C>,
   getUser: (targetID: string) => Promise<PUser>,
   saveUser: (platformUser: PUser) => Promise<unknown>
 ): Transformer<Messenger> {
-  return async processor => {
+  return async (processor) => {
     return {
       ...processor,
-      receiveRequest: async request => {
+      receiveRequest: async (request) => {
         const { oldContext, targetID, targetPlatform } = request;
         const sidKey: keyof DefaultContext = "targetID";
 
@@ -108,7 +108,7 @@ export function saveUserForTargetID<
         }
 
         return processor.receiveRequest({ ...request, oldContext });
-      }
+      },
     };
   };
 }
@@ -125,20 +125,20 @@ export function setTypingIndicator<
   C,
   PRequest,
   PResponse,
-  GRequest extends GenericRequest<C>
+  GRequest extends AmbiguousRequest<C>
 >(
   communicator: PlatformCommunicator<PResponse>
-): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
-  return async processor => {
+): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  return async (processor) => {
     return {
       ...processor,
-      sendResponse: async response => {
+      sendResponse: async (response) => {
         const { targetID } = response;
         await communicator.setTypingIndicator(targetID, true);
         const result = await processor.sendResponse(response);
         await communicator.setTypingIndicator(targetID, false);
         return result;
-      }
+      },
     };
   };
 }
@@ -154,12 +154,12 @@ export function transformMessageProcessorsDefault<
   C,
   PRequest,
   PResponse,
-  GRequest extends GenericRequest<C>
+  GRequest extends AmbiguousRequest<C>
 >(
   contextDAO: Pick<ContextDAO<C>, "getContext" | "appendContext">,
   communicator: PlatformCommunicator<PResponse>
-): Transformer<RootMessageProcessor<C, PRequest, GRequest>> {
-  return processor =>
+): Transformer<BaseMessageProcessor<C, PRequest, GRequest>> {
+  return (processor) =>
     compose(
       processor,
       injectContextOnReceive(contextDAO),

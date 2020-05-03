@@ -1,7 +1,7 @@
 import { Coordinates, Transformer } from "../type/common";
-import { FacebookPlatformRequest } from "../type/facebook";
-import { SupportedPlatform } from "../type/messenger";
-import { TelegramPlatformRequest } from "../type/telegram";
+import { FacebookRawRequest } from "../type/facebook";
+import { AmbiguousPlatform } from "../type/messenger";
+import { TelegramRawRequest } from "../type/telegram";
 
 export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
@@ -16,7 +16,7 @@ export function isType<
 >(object: any, ...keys: readonly K[]): object is T {
   if (!object) return false;
   const objectKeySet = new Set(Object.keys(object));
-  return keys.every(key => objectKeySet.has(key));
+  return keys.every((key) => objectKeySet.has(key));
 }
 
 /**
@@ -156,7 +156,7 @@ export function requireKeys<T, K extends keyof T>(
   object: T,
   ...keys: K[]
 ): T & Required<{ [K1 in K]: NonNullable<T[K1]> }> {
-  keys.forEach(key => {
+  keys.forEach((key) => {
     if (object[key] === undefined || object[key] === null) {
       throw new Error(`Key ${key} is invalid`);
     }
@@ -192,12 +192,12 @@ export async function toPromise<T>(
 }
 
 /** Get the platform to which a request belongs. */
-export function getRequestPlatform(request: unknown): SupportedPlatform {
-  if (isType<FacebookPlatformRequest>(request, "object", "entry")) {
+export function getRequestPlatform(request: unknown): AmbiguousPlatform {
+  if (isType<FacebookRawRequest>(request, "object", "entry")) {
     return "facebook";
   }
 
-  if (isType<TelegramPlatformRequest>(request, "update_id")) {
+  if (isType<TelegramRawRequest>(request, "update_id")) {
     return "telegram";
   }
 

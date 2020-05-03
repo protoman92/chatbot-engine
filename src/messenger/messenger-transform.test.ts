@@ -3,40 +3,40 @@ import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose } from "../common/utils";
 import { PlatformCommunicator } from "../type/communicator";
 import { ContextDAO } from "../type/context-dao";
-import { RootMessageProcessor } from "../type/messenger";
-import { GenericRequest } from "../type/request";
-import { GenericResponse } from "../type/response";
+import { BaseMessageProcessor } from "../type/messenger";
+import { AmbiguousRequest } from "../type/request";
+import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
 import {
   injectContextOnReceive,
   saveContextOnSend,
   saveUserForTargetID,
-  setTypingIndicator
+  setTypingIndicator,
 } from "./messenger-transform";
 import { saveTelegramUser } from "./telegram-transform";
 
 const targetID = "target-id";
 const targetPlatform = "facebook";
-let messenger: RootMessageProcessor<{}, unknown, GenericRequest<{}>>;
+let messenger: BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>;
 let communicator: PlatformCommunicator<unknown>;
 let contextDAO: ContextDAO<{}>;
 
 beforeEach(async () => {
-  messenger = spy<RootMessageProcessor<{}, unknown, GenericRequest<{}>>>({
+  messenger = spy<BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>>({
     generalizeRequest: () => Promise.reject(""),
     receiveRequest: () => Promise.reject(""),
-    sendResponse: () => Promise.reject("")
+    sendResponse: () => Promise.reject(""),
   });
 
   communicator = spy<PlatformCommunicator<unknown>>({
     sendResponse: () => Promise.reject(""),
-    setTypingIndicator: () => Promise.reject("")
+    setTypingIndicator: () => Promise.reject(""),
   });
 
   contextDAO = spy<ContextDAO<{}>>({
     getContext: () => Promise.reject(""),
     appendContext: () => Promise.reject(""),
-    resetContext: () => Promise.reject("")
+    resetContext: () => Promise.reject(""),
   });
 });
 
@@ -59,11 +59,11 @@ describe("Save context on send", () => {
 
     const additionalContext: Partial<{}> = { a: 1, b: 2 };
 
-    const genericResponse: GenericResponse<{}> = {
+    const genericResponse: AmbiguousResponse<{}> = {
       targetID,
       targetPlatform,
       additionalContext,
-      output: []
+      output: [],
     };
 
     // When
@@ -90,7 +90,7 @@ describe("Inject context on receive", () => {
     when(messenger.receiveRequest(anything())).thenResolve({
       targetID,
       newContext: expectedContext,
-      visualContents: []
+      visualContents: [],
     });
 
     when(contextDAO.getContext(targetID, targetPlatform)).thenResolve(
@@ -102,11 +102,11 @@ describe("Inject context on receive", () => {
       injectContextOnReceive(instance(contextDAO))
     );
 
-    const genericRequest: GenericRequest<{}> = {
+    const genericRequest: AmbiguousRequest<{}> = {
       targetID,
       targetPlatform,
       oldContext: {},
-      input: []
+      input: [],
     };
 
     // When
@@ -132,7 +132,7 @@ describe("Save user for target ID", () => {
 
     when(messenger.receiveRequest(anything())).thenResolve({
       targetID,
-      visualContents: []
+      visualContents: [],
     });
 
     const transformed = await compose(
@@ -144,11 +144,11 @@ describe("Save user for target ID", () => {
       )
     );
 
-    const genericRequest: GenericRequest<{}> = {
+    const genericRequest: AmbiguousRequest<{}> = {
       targetID,
       targetPlatform,
       oldContext: {},
-      input: []
+      input: [],
     };
 
     // When
@@ -176,7 +176,7 @@ describe("Save Telegram user for target ID", () => {
     tlMessenger = spy<TelegramMessageProcessor<{}>>({
       generalizeRequest: () => Promise.reject(""),
       receiveRequest: () => Promise.reject(""),
-      sendResponse: () => Promise.reject("")
+      sendResponse: () => Promise.reject(""),
     });
   });
 
@@ -201,11 +201,11 @@ describe("Save Telegram user for target ID", () => {
         last_name: "",
         username: "",
         language_code: "en" as const,
-        is_bot: false
+        is_bot: false,
       },
       targetPlatform: "telegram",
       oldContext: {},
-      input: []
+      input: [],
     });
 
     // Then
@@ -230,7 +230,7 @@ describe("Set typing indicator", () => {
     await transformed.sendResponse({
       targetID,
       targetPlatform,
-      output: []
+      output: [],
     });
 
     // Then

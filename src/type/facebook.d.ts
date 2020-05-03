@@ -2,38 +2,38 @@ import { DeepReadonly, Omit } from "ts-essentials";
 import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformCommunicator } from "./communicator";
 import { Leaf as RootLeaf } from "./leaf";
-import { RootMessageProcessor } from "./messenger";
-import { RootGenericRequest, RootGenericRequestInput } from "./request";
-import { RootGenericResponse } from "./response";
-import { RootVisualContent } from "./visual-content";
+import { BaseMessageProcessor } from "./messenger";
+import { BaseRequest, BaseRequestInput } from "./request";
+import { BaseResponse } from "./response";
+import { BaseResponseOutput } from "./visual-content";
 
-export interface GenericFacebookRequestInput extends RootGenericRequestInput {
+export interface FacebookRequestInput extends BaseRequestInput {
   readonly targetPlatform: "facebook";
   readonly stickerID: string;
 }
 
-export interface GenericFacebookRequest<C> extends RootGenericRequest<C> {
+export interface FacebookRequest<C> extends BaseRequest<C> {
   readonly targetPlatform: "facebook";
-  readonly input: readonly GenericFacebookRequestInput[];
+  readonly input: readonly FacebookRequestInput[];
 }
 
-export interface GenericFacebookResponse<C> extends RootGenericResponse<C> {
+export interface FacebookResponse<C> extends BaseResponse<C> {
   readonly targetPlatform: "facebook";
-  readonly output: readonly FacebookVisualContent[];
+  readonly output: readonly FacebookResponseOutput[];
 }
 
-declare namespace FacebookVisualContent {
+declare namespace FacebookResponseOutput {
   type QuickReply =
-    | RootVisualContent.QuickReply.Location
-    | RootVisualContent.QuickReply.Postback
-    | RootVisualContent.QuickReply.Text;
+    | BaseResponseOutput.QuickReply.Location
+    | BaseResponseOutput.QuickReply.Postback
+    | BaseResponseOutput.QuickReply.Text;
 }
 
-export interface FacebookVisualContent extends RootVisualContent {
-  readonly quickReplies?: readonly FacebookVisualContent.QuickReply[];
+export interface FacebookResponseOutput extends BaseResponseOutput {
+  readonly quickReplies?: readonly FacebookResponseOutput.QuickReply[];
 }
 
-declare namespace FacebookPlatformRequest {
+declare namespace FacebookRawRequest {
   namespace Entry {
     namespace Messaging {
       interface Postback {
@@ -111,17 +111,17 @@ declare namespace FacebookPlatformRequest {
 }
 
 /** Represents a webhook request. */
-export interface FacebookPlatformRequest {
+export interface FacebookRawRequest {
   readonly object: "page";
   readonly entry:
     | Readonly<{
-        messaging: readonly FacebookPlatformRequest.Entry.Messaging[];
+        messaging: readonly FacebookRawRequest.Entry.Messaging[];
       }>[]
     | undefined
     | null;
 }
 
-declare namespace FacebookPlatformResponse {
+declare namespace FacebookRawResponse {
   interface QuickReply {
     readonly title: string;
     readonly content_type: "location" | "text";
@@ -229,15 +229,12 @@ declare namespace FacebookPlatformResponse {
     | Message.Text;
 }
 
-export type FacebookPlatformResponse = Omit<
-  FacebookPlatformResponse.Message,
-  "message"
-> &
+export type FacebookRawResponse = Omit<FacebookRawResponse.Message, "message"> &
   DeepReadonly<{
     recipient: { id: string };
     message: {
-      quick_replies: readonly FacebookPlatformResponse.QuickReply[] | undefined;
-    } & FacebookPlatformResponse.Message["message"];
+      quick_replies: readonly FacebookRawResponse.QuickReply[] | undefined;
+    } & FacebookRawResponse.Message["message"];
   }>;
 
 /**
@@ -245,14 +242,9 @@ export type FacebookPlatformResponse = Omit<
  * @template C The context used by the current chatbot.
  */
 export interface FacebookMessageProcessor<C>
-  extends RootMessageProcessor<
-    C,
-    FacebookPlatformRequest,
-    GenericFacebookRequest<C>
-  > {}
+  extends BaseMessageProcessor<C, FacebookRawRequest, FacebookRequest<C>> {}
 
-export type FacebookDefaultContext = RootDefaultContext &
-  GenericFacebookRequestInput;
+export type FacebookDefaultContext = RootDefaultContext & FacebookRequestInput;
 
 declare namespace FacebookLeaf {
   type Observer<C> = RootLeaf.Base.Observer<C, FacebookDefaultContext>;
@@ -277,7 +269,7 @@ export interface FacebookConfigs {
 
 /** Represents a Facebook-specific communicator. */
 export interface FacebookCommunicator
-  extends PlatformCommunicator<FacebookPlatformResponse> {
+  extends PlatformCommunicator<FacebookRawResponse> {
   /** Get the user associated with a sender ID. */
   getUser(targetID: string): Promise<FacebookUser>;
 
