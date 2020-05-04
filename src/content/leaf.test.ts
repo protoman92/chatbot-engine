@@ -61,7 +61,7 @@ describe("Leaf for platforms", () => {
       complete: () => Promise.reject(""),
     });
 
-    platformLeaf = await createLeafWithObserver(() => {
+    platformLeaf = await createLeafWithObserver<{}>(() => {
       return createLeafObserverForPlatforms({
         facebook: instance(fbLeaf),
         telegram: instance(tlLeaf),

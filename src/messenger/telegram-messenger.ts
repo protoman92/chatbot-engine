@@ -52,13 +52,9 @@ function createTelegramRequest<Context>(
   function processMessageRequest({
     message: { chat, from: user, ...restMessage },
   }: TelegramRawRequest.Message):
-    | [
-        TelegramUser,
-        TelegramRawRequest.Message.Message.Chat.Chat,
-        TelegramRequest<Context>["input"]
-      ]
+    | [TelegramUser, TelegramRawRequest.Chat, TelegramRequest<Context>["input"]]
     | undefined {
-    if (isType<TelegramRawRequest.Message.Message.Text>(restMessage, "text")) {
+    if (isType<TelegramRawRequest.Text>(restMessage, "text")) {
       const { text } = restMessage;
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
@@ -79,10 +75,7 @@ function createTelegramRequest<Context>(
     }
 
     if (
-      isType<TelegramRawRequest.Message.Message.NewChatMember>(
-        restMessage,
-        "new_chat_members"
-      )
+      isType<TelegramRawRequest.NewChatMember>(restMessage, "new_chat_members")
     ) {
       const { new_chat_members: newChatMembers } = restMessage;
 
@@ -103,10 +96,7 @@ function createTelegramRequest<Context>(
     }
 
     if (
-      isType<TelegramRawRequest.Message.Message.LeftChatMember>(
-        restMessage,
-        "left_chat_member"
-      )
+      isType<TelegramRawRequest.LeftChatMember>(restMessage, "left_chat_member")
     ) {
       const { left_chat_member } = restMessage;
 
@@ -134,7 +124,7 @@ function createTelegramRequest<Context>(
   }: TelegramRawRequest.Callback):
     | [
         TelegramUser,
-        TelegramRawRequest.Message.Message.Chat.Chat | undefined,
+        TelegramRawRequest.Chat | undefined,
         TelegramRequest<Context>["input"]
       ]
     | undefined {
@@ -159,7 +149,7 @@ function createTelegramRequest<Context>(
   ):
     | [
         TelegramUser,
-        TelegramRawRequest.Message.Message.Chat.Chat | undefined,
+        TelegramRawRequest.Chat | undefined,
         TelegramRequest<Context>["input"]
       ]
     | undefined {

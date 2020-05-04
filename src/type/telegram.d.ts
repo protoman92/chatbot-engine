@@ -1,6 +1,6 @@
 import { DeepReadonly } from "ts-essentials";
-import { DefaultContext as RootDefaultContext } from "./common";
 import { PlatformClient } from "./client";
+import { DefaultContext as RootDefaultContext } from "./common";
 import { BaseLeaf, BaseLeafObserver } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
@@ -81,58 +81,47 @@ export interface TelegramResponseOutput extends BaseResponseOutput {
 }
 
 declare namespace TelegramRawRequest {
-  namespace Message {
-    namespace Message {
-      namespace Chat {
-        namespace Chat {
-          interface Private {
-            readonly id: number;
-            readonly type: "private";
-          }
-
-          interface Group {
-            readonly id: number;
-            readonly type: "group";
-          }
-        }
-
-        type Chat = Chat.Group | Chat.Private;
-      }
-
-      interface LeftChatMember {
-        readonly chat: TelegramRawRequest.Message.Message.Chat.Chat;
-        readonly from: TelegramUser;
-        readonly message_id: number;
-        readonly left_chat_participant: TelegramBot | TelegramUser;
-        readonly left_chat_member: TelegramBot | TelegramUser;
-      }
-
-      interface NewChatMember {
-        readonly chat: TelegramRawRequest.Message.Message.Chat.Chat;
-        readonly from: TelegramUser;
-        readonly message_id: number;
-        readonly new_chat_participant: TelegramBot | TelegramUser;
-        readonly new_chat_member: TelegramBot | TelegramUser;
-        readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
-      }
-
-      interface Text {
-        readonly chat: TelegramRawRequest.Message.Message.Chat.Chat;
-        readonly from: TelegramUser;
-        readonly message_id: number;
-        readonly text: string;
-      }
+  namespace Chat {
+    interface Private {
+      readonly id: number;
+      readonly type: "private";
     }
 
-    type Message =
-      | Message.LeftChatMember
-      | Message.NewChatMember
-      | Message.Text;
+    interface Group {
+      readonly id: number;
+      readonly type: "group";
+    }
+  }
+
+  type Chat = Chat.Group | Chat.Private;
+
+  interface LeftChatMember {
+    readonly chat: Chat;
+    readonly from: TelegramUser;
+    readonly message_id: number;
+    readonly left_chat_participant: TelegramBot | TelegramUser;
+    readonly left_chat_member: TelegramBot | TelegramUser;
+  }
+
+  interface NewChatMember {
+    readonly chat: Chat;
+    readonly from: TelegramUser;
+    readonly message_id: number;
+    readonly new_chat_participant: TelegramBot | TelegramUser;
+    readonly new_chat_member: TelegramBot | TelegramUser;
+    readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
+  }
+
+  interface Text {
+    readonly chat: Chat;
+    readonly from: TelegramUser;
+    readonly message_id: number;
+    readonly text: string;
   }
 
   /** Payload that includes on message field. */
   interface Message {
-    readonly message: Message.Message;
+    readonly message: LeftChatMember | NewChatMember | Text;
     readonly update_id: number;
   }
 
@@ -141,10 +130,10 @@ declare namespace TelegramRawRequest {
     readonly callback_query: DeepReadonly<{
       id: string;
       from: TelegramUser;
-      message: Message.Message;
       chat_instance: string;
       data: string;
-    }>;
+    }> &
+      Pick<Message, "message">;
 
     readonly update_id: number;
   }
