@@ -8,6 +8,7 @@ import { BaseResponse } from "./response";
 import { BaseResponseOutput } from "./visual-content";
 
 export interface FacebookRequestInput extends BaseRequestInput {
+  readonly inputImageURL: string;
   readonly targetPlatform: "facebook";
   readonly stickerID: string;
 }

@@ -5,7 +5,6 @@ import { TelegramRequest, TelegramRequestInput } from "./telegram";
 
 export interface BaseRequestInput {
   readonly inputText: string;
-  readonly inputImageURL: string;
   readonly inputCoordinate: Coordinates;
 }
 
