@@ -6,7 +6,7 @@ import {
   TelegramBot,
   TelegramClient,
   TelegramMessageProcessor,
-  TelegramRawRequest,
+  TelegramRawRequest as RawRequest,
   TelegramRawResponse,
   TelegramRequest,
   TelegramResponse,
@@ -46,15 +46,15 @@ export function extractInputCommand(
 
 /** Map platform request to generic request for generic processing */
 function createTelegramRequest<Context>(
-  webhook: TelegramRawRequest,
+  webhook: RawRequest,
   { username }: TelegramBot
 ): readonly TelegramRequest<Context>[] {
   function processMessageRequest({
     message: { chat, from: user, ...restMessage },
-  }: TelegramRawRequest.Message):
-    | [TelegramUser, TelegramRawRequest.Chat, TelegramRequest<Context>["input"]]
+  }: RawRequest.Message):
+    | [TelegramUser, RawRequest.Chat, TelegramRequest<Context>["input"]]
     | undefined {
-    if (isType<TelegramRawRequest.Text>(restMessage, "text")) {
+    if (isType<RawRequest.Message.Text>(restMessage, "text")) {
       const { text } = restMessage;
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
@@ -65,6 +65,7 @@ function createTelegramRequest<Context>(
           {
             inputCommand,
             inputText,
+            inputPhotos: [],
             leftChatMembers: [],
             newChatMembers: [],
             targetPlatform: "telegram",
@@ -75,7 +76,7 @@ function createTelegramRequest<Context>(
     }
 
     if (
-      isType<TelegramRawRequest.NewChatMember>(restMessage, "new_chat_members")
+      isType<RawRequest.Message.NewChatMember>(restMessage, "new_chat_members")
     ) {
       const { new_chat_members: newChatMembers } = restMessage;
 
@@ -86,6 +87,7 @@ function createTelegramRequest<Context>(
           {
             newChatMembers,
             inputCommand: "",
+            inputPhotos: [],
             inputText: "",
             leftChatMembers: [],
             targetPlatform: "telegram",
@@ -96,7 +98,7 @@ function createTelegramRequest<Context>(
     }
 
     if (
-      isType<TelegramRawRequest.LeftChatMember>(restMessage, "left_chat_member")
+      isType<RawRequest.Message.LeftChatMember>(restMessage, "left_chat_member")
     ) {
       const { left_chat_member } = restMessage;
 
@@ -106,9 +108,30 @@ function createTelegramRequest<Context>(
         [
           {
             inputCommand: "",
+            inputPhotos: [],
             inputText: "",
             newChatMembers: [],
             leftChatMembers: [left_chat_member],
+            targetPlatform: "telegram",
+            inputCoordinate: DEFAULT_COORDINATES,
+          },
+        ],
+      ];
+    }
+
+    if (isType<RawRequest.Message.Photo>(restMessage, "photo")) {
+      const { photo: inputPhotos } = restMessage;
+
+      return [
+        user,
+        chat,
+        [
+          {
+            inputPhotos,
+            inputCommand: "",
+            inputText: "",
+            newChatMembers: [],
+            leftChatMembers: [],
             targetPlatform: "telegram",
             inputCoordinate: DEFAULT_COORDINATES,
           },
@@ -121,10 +144,10 @@ function createTelegramRequest<Context>(
 
   function processCallbackRequest({
     callback_query: { data, from: user },
-  }: TelegramRawRequest.Callback):
+  }: RawRequest.Callback):
     | [
         TelegramUser,
-        TelegramRawRequest.Chat | undefined,
+        RawRequest.Chat | undefined,
         TelegramRequest<Context>["input"]
       ]
     | undefined {
@@ -135,6 +158,7 @@ function createTelegramRequest<Context>(
         {
           targetPlatform: "telegram",
           inputCommand: "",
+          inputPhotos: [],
           inputText: data,
           inputCoordinate: DEFAULT_COORDINATES,
           leftChatMembers: [],
@@ -145,21 +169,21 @@ function createTelegramRequest<Context>(
   }
 
   function processRequest(
-    request: TelegramRawRequest
+    request: RawRequest
   ):
     | [
         TelegramUser,
-        TelegramRawRequest.Chat | undefined,
+        RawRequest.Chat | undefined,
         TelegramRequest<Context>["input"]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
-    if (isType<TelegramRawRequest.Message>(request, "message")) {
+    if (isType<RawRequest.Message>(request, "message")) {
       result = processMessageRequest(request);
     }
 
-    if (isType<TelegramRawRequest.Callback>(request, "callback_query")) {
+    if (isType<RawRequest.Callback>(request, "callback_query")) {
       result = processCallbackRequest(request);
     }
 

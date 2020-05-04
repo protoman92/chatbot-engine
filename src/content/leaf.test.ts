@@ -90,6 +90,7 @@ describe("Leaf for platforms", () => {
       targetID,
       targetPlatform: "telegram",
       inputCommand: "",
+      inputPhotos: [],
       inputText: "",
       inputCoordinate: DEFAULT_COORDINATES,
       leftChatMembers: [],
@@ -132,6 +133,7 @@ describe("Leaf for platforms", () => {
         leftChatMembers: [],
         inputCommand: "",
         inputCoordinate: DEFAULT_COORDINATES,
+        inputPhotos: [],
         inputText: "",
         newChatMembers: [],
       });

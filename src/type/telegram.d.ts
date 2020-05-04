@@ -9,6 +9,7 @@ import { BaseResponseOutput } from "./visual-content";
 
 export interface TelegramRequestInput extends BaseRequestInput {
   readonly inputCommand: string;
+  readonly inputPhotos: readonly TelegramRawRequest.PhotoDetails[];
   readonly leftChatMembers: readonly (TelegramBot | TelegramUser)[];
   readonly newChatMembers: readonly (TelegramBot | TelegramUser)[];
   readonly targetPlatform: "telegram";
@@ -95,33 +96,55 @@ declare namespace TelegramRawRequest {
 
   type Chat = Chat.Group | Chat.Private;
 
-  interface LeftChatMember {
-    readonly chat: Chat;
-    readonly from: TelegramUser;
-    readonly message_id: number;
-    readonly left_chat_participant: TelegramBot | TelegramUser;
-    readonly left_chat_member: TelegramBot | TelegramUser;
+  interface PhotoDetails {
+    readonly file_id: string;
+    readonly file_unique_id: string;
+    readonly file_size: number;
+    readonly width: number;
+    readonly height: number;
   }
 
-  interface NewChatMember {
-    readonly chat: Chat;
-    readonly from: TelegramUser;
-    readonly message_id: number;
-    readonly new_chat_participant: TelegramBot | TelegramUser;
-    readonly new_chat_member: TelegramBot | TelegramUser;
-    readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
-  }
+  namespace Message {
+    interface LeftChatMember {
+      readonly chat: Chat;
+      readonly from: TelegramUser;
+      readonly message_id: number;
+      readonly left_chat_participant: TelegramBot | TelegramUser;
+      readonly left_chat_member: TelegramBot | TelegramUser;
+    }
 
-  interface Text {
-    readonly chat: Chat;
-    readonly from: TelegramUser;
-    readonly message_id: number;
-    readonly text: string;
+    interface NewChatMember {
+      readonly chat: Chat;
+      readonly from: TelegramUser;
+      readonly message_id: number;
+      readonly new_chat_participant: TelegramBot | TelegramUser;
+      readonly new_chat_member: TelegramBot | TelegramUser;
+      readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
+    }
+
+    interface Photo {
+      readonly chat: Chat;
+      readonly date: number;
+      readonly from: TelegramUser;
+      readonly message_id: number;
+      readonly photo: readonly PhotoDetails[];
+    }
+
+    interface Text {
+      readonly chat: Chat;
+      readonly from: TelegramUser;
+      readonly message_id: number;
+      readonly text: string;
+    }
   }
 
   /** Payload that includes on message field. */
   interface Message {
-    readonly message: LeftChatMember | NewChatMember | Text;
+    readonly message:
+      | Message.LeftChatMember
+      | Message.NewChatMember
+      | Message.Photo
+      | Message.Text;
     readonly update_id: number;
   }
 
