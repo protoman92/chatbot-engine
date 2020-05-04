@@ -17,13 +17,13 @@ export interface WitResponse<Entities extends string = string> {
   readonly entities: { [K in Entities]?: readonly WitEntity[] };
 }
 
-/** Client to access wit APIs. */
+/** Client to access wit APIs */
 export interface WitClient {
-  /** Validate a query with wit. */
+  /** Validate a query with wit */
   validate<E extends string>(message: string): Promise<WitResponse<E>>;
 }
 
-/** Use this context if we want to access wit validation results. */
+/** Use this context if we want to access wit validation results */
 export interface WitContext<Entities extends string = string> {
   readonly witEntities: Readonly<{ [K in Entities]?: readonly WitEntity[] }>;
 }

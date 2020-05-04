@@ -1,8 +1,8 @@
 import { NextResult } from "../stream";
 
-/** Represents a subscription to some content stream. */
+/** Represents a subscription to some content stream */
 export interface ContentSubscription {
-  /** Unsubscribe from the underlying stream. */
+  /** Unsubscribe from the underlying stream */
   unsubscribe(): Promise<unknown>;
 }
 
@@ -18,7 +18,7 @@ export interface ContentObserver<T> extends NextContentObserver<T> {
 
 /** Observe some contents on subscription */
 export interface ContentObservable<T> {
-  /** Subscribe to this stream's contents. */
+  /** Subscribe to this stream's contents */
   subscribe(observer: ContentObserver<T>): Promise<ContentSubscription>;
 }
 

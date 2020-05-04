@@ -6,16 +6,16 @@ import { AmbiguousPlatform } from "./messenger";
  * persistence framework here.
  */
 export interface ContextDAO<Context> {
-  /** Get the whole context in storage. */
+  /** Get the whole context in storage */
   getContext(targetID: string, platform: AmbiguousPlatform): Promise<Context>;
 
-  /** Append to the current context in storage. */
+  /** Append to the current context in storage */
   appendContext(
     targetID: string,
     platform: AmbiguousPlatform,
     context: Partial<Context>
   ): Promise<unknown>;
 
-  /** Reset all context to factory. */
+  /** Reset all context to factory */
   resetContext(targetID: string, platform: AmbiguousPlatform): Promise<unknown>;
 }

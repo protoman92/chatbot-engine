@@ -3,7 +3,7 @@ import { LeafSelector } from "./leaf";
 import { AmbiguousRequest } from "./request";
 import { AmbiguousResponse } from "./response";
 
-/** Represents all supported platform identifiers. */
+/** Represents all supported platform identifiers */
 export type AmbiguousPlatform = "facebook" | "telegram";
 
 declare namespace BaseMessageProcessor {
@@ -42,13 +42,13 @@ export interface BaseMessageProcessor<
   RawRequest,
   AmbRequest extends AmbiguousRequest<Context>
 > {
-  /** Generalize a raw request into a generic request. */
+  /** Generalize a raw request into a generic request */
   generalizeRequest(request: RawRequest): Promise<readonly AmbRequest[]>;
 
-  /** Receive an incoming generic request. */
+  /** Receive an incoming generic request */
   receiveRequest(request: AmbRequest): Promise<{}>;
 
-  /** Send an outgoing platform response. */
+  /** Send an outgoing platform response */
   sendResponse(response: AmbiguousResponse<Context>): Promise<{}>;
 }
 
@@ -58,6 +58,6 @@ export interface BaseMessageProcessor<
  * have a generic messenger that handles requests one-by-one.
  */
 export interface Messenger<RawRequest, RawResponse> {
-  /** Process a platform request from end-to-end. */
+  /** Process a platform request from end-to-end */
   processRawRequest(req: RawRequest): Promise<unknown>;
 }

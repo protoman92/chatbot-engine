@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { HTTPClient } from "../type/client";
 
-/** Create a default HTTP client using axios. */
+/** Create a default HTTP client using axios */
 export function createAxiosClient(axiosInstance: AxiosInstance = axios) {
   const client: HTTPClient = {
     communicate: async (request) => {

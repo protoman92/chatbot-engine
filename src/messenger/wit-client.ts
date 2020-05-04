@@ -3,7 +3,7 @@ import { HTTPClient } from "../type/client";
 import { WitClient, WitConfigs, WitResponse } from "../type/wit";
 import defaultAxiosClient from "./axios-client";
 
-/** Create a default wit client. */
+/** Create a default wit client */
 export function createWitClient(
   client: HTTPClient,
   configs: WitConfigs

@@ -50,12 +50,12 @@ function createTelegramRequest<Context>(
   { username }: TelegramBot
 ): readonly TelegramRequest<Context>[] {
   function processMessageRequest({
-    message: { chat, from: user, ...restMessage },
+    message: { chat, from: user, ...message },
   }: RawRequest.Message):
     | [TelegramUser, RawRequest.Chat, TelegramRequest<Context>["input"]]
     | undefined {
-    if (isType<RawRequest.Message.Text>(restMessage, "text")) {
-      const { text } = restMessage;
+    if (isType<RawRequest.Message.Text>(message, "text")) {
+      const { text } = message;
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
       return [
@@ -75,10 +75,29 @@ function createTelegramRequest<Context>(
       ];
     }
 
-    if (
-      isType<RawRequest.Message.NewChatMember>(restMessage, "new_chat_members")
-    ) {
-      const { new_chat_members: newChatMembers } = restMessage;
+    if (isType<RawRequest.Message.Document>(message, "document")) {
+      const { document } = message;
+
+      return [
+        user,
+        chat,
+        [
+          {
+            inputCommand: "",
+            inputDocument: document,
+            inputText: "",
+            inputPhotos: [],
+            leftChatMembers: [],
+            newChatMembers: [],
+            targetPlatform: "telegram",
+            inputCoordinate: DEFAULT_COORDINATES,
+          },
+        ],
+      ];
+    }
+
+    if (isType<RawRequest.Message.NewChatMember>(message, "new_chat_members")) {
+      const { new_chat_members: newChatMembers } = message;
 
       return [
         user,
@@ -98,9 +117,9 @@ function createTelegramRequest<Context>(
     }
 
     if (
-      isType<RawRequest.Message.LeftChatMember>(restMessage, "left_chat_member")
+      isType<RawRequest.Message.LeftChatMember>(message, "left_chat_member")
     ) {
-      const { left_chat_member } = restMessage;
+      const { left_chat_member } = message;
 
       return [
         user,
@@ -119,8 +138,8 @@ function createTelegramRequest<Context>(
       ];
     }
 
-    if (isType<RawRequest.Message.Photo>(restMessage, "photo")) {
-      const { photo: inputPhotos } = restMessage;
+    if (isType<RawRequest.Message.Photo>(message, "photo")) {
+      const { photo: inputPhotos } = message;
 
       return [
         user,

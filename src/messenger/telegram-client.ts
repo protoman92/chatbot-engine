@@ -1,7 +1,12 @@
 import { stringify } from "querystring";
 import { requireAllTruthy } from "../common/utils";
 import { HTTPClient } from "../type/client";
-import { TelegramBot, TelegramClient, TelegramConfigs } from "../type/telegram";
+import {
+  TelegramBot,
+  TelegramClient,
+  TelegramConfigs,
+  TelegramRawRequest,
+} from "../type/telegram";
 import defaultAxiosClient from "./axios-client";
 
 export function createTelegramClient(
@@ -32,6 +37,13 @@ export function createTelegramClient(
   return {
     getCurrentBot: () =>
       communicate<TelegramBot>({ url: formatURL("getMe"), method: "GET" }),
+    getFile: (file_id) =>
+      communicate<TelegramRawRequest.FileDetails>({
+        url: formatURL("getFile"),
+        method: "GET",
+        query: { file_id },
+      }),
+    getFileURL: async (filePath) => formatURL(filePath),
     isMember: (chat_id, user_id) =>
       communicate<{ status: string }>({
         url: formatURL("getChatMember"),

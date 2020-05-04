@@ -33,7 +33,7 @@ export interface MonoLeadTransformer<Context>
 export interface LeafTransformChain<InContext, OutContext> {
   transform: LeafTransformer<InContext, OutContext>;
 
-  /** This is only used for debugging, and serves no production purposes. */
+  /** This is only used for debugging, and serves no production purposes */
   checkThis(test?: (ci: InContext, co: OutContext) => unknown): this;
 
   /** Apply post-transformers on the base leaf */
@@ -41,7 +41,7 @@ export interface LeafTransformChain<InContext, OutContext> {
     fn: LeafTransformer<OutContext, OutContext1>
   ): LeafTransformChain<InContext, OutContext1>;
 
-  /** This is only used for debugging, and serves no production purposes. */
+  /** This is only used for debugging, and serves no production purposes */
   forContextOfType<Context>(
     ctx?: Context
   ): LeafTransformChain<Context, Context>;

@@ -19,7 +19,7 @@ function createFacebookRequest<Context>(
 ): readonly FacebookRequest<Context>[] {
   const { object, entry } = webhook;
 
-  /** Group requests based on target ID. */
+  /** Group requests based on target ID */
   function groupRequests(reqs: readonly FacebookRawRequest.Entry.Messaging[]) {
     const requestMap: {
       [K: string]: readonly FacebookRawRequest.Entry.Messaging[];
@@ -336,7 +336,7 @@ function createFacebookResponse<Context>({
     }
   }
 
-  /** Create a Facebook quick reply from a generic quick reply. */
+  /** Create a Facebook quick reply from a generic quick reply */
   function createQuickReply(
     quickReply: FacebookResponseOutput.QuickReply
   ): FacebookRawResponse.QuickReply {

@@ -16,7 +16,7 @@ export enum NextResult {
   FAILURE = "FAILURE",
 }
 
-/** Create a subscription with custom unsubscribe logic. */
+/** Create a subscription with custom unsubscribe logic */
 export function createSubscription(
   unsub: () => Promise<unknown>
 ): ContentSubscription {

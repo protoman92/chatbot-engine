@@ -61,7 +61,7 @@ declare namespace FacebookResponseOutput {
       }
     }
 
-    /** Does something, like communicating with a remote service. */
+    /** Does something, like communicating with a remote service */
     type Action = Action.Postback | Action.URL;
 
     interface Button {
@@ -199,12 +199,12 @@ declare namespace FacebookRawRequest {
       type Message = Message.Attachment | Message.Text | Message.QuickReply;
     }
 
-    /** Represents possible combinations of Facebook requests. */
+    /** Represents possible combinations of Facebook requests */
     type Messaging = Messaging.Message | Messaging.Postback;
   }
 }
 
-/** Represents a webhook request. */
+/** Represents a webhook request */
 export interface FacebookRawRequest {
   readonly object: "page";
   readonly entry:
@@ -348,7 +348,7 @@ export type FacebookLeafObserver<Context> = BaseLeafObserver<
 
 export type FacebookLeaf<Context> = BaseLeaf<Context, FacebookDefaultContext>;
 
-/** Represents a Facebook user. */
+/** Represents a Facebook user */
 export interface FacebookUser {
   readonly first_name?: string;
   readonly last_name?: string;
@@ -356,19 +356,19 @@ export interface FacebookUser {
   readonly id: string;
 }
 
-/** Represents Facebook configurations. */
+/** Represents Facebook configurations */
 export interface FacebookConfigs {
   readonly apiVersion: string;
   readonly pageToken: string;
   readonly verifyToken: string;
 }
 
-/** Represents a Facebook-specific client. */
+/** Represents a Facebook-specific client */
 export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
-  /** Get the user associated with a sender ID. */
+  /** Get the user associated with a sender ID */
   getUser(targetID: string): Promise<FacebookUser>;
 
-  /** Resolve Facebook hub challenge to establish connection with chatbot. */
+  /** Resolve Facebook hub challenge to establish connection with chatbot */
   resolveVerifyChallenge(
     requestQuery: Readonly<{
       "hub.mode"?: string;

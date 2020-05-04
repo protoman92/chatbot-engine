@@ -7,7 +7,7 @@ import {
 } from "../type/facebook";
 import { saveUserForTargetID } from "./messenger-transform";
 
-/** Save a Facebook user when there is no target ID in the context. */
+/** Save a Facebook user when there is no target ID in the context */
 export function saveFacebookUser<Context>(
   contextDAO: ContextDAO<Context>,
   client: FacebookClient,

@@ -19,7 +19,7 @@ declare namespace HTTPRequest {
 
 export type HTTPRequest = HTTPRequest.GET | HTTPRequest.POST;
 
-/** Handle HTTP communication. */
+/** Handle HTTP communication */
 export interface HTTPClient {
   communicate<T>(request: HTTPRequest): Promise<T>;
 }
@@ -30,9 +30,9 @@ export interface HTTPClient {
  * handle all methods specified here.
  */
 export interface PlatformClient<RawResponse> {
-  /** Send a response to the related platform. */
+  /** Send a response to the related platform */
   sendResponse(data: RawResponse): Promise<unknown>;
 
-  /** Toggle typing indicator. */
+  /** Toggle typing indicator */
   setTypingIndicator(targetID: string, enabled: boolean): Promise<unknown>;
 }

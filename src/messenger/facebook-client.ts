@@ -3,7 +3,7 @@ import { HTTPClient } from "../type/client";
 import { FacebookClient, FacebookConfigs } from "../type/facebook";
 import defaultAxiosClient from "./axios-client";
 
-/** Create a platform client for Facebook. */
+/** Create a platform client for Facebook */
 export function createFacebookClient(
   client: HTTPClient,
   configs: FacebookConfigs

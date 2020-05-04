@@ -9,6 +9,7 @@ import { BaseResponseOutput } from "./visual-content";
 
 export interface TelegramRequestInput extends BaseRequestInput {
   readonly inputCommand: string;
+  readonly inputDocument?: TelegramRawRequest.DocumentDetails;
   readonly inputPhotos: readonly TelegramRawRequest.PhotoDetails[];
   readonly leftChatMembers: readonly (TelegramBot | TelegramUser)[];
   readonly newChatMembers: readonly (TelegramBot | TelegramUser)[];
@@ -96,6 +97,28 @@ declare namespace TelegramRawRequest {
 
   type Chat = Chat.Group | Chat.Private;
 
+  interface DocumentDetails {
+    readonly file_name: string;
+    readonly mime_type: string;
+    readonly thumb: Readonly<{
+      file_id: string;
+      file_unique_id: string;
+      file_size: number;
+      width: number;
+      height: number;
+    }>;
+    readonly file_id: string;
+    readonly file_unique_id: string;
+    readonly file_size: number;
+  }
+
+  interface FileDetails {
+    file_id: string;
+    file_unique_id: string;
+    file_size: number;
+    file_path: string;
+  }
+
   interface PhotoDetails {
     readonly file_id: string;
     readonly file_unique_id: string;
@@ -105,6 +128,14 @@ declare namespace TelegramRawRequest {
   }
 
   namespace Message {
+    interface Document {
+      readonly chat: Chat;
+      readonly date: number;
+      readonly from: TelegramUser;
+      readonly message_id: number;
+      readonly document: DocumentDetails;
+    }
+
     interface LeftChatMember {
       readonly chat: Chat;
       readonly from: TelegramUser;
@@ -138,9 +169,10 @@ declare namespace TelegramRawRequest {
     }
   }
 
-  /** Payload that includes on message field. */
+  /** Payload that includes on message field */
   interface Message {
     readonly message:
+      | Message.Document
       | Message.LeftChatMember
       | Message.NewChatMember
       | Message.Photo
@@ -148,7 +180,7 @@ declare namespace TelegramRawRequest {
     readonly update_id: number;
   }
 
-  /** Payload that includes callback field, usually for quick replies. */
+  /** Payload that includes callback field, usually for quick replies */
   interface Callback {
     readonly callback_query: DeepReadonly<{
       id: string;
@@ -249,7 +281,7 @@ export interface TelegramUser extends TelegramBot {
   readonly language_code: "en";
 }
 
-/** Represents Telegram configurations. */
+/** Represents Telegram configurations */
 export interface TelegramConfigs {
   readonly authToken: string;
   readonly webhookURL: string;
@@ -272,14 +304,20 @@ declare namespace TelegramClient {
   type APIResponse = APIResponse.Success | APIResponse.Failure;
 }
 
-/** A Telegram-specific client. */
+/** A Telegram-specific client */
 export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
-  /** Get the current chatbot. */
+  /** Get the current chatbot */
   getCurrentBot(): Promise<TelegramBot>;
 
-  /** Check if a bot is a member of a group. */
+  /** Get a file using its ID */
+  getFile(fileID: string): Promise<TelegramRawRequest.FileDetails>;
+
+  /** Get the URL to a file in Telegram */
+  getFileURL(filePath: string): Promise<string>;
+
+  /** Check if a bot is a member of a group */
   isMember(chatID: string, botID: string): Promise<boolean>;
 
-  /** Set webhook to start receiving message updates. */
+  /** Set webhook to start receiving message updates */
   setWebhook(): Promise<unknown>;
 }

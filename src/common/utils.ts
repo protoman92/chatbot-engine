@@ -58,7 +58,7 @@ export async function mapSeries<T1, T2>(
 export function promisify<T>(
   fn: (callback: (err: Error | undefined | null, value: T) => any) => void
 ): () => Promise<T> {
-  return function () {
+  return function() {
     return new Promise((resolve, reject) => {
       fn((err, val) => {
         if (err !== undefined && err !== null) {
@@ -80,7 +80,7 @@ export function promisify1<
 >(
   fn: FN
 ): (param1: Parameters<FN>[0]) => Promise<Parameters<Parameters<FN>[1]>[1]> {
-  return function (this: any, param1) {
+  return function(this: any, param1) {
     return promisify(fn.bind(this, param1))();
   };
 }
@@ -98,7 +98,7 @@ export function promisify2<
   p1: Parameters<FN>[0],
   p2: Parameters<FN>[1]
 ) => Promise<Parameters<Parameters<FN>[2]>[1]> {
-  return function (this: any, p1, p2) {
+  return function(this: any, p1, p2) {
     return promisify(fn.bind(this, p1, p2))();
   };
 }
@@ -151,7 +151,7 @@ export async function toPromise<T>(
   return convertible;
 }
 
-/** Get the platform to which a request belongs. */
+/** Get the platform to which a request belongs */
 export function getRequestPlatform(request: unknown): AmbiguousPlatform {
   if (isType<FacebookRawRequest>(request, "object", "entry")) {
     return "facebook";
@@ -168,12 +168,12 @@ export function genericError(message: string): Error {
   return new Error(`chatbot-engine: ${message}`);
 }
 
-/** Format an error for Facebook. */
+/** Format an error for Facebook */
 export function facebookError(error: string): Error {
   return new Error(`FACEBOOK: ${error}`);
 }
 
-/** Format an error for Telegram. */
+/** Format an error for Telegram */
 export function telegramError(error: string): Error {
   return new Error(`TELEGRAM: ${error}`);
 }
