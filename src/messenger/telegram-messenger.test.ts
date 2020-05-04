@@ -52,5 +52,10 @@ describe("Utilities", () => {
     expectJs(text5).to.eql(`run123
 456
 789`);
+
+    // Setup && When && Then 6
+    const [command6, text6] = extractInputCommand(username, "/start run123");
+    expectJs(command6).to.eql("start");
+    expectJs(text6).to.eql("run123");
   });
 });

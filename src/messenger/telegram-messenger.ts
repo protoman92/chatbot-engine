@@ -26,12 +26,23 @@ export function extractInputCommand(
   username: string,
   inputText: string
 ): [string, string] {
-  const [, command = "", text = inputText] =
-    inputText.match(
-      new RegExp(`^\\/\(\\w*\)\\s*@${username}\\s*\(\(.|\\s\)*\)$`, "im")
-    ) || [];
+  const usernamePing = `@${username}`;
 
-  return [command.trim(), text.trim()];
+  if (inputText.includes(usernamePing)) {
+    /** In this case, the bot is in a group, so it needs to be pinged */
+    const [, command = "", text = inputText] =
+      inputText.match(
+        new RegExp(`^\\/\(\\w*\)\\s*${usernamePing}\\s*\(\(.|\\s\)*\)$`, "im")
+      ) || [];
+
+    return [command.trim(), text.trim()];
+  } else {
+    const [, command = "", text = inputText] =
+      inputText.match(new RegExp(`^\\/\(\\w*\)\\s*\(\(.|\\s\)*\)$`, "im")) ||
+      [];
+
+    return [command.trim(), text.trim()];
+  }
 }
 
 /** Map platform request to generic request for generic processing */
