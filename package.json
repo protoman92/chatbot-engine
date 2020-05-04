@@ -3,11 +3,6 @@
   "bugs": {
     "url": "https://github.com/protoman92/chatbot-engine/issues"
   },
-  "dependencies": {
-    "aws-sdk": "^2.668.0",
-    "axios": "^0.18.1",
-    "redis": "3.0.2"
-  },
   "description": "Experimental chatbot engine",
   "devDependencies": {
     "@types/aws-sdk": "^2.7.0",
@@ -36,11 +31,6 @@
     "dist"
   ],
   "homepage": "https://github.com/protoman92/chatbot-engine#readme",
-  "husky": {
-    "hooks": {
-      "pre-push": "npm run build"
-    }
-  },
   "keywords": [
     "chatbot"
   ],
@@ -68,6 +58,11 @@
       "ts-node/register"
     ],
     "sourceMap": true
+  },
+  "peerDependencies": {
+    "aws-sdk": "^2.668.0",
+    "axios": "^0.18.1",
+    "redis": "3.0.2"
   },
   "repository": {
     "type": "git",
