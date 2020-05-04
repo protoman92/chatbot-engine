@@ -1,13 +1,13 @@
 import { FacebookResponse } from "./facebook";
 import { AmbiguousPlatform } from "./messenger";
 import { TelegramResponse } from "./telegram";
-import { BaseResponseOutput } from "./visual-content";
+import { AmbiguousResponseOutput } from "./visual-content";
 
 export interface BaseResponse<Context> {
   readonly targetID: string;
   readonly targetPlatform: AmbiguousPlatform;
   readonly additionalContext?: Partial<Context>;
-  readonly output: readonly BaseResponseOutput[];
+  readonly output: readonly AmbiguousResponseOutput[];
 }
 
 /**

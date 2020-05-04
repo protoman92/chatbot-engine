@@ -10,7 +10,6 @@ import {
   FacebookResponseOutput,
 } from "../type/facebook";
 import { LeafSelector } from "../type/leaf";
-import { BaseResponseOutput } from "../type/visual-content";
 import { createMessageProcessor } from "./generic-messenger";
 
 /** Map platform request to generic request for generic processing */
@@ -171,7 +170,7 @@ function createFacebookResponse<Context>({
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createSingleAction(
-    action: BaseResponseOutput.SubContent.Action
+    action: FacebookResponseOutput.Content.Action
   ): FacebookRawResponse.Message.Button.Button {
     const { text: title } = action;
 
@@ -187,7 +186,7 @@ function createFacebookResponse<Context>({
   function createButtonResponse({
     text,
     actions,
-  }: BaseResponseOutput.MainContent.Button): FacebookRawResponse.Message.Button {
+  }: FacebookResponseOutput.Content.Button): FacebookRawResponse.Message.Button {
     return {
       messaging_type: "RESPONSE",
       message: {
@@ -205,7 +204,7 @@ function createFacebookResponse<Context>({
 
   function createCarouselResponse({
     items,
-  }: BaseResponseOutput.MainContent.Carousel): FacebookRawResponse.Message.Carousel {
+  }: FacebookResponseOutput.Content.Carousel): FacebookRawResponse.Message.Carousel {
     if (!items.length) {
       throw facebookError("Not enough carousel items");
     }
@@ -243,7 +242,7 @@ function createFacebookResponse<Context>({
   }
 
   function createListResponse(
-    content: BaseResponseOutput.MainContent.List
+    content: FacebookResponseOutput.Content.List
   ): FacebookRawResponse.Message.List {
     const { items, actions: listActions } = content;
 
@@ -291,7 +290,7 @@ function createFacebookResponse<Context>({
 
   function createMediaResponse({
     media: { type, url },
-  }: BaseResponseOutput.MainContent.Media): FacebookRawResponse.Message.Media {
+  }: FacebookResponseOutput.Content.Media): FacebookRawResponse.Message.Media {
     return {
       message: {
         attachment: {
@@ -312,7 +311,7 @@ function createFacebookResponse<Context>({
 
   function createTextResponse({
     text,
-  }: BaseResponseOutput.MainContent.Text): FacebookRawResponse.Message.Text {
+  }: FacebookResponseOutput.Content.Text): FacebookRawResponse.Message.Text {
     return { messaging_type: "RESPONSE", message: { text } };
   }
 

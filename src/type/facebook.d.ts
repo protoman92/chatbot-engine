@@ -23,13 +23,106 @@ export interface FacebookResponse<Context> extends BaseResponse<Context> {
 }
 
 declare namespace FacebookResponseOutput {
-  type QuickReply =
-    | BaseResponseOutput.QuickReply.Location
-    | BaseResponseOutput.QuickReply.Postback
-    | BaseResponseOutput.QuickReply.Text;
+  namespace QuickReply {
+    interface Location {
+      readonly text: string;
+      readonly type: "location";
+    }
+
+    interface Postback {
+      readonly payload: string;
+      readonly text: string;
+      readonly type: "postback";
+    }
+
+    interface Text {
+      readonly text: string;
+      readonly type: "text";
+    }
+  }
+
+  type QuickReply = QuickReply.Location | QuickReply.Postback | QuickReply.Text;
+}
+
+declare namespace FacebookResponseOutput {
+  namespace Content {
+    namespace Action {
+      interface Postback {
+        readonly payload: string;
+        readonly text: string;
+        readonly type: "postback";
+      }
+
+      interface URL {
+        readonly url: string;
+        readonly text: string;
+        readonly type: "url";
+      }
+    }
+
+    /** Does something, like communicating with a remote service. */
+    type Action = Action.Postback | Action.URL;
+
+    interface Button {
+      readonly actions: readonly Action[];
+      readonly text: string;
+      readonly type: "button";
+    }
+
+    interface Carousel {
+      readonly actions: readonly Action[] | undefined | null;
+
+      readonly items: Readonly<{
+        title: string;
+        description: string | undefined | null;
+        mediaURL: string | undefined | null;
+        actions: readonly Action[] | undefined | null;
+      }>[];
+
+      readonly type: "carousel";
+    }
+
+    interface List {
+      readonly actions: readonly Action[] | undefined | null;
+
+      readonly items: Readonly<{
+        title: string;
+        description: string | undefined | null;
+        size: "large" | "small";
+        actions: readonly Action[] | undefined | null;
+      }>[];
+
+      readonly type: "list";
+    }
+
+    namespace Media {
+      interface Media {
+        readonly type: "image" | "video";
+        readonly url: string;
+      }
+    }
+
+    interface Media {
+      readonly media: Media.Media;
+      readonly type: "media";
+    }
+
+    interface Text {
+      readonly text: string;
+      readonly type: "text";
+    }
+  }
+
+  type Content =
+    | Content.Button
+    | Content.Carousel
+    | Content.List
+    | Content.Media
+    | Content.Text;
 }
 
 export interface FacebookResponseOutput extends BaseResponseOutput {
+  readonly content: FacebookResponseOutput.Content;
   readonly quickReplies?: readonly FacebookResponseOutput.QuickReply[];
 }
 

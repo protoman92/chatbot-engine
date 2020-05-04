@@ -13,7 +13,6 @@ import {
   TelegramResponseOutput,
   TelegramUser,
 } from "../type/telegram";
-import { BaseResponseOutput } from "../type/visual-content";
 import { createMessageProcessor } from "./generic-messenger";
 
 /**
@@ -208,7 +207,7 @@ function createTelegramResponse<Context>({
 }: TelegramResponse<Context>): readonly TelegramRawResponse[] {
   function createTextResponse(
     targetID: string,
-    { text }: BaseResponseOutput.MainContent.Text
+    { text }: TelegramResponseOutput.Content.Text
   ): Omit<TelegramRawResponse.SendMessage, "reply_markup"> {
     return { text, action: "sendMessage", chat_id: targetID };
   }

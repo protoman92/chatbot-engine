@@ -4,10 +4,9 @@ import { Omit } from "ts-essentials";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { DEFAULT_COORDINATES, isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
-import { FacebookLeaf } from "../type/facebook";
+import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousLeaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
-import { BaseResponseOutput } from "../type/visual-content";
 import {
   createDefaultErrorLeaf,
   createLeafObserverForPlatforms,
@@ -33,11 +32,12 @@ describe("Default error leaf", () => {
       inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
     });
+
     // Then
     expectJs(output).to.have.length(1);
     const [{ content: response }] = output;
 
-    if (isType<BaseResponseOutput.MainContent.Text>(response, "text")) {
+    if (isType<FacebookResponseOutput.Content.Text>(response, "text")) {
       expectJs(response.text).to.contain(error.message);
     } else {
       throw new Error("Never should have come here");
