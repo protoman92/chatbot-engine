@@ -135,12 +135,14 @@ describe("Save user for target ID", () => {
       visualContents: [],
     });
 
+    const additionalContext = { a: 1, b: 2 };
+
     const transformed = await compose(
       instance(messenger),
       saveUserForTargetID(
         instance(contextDAO),
         async () => ({ id: targetID }),
-        async () => {}
+        async () => ({ additionalContext, targetUserID: targetID })
       )
     );
 
@@ -159,7 +161,7 @@ describe("Save user for target ID", () => {
       contextDAO.appendContext(
         targetID,
         targetPlatform,
-        deepEqual({ targetID })
+        deepEqual({ ...additionalContext, targetID })
       )
     ).once();
 

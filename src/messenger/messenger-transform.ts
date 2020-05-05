@@ -1,8 +1,11 @@
 import { compose, deepClone } from "../common/utils";
-import { DefaultContext, Transformer } from "../type/common";
 import { PlatformClient } from "../type/client";
+import { DefaultContext, Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
-import { BaseMessageProcessor } from "../type/messenger";
+import {
+  BaseMessageProcessor,
+  SaveUserForTargetIDContext,
+} from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
 
 /**
@@ -76,7 +79,7 @@ export function saveUserForTargetID<
 >(
   contextDAO: ContextDAO<Context>,
   getUser: (targetID: string) => Promise<RawUser>,
-  saveUser: (platformUser: RawUser) => Promise<unknown>
+  saveUser: (rawUser: RawUser) => Promise<SaveUserForTargetIDContext<Context>>
 ): Transformer<Messenger> {
   return async (processor) => {
     return {
@@ -86,15 +89,13 @@ export function saveUserForTargetID<
         const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
-          const platformUser = await getUser(targetID);
-          await saveUser(platformUser);
-          const additionalContext: {} = { [sidKey]: targetID };
+          const rawUser = await getUser(targetID);
+          const { additionalContext, targetUserID } = await saveUser(rawUser);
 
-          await contextDAO.appendContext(
-            targetID,
-            targetPlatform,
-            additionalContext
-          );
+          await contextDAO.appendContext(targetID, targetPlatform, {
+            ...additionalContext,
+            [sidKey]: targetUserID,
+          });
         }
 
         return processor.receiveRequest({ ...request, oldContext });

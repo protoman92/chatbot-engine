@@ -61,3 +61,8 @@ export interface Messenger<RawRequest, RawResponse> {
   /** Process a platform request from end-to-end */
   processRawRequest(req: RawRequest): Promise<unknown>;
 }
+
+export interface SaveUserForTargetIDContext<Context> {
+  readonly additionalContext: Partial<Context>;
+  readonly targetUserID: string;
+}

@@ -1,11 +1,10 @@
 import { DefaultContext, Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
-import { TelegramMessageProcessor, TelegramUser } from "../type/telegram";
-
-interface SaveTelegramUserContext<Context> {
-  readonly additionalContext: Partial<Context>;
-  readonly telegramUserID: string;
-}
+import {
+  SaveTelegramUserContext,
+  TelegramMessageProcessor,
+  TelegramUser,
+} from "../type/telegram";
 
 /** Save a Telegram user in backend if targetID is not found in context */
 export function saveTelegramUser<Context>(
@@ -20,14 +19,13 @@ export function saveTelegramUser<Context>(
         const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
-          const {
-            additionalContext,
-            telegramUserID: targetID,
-          } = await saveUser(telegramUser);
+          const { additionalContext, telegramUserID } = await saveUser(
+            telegramUser
+          );
 
-          await contextDAO.appendContext(targetID, targetPlatform, {
+          await contextDAO.appendContext(telegramUserID, targetPlatform, {
             ...additionalContext,
-            targetID,
+            [sidKey]: telegramUserID,
           });
         }
 
