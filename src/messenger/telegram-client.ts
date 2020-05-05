@@ -11,7 +11,7 @@ import defaultAxiosClient from "./axios-client";
 
 export function createTelegramClient(
   client: HTTPClient,
-  { authToken, webhookURL }: TelegramConfigs
+  { authToken, defaultParseMode, webhookURL }: TelegramConfigs
 ): TelegramClient {
   function formatURL(action: string, query?: {}) {
     const qs = stringify(query);
@@ -50,9 +50,13 @@ export function createTelegramClient(
         method: "GET",
         query: { chat_id, user_id },
       }).then(({ status }) => status === "member"),
-    sendResponse: ({ action, ...payload }) => {
+    sendResponse: ({
+      action,
+      parseMode: parse_mode = defaultParseMode,
+      ...payload
+    }) => {
       return communicate({
-        url: formatURL(action),
+        url: formatURL(action, { parse_mode }),
         method: "POST",
         body: payload,
       });
@@ -81,7 +85,7 @@ export function createTelegramClient(
   };
 }
 
-export default function() {
+export default function(args?: Pick<TelegramConfigs, "defaultParseMode">) {
   const { TELEGRAM_AUTH_TOKEN = "", TELEGRAM_WEBHOOK_URL = "" } = process.env;
 
   const {
@@ -93,6 +97,7 @@ export default function() {
   });
 
   return createTelegramClient(defaultAxiosClient, {
+    ...args,
     authToken,
     webhookURL,
   });

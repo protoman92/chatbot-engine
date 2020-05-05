@@ -327,15 +327,18 @@ function createTelegramResponse<Context>({
 
   function createPlatformResponse(
     targetID: string,
-    { quickReplies, content }: TelegramResponse<Context>["output"][number]
+    {
+      content,
+      quickReplies,
+      parseMode,
+    }: TelegramResponse<Context>["output"][number]
   ): TelegramRawResponse {
-    const tlQuickReplies = quickReplies && createQuickReplies(quickReplies);
-
     switch (content.type) {
       case "text":
         return {
           ...createTextResponse(targetID, content),
-          reply_markup: tlQuickReplies,
+          parseMode,
+          reply_markup: quickReplies && createQuickReplies(quickReplies),
         };
 
       default:

@@ -80,6 +80,7 @@ declare namespace TelegramResponseOutput {
 export interface TelegramResponseOutput extends BaseResponseOutput {
   readonly content: TelegramResponseOutput.Content;
   readonly quickReplies?: TelegramResponseOutput.QuickReplyMatrix;
+  readonly parseMode?: "html" | "markdown";
 }
 
 declare namespace TelegramRawRequest {
@@ -245,6 +246,7 @@ declare namespace TelegramRawResponse {
   interface SendMessage {
     readonly action: "sendMessage";
     readonly chat_id: string;
+    readonly parseMode?: "html" | "markdown";
     readonly reply_markup: SendMessage.ReplyMarkup | undefined;
     readonly text: string;
   }
@@ -291,6 +293,7 @@ export interface TelegramUser extends TelegramBot {
 /** Represents Telegram configurations */
 export interface TelegramConfigs {
   readonly authToken: string;
+  readonly defaultParseMode?: "html" | "markdown";
   readonly webhookURL: string;
 }
 
