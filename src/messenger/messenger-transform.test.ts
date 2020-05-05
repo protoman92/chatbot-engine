@@ -187,9 +187,13 @@ describe("Save Telegram user for target ID", () => {
     ).thenResolve({});
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
+    const additionalContext = { a: 1, b: 2 };
+
     const transformed = await compose(
       instance(tlMessenger),
-      saveTelegramUser(instance(contextDAO), () => Promise.resolve({}))
+      saveTelegramUser(instance(contextDAO), () =>
+        Promise.resolve({ additionalContext, telegramUserID: targetID })
+      )
     );
 
     // When
@@ -210,7 +214,11 @@ describe("Save Telegram user for target ID", () => {
 
     // Then
     verify(
-      contextDAO.appendContext(targetID, "telegram", deepEqual({ targetID }))
+      contextDAO.appendContext(
+        targetID,
+        "telegram",
+        deepEqual({ ...additionalContext, targetID })
+      )
     ).once();
   });
 });
