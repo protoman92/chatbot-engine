@@ -1,7 +1,7 @@
 import { DeepReadonly, Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { DefaultContext as RootDefaultContext } from "./common";
-import { BaseLeaf, BaseLeafObserver } from "./leaf";
+import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
 import { BaseResponse } from "./response";
@@ -330,6 +330,13 @@ export type FacebookRawResponse = Omit<FacebookRawResponse.Message, "message"> &
       quick_replies: readonly FacebookRawResponse.QuickReply[] | undefined;
     } & FacebookRawResponse.Message["message"];
   }>;
+
+declare namespace FacebookMessageProcessor {
+  interface Configs<Context> {
+    readonly leafSelector: LeafSelector<Context>;
+    readonly client: FacebookClient;
+  }
+}
 
 /** Represents a Facebook-specific messenger */
 export interface FacebookMessageProcessor<Context>

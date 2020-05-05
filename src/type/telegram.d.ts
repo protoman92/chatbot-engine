@@ -1,7 +1,7 @@
 import { DeepReadonly } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { DefaultContext as RootDefaultContext } from "./common";
-import { BaseLeaf, BaseLeafObserver } from "./leaf";
+import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
 import { BaseResponse } from "./response";
@@ -251,6 +251,13 @@ declare namespace TelegramRawResponse {
 }
 
 export type TelegramRawResponse = TelegramRawResponse.SendMessage;
+
+declare namespace TelegramMessageProcessor {
+  interface Configs<Context> {
+    readonly leafSelector: LeafSelector<Context>;
+    readonly client: TelegramClient;
+  }
+}
 
 /** Represents a Telegram-specific message processor */
 export interface TelegramMessageProcessor<Context>

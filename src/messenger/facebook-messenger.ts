@@ -1,7 +1,6 @@
 import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
-  FacebookClient,
   FacebookMessageProcessor,
   FacebookRawRequest,
   FacebookRawResponse,
@@ -9,10 +8,9 @@ import {
   FacebookResponse,
   FacebookResponseOutput,
 } from "../type/facebook";
-import { LeafSelector } from "../type/leaf";
 import { createMessageProcessor } from "./generic-messenger";
 
-/** Map platform request to generic request for generic processing */
+/** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>(
   webhook: FacebookRawRequest,
   targetPlatform: "facebook"
@@ -358,7 +356,7 @@ function createFacebookResponse<Context>({
     }
   }
 
-  function createPlatformResponse(
+  function createRawResponse(
     targetID: string,
     { content, quickReplies = [] }: FacebookResponse<Context>["output"][number]
   ): FacebookRawResponse {
@@ -374,13 +372,12 @@ function createFacebookResponse<Context>({
     return { ...fbResponse, message, recipient: { id: targetID } };
   }
 
-  return output.map((o) => createPlatformResponse(targetID, o));
+  return output.map((o) => createRawResponse(targetID, o));
 }
 
 /** Create a Facebook message processor */
 export async function createFacebookMessageProcessor<Context>(
-  leafSelector: LeafSelector<Context>,
-  client: FacebookClient,
+  { leafSelector, client }: FacebookMessageProcessor.Configs<Context>,
   ...transformers: readonly Transformer<FacebookMessageProcessor<Context>>[]
 ): Promise<FacebookMessageProcessor<Context>> {
   return createMessageProcessor(

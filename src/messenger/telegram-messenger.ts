@@ -1,10 +1,8 @@
 import { Omit } from "ts-essentials";
 import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
-import { LeafSelector } from "../type/leaf";
 import {
   TelegramBot,
-  TelegramClient,
   TelegramMessageProcessor,
   TelegramRawRequest as RawRequest,
   TelegramRawResponse,
@@ -350,8 +348,7 @@ function createTelegramResponse<Context>({
 
 /** Create a Telegram message processor */
 export async function createTelegramMessageProcessor<Context>(
-  leafSelector: LeafSelector<Context>,
-  client: TelegramClient,
+  { leafSelector, client }: TelegramMessageProcessor.Configs<Context>,
   ...transformers: readonly Transformer<TelegramMessageProcessor<Context>>[]
 ): Promise<TelegramMessageProcessor<Context>> {
   await client.setWebhook();
