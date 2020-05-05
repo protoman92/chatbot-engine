@@ -15,7 +15,6 @@ import {
 } from "./messenger-transform";
 import { saveTelegramUser } from "./telegram-transform";
 
-const targetID = "target-id";
 const targetPlatform = "facebook";
 let messenger: BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>;
 let client: PlatformClient<unknown>;
@@ -41,6 +40,8 @@ beforeEach(async () => {
 });
 
 describe("Save context on send", () => {
+  const targetID = "target-id";
+
   it("Should save context on send", async () => {
     // Setup
     const oldContext: {} = { a: 1, b: 2 };
@@ -83,6 +84,8 @@ describe("Save context on send", () => {
 });
 
 describe("Inject context on receive", () => {
+  const targetID = "target-id";
+
   it("Should inject context on receive", async () => {
     // Setup
     const expectedContext = { a: 1, b: 2 };
@@ -124,6 +127,8 @@ describe("Inject context on receive", () => {
 });
 
 describe("Save user for target ID", () => {
+  const targetID = "target-id";
+
   it("Should save user when no user ID is present in context", async () => {
     // Setup
     when(
@@ -172,6 +177,7 @@ describe("Save user for target ID", () => {
 });
 
 describe("Save Telegram user for target ID", () => {
+  const targetID = 1;
   let tlMessenger: TelegramMessageProcessor<{}>;
 
   beforeEach(() => {
@@ -200,7 +206,7 @@ describe("Save Telegram user for target ID", () => {
 
     // When
     await transformed.receiveRequest({
-      targetID,
+      targetID: `${targetID}`,
       telegramUser: {
         id: 0,
         first_name: "",
@@ -217,15 +223,17 @@ describe("Save Telegram user for target ID", () => {
     // Then
     verify(
       contextDAO.appendContext(
-        targetID,
+        `${targetID}`,
         "telegram",
-        deepEqual({ ...additionalContext, targetID })
+        deepEqual({ ...additionalContext, targetID: `${targetID}` })
       )
     ).once();
   });
 });
 
 describe("Set typing indicator", () => {
+  const targetID = "target-id";
+
   it("Should set typing indicator when response is being sent", async () => {
     // Setup
     when(messenger.sendResponse(anything())).thenResolve();

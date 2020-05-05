@@ -15,17 +15,18 @@ export function saveTelegramUser<Context>(
     return {
       ...processor,
       receiveRequest: async (request) => {
-        const { targetPlatform, telegramUser, oldContext } = request;
+        const { targetID, targetPlatform, telegramUser, oldContext } = request;
         const sidKey: keyof DefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
-          const { additionalContext, telegramUserID } = await saveUser(
-            telegramUser
-          );
+          const {
+            additionalContext = {} as Partial<Context>,
+            telegramUserID,
+          } = await saveUser(telegramUser);
 
-          await contextDAO.appendContext(telegramUserID, targetPlatform, {
+          await contextDAO.appendContext(targetID, targetPlatform, {
             ...additionalContext,
-            [sidKey]: telegramUserID,
+            [sidKey]: `${telegramUserID}`,
           });
         }
 

@@ -323,6 +323,6 @@ export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
 }
 
 export interface SaveTelegramUserContext<Context> {
-  readonly additionalContext: Partial<Context>;
-  readonly telegramUserID: string;
+  readonly additionalContext?: Partial<Context>;
+  readonly telegramUserID: number;
 }

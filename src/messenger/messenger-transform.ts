@@ -90,11 +90,15 @@ export function saveUserForTargetID<
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           const rawUser = await getUser(targetID);
-          const { additionalContext, targetUserID } = await saveUser(rawUser);
+
+          const {
+            additionalContext = {} as Partial<Context>,
+            targetUserID,
+          } = await saveUser(rawUser);
 
           await contextDAO.appendContext(targetID, targetPlatform, {
             ...additionalContext,
-            [sidKey]: targetUserID,
+            [sidKey]: `${targetUserID}`,
           });
         }
 

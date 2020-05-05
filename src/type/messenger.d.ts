@@ -63,6 +63,6 @@ export interface Messenger<RawRequest, RawResponse> {
 }
 
 export interface SaveUserForTargetIDContext<Context> {
-  readonly additionalContext: Partial<Context>;
+  readonly additionalContext?: Partial<Context>;
   readonly targetUserID: string;
 }
