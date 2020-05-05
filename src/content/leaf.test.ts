@@ -87,6 +87,11 @@ describe("Leaf for platforms", () => {
     });
 
     await platformLeaf.next({
+      currentBot: {
+        id: 1,
+        first_name: "Hai",
+        username: "test_bot",
+      },
       targetID,
       targetPlatform: "telegram",
       inputCommand: "",
@@ -128,6 +133,11 @@ describe("Leaf for platforms", () => {
     // When && Then: Telegram
     try {
       await platformObserver.next({
+        currentBot: {
+          id: 1,
+          first_name: "Hai",
+          username: "test_bot",
+        },
         targetID,
         targetPlatform: "telegram",
         leftChatMembers: [],

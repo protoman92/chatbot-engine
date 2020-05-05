@@ -3,6 +3,7 @@ import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   TelegramBot,
+  TelegramDefaultContext,
   TelegramMessageProcessor,
   TelegramRawRequest as RawRequest,
   TelegramRawResponse,
@@ -45,8 +46,10 @@ export function extractInputCommand(
 /** Map platform request to generic request for generic processing */
 function createTelegramRequest<Context>(
   webhook: RawRequest,
-  { username }: TelegramBot
+  currentBot: TelegramBot
 ): readonly TelegramRequest<Context>[] {
+  const { username } = currentBot;
+
   function processMessageRequest({
     message: { chat, from: user, ...message },
   }: RawRequest.Message):
@@ -61,6 +64,7 @@ function createTelegramRequest<Context>(
         chat,
         [
           {
+            currentBot,
             inputCommand,
             inputText,
             inputPhotos: [],
@@ -81,6 +85,7 @@ function createTelegramRequest<Context>(
         chat,
         [
           {
+            currentBot,
             inputCommand: "",
             inputDocument: document,
             inputText: "",
@@ -102,6 +107,7 @@ function createTelegramRequest<Context>(
         chat,
         [
           {
+            currentBot,
             newChatMembers,
             inputCommand: "",
             inputPhotos: [],
@@ -124,6 +130,7 @@ function createTelegramRequest<Context>(
         chat,
         [
           {
+            currentBot,
             inputCommand: "",
             inputPhotos: [],
             inputText: "",
@@ -144,6 +151,7 @@ function createTelegramRequest<Context>(
         chat,
         [
           {
+            currentBot,
             inputPhotos,
             inputCommand: "",
             inputText: "",
@@ -173,6 +181,7 @@ function createTelegramRequest<Context>(
       undefined,
       [
         {
+          currentBot,
           targetPlatform: "telegram",
           inputCommand: "",
           inputPhotos: [],
@@ -222,7 +231,7 @@ function createTelegramRequest<Context>(
       telegramUser,
       input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
-      oldContext: {} as Context,
+      oldContext: {} as Context & TelegramDefaultContext,
     },
   ];
 }
@@ -355,14 +364,14 @@ export async function createTelegramMessageProcessor<Context>(
   ...transformers: readonly Transformer<TelegramMessageProcessor<Context>>[]
 ): Promise<TelegramMessageProcessor<Context>> {
   await client.setWebhook();
-  const bot = await client.getCurrentBot();
+  const currentBot = await client.getCurrentBot();
 
   const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
       client,
       targetPlatform: "telegram",
-      mapRequest: async (req) => createTelegramRequest(req, bot),
+      mapRequest: async (req) => createTelegramRequest(req, currentBot),
       mapResponse: async (res) => {
         return createTelegramResponse(res as TelegramResponse<Context>);
       },
@@ -372,10 +381,16 @@ export async function createTelegramMessageProcessor<Context>(
 
   return {
     ...baseProcessor,
+    receiveRequest: async ({ oldContext, ...args }) => {
+      return baseProcessor.receiveRequest({
+        ...args,
+        oldContext: { ...oldContext, currentBot },
+      });
+    },
     sendResponse: async (response) => {
       const { targetID } = response;
 
-      if (!!(await client.isMember(targetID, `${bot.id}`))) {
+      if (!!(await client.isMember(targetID, `${currentBot.id}`))) {
         return baseProcessor.sendResponse(response);
       }
 

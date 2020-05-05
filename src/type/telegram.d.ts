@@ -1,6 +1,6 @@
 import { DeepReadonly } from "ts-essentials";
 import { PlatformClient } from "./client";
-import { DefaultContext as RootDefaultContext } from "./common";
+import { BaseDefaultContext } from "./common";
 import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
@@ -8,6 +8,7 @@ import { BaseResponse } from "./response";
 import { BaseResponseOutput } from "./visual-content";
 
 export interface TelegramRequestInput extends BaseRequestInput {
+  readonly currentBot: TelegramBot;
   readonly inputCommand: string;
   readonly inputDocument?: TelegramRawRequest.DocumentDetails;
   readonly inputPhotos: readonly TelegramRawRequest.PhotoDetails[];
@@ -269,7 +270,7 @@ export interface TelegramMessageProcessor<Context>
     TelegramRequest<Context>
   > {}
 
-export type TelegramDefaultContext = RootDefaultContext & TelegramRequestInput;
+export type TelegramDefaultContext = BaseDefaultContext & TelegramRequestInput;
 
 export type TelegramLeafObserver<Context> = BaseLeafObserver<
   Context,
@@ -282,10 +283,10 @@ export interface TelegramBot {
   readonly id: number;
   readonly first_name: string;
   readonly username: string;
-  readonly is_bot: boolean;
 }
 
 export interface TelegramUser extends TelegramBot {
+  readonly is_bot: boolean;
   readonly last_name: string;
   readonly language_code: "en";
 }

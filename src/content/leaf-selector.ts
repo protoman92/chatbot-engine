@@ -1,7 +1,7 @@
 import { deepClone, mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import { Branch } from "../type/branch";
-import { DefaultContext, KV } from "../type/common";
+import { BaseDefaultContext, KV } from "../type/common";
 import { LeafEnumeration } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
 import { ContentObservable, ContentObserver } from "../type/stream";
@@ -70,11 +70,11 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
      */
     triggerLeaf: (
       { currentLeaf }: LeafEnumeration<Context>,
-      input: Context & DefaultContext
+      input: Context & BaseDefaultContext
     ) => {
       return currentLeaf.next(input);
     },
-    next: async (input: Context & DefaultContext): Promise<NextResult> => {
+    next: async (input: Context & BaseDefaultContext): Promise<NextResult> => {
       const enumeratedLeaves = await selector.enumerateLeaves();
 
       for (const enumeratedLeaf of enumeratedLeaves) {

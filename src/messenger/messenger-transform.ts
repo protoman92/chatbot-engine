@@ -1,6 +1,6 @@
 import { compose, deepClone } from "../common/utils";
 import { PlatformClient } from "../type/client";
-import { DefaultContext, Transformer } from "../type/common";
+import { BaseDefaultContext, Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
@@ -86,7 +86,7 @@ export function saveUserForTargetID<
       ...processor,
       receiveRequest: async (request) => {
         const { oldContext, targetID, targetPlatform } = request;
-        const sidKey: keyof DefaultContext = "targetID";
+        const sidKey: keyof BaseDefaultContext = "targetID";
 
         if (!oldContext || !(oldContext as any)[sidKey]) {
           const rawUser = await getUser(targetID);

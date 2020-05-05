@@ -15,7 +15,12 @@ describe("Telegram client", () => {
       communicate: () => Promise.reject(""),
     });
 
-    configs = spy<TelegramConfigs>({ authToken: "", webhookURL: "" });
+    configs = spy<TelegramConfigs>({
+      authToken: "",
+      defaultParseMode: "markdown",
+      webhookURL: "",
+    });
+
     tlClient = createTelegramClient(instance(client), instance(configs));
   });
 

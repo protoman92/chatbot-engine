@@ -8,7 +8,7 @@ export interface Coordinates {
   readonly lng: number;
 }
 
-export type DefaultContext = AmbiguousRequestInput &
+export type BaseDefaultContext = AmbiguousRequestInput &
   Readonly<{
     activeBranch?: string;
     targetID: string;

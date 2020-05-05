@@ -1,6 +1,6 @@
 import { DeepReadonly, Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
-import { DefaultContext as RootDefaultContext } from "./common";
+import { BaseDefaultContext } from "./common";
 import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
@@ -18,7 +18,8 @@ export interface FacebookRequest<Context> extends BaseRequest<Context> {
   readonly input: readonly FacebookRequestInput[];
 }
 
-export interface FacebookResponse<Context> extends BaseResponse<Context> {
+export interface FacebookResponse<Context>
+  extends BaseResponse<Context & FacebookDefaultContext> {
   readonly targetPlatform: "facebook";
   readonly output: readonly FacebookResponseOutput[];
 }
@@ -346,7 +347,7 @@ export interface FacebookMessageProcessor<Context>
     FacebookRequest<Context>
   > {}
 
-export type FacebookDefaultContext = RootDefaultContext & FacebookRequestInput;
+export type FacebookDefaultContext = BaseDefaultContext & FacebookRequestInput;
 
 export type FacebookLeafObserver<Context> = BaseLeafObserver<
   Context,

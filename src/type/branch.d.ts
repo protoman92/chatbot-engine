@@ -1,4 +1,4 @@
-import { DefaultContext, KV } from "./common";
+import { KV } from "./common";
 import { AmbiguousLeaf } from "./leaf";
 
 /**

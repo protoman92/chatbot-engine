@@ -1,5 +1,5 @@
 import { Branch } from "./branch";
-import { DefaultContext } from "./common";
+import { BaseDefaultContext } from "./common";
 import { AmbiguousResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 
@@ -54,7 +54,7 @@ export interface BaseLeafObservable<Context>
   extends ContentObservable<AmbiguousResponse<Context>> {}
 
 export interface AmbiguousLeafObserver<Context>
-  extends BaseLeafObserver<Context, DefaultContext> {}
+  extends BaseLeafObserver<Context, BaseDefaultContext> {}
 
 export interface BaseLeaf<Context, ExtraContext>
   extends BaseLeafObserver<Context, ExtraContext>,
@@ -68,6 +68,6 @@ export interface BaseLeaf<Context, ExtraContext>
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
 export interface AmbiguousLeaf<Context>
-  extends BaseLeaf<Context, DefaultContext> {}
+  extends BaseLeaf<Context, BaseDefaultContext> {}
 
 export interface LeafSelector<Context> extends AmbiguousLeaf<Context> {}
