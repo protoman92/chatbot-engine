@@ -66,6 +66,12 @@ describe("Generic message processor", () => {
     const response: AmbiguousResponse<{}> = {
       targetID,
       targetPlatform,
+      originalRequest: {
+        targetID,
+        input: {},
+        oldContext: {},
+        targetPlatform: "facebook",
+      },
       output: [],
     };
 
@@ -102,6 +108,12 @@ describe("Generic message processor", () => {
     const nextResult = await next({
       targetID,
       targetPlatform,
+      originalRequest: {
+        targetID,
+        input: {},
+        oldContext: {},
+        targetPlatform: "facebook",
+      },
       output: [],
     });
 

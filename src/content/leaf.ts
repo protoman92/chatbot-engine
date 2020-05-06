@@ -14,19 +14,36 @@ import { TelegramLeafObserver } from "../type/telegram";
  */
 export async function createLeafWithObserver<Context = {}>(
   fn: (
-    observer: NextContentObserver<AmbiguousResponse<Context>>
+    observer: NextContentObserver<
+      Omit<AmbiguousResponse<Context>, "originalRequest">
+    >
   ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
 ): Promise<AmbiguousLeaf<Context>> {
-  const subject = createContentSubject<AmbiguousResponse<Context>>();
+  let originalRequest: AmbiguousResponse<Context>["originalRequest"];
+  const baseSubject = createContentSubject<AmbiguousResponse<Context>>();
+
+  const subject: typeof baseSubject = {
+    ...baseSubject,
+    next: async (response) => {
+      return baseSubject.next({
+        ...response,
+        originalRequest,
+      } as AmbiguousResponse<Context>);
+    },
+  };
+
   const baseLeaf = await fn(subject);
 
   return {
-    ...baseLeaf,
+    next: async (request) => {
+      originalRequest = request;
+      return baseLeaf.next(request);
+    },
     complete: async () => {
       !!baseLeaf.complete && (await baseLeaf.complete());
-      await subject.complete();
+      await baseSubject.complete();
     },
-    subscribe: (observer) => subject.subscribe(observer),
+    subscribe: (observer) => baseSubject.subscribe(observer),
   };
 }
 

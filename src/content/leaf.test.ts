@@ -12,9 +12,40 @@ import {
   createLeafObserverForPlatforms,
   createLeafWithObserver,
 } from "./leaf";
+import { AmbiguousRequestPerInput } from "../type";
 
 const targetID = "target-id";
-const targetPlatform = "facebook";
+const targetPlatform = "facebook" as const;
+
+describe("Create leaf with observer", () => {
+  it("Should add originalRequest to response", async () => {
+    // Setup
+    const leaf = await createLeafWithObserver(async (observer) => ({
+      next: async ({ targetID }) => {
+        await observer.next({
+          targetID,
+          output: [],
+          targetPlatform: "facebook",
+        });
+
+        return NextResult.SUCCESS;
+      },
+    }));
+
+    const request: AmbiguousRequestPerInput<{}> = {
+      targetID,
+      targetPlatform,
+      input: {},
+      oldContext: {},
+    };
+
+    // When
+    const { originalRequest } = await bridgeEmission(leaf)(request);
+
+    // Then
+    expectJs(originalRequest).to.eql(request);
+  });
+});
 
 describe("Default error leaf", () => {
   it("Should work correctly", async () => {

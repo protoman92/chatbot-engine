@@ -28,8 +28,8 @@ export interface FacebookRequestPerInput<Context> extends BaseRequest<Context> {
 
 export interface FacebookResponse<Context>
   extends BaseResponse<Context & FacebookDefaultContext> {
-  readonly targetPlatform: "facebook";
   readonly output: readonly FacebookResponseOutput[];
+  readonly targetPlatform: "facebook";
 }
 
 declare namespace FacebookResponseOutput {

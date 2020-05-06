@@ -70,6 +70,12 @@ describe("Save context on send", () => {
       targetID,
       targetPlatform,
       additionalContext,
+      originalRequest: {
+        targetID,
+        input: {},
+        oldContext: {},
+        targetPlatform: "facebook",
+      },
       output: [],
     };
 
@@ -259,6 +265,12 @@ describe("Set typing indicator", () => {
     await transformed.sendResponse({
       targetID,
       targetPlatform,
+      originalRequest: {
+        targetID,
+        input: {},
+        oldContext: {},
+        targetPlatform: "facebook",
+      },
       output: [],
     });
 

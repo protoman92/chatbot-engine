@@ -71,13 +71,9 @@ export async function createMessageProcessor<
   );
 
   await leafSelector.subscribe({
-    next: async ({ targetPlatform: pf, ...restInput }) => {
-      if (pf === targetPlatform) {
-        await processor.sendResponse({
-          ...restInput,
-          targetPlatform: pf,
-        });
-
+    next: async (request) => {
+      if (request.targetPlatform === targetPlatform) {
+        await processor.sendResponse(request);
         return NextResult.SUCCESS;
       }
 

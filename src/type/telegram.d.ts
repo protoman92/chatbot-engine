@@ -34,8 +34,8 @@ export interface TelegramRequestPerInput<Context> extends BaseRequest<Context> {
 }
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
-  readonly targetPlatform: "telegram";
   readonly output: readonly TelegramResponseOutput[];
+  readonly targetPlatform: "telegram";
 }
 
 declare namespace TelegramResponseOutput {
