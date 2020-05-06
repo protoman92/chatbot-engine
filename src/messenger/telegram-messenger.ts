@@ -224,7 +224,7 @@ function createTelegramResponse<Context>({
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    quickReplies: TelegramResponseOutput.QuickReply.InlineMarkupMatrix
+    quickReplies: TelegramResponseOutput.InlineMarkupMatrix
   ): TelegramRawResponse.SendMessage.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: quickReplies.map((qrs) =>
@@ -245,7 +245,7 @@ function createTelegramResponse<Context>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    quickReplyMatrix: TelegramResponseOutput.QuickReply.ReplyMarkupMatrix
+    quickReplyMatrix: TelegramResponseOutput.ReplyMarkupMatrix
   ): TelegramRawResponse.SendMessage.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: quickReplyMatrix.map((quickReplies) =>
@@ -284,28 +284,15 @@ function createTelegramResponse<Context>({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReplyMatrix: TelegramResponseOutput.QuickReplyMatrix
+    quickReply: TelegramResponseOutput.QuickReply
   ): TelegramRawResponse.SendMessage.ReplyMarkup {
-    const shouldBeReplyMarkup = quickReplyMatrix.every(
-      (quickReplies: TelegramResponseOutput.QuickReplyMatrix[number]) =>
-        quickReplies.every(
-          ({
-            type,
-          }: TelegramResponseOutput.QuickReplyMatrix[number][number]) => {
-            return type === "location";
-          }
-        )
-    );
+    switch (quickReply.type) {
+      case "inline_markup":
+        return createInlineMarkups(quickReply.content);
 
-    if (shouldBeReplyMarkup) {
-      return createReplyMarkups(
-        quickReplyMatrix as TelegramResponseOutput.QuickReply.ReplyMarkupMatrix
-      );
+      case "reply_markup":
+        return createReplyMarkups(quickReply.content);
     }
-
-    return createInlineMarkups(
-      quickReplyMatrix as TelegramResponseOutput.QuickReply.InlineMarkupMatrix
-    );
   }
 
   function createPlatformResponse(

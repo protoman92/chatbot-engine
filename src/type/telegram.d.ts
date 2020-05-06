@@ -50,21 +50,16 @@ declare namespace TelegramResponseOutput {
       readonly text: string;
       readonly type: "text";
     }
-
-    type InlineMarkup = QuickReply.Postback | QuickReply.Text;
-
-    type ReplyMarkup =
-      | QuickReply.Location
-      | QuickReply.Text
-      | QuickReply.Contact;
-
-    type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
-    type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
   }
 
-  type QuickReplyMatrix =
-    | QuickReply.InlineMarkupMatrix
-    | QuickReply.ReplyMarkupMatrix;
+  type InlineMarkup = QuickReply.Postback | QuickReply.Text;
+  type ReplyMarkup = QuickReply.Location | QuickReply.Text | QuickReply.Contact;
+  type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
+  type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
+
+  type QuickReply =
+    | { content: ReplyMarkupMatrix; type: "reply_markup" }
+    | { content: InlineMarkupMatrix; type: "inline_markup" };
 }
 
 declare namespace TelegramResponseOutput {
@@ -80,7 +75,7 @@ declare namespace TelegramResponseOutput {
 
 export interface TelegramResponseOutput extends BaseResponseOutput {
   readonly content: TelegramResponseOutput.Content;
-  readonly quickReplies?: TelegramResponseOutput.QuickReplyMatrix;
+  readonly quickReplies?: TelegramResponseOutput.QuickReply;
   readonly parseMode?: "html" | "markdown";
 }
 
