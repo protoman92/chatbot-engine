@@ -77,7 +77,9 @@ describe("Transform chain", () => {
       .pipe(catchError(await createDefaultErrorLeaf()))
       .transform(
         await createLeafWithObserver(async (observer) => ({
-          next: async ({ inputText: text, targetID, targetPlatform }) => {
+          next: async ({ targetID, targetPlatform, ...input }) => {
+            const text = (input as { inputText: string }).inputText;
+
             return observer.next({
               targetID,
               targetPlatform,

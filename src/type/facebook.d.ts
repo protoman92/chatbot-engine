@@ -1,6 +1,6 @@
 import { DeepReadonly, Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
-import { BaseDefaultContext } from "./common";
+import { BaseDefaultContext, Coordinates } from "./common";
 import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
@@ -8,6 +8,8 @@ import { BaseResponse } from "./response";
 import { BaseResponseOutput } from "./visual-content";
 
 export interface FacebookRequestInput extends BaseRequestInput {
+  readonly inputCoordinate?: Coordinates;
+  readonly inputText: string;
   readonly inputImageURL: string;
   readonly targetPlatform: "facebook";
   readonly stickerID: string;

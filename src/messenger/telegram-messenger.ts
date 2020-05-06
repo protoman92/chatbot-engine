@@ -79,14 +79,7 @@ function createTelegramRequest<Context>(
       return [
         user,
         chat,
-        [
-          {
-            currentBot,
-            inputDocument: document,
-            inputText: "",
-            targetPlatform: "telegram",
-          },
-        ],
+        [{ currentBot, inputDocument: document, targetPlatform: "telegram" }],
       ];
     }
 
@@ -96,14 +89,7 @@ function createTelegramRequest<Context>(
       return [
         user,
         chat,
-        [
-          {
-            currentBot,
-            newChatMembers,
-            inputText: "",
-            targetPlatform: "telegram",
-          },
-        ],
+        [{ currentBot, newChatMembers, targetPlatform: "telegram" }],
       ];
     }
 
@@ -118,7 +104,6 @@ function createTelegramRequest<Context>(
         [
           {
             currentBot,
-            inputText: "",
             leftChatMembers: [left_chat_member],
             targetPlatform: "telegram",
           },
@@ -132,14 +117,7 @@ function createTelegramRequest<Context>(
       return [
         user,
         chat,
-        [
-          {
-            currentBot,
-            inputPhotos,
-            inputText: "",
-            targetPlatform: "telegram",
-          },
-        ],
+        [{ currentBot, inputPhotos, targetPlatform: "telegram" }],
       ];
     }
 

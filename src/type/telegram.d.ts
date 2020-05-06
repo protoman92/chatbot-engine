@@ -1,21 +1,23 @@
 import { DeepReadonly } from "ts-essentials";
 import { PlatformClient } from "./client";
-import { BaseDefaultContext } from "./common";
+import { BaseDefaultContext, Coordinates } from "./common";
 import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, BaseRequestInput } from "./request";
 import { BaseResponse } from "./response";
 import { BaseResponseOutput } from "./visual-content";
 
-export interface TelegramRequestInput extends BaseRequestInput {
-  readonly currentBot: TelegramBot;
-  readonly inputCommand?: string;
-  readonly inputDocument?: TelegramRawRequest.DocumentDetails;
-  readonly inputPhotos?: readonly TelegramRawRequest.PhotoDetails[];
-  readonly leftChatMembers?: readonly (TelegramBot | TelegramUser)[];
-  readonly newChatMembers?: readonly (TelegramBot | TelegramUser)[];
-  readonly targetPlatform: "telegram";
-}
+export type TelegramRequestInput = DeepReadonly<
+  BaseRequestInput & { currentBot: TelegramBot; targetPlatform: "telegram" } & (
+      | { inputCommand: string; inputText: string }
+      | { inputText: string }
+      | { inputCoordinate: Coordinates }
+      | { inputDocument: TelegramRawRequest.DocumentDetails }
+      | { inputPhotos: TelegramRawRequest.PhotoDetails[] }
+      | { leftChatMembers: (TelegramBot | TelegramUser)[] }
+      | { newChatMembers: (TelegramBot | TelegramUser)[] }
+    )
+>;
 
 export interface TelegramRequest<Context> extends BaseRequest<Context> {
   readonly targetPlatform: "telegram";

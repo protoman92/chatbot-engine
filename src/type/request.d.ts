@@ -3,10 +3,7 @@ import { FacebookRequest, FacebookRequestInput } from "./facebook";
 import { AmbiguousPlatform } from "./messenger";
 import { TelegramRequest, TelegramRequestInput } from "./telegram";
 
-export interface BaseRequestInput {
-  readonly inputText: string;
-  readonly inputCoordinate?: Coordinates;
-}
+export interface BaseRequestInput {}
 
 export interface BaseRequest<Context> {
   readonly targetID: string;
