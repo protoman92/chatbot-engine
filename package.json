@@ -20,7 +20,7 @@
     "mocha": "^7.1.2",
     "nodemon": "^1.19.4",
     "nyc": "^14.1.1",
-    "snyk": "^1.316.2",
+    "snyk": "^1.319.0",
     "source-map-support": "^0.5.19",
     "ts-essentials": "^2.0.12",
     "ts-mockito": "^2.5.0",
