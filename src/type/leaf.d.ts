@@ -10,7 +10,7 @@ import { ContentObservable, ContentObserver } from "./stream";
 export interface LeafEnumeration<Context> {
   readonly parentBranch: Branch<Context>;
   readonly prefixLeafPaths: readonly string[];
-  readonly currentLeaf: BaseLeaf<Context>;
+  readonly currentLeaf: AmbiguousLeaf<Context>;
   readonly currentLeafID: string;
 }
 
@@ -19,8 +19,8 @@ export interface LeafEnumeration<Context> {
  * functions.
  */
 export type LeafTransformer<InContext, OutContext> = (
-  leaf: BaseLeaf<InContext>
-) => Promise<BaseLeaf<OutContext>>;
+  leaf: AmbiguousLeaf<InContext>
+) => Promise<AmbiguousLeaf<OutContext>>;
 
 /** Compose functions that have the same input/output type */
 export interface MonoLeafTransformer<Context>
@@ -47,11 +47,8 @@ export interface LeafTransformChain<InContext, OutContext> {
   ): LeafTransformChain<Context, Context>;
 }
 
-export interface BaseLeafObserver<T>
+export interface AmbiguousLeafObserver<T>
   extends ContentObserver<AmbiguousRequestPerInput<T>> {}
-
-export interface BaseLeafObservable<T>
-  extends ContentObservable<AmbiguousResponse<T>> {}
 
 /**
  * Represents a sequence of messenges that have some commonalities among each
@@ -60,5 +57,7 @@ export interface BaseLeafObservable<T>
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export type BaseLeaf<T> = BaseLeafObserver<T> & BaseLeafObservable<T>;
-export type LeafSelector<T> = BaseLeaf<T>;
+export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
+  ContentObservable<AmbiguousResponse<T>>;
+
+export type LeafSelector<T> = AmbiguousLeaf<T>;

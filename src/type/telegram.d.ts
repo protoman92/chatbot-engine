@@ -1,11 +1,11 @@
 import { DeepReadonly } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import { BaseLeaf, LeafSelector, BaseLeafObservable } from "./leaf";
+import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
-import { ContentObserver } from "./stream";
+import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
 export type TelegramRequestInput = DeepReadonly<
@@ -281,7 +281,8 @@ export type TelegramLeafObserver<T> = ContentObserver<
   TelegramRequestPerInput<T & TelegramDefaultContext>
 >;
 
-export type TelegramLeaf<T> = TelegramLeafObserver<T> & BaseLeafObservable<T>;
+export type TelegramLeaf<T> = TelegramLeafObserver<T> &
+  ContentObservable<TelegramResponse<T>>;
 
 export interface TelegramBot {
   readonly id: number;

@@ -1,11 +1,11 @@
 import { DeepReadonly, Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import { BaseLeafObservable, LeafSelector } from "./leaf";
+import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
-import { ContentObserver } from "./stream";
+import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
 export type FacebookRequestInput = DeepReadonly<
@@ -361,7 +361,8 @@ export type FacebookLeafObserver<T> = ContentObserver<
   FacebookRequestPerInput<T & FacebookDefaultContext>
 >;
 
-export type FacebookLeaf<T> = FacebookLeafObserver<T> & BaseLeafObservable<T>;
+export type FacebookLeaf<T> = FacebookLeafObserver<T> &
+  ContentObservable<FacebookResponse<T>>;
 
 /** Represents a Facebook user */
 export interface FacebookUser {

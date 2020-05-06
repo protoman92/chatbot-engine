@@ -3,7 +3,7 @@ import { genericError } from "../common/utils";
 import { createContentSubject } from "../stream";
 import { ErrorContext } from "../type/common";
 import { FacebookLeafObserver } from "../type/facebook";
-import { BaseLeaf, BaseLeafObserver } from "../type/leaf";
+import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
 import { TelegramLeafObserver } from "../type/telegram";
@@ -15,8 +15,8 @@ import { TelegramLeafObserver } from "../type/telegram";
 export async function createLeafWithObserver<Context = {}>(
   fn: (
     observer: NextContentObserver<AmbiguousResponse<Context>>
-  ) => Promise<Omit<BaseLeaf<Context>, "subscribe">>
-): Promise<BaseLeaf<Context>> {
+  ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
+): Promise<AmbiguousLeaf<Context>> {
   const subject = createContentSubject<AmbiguousResponse<Context>>();
   const baseLeaf = await fn(subject);
 
@@ -36,7 +36,7 @@ export async function createLeafWithObserver<Context = {}>(
  */
 export function createDefaultErrorLeaf<Context = {}>(
   fn?: (e: Error) => Promise<unknown>
-): Promise<BaseLeaf<Context & ErrorContext>> {
+): Promise<AmbiguousLeaf<Context & ErrorContext>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ oldContext: { error }, ...request }) => {
       !!fn && (await fn(error));
@@ -67,7 +67,7 @@ export async function createLeafObserverForPlatforms<Context = {}>({
 }: Readonly<{
   facebook?: FacebookLeafObserver<Context>;
   telegram?: TelegramLeafObserver<Context>;
-}>): Promise<BaseLeafObserver<Context>> {
+}>): Promise<AmbiguousLeafObserver<Context>> {
   return {
     next: async (request) => {
       switch (request.targetPlatform) {

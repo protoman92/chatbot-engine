@@ -1,10 +1,10 @@
 import { createCompositeSubscription } from "../../stream";
 import { ErrorContext } from "../../type/common";
-import { BaseLeaf, LeafTransformer } from "../../type/leaf";
+import { AmbiguousLeaf, LeafTransformer } from "../../type/leaf";
 
 /** If a leaf throws error while producing content, switch to fallback leaf */
 export function catchError<Context>(
-  fallbackLeaf: BaseLeaf<Context & ErrorContext>
+  fallbackLeaf: AmbiguousLeaf<Context & ErrorContext>
 ): LeafTransformer<Context, Context> {
   return async (leaf) => ({
     next: async ({ oldContext, ...request }) => {

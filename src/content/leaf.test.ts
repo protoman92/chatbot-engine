@@ -5,7 +5,7 @@ import { anything, instance, spy, verify, when } from "ts-mockito";
 import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
 import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
-import { BaseLeaf } from "../type/leaf";
+import { AmbiguousLeaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
 import {
   createDefaultErrorLeaf,
@@ -45,7 +45,7 @@ describe("Default error leaf", () => {
 describe("Leaf for platforms", () => {
   let fbLeaf: Omit<FacebookLeaf<{}>, "subscribe">;
   let tlLeaf: Omit<TelegramLeaf<{}>, "subscribe">;
-  let platformLeaf: BaseLeaf<{}>;
+  let platformLeaf: AmbiguousLeaf<{}>;
 
   beforeEach(async () => {
     fbLeaf = spy<Omit<FacebookLeaf<{}>, "subscribe">>({

@@ -14,8 +14,6 @@ export interface BaseRequest<Context> {
   readonly oldContext: Context;
 }
 
-export type AmbiguousRequestInput = FacebookRequestInput | TelegramRequestInput;
-
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>
   | TelegramRequest<Context>;
