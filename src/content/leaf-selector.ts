@@ -24,13 +24,13 @@ export function enumerateLeaves<Context>(
     for (const [branchID, parentBranch] of branchEntries) {
       if (!parentBranch) continue;
       const prefixLeafPaths = [...(prefixPaths || []), branchID];
-      const { subBranches, leaves } = parentBranch;
+      const { subBranches, ...leaves } = parentBranch;
+      const leafEntries = Object.entries(leaves);
 
-      if (leaves !== undefined && leaves !== null) {
-        const leafEntries = Object.entries(leaves);
-
+      if (!!leafEntries.length) {
         for (const [currentLeafID, currentLeaf] of leafEntries) {
           if (!currentLeaf) continue;
+
           inputs.push({
             parentBranch,
             currentLeaf,
