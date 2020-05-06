@@ -68,9 +68,5 @@ export interface SaveUserForTargetIDContext<Context> {
 }
 
 export type OnContextChangeCallback<Context> = (
-  args: Readonly<{
-    targetID: string;
-    targetPlatform: AmbiguousPlatform;
-    newContext: Context;
-  }>
+  args: Readonly<{ response: AmbiguousResponse<Context>; newContext: Context }>
 ) => Promise<unknown>;

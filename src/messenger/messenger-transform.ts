@@ -36,17 +36,34 @@ export function saveContextOnSend<
             additionalContext
           );
 
-          if (onContextChangeCallback != null)
-            onContextChangeCallback({
-              newContext,
-              targetID,
-              targetPlatform,
-            });
+          if (onContextChangeCallback != null) {
+            await onContextChangeCallback({ newContext, response });
+          }
         }
 
         return result;
       },
     };
+  };
+}
+
+/** When the context changes, notify leaves to catch the new context */
+export function notifyLeavesOnContextChange<
+  Context,
+  Processor extends BaseMessageProcessor<
+    Context,
+    unknown,
+    AmbiguousRequest<Context>
+  >
+>(fn: () => Processor): OnContextChangeCallback<Context> {
+  return async function({ newContext, response: { originalRequest } }) {
+    const messageProcessor = fn();
+
+    await messageProcessor.receiveRequest({
+      ...originalRequest,
+      input: [{}],
+      oldContext: newContext,
+    } as AmbiguousRequest<Context>);
   };
 }
 

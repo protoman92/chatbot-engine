@@ -8,11 +8,12 @@ import {
   BaseMessageProcessor,
   OnContextChangeCallback,
 } from "../type/messenger";
-import { AmbiguousRequest } from "../type/request";
+import { AmbiguousRequest, AmbiguousRequestPerInput } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
 import {
   injectContextOnReceive,
+  notifyLeavesOnContextChange,
   saveContextOnSend,
   saveUserForTargetID,
   setTypingIndicator,
@@ -66,7 +67,7 @@ describe("Save context on send", () => {
 
     const additionalContext: Partial<{}> = { a: 1, b: 2 };
 
-    const genericResponse: AmbiguousResponse<{}> = {
+    const response: AmbiguousResponse<{}> = {
       targetID,
       targetPlatform,
       additionalContext,
@@ -80,7 +81,7 @@ describe("Save context on send", () => {
     };
 
     // When
-    await transformed.sendResponse(genericResponse);
+    await transformed.sendResponse(response);
 
     // Then
     verify(
@@ -91,11 +92,46 @@ describe("Save context on send", () => {
       )
     ).once();
 
-    verify(messenger.sendResponse(deepEqual(genericResponse))).once();
+    verify(messenger.sendResponse(deepEqual(response))).once();
+    expectJs(callbackParameters).to.eql([{ response, newContext: {} }]);
+  });
 
-    expectJs(callbackParameters).to.eql([
-      { targetID, targetPlatform, newContext: {} },
-    ]);
+  it("Should notify leaves when context changes", async () => {
+    // Setup
+    const newContext = { a: 1, b: 2 };
+
+    const originalRequest: AmbiguousRequestPerInput<{}> = {
+      targetID,
+      input: {},
+      oldContext: {},
+      targetPlatform: "facebook",
+    };
+
+    const messengerFn = () => instance(messenger);
+    when(messenger.receiveRequest(anything())).thenResolve({});
+
+    // When
+    await notifyLeavesOnContextChange(messengerFn)({
+      newContext,
+      response: {
+        originalRequest,
+        targetID,
+        output: [],
+        targetPlatform: "telegram",
+      },
+    });
+
+    // Then
+    verify(
+      messenger.receiveRequest(
+        deepEqual({
+          ...originalRequest,
+          input: [{}],
+          oldContext: newContext,
+          targetPlatform: "facebook",
+        })
+      )
+    ).once();
   });
 });
 
