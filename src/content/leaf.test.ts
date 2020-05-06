@@ -26,10 +26,8 @@ describe("Default error leaf", () => {
     const { output } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
-      error,
-      inputText: "",
-      inputImageURL: "",
-      stickerID: "",
+      input: {},
+      oldContext: { error },
     });
 
     // Then
@@ -78,21 +76,29 @@ describe("Leaf for platforms", () => {
     // When
     await platformLeaf.next({
       targetID,
+      input: {},
+      oldContext: {},
       targetPlatform: "facebook",
-      inputText: "",
-      inputImageURL: "",
-      stickerID: "",
     });
 
     await platformLeaf.next({
+      targetID,
       currentBot: {
         id: 1,
-        first_name: "Hai",
-        username: "test_bot",
+        first_name: "",
+        username: "",
       },
-      targetID,
+      input: {},
+      oldContext: {},
       targetPlatform: "telegram",
-      inputText: "",
+      telegramUser: {
+        id: 1,
+        first_name: "",
+        last_name: "",
+        language_code: "en",
+        is_bot: false,
+        username: "",
+      },
     });
 
     await platformLeaf.complete!();
@@ -114,9 +120,8 @@ describe("Leaf for platforms", () => {
       await platformObserver.next({
         targetID,
         targetPlatform: "facebook",
-        inputImageURL: "",
-        inputText: "",
-        stickerID: "",
+        input: {},
+        oldContext: {},
       });
 
       throw new Error("Never should have come here");
@@ -125,14 +130,23 @@ describe("Leaf for platforms", () => {
     // When && Then: Telegram
     try {
       await platformObserver.next({
+        targetID,
         currentBot: {
           id: 1,
-          first_name: "Hai",
-          username: "test_bot",
+          first_name: "",
+          username: "",
         },
-        targetID,
+        input: {},
+        oldContext: {},
         targetPlatform: "telegram",
-        inputText: "",
+        telegramUser: {
+          id: 1,
+          first_name: "",
+          last_name: "",
+          language_code: "en",
+          is_bot: false,
+          username: "",
+        },
       });
 
       throw new Error("Never should have come here");

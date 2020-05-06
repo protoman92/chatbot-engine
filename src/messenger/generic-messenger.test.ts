@@ -151,10 +151,10 @@ describe("Generic message processor", () => {
     });
 
     // Then
-    input.forEach((datum) =>
+    input.forEach((input) =>
       verify(
         leafSelector.next(
-          deepEqual({ ...datum, ...oldContext, targetID, targetPlatform })
+          deepEqual({ input, oldContext, targetID, targetPlatform })
         )
       ).once()
     );
@@ -203,9 +203,10 @@ describe("Cross platform messenger", () => {
     when(tlProcessor.generalizeRequest(anything())).thenResolve([
       {
         targetID,
-        targetPlatform: "telegram" as const,
-        oldContext: {},
+        currentBot: { id: 0, first_name: "", username: "" },
         input: [],
+        oldContext: {},
+        targetPlatform: "telegram" as const,
         telegramUser: {
           id: 0,
           first_name: "",

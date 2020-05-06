@@ -1,28 +1,36 @@
 import { DeepReadonly } from "ts-essentials";
 import { PlatformClient } from "./client";
-import { BaseDefaultContext, Coordinates } from "./common";
-import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
+import { Coordinates } from "./common";
+import { BaseLeaf, LeafSelector, BaseLeafObservable } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest, BaseRequestInput } from "./request";
+import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
+import { ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
 export type TelegramRequestInput = DeepReadonly<
-  BaseRequestInput & { currentBot: TelegramBot; targetPlatform: "telegram" } & (
-      | { inputCommand: string; inputText: string }
-      | { inputText: string }
-      | { inputCoordinate: Coordinates }
-      | { inputDocument: TelegramRawRequest.DocumentDetails }
-      | { inputPhotos: TelegramRawRequest.PhotoDetails[] }
-      | { leftChatMembers: (TelegramBot | TelegramUser)[] }
-      | { newChatMembers: (TelegramBot | TelegramUser)[] }
-    )
+  | {}
+  | { inputCommand: string; inputText: string }
+  | { inputText: string }
+  | { inputCoordinate: Coordinates }
+  | { inputDocument: TelegramRawRequest.DocumentDetails }
+  | { inputPhotos: TelegramRawRequest.PhotoDetails[] }
+  | { leftChatMembers: (TelegramBot | TelegramUser)[] }
+  | { newChatMembers: (TelegramBot | TelegramUser)[] }
 >;
 
 export interface TelegramRequest<Context> extends BaseRequest<Context> {
+  readonly currentBot: TelegramBot;
   readonly targetPlatform: "telegram";
   readonly telegramUser: TelegramUser;
   readonly input: readonly TelegramRequestInput[];
+}
+
+export interface TelegramRequestPerInput<Context> extends BaseRequest<Context> {
+  readonly currentBot: TelegramBot;
+  readonly targetPlatform: "telegram";
+  readonly telegramUser: TelegramUser;
+  readonly input: TelegramRequestInput;
 }
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
@@ -267,13 +275,13 @@ export interface TelegramMessageProcessor<Context>
     TelegramRequest<Context>
   > {}
 
-export type TelegramDefaultContext = BaseDefaultContext & TelegramRequestInput;
+export type TelegramDefaultContext = {};
 
-export type TelegramLeafObserver<T> = BaseLeafObserver<
-  T & TelegramDefaultContext
+export type TelegramLeafObserver<T> = ContentObserver<
+  TelegramRequestPerInput<T & TelegramDefaultContext>
 >;
 
-export type TelegramLeaf<T> = BaseLeaf<T & TelegramDefaultContext>;
+export type TelegramLeaf<T> = TelegramLeafObserver<T> & BaseLeafObservable<T>;
 
 export interface TelegramBot {
   readonly id: number;

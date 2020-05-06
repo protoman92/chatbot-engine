@@ -1,4 +1,4 @@
-import { BaseDefaultContext, Transformer } from "../type/common";
+import { Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
 import {
   SaveTelegramUserContext,
@@ -16,9 +16,8 @@ export function saveTelegramUser<Context>(
       ...processor,
       receiveRequest: async (request) => {
         const { targetID, targetPlatform, telegramUser, oldContext } = request;
-        const sidKey: keyof BaseDefaultContext = "targetID";
 
-        if (!oldContext || !(oldContext as any)[sidKey]) {
+        if (!oldContext || !(oldContext as any)["targetID"]) {
           const {
             additionalContext = {} as Partial<Context>,
             telegramUserID,
@@ -26,7 +25,7 @@ export function saveTelegramUser<Context>(
 
           await contextDAO.appendContext(targetID, targetPlatform, {
             ...additionalContext,
-            [sidKey]: `${telegramUserID}`,
+            targetID: `${telegramUserID}`,
           });
         }
 

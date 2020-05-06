@@ -1,6 +1,6 @@
 import { deepClone } from "../common/utils";
 import { PlatformClient } from "../type/client";
-import { BaseDefaultContext, Transformer } from "../type/common";
+import { Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
@@ -95,9 +95,8 @@ export function saveUserForTargetID<
       ...processor,
       receiveRequest: async (request) => {
         const { oldContext, targetID, targetPlatform } = request;
-        const sidKey: keyof BaseDefaultContext = "targetID";
 
-        if (!oldContext || !(oldContext as any)[sidKey]) {
+        if (!oldContext || !(oldContext as any)["targetID"]) {
           const rawUser = await getUser(targetID);
 
           const {
@@ -107,7 +106,7 @@ export function saveUserForTargetID<
 
           await contextDAO.appendContext(targetID, targetPlatform, {
             ...additionalContext,
-            [sidKey]: `${targetUserID}`,
+            targetID: `${targetUserID}`,
           });
         }
 

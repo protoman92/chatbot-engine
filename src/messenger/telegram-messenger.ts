@@ -3,7 +3,6 @@ import { isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   TelegramBot,
-  TelegramDefaultContext,
   TelegramMessageProcessor,
   TelegramRawRequest as RawRequest,
   TelegramRawResponse,
@@ -59,66 +58,29 @@ function createTelegramRequest<Context>(
       const { text } = message;
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
-      return [
-        user,
-        chat,
-        [
-          {
-            currentBot,
-            inputCommand,
-            inputText,
-            targetPlatform: "telegram",
-          },
-        ],
-      ];
+      return [user, chat, [{ inputCommand, inputText }]];
     }
 
     if (isType<RawRequest.Message.Document>(message, "document")) {
       const { document } = message;
-
-      return [
-        user,
-        chat,
-        [{ currentBot, inputDocument: document, targetPlatform: "telegram" }],
-      ];
+      return [user, chat, [{ inputDocument: document }]];
     }
 
     if (isType<RawRequest.Message.NewChatMember>(message, "new_chat_members")) {
       const { new_chat_members: newChatMembers } = message;
-
-      return [
-        user,
-        chat,
-        [{ currentBot, newChatMembers, targetPlatform: "telegram" }],
-      ];
+      return [user, chat, [{ newChatMembers }]];
     }
 
     if (
       isType<RawRequest.Message.LeftChatMember>(message, "left_chat_member")
     ) {
       const { left_chat_member } = message;
-
-      return [
-        user,
-        chat,
-        [
-          {
-            currentBot,
-            leftChatMembers: [left_chat_member],
-            targetPlatform: "telegram",
-          },
-        ],
-      ];
+      return [user, chat, [{ leftChatMembers: [left_chat_member] }]];
     }
 
     if (isType<RawRequest.Message.Photo>(message, "photo")) {
       const { photo: inputPhotos } = message;
-
-      return [
-        user,
-        chat,
-        [{ currentBot, inputPhotos, targetPlatform: "telegram" }],
-      ];
+      return [user, chat, [{ inputPhotos }]];
     }
 
     return undefined;
@@ -133,17 +95,7 @@ function createTelegramRequest<Context>(
         TelegramRequest<Context>["input"]
       ]
     | undefined {
-    return [
-      user,
-      undefined,
-      [
-        {
-          currentBot,
-          targetPlatform: "telegram",
-          inputText: data,
-        },
-      ],
-    ];
+    return [user, undefined, [{ inputText: data }]];
   }
 
   function processRequest(
@@ -179,11 +131,12 @@ function createTelegramRequest<Context>(
 
   return [
     {
+      currentBot,
       targetPlatform: "telegram",
       telegramUser,
       input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
-      oldContext: {} as Context & TelegramDefaultContext,
+      oldContext: {} as Context,
     },
   ];
 }

@@ -1,5 +1,5 @@
 import { Branch } from "./branch";
-import { BaseDefaultContext } from "./common";
+import { AmbiguousRequestPerInput } from "./request";
 import { AmbiguousResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 
@@ -23,7 +23,7 @@ export type LeafTransformer<InContext, OutContext> = (
 ) => Promise<BaseLeaf<OutContext>>;
 
 /** Compose functions that have the same input/output type */
-export interface MonoLeadTransformer<Context>
+export interface MonoLeafTransformer<Context>
   extends LeafTransformer<Context, Context> {}
 
 /**
@@ -48,7 +48,7 @@ export interface LeafTransformChain<InContext, OutContext> {
 }
 
 export interface BaseLeafObserver<T>
-  extends ContentObserver<T & BaseDefaultContext> {}
+  extends ContentObserver<AmbiguousRequestPerInput<T>> {}
 
 export interface BaseLeafObservable<T>
   extends ContentObservable<AmbiguousResponse<T>> {}
@@ -60,8 +60,5 @@ export interface BaseLeafObservable<T>
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export interface BaseLeaf<T>
-  extends BaseLeafObserver<T>,
-    BaseLeafObservable<T> {}
-
+export type BaseLeaf<T> = BaseLeafObserver<T> & BaseLeafObservable<T>;
 export type LeafSelector<T> = BaseLeaf<T>;

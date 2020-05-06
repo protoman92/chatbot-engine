@@ -27,15 +27,12 @@ describe("Wit higher order function", () => {
     const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When
-    const input = {
+    await transformed.next({
       targetID,
       targetPlatform,
-      inputText: "some-text",
-      inputImageURL: "",
-      stickerID: "",
-    };
-
-    await transformed.next(input);
+      input: { inputText: "some-text" },
+      oldContext: {},
+    });
 
     // Then
     verify(comm.validate(anything())).never();
@@ -66,18 +63,25 @@ describe("Wit higher order function", () => {
     const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When
-    const input = {
+    await transformed.next({
       targetID,
       targetPlatform,
-      inputText,
-      inputImageURL: "",
-      stickerID: "",
-    };
-
-    await transformed.next(input);
+      input: { inputText },
+      oldContext: {},
+    });
 
     // Then
     verify(comm.validate(inputText)).once();
-    verify(rootLeaf.next(deepEqual({ ...input, witEntities }))).once();
+
+    verify(
+      rootLeaf.next(
+        deepEqual({
+          targetID,
+          targetPlatform,
+          input: { inputText },
+          oldContext: { witEntities },
+        })
+      )
+    ).once();
   });
 });

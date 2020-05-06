@@ -58,9 +58,8 @@ describe("Leaf selector", () => {
     await instance(selector).next({
       targetID,
       targetPlatform,
-      inputText: "",
-      inputImageURL: "",
-      stickerID: "",
+      input: [],
+      oldContext: {},
     });
 
     // Then
@@ -144,9 +143,8 @@ describe("Leaf selector", () => {
       await instance(selector).next({
         targetID,
         targetPlatform,
-        inputText: "",
-        inputImageURL: "",
-        stickerID: "",
+        input: [],
+        oldContext: {},
       });
 
       // Then

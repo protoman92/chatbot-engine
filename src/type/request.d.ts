@@ -1,9 +1,13 @@
-import { Coordinates } from "./common";
-import { FacebookRequest, FacebookRequestInput } from "./facebook";
-import { AmbiguousPlatform } from "./messenger";
-import { TelegramRequest, TelegramRequestInput } from "./telegram";
-
-export interface BaseRequestInput {}
+import {
+  FacebookRequest,
+  FacebookRequestInput,
+  FacebookRequestPerInput,
+} from "./facebook";
+import {
+  TelegramRequest,
+  TelegramRequestInput,
+  TelegramRequestPerInput,
+} from "./telegram";
 
 export interface BaseRequest<Context> {
   readonly targetID: string;
@@ -15,3 +19,7 @@ export type AmbiguousRequestInput = FacebookRequestInput | TelegramRequestInput;
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>
   | TelegramRequest<Context>;
+
+export type AmbiguousRequestPerInput<Context> =
+  | FacebookRequestPerInput<Context>
+  | TelegramRequestPerInput<Context>;

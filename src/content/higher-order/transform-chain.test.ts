@@ -33,23 +33,28 @@ describe("Transform chain", () => {
       .transform(instance(errorLeaf));
 
     // When
-    const input = {
+    const nextResult = await transformed.next({
       targetID,
       targetPlatform,
-      inputText: "",
-      inputImageURL: "",
-      stickerID: "",
-      a: 1,
-      b: 2,
-      error: new Error(""),
-    };
+      input: {},
+      oldContext: { a: 1, b: 2, error: new Error("") },
+    });
 
-    const nextResult = await transformed.next(input);
     await transformed.subscribe({ next: async () => NextResult.SUCCESS });
     await transformed.complete!();
 
     // Then
-    verify(fallbackLeaf.next(deepEqual({ ...input, error }))).once();
+    verify(
+      fallbackLeaf.next(
+        deepEqual({
+          targetID,
+          targetPlatform,
+          input: {},
+          oldContext: { error, a: 1, b: 2 },
+        })
+      )
+    ).once();
+
     verify(fallbackLeaf.complete!()).once();
     verify(fallbackLeaf.subscribe(anything())).once();
     verify(errorLeaf.complete!()).once();
@@ -62,8 +67,8 @@ describe("Transform chain", () => {
     const trasformedLeaf: BaseLeaf<ErrorContext> = await createTransformChain()
       .pipe<{}>(async (leaf) => ({
         ...leaf,
-        next: async (input) => {
-          const previousResult = await leaf.next(input);
+        next: async (request) => {
+          const previousResult = await leaf.next(request);
 
           switch (previousResult) {
             case NextResult.SUCCESS:
@@ -77,7 +82,7 @@ describe("Transform chain", () => {
       .pipe(catchError(await createDefaultErrorLeaf()))
       .transform(
         await createLeafWithObserver(async (observer) => ({
-          next: async ({ targetID, targetPlatform, ...input }) => {
+          next: async ({ targetID, targetPlatform, input }) => {
             const text = (input as { inputText: string }).inputText;
 
             return observer.next({
@@ -103,10 +108,8 @@ describe("Transform chain", () => {
     await trasformedLeaf.next({
       targetID,
       targetPlatform,
-      inputText: "",
-      inputImageURL: "",
-      stickerID: "",
-      error: new Error(""),
+      input: {},
+      oldContext: { error: new Error("") },
     });
 
     // Then

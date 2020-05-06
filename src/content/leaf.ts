@@ -38,12 +38,12 @@ export function createDefaultErrorLeaf<Context = {}>(
   fn?: (e: Error) => Promise<unknown>
 ): Promise<BaseLeaf<Context & ErrorContext>> {
   return createLeafWithObserver(async (observer) => ({
-    next: async ({ error, ...restInput }) => {
+    next: async ({ oldContext: { error }, ...request }) => {
       !!fn && (await fn(error));
 
       return observer.next({
-        ...restInput,
-        targetPlatform: restInput.targetPlatform,
+        ...request,
+        targetPlatform: request.targetPlatform,
         output: [
           {
             content: {
@@ -69,18 +69,18 @@ export async function createLeafObserverForPlatforms<Context = {}>({
   telegram?: TelegramLeafObserver<Context>;
 }>): Promise<BaseLeafObserver<Context>> {
   return {
-    next: async (input) => {
-      switch (input.targetPlatform) {
+    next: async (request) => {
+      switch (request.targetPlatform) {
         case "facebook":
           if (!facebook) break;
-          return facebook.next(input);
+          return facebook.next(request);
 
         case "telegram":
           if (!telegram) break;
-          return telegram.next(input);
+          return telegram.next(request);
       }
 
-      throw genericError(`Unhandled platform ${input.targetPlatform}`);
+      throw genericError(`Unhandled platform ${request.targetPlatform}`);
     },
     complete: async () => {
       !!facebook && !!facebook.complete && (await facebook.complete());

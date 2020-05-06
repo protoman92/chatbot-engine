@@ -1,24 +1,29 @@
 import { DeepReadonly, Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
-import { BaseDefaultContext, Coordinates } from "./common";
-import { BaseLeaf, BaseLeafObserver, LeafSelector } from "./leaf";
+import { Coordinates } from "./common";
+import { BaseLeafObservable, LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest, BaseRequestInput } from "./request";
+import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
+import { ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
 export type FacebookRequestInput = DeepReadonly<
-  BaseRequestInput & { targetPlatform: "facebook" } & (
-      | { inputCoordinate: Coordinates }
-      | { inputText: string }
-      | { inputImageURL: string }
-      | { stickerID: string }
-    )
+  | {}
+  | { inputCoordinate: Coordinates }
+  | { inputText: string }
+  | { inputImageURL: string }
+  | { stickerID: string }
 >;
 
 export interface FacebookRequest<Context> extends BaseRequest<Context> {
   readonly targetPlatform: "facebook";
   readonly input: readonly FacebookRequestInput[];
+}
+
+export interface FacebookRequestPerInput<Context> extends BaseRequest<Context> {
+  readonly targetPlatform: "facebook";
+  readonly input: FacebookRequestInput;
 }
 
 export interface FacebookResponse<Context>
@@ -350,13 +355,13 @@ export interface FacebookMessageProcessor<Context>
     FacebookRequest<Context>
   > {}
 
-export type FacebookDefaultContext = BaseDefaultContext & FacebookRequestInput;
+export type FacebookDefaultContext = {};
 
-export type FacebookLeafObserver<T> = BaseLeafObserver<
-  T & FacebookDefaultContext
+export type FacebookLeafObserver<T> = ContentObserver<
+  FacebookRequestPerInput<T & FacebookDefaultContext>
 >;
 
-export type FacebookLeaf<T> = BaseLeaf<T & FacebookDefaultContext>;
+export type FacebookLeaf<T> = FacebookLeafObserver<T> & BaseLeafObservable<T>;
 
 /** Represents a Facebook user */
 export interface FacebookUser {

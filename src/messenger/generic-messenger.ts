@@ -16,7 +16,11 @@ import {
   BaseMessageProcessor,
   Messenger,
 } from "../type/messenger";
-import { AmbiguousRequest, AmbiguousRequestInput } from "../type/request";
+import {
+  AmbiguousRequest,
+  AmbiguousRequestInput,
+  AmbiguousRequestPerInput,
+} from "../type/request";
 import {
   TelegramMessageProcessor,
   TelegramRawRequest,
@@ -51,14 +55,12 @@ export async function createMessageProcessor<
   > = await compose(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
-      receiveRequest: ({ targetID, targetPlatform, oldContext, input }) => {
-        return mapSeries(input as readonly AmbiguousRequestInput[], (datum) => {
+      receiveRequest: ({ input, ...request }) => {
+        return mapSeries(input as AmbiguousRequestInput[], (input) => {
           return leafSelector.next({
-            ...datum,
-            ...oldContext,
-            targetID,
-            targetPlatform,
-          });
+            ...request,
+            input,
+          } as AmbiguousRequestPerInput<Context>);
         });
       },
       sendResponse: async (response) => {

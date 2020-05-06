@@ -216,7 +216,11 @@ describe("Save Telegram user for target ID", () => {
 
     // When
     await transformed.receiveRequest({
+      currentBot: { id: 0, first_name: "", username: "" },
+      input: [],
+      oldContext: {},
       targetID: `${targetID}`,
+      targetPlatform: "telegram",
       telegramUser: {
         id: 0,
         first_name: "",
@@ -225,9 +229,6 @@ describe("Save Telegram user for target ID", () => {
         language_code: "en" as const,
         is_bot: false,
       },
-      targetPlatform: "telegram",
-      oldContext: {},
-      input: [],
     });
 
     // Then
