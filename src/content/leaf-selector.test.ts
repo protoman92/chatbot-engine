@@ -2,7 +2,7 @@ import expectJs from "expect.js";
 import { beforeEach, describe } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
-import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
+import { BaseLeaf, LeafEnumeration } from "../type/leaf";
 import { createLeafWithObserver } from "./leaf";
 import { createLeafSelector } from "./leaf-selector";
 
@@ -15,12 +15,11 @@ const targetPlatform = "facebook";
 
 describe("Leaf selector", () => {
   interface Context {}
-
-  let currentLeaf: AmbiguousLeaf<Context>;
+  let currentLeaf: BaseLeaf<Context>;
   let selector: TestLeafSelector;
 
   beforeEach(async () => {
-    currentLeaf = spy<AmbiguousLeaf<Context>>(
+    currentLeaf = spy<BaseLeaf<Context>>(
       await createLeafWithObserver(async () => ({
         checkTextConditions: () => Promise.reject(""),
         checkContextConditions: () => Promise.reject(""),

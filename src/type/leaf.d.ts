@@ -10,7 +10,7 @@ import { ContentObservable, ContentObserver } from "./stream";
 export interface LeafEnumeration<Context> {
   readonly parentBranch: Branch<Context>;
   readonly prefixLeafPaths: readonly string[];
-  readonly currentLeaf: AmbiguousLeaf<Context>;
+  readonly currentLeaf: BaseLeaf<Context>;
   readonly currentLeafID: string;
 }
 
@@ -19,8 +19,8 @@ export interface LeafEnumeration<Context> {
  * functions.
  */
 export type LeafTransformer<InContext, OutContext> = (
-  leaf: AmbiguousLeaf<InContext>
-) => Promise<AmbiguousLeaf<OutContext>>;
+  leaf: BaseLeaf<InContext>
+) => Promise<BaseLeaf<OutContext>>;
 
 /** Compose functions that have the same input/output type */
 export interface MonoLeadTransformer<Context>
@@ -47,18 +47,11 @@ export interface LeafTransformChain<InContext, OutContext> {
   ): LeafTransformChain<Context, Context>;
 }
 
-export interface BaseLeafObserver<Context, ExtraContext>
-  extends ContentObserver<Context & ExtraContext> {}
+export interface BaseLeafObserver<T>
+  extends ContentObserver<T & BaseDefaultContext> {}
 
-export interface BaseLeafObservable<Context>
-  extends ContentObservable<AmbiguousResponse<Context>> {}
-
-export interface AmbiguousLeafObserver<Context>
-  extends BaseLeafObserver<Context, BaseDefaultContext> {}
-
-export interface BaseLeaf<Context, ExtraContext>
-  extends BaseLeafObserver<Context, ExtraContext>,
-    BaseLeafObservable<Context> {}
+export interface BaseLeafObservable<T>
+  extends ContentObservable<AmbiguousResponse<T>> {}
 
 /**
  * Represents a sequence of messenges that have some commonalities among each
@@ -67,7 +60,8 @@ export interface BaseLeaf<Context, ExtraContext>
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export interface AmbiguousLeaf<Context>
-  extends BaseLeaf<Context, BaseDefaultContext> {}
+export interface BaseLeaf<T>
+  extends BaseLeafObserver<T>,
+    BaseLeafObservable<T> {}
 
-export interface LeafSelector<Context> extends AmbiguousLeaf<Context> {}
+export type LeafSelector<T> = BaseLeaf<T>;

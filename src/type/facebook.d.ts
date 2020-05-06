@@ -352,12 +352,11 @@ export interface FacebookMessageProcessor<Context>
 
 export type FacebookDefaultContext = BaseDefaultContext & FacebookRequestInput;
 
-export type FacebookLeafObserver<Context> = BaseLeafObserver<
-  Context,
-  FacebookDefaultContext
+export type FacebookLeafObserver<T> = BaseLeafObserver<
+  T & FacebookDefaultContext
 >;
 
-export type FacebookLeaf<Context> = BaseLeaf<Context, FacebookDefaultContext>;
+export type FacebookLeaf<T> = BaseLeaf<T & FacebookDefaultContext>;
 
 /** Represents a Facebook user */
 export interface FacebookUser {

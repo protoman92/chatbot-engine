@@ -3,7 +3,7 @@ import { describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription, NextResult } from "../../stream";
 import { ErrorContext } from "../../type/common";
-import { AmbiguousLeaf } from "../../type/leaf";
+import { BaseLeaf } from "../../type/leaf";
 import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
 import { catchError } from "./catch-error";
 import { createTransformChain } from "./transform-chain";
@@ -16,13 +16,13 @@ describe("Transform chain", () => {
     // Setup
     const error = new Error("Something happened");
 
-    const errorLeaf = spy<AmbiguousLeaf<{}>>({
+    const errorLeaf = spy<BaseLeaf<{}>>({
       next: () => Promise.reject(error),
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
 
-    const fallbackLeaf = spy<AmbiguousLeaf<ErrorContext>>({
+    const fallbackLeaf = spy<BaseLeaf<ErrorContext>>({
       next: () => Promise.resolve(NextResult.SUCCESS),
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
@@ -59,7 +59,7 @@ describe("Transform chain", () => {
 
   it("Create leaf with pipe chain", async () => {
     // Setup
-    const trasformedLeaf: AmbiguousLeaf<ErrorContext> = await createTransformChain()
+    const trasformedLeaf: BaseLeaf<ErrorContext> = await createTransformChain()
       .pipe<{}>(async (leaf) => ({
         ...leaf,
         next: async (input) => {

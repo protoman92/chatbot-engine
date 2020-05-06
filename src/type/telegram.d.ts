@@ -269,12 +269,11 @@ export interface TelegramMessageProcessor<Context>
 
 export type TelegramDefaultContext = BaseDefaultContext & TelegramRequestInput;
 
-export type TelegramLeafObserver<Context> = BaseLeafObserver<
-  Context,
-  TelegramDefaultContext
+export type TelegramLeafObserver<T> = BaseLeafObserver<
+  T & TelegramDefaultContext
 >;
 
-export type TelegramLeaf<Context> = BaseLeaf<Context, TelegramDefaultContext>;
+export type TelegramLeaf<T> = BaseLeaf<T & TelegramDefaultContext>;
 
 export interface TelegramBot {
   readonly id: number;

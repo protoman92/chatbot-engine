@@ -1,7 +1,7 @@
 import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../../stream";
-import { AmbiguousLeaf } from "../../type/leaf";
+import { BaseLeaf } from "../../type/leaf";
 import { WitClient, WitContext, WitResponse } from "../../type/wit";
 import { retryWithWit } from "./wit";
 
@@ -10,12 +10,12 @@ const targetPlatform = "facebook" as const;
 
 describe("Wit higher order function", () => {
   let comm: WitClient;
-  let rootLeaf: AmbiguousLeaf<WitContext>;
+  let rootLeaf: BaseLeaf<WitContext>;
 
   beforeEach(() => {
     comm = spy<WitClient>({ validate: () => Promise.reject("") });
 
-    rootLeaf = spy<AmbiguousLeaf<WitContext>>({
+    rootLeaf = spy<BaseLeaf<WitContext>>({
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });
