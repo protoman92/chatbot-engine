@@ -7,13 +7,14 @@ import { BaseRequest, BaseRequestInput } from "./request";
 import { BaseResponse } from "./response";
 import { BaseResponseOutput } from "./visual-content";
 
-export interface FacebookRequestInput extends BaseRequestInput {
-  readonly inputCoordinate?: Coordinates;
-  readonly inputText: string;
-  readonly inputImageURL: string;
-  readonly targetPlatform: "facebook";
-  readonly stickerID: string;
-}
+export type FacebookRequestInput = DeepReadonly<
+  BaseRequestInput & { targetPlatform: "facebook" } & (
+      | { inputCoordinate: Coordinates }
+      | { inputText: string }
+      | { inputImageURL: string }
+      | { stickerID: string }
+    )
+>;
 
 export interface FacebookRequest<Context> extends BaseRequest<Context> {
   readonly targetPlatform: "facebook";

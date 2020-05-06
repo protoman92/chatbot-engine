@@ -1,6 +1,7 @@
 import { DynamoDB } from "aws-sdk";
 import { requireAllTruthy } from "../common/utils";
 import { ContextDAO, AmbiguousPlatform } from "../type";
+import { AttributeMap } from "aws-sdk/clients/dynamodb";
 
 export function createDynamoDBContextDAO<Context>(
   ddb: DynamoDB,
@@ -36,6 +37,18 @@ export function createDynamoDBContextDAO<Context>(
     };
   }
 
+  function mapAttributeMapToContext(attrMap: AttributeMap) {
+    const resolved = Object.entries(attrMap).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: Object.values(value)[0],
+      }),
+      {} as Context
+    );
+
+    return resolved;
+  }
+
   return {
     getContext: (targetID, targetPlatform) =>
       new Promise((resolve, reject) => {
@@ -51,15 +64,7 @@ export function createDynamoDBContextDAO<Context>(
             }
 
             const { Item = {} } = data;
-
-            const resolved = Object.entries(Item).reduce(
-              (acc, [key, value]) => ({
-                ...acc,
-                [key]: Object.values(value)[0],
-              }),
-              {} as Context
-            );
-
+            const resolved = mapAttributeMapToContext(Item);
             resolve(resolved);
           }
         );
@@ -79,7 +84,9 @@ export function createDynamoDBContextDAO<Context>(
               return;
             }
 
-            resolve(data);
+            const { Attributes = {} } = data;
+            const newContext = mapAttributeMapToContext(Attributes);
+            resolve({ newContext });
           }
         );
       }),

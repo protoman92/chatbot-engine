@@ -21,7 +21,7 @@ describe("Redis context DAO", () => {
     redis = spy<Pick<RedisClient, "get" | "set" | "del">>({
       get: () => false,
       set: () => false,
-      del: () => false
+      del: () => false,
     });
 
     contextDAO = createRedisContextDAO(instance(redis));
@@ -48,13 +48,13 @@ describe("Redis context DAO", () => {
     const oldContext = { a: 1, b: 2 };
     const additionalContext = { c: 3 };
 
-    when(redis.get(anything(), anything())).thenCall((param1, param2) => {
+    when(redis.get(anything(), anything())).thenCall((...[, param2]) => {
       param2(null, JSON.stringify(oldContext));
     });
 
-    when(redis.set(anything(), anything(), anything())).thenCall(
-      (param1, param2, param3) => param3(null, "OK")
-    );
+    when(
+      redis.set(anything(), anything(), anything())
+    ).thenCall((...[, , param3]) => param3(null, "OK"));
 
     // When
     const result = await contextDAO.appendContext(
@@ -64,13 +64,10 @@ describe("Redis context DAO", () => {
     );
 
     // Then
-    const finalContext = joinObjects<{}>(oldContext, additionalContext);
-
-    verify(
-      redis.set(getCacheKey(targetID), JSON.stringify(finalContext), anything())
-    ).once();
-
-    expectJs(result).to.equal("OK");
+    const newContext = joinObjects<{}>(oldContext, additionalContext);
+    const cacheKey = getCacheKey(targetID);
+    verify(redis.set(cacheKey, JSON.stringify(newContext), anything())).once();
+    expectJs(result).to.eql({ newContext });
   });
 
   it("Should clear context on reset call", async () => {

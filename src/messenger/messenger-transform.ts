@@ -1,9 +1,10 @@
-import { compose, deepClone } from "../common/utils";
+import { deepClone } from "../common/utils";
 import { PlatformClient } from "../type/client";
 import { BaseDefaultContext, Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
+  OnContextChangeCallback,
   SaveUserForTargetIDContext,
 } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
@@ -18,7 +19,8 @@ export function saveContextOnSend<
   RawRequest,
   AmbRequest extends AmbiguousRequest<Context>
 >(
-  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">
+  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">,
+  onContextChangeCallback?: OnContextChangeCallback<Context>
 ): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
   return async (processor) => {
     return {
@@ -27,12 +29,19 @@ export function saveContextOnSend<
         const { targetID, targetPlatform, additionalContext } = response;
         const result = await processor.sendResponse(response);
 
-        if (!!additionalContext) {
-          await contextDAO.appendContext(
+        if (additionalContext != null) {
+          const { newContext } = await contextDAO.appendContext(
             targetID,
             targetPlatform,
             additionalContext
           );
+
+          if (onContextChangeCallback != null)
+            onContextChangeCallback({
+              newContext,
+              targetID,
+              targetPlatform,
+            });
         }
 
         return result;

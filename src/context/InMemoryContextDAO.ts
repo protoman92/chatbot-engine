@@ -18,6 +18,7 @@ export function createInMemoryContextDAO<Context>(): ContextDAO<Context> {
     appendContext: async (targetID, targetPlatform, context) => {
       const cacheKey = getCacheKey(targetID, targetPlatform);
       storage[cacheKey] = joinObjects(storage[cacheKey], context);
+      return { newContext: storage[cacheKey] };
     },
     resetContext: async () => {
       const keys = Object.keys(storage);

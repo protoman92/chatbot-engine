@@ -14,7 +14,7 @@ export interface ContextDAO<Context> {
     targetID: string,
     platform: AmbiguousPlatform,
     context: Partial<Context>
-  ): Promise<unknown>;
+  ): Promise<Readonly<{ newContext: Context }>>;
 
   /** Reset all context to factory */
   resetContext(targetID: string, platform: AmbiguousPlatform): Promise<unknown>;

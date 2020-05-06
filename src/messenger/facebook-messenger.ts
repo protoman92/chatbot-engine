@@ -38,14 +38,7 @@ function createFacebookRequest<Context>(
     if (
       isType<FacebookRawRequest.Entry.Messaging.Postback>(request, "postback")
     ) {
-      return [
-        {
-          targetPlatform,
-          inputText: request.postback.payload,
-          inputImageURL: "",
-          stickerID: "",
-        },
-      ];
+      return [{ targetPlatform, inputText: request.postback.payload }];
     }
 
     if (
@@ -59,14 +52,7 @@ function createFacebookRequest<Context>(
           "quick_reply"
         )
       ) {
-        return [
-          {
-            targetPlatform,
-            inputText: message.quick_reply.payload,
-            inputImageURL: "",
-            stickerID: "",
-          },
-        ];
+        return [{ targetPlatform, inputText: message.quick_reply.payload }];
       }
 
       if (
@@ -75,14 +61,7 @@ function createFacebookRequest<Context>(
           "text"
         )
       ) {
-        return [
-          {
-            targetPlatform,
-            inputText: message.text,
-            inputImageURL: "",
-            stickerID: "",
-          },
-        ];
+        return [{ targetPlatform, inputText: message.text }];
       }
 
       if (
@@ -115,14 +94,7 @@ function createFacebookRequest<Context>(
             case "location":
               const { lat, long } = attachment.payload.coordinates;
               const coordinates = { lat, lng: long };
-
-              return {
-                targetPlatform,
-                inputText: JSON.stringify(coordinates),
-                inputImageURL: "",
-                inputCoordinate: coordinates,
-                stickerID: "",
-              };
+              return { targetPlatform, inputCoordinate: coordinates };
           }
         });
       }

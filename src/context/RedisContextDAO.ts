@@ -28,10 +28,12 @@ export function createRedisContextDAO<Context>(
       const oldContext = await contextDAO.getContext(targetID, targetPlatform);
       const newContext = joinObjects(oldContext, context);
 
-      return set(
+      await set(
         getCacheKey(targetID, targetPlatform),
         JSON.stringify(newContext)
       );
+
+      return { newContext };
     },
     resetContext: (targetID, targetPlatform) => {
       return del(getCacheKey(targetID, targetPlatform));

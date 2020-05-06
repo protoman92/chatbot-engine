@@ -7,9 +7,7 @@ export interface BaseRequestInput {}
 
 export interface BaseRequest<Context> {
   readonly targetID: string;
-  readonly targetPlatform: AmbiguousPlatform;
   readonly oldContext: Context;
-  readonly input: readonly AmbiguousRequestInput[];
 }
 
 export type AmbiguousRequestInput = FacebookRequestInput | TelegramRequestInput;

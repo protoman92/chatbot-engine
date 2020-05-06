@@ -66,3 +66,11 @@ export interface SaveUserForTargetIDContext<Context> {
   readonly additionalContext?: Partial<Context>;
   readonly targetUserID: string;
 }
+
+export type OnContextChangeCallback<Context> = (
+  args: Readonly<{
+    targetID: string;
+    targetPlatform: AmbiguousPlatform;
+    newContext: Context;
+  }>
+) => Promise<unknown>;

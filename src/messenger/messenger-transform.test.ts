@@ -1,9 +1,13 @@
+import expectJs from "expect.js";
 import { beforeEach, describe } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose } from "../common/utils";
 import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
-import { BaseMessageProcessor } from "../type/messenger";
+import {
+  BaseMessageProcessor,
+  OnContextChangeCallback,
+} from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
@@ -44,18 +48,20 @@ describe("Save context on send", () => {
 
   it("Should save context on send", async () => {
     // Setup
-    const oldContext: {} = { a: 1, b: 2 };
-    when(contextDAO.getContext(targetID, targetPlatform)).thenResolve(
-      oldContext
-    );
+    const oldCtx: {} = { a: 1, b: 2 };
+    when(contextDAO.getContext(targetID, targetPlatform)).thenResolve(oldCtx);
     when(
       contextDAO.appendContext(targetID, targetPlatform, anything())
-    ).thenResolve();
+    ).thenResolve({ newContext: {} });
     when(messenger.sendResponse(anything())).thenResolve();
+    let callbackParameters: Parameters<OnContextChangeCallback<{}>> | undefined;
 
     const transformed = await compose(
       instance(messenger),
-      saveContextOnSend(instance(contextDAO))
+      saveContextOnSend(
+        instance(contextDAO),
+        async (...args) => (callbackParameters = args)
+      )
     );
 
     const additionalContext: Partial<{}> = { a: 1, b: 2 };
@@ -80,6 +86,10 @@ describe("Save context on send", () => {
     ).once();
 
     verify(messenger.sendResponse(deepEqual(genericResponse))).once();
+
+    expectJs(callbackParameters).to.eql([
+      { targetID, targetPlatform, newContext: {} },
+    ]);
   });
 });
 
@@ -133,7 +143,7 @@ describe("Save user for target ID", () => {
     // Setup
     when(
       contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({});
+    ).thenResolve({ newContext: {} });
 
     when(messenger.receiveRequest(anything())).thenResolve({
       targetID,
@@ -192,7 +202,7 @@ describe("Save Telegram user for target ID", () => {
     // Setup
     when(
       contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({});
+    ).thenResolve({ newContext: {} });
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
     const additionalContext = { a: 1, b: 2 };
