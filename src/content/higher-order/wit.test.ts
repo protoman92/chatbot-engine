@@ -1,6 +1,5 @@
 import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { DEFAULT_COORDINATES } from "../../common/utils";
 import { NextResult } from "../../stream";
 import { AmbiguousLeaf } from "../../type/leaf";
 import { WitClient, WitContext, WitResponse } from "../../type/wit";
@@ -33,7 +32,6 @@ describe("Wit higher order function", () => {
       targetPlatform,
       inputText: "some-text",
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
     };
 
@@ -73,7 +71,6 @@ describe("Wit higher order function", () => {
       targetPlatform,
       inputText,
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
     };
 

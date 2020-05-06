@@ -1,7 +1,6 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
-import { DEFAULT_COORDINATES } from "../../common/utils";
 import { createSubscription, NextResult } from "../../stream";
 import { ErrorContext } from "../../type/common";
 import { AmbiguousLeaf } from "../../type/leaf";
@@ -39,7 +38,6 @@ describe("Transform chain", () => {
       targetPlatform,
       inputText: "",
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
       a: 1,
       b: 2,
@@ -105,7 +103,6 @@ describe("Transform chain", () => {
       targetPlatform,
       inputText: "",
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
       error: new Error(""),
     });

@@ -1,5 +1,5 @@
 import { Omit } from "ts-essentials";
-import { DEFAULT_COORDINATES, isType, telegramError } from "../common/utils";
+import { isType, telegramError } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   TelegramBot,
@@ -67,11 +67,7 @@ function createTelegramRequest<Context>(
             currentBot,
             inputCommand,
             inputText,
-            inputPhotos: [],
-            leftChatMembers: [],
-            newChatMembers: [],
             targetPlatform: "telegram",
-            inputCoordinate: DEFAULT_COORDINATES,
           },
         ],
       ];
@@ -86,14 +82,9 @@ function createTelegramRequest<Context>(
         [
           {
             currentBot,
-            inputCommand: "",
             inputDocument: document,
             inputText: "",
-            inputPhotos: [],
-            leftChatMembers: [],
-            newChatMembers: [],
             targetPlatform: "telegram",
-            inputCoordinate: DEFAULT_COORDINATES,
           },
         ],
       ];
@@ -109,12 +100,8 @@ function createTelegramRequest<Context>(
           {
             currentBot,
             newChatMembers,
-            inputCommand: "",
-            inputPhotos: [],
             inputText: "",
-            leftChatMembers: [],
             targetPlatform: "telegram",
-            inputCoordinate: DEFAULT_COORDINATES,
           },
         ],
       ];
@@ -131,13 +118,9 @@ function createTelegramRequest<Context>(
         [
           {
             currentBot,
-            inputCommand: "",
-            inputPhotos: [],
             inputText: "",
-            newChatMembers: [],
             leftChatMembers: [left_chat_member],
             targetPlatform: "telegram",
-            inputCoordinate: DEFAULT_COORDINATES,
           },
         ],
       ];
@@ -153,12 +136,8 @@ function createTelegramRequest<Context>(
           {
             currentBot,
             inputPhotos,
-            inputCommand: "",
             inputText: "",
-            newChatMembers: [],
-            leftChatMembers: [],
             targetPlatform: "telegram",
-            inputCoordinate: DEFAULT_COORDINATES,
           },
         ],
       ];
@@ -183,12 +162,7 @@ function createTelegramRequest<Context>(
         {
           currentBot,
           targetPlatform: "telegram",
-          inputCommand: "",
-          inputPhotos: [],
           inputText: data,
-          inputCoordinate: DEFAULT_COORDINATES,
-          leftChatMembers: [],
-          newChatMembers: [],
         },
       ],
     ];

@@ -1,9 +1,7 @@
-import { Coordinates, Transformer } from "../type/common";
+import { Transformer } from "../type/common";
 import { FacebookRawRequest } from "../type/facebook";
 import { AmbiguousPlatform } from "../type/messenger";
 import { TelegramRawRequest } from "../type/telegram";
-
-export const DEFAULT_COORDINATES: Coordinates = { lat: 0, lng: 0 };
 
 /** Check if an object is of a certain type */
 export function isType<

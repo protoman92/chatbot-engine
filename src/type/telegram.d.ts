@@ -9,11 +9,11 @@ import { BaseResponseOutput } from "./visual-content";
 
 export interface TelegramRequestInput extends BaseRequestInput {
   readonly currentBot: TelegramBot;
-  readonly inputCommand: string;
+  readonly inputCommand?: string;
   readonly inputDocument?: TelegramRawRequest.DocumentDetails;
-  readonly inputPhotos: readonly TelegramRawRequest.PhotoDetails[];
-  readonly leftChatMembers: readonly (TelegramBot | TelegramUser)[];
-  readonly newChatMembers: readonly (TelegramBot | TelegramUser)[];
+  readonly inputPhotos?: readonly TelegramRawRequest.PhotoDetails[];
+  readonly leftChatMembers?: readonly (TelegramBot | TelegramUser)[];
+  readonly newChatMembers?: readonly (TelegramBot | TelegramUser)[];
   readonly targetPlatform: "telegram";
 }
 

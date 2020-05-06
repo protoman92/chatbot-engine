@@ -1,4 +1,4 @@
-import { DEFAULT_COORDINATES, facebookError, isType } from "../common/utils";
+import { facebookError, isType } from "../common/utils";
 import { Transformer } from "../type/common";
 import {
   FacebookMessageProcessor,
@@ -43,7 +43,6 @@ function createFacebookRequest<Context>(
           targetPlatform,
           inputText: request.postback.payload,
           inputImageURL: "",
-          inputCoordinate: DEFAULT_COORDINATES,
           stickerID: "",
         },
       ];
@@ -65,7 +64,6 @@ function createFacebookRequest<Context>(
             targetPlatform,
             inputText: message.quick_reply.payload,
             inputImageURL: "",
-            inputCoordinate: DEFAULT_COORDINATES,
             stickerID: "",
           },
         ];
@@ -82,7 +80,6 @@ function createFacebookRequest<Context>(
             targetPlatform,
             inputText: message.text,
             inputImageURL: "",
-            inputCoordinate: DEFAULT_COORDINATES,
             stickerID: "",
           },
         ];
@@ -102,7 +99,6 @@ function createFacebookRequest<Context>(
                 targetPlatform,
                 inputText: attachment.payload.url,
                 inputImageURL: attachment.payload.url,
-                inputCoordinate: DEFAULT_COORDINATES,
                 stickerID: (() => {
                   if (
                     isType<

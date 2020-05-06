@@ -5,7 +5,7 @@ import { TelegramRequest, TelegramRequestInput } from "./telegram";
 
 export interface BaseRequestInput {
   readonly inputText: string;
-  readonly inputCoordinate: Coordinates;
+  readonly inputCoordinate?: Coordinates;
 }
 
 export interface BaseRequest<Context> {

@@ -2,7 +2,7 @@ import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { Omit } from "ts-essentials";
 import { anything, instance, spy, verify, when } from "ts-mockito";
-import { DEFAULT_COORDINATES, isType } from "../common/utils";
+import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
 import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousLeaf } from "../type/leaf";
@@ -29,7 +29,6 @@ describe("Default error leaf", () => {
       error,
       inputText: "",
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
     });
 
@@ -82,7 +81,6 @@ describe("Leaf for platforms", () => {
       targetPlatform: "facebook",
       inputText: "",
       inputImageURL: "",
-      inputCoordinate: DEFAULT_COORDINATES,
       stickerID: "",
     });
 
@@ -94,12 +92,7 @@ describe("Leaf for platforms", () => {
       },
       targetID,
       targetPlatform: "telegram",
-      inputCommand: "",
-      inputPhotos: [],
       inputText: "",
-      inputCoordinate: DEFAULT_COORDINATES,
-      leftChatMembers: [],
-      newChatMembers: [],
     });
 
     await platformLeaf.complete!();
@@ -121,7 +114,6 @@ describe("Leaf for platforms", () => {
       await platformObserver.next({
         targetID,
         targetPlatform: "facebook",
-        inputCoordinate: DEFAULT_COORDINATES,
         inputImageURL: "",
         inputText: "",
         stickerID: "",
@@ -140,12 +132,7 @@ describe("Leaf for platforms", () => {
         },
         targetID,
         targetPlatform: "telegram",
-        leftChatMembers: [],
-        inputCommand: "",
-        inputCoordinate: DEFAULT_COORDINATES,
-        inputPhotos: [],
         inputText: "",
-        newChatMembers: [],
       });
 
       throw new Error("Never should have come here");
