@@ -133,22 +133,3 @@ export function setTypingIndicator<
     };
   };
 }
-
-/** Create default transformers that all message processors should use */
-export function transformMessageProcessorsDefault<
-  Context,
-  RawRequest,
-  RawResponse,
-  AmbRequest extends AmbiguousRequest<Context>
->(
-  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">,
-  client: PlatformClient<RawResponse>
-): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
-  return (processor) =>
-    compose(
-      processor,
-      injectContextOnReceive(contextDAO),
-      saveContextOnSend(contextDAO),
-      setTypingIndicator(client)
-    );
-}
