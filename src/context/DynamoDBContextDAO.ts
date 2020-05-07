@@ -1,6 +1,5 @@
 import { DynamoDB } from "aws-sdk";
-import { AttributeMap } from "aws-sdk/clients/dynamodb";
-import { requireAllTruthy } from "../common/utils";
+import { joinObjects, requireAllTruthy } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
 
 interface CreateDynamoDBContextDAOConfig {
@@ -19,38 +18,7 @@ export function createDynamoDBContextDAO<Context>({
     };
   }
 
-  function getUpdateExpression(context: Partial<Context>) {
-    const contextEntries = Object.entries(context);
-
-    const attributes = contextEntries.map(([key, value]) => [
-      { [`#${key}`]: key },
-      { [`:${key}`]: { S: value } },
-    ]);
-
-    return {
-      ExpressionAttributeNames: attributes.reduce(
-        (acc, [keyAttr]) => ({ ...acc, ...keyAttr }),
-        {}
-      ),
-      ExpressionAttributeValues: attributes.reduce(
-        (acc, [, valueAttr]) => ({ ...acc, ...valueAttr }),
-        {}
-      ),
-      UpdateExpression: "SET ".concat(
-        contextEntries.map(([key, value]) => `#${key}=:${value}`).join(",")
-      ),
-    };
-  }
-
-  function mapAttributeMapToContext(attrMap: AttributeMap) {
-    return Object.entries(attrMap).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: Object.values(value)[0],
-      }),
-      {} as Context
-    );
-  }
+  const strContextKey = "context";
 
   const contextDAO: ContextDAO<Context> = {
     getContext: async (targetID, targetPlatform) => {
@@ -61,21 +29,25 @@ export function createDynamoDBContextDAO<Context>({
         })
         .promise();
 
-      return mapAttributeMapToContext(Item);
+      const strContext = Item[strContextKey]?.S || "{}";
+      return JSON.parse(strContext);
     },
     appendContext: async (targetID, targetPlatform, context) => {
       const oldContext = await contextDAO.getContext(targetID, targetPlatform);
+      const newContext = joinObjects(oldContext, context);
+      const strContext = JSON.stringify(newContext);
 
-      const { Attributes = {} } = await ddb
-        .updateItem({
-          Key: getTableKey(targetID, targetPlatform),
+      await ddb
+        .putItem({
+          Item: {
+            ...getTableKey(targetID, targetPlatform),
+            [strContextKey]: { S: strContext },
+          },
           ReturnValues: "NONE",
           TableName: tableName,
-          ...getUpdateExpression(context),
         })
         .promise();
 
-      const newContext = mapAttributeMapToContext(Attributes);
       return { newContext, oldContext };
     },
     resetContext: async (targetID, targetPlatform) =>
