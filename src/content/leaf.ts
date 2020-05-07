@@ -55,7 +55,7 @@ export function createDefaultErrorLeaf<Context = {}>(
   fn?: (e: Error) => Promise<unknown>
 ): Promise<AmbiguousLeaf<Context & ErrorContext>> {
   return createLeafWithObserver(async (observer) => ({
-    next: async ({ oldContext: { error }, ...request }) => {
+    next: async ({ currentContext: { error }, ...request }) => {
       !!fn && (await fn(error));
 
       return observer.next({

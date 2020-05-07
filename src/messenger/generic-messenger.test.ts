@@ -68,8 +68,8 @@ describe("Generic message processor", () => {
       targetPlatform,
       originalRequest: {
         targetID,
+        currentContext: {},
         input: {},
-        oldContext: {},
         targetPlatform: "facebook",
       },
       output: [],
@@ -110,8 +110,8 @@ describe("Generic message processor", () => {
       targetPlatform,
       originalRequest: {
         targetID,
+        currentContext: {},
         input: {},
-        oldContext: {},
         targetPlatform: "facebook",
       },
       output: [],
@@ -127,7 +127,7 @@ describe("Generic message processor", () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
-    const oldContext = { a: 1, b: 2 };
+    const currentContext = { a: 1, b: 2 };
 
     const input: readonly FacebookRequestInput[] = [
       {
@@ -156,17 +156,17 @@ describe("Generic message processor", () => {
     });
 
     await messageProcessor.receiveRequest({
+      currentContext,
+      input,
       targetID,
       targetPlatform,
-      oldContext,
-      input,
     });
 
     // Then
     input.forEach((input) =>
       verify(
         leafSelector.next(
-          deepEqual({ input, oldContext, targetID, targetPlatform })
+          deepEqual({ currentContext, input, targetID, targetPlatform })
         )
       ).once()
     );
@@ -206,9 +206,9 @@ describe("Cross platform messenger", () => {
     when(fbProcessor.generalizeRequest(anything())).thenResolve([
       {
         targetID,
-        targetPlatform: "facebook",
-        oldContext: {},
+        currentContext: {},
         input: [],
+        targetPlatform: "facebook",
       },
     ]);
 
@@ -216,8 +216,8 @@ describe("Cross platform messenger", () => {
       {
         targetID,
         currentBot: { id: 0, first_name: "", username: "" },
+        currentContext: {},
         input: [],
-        oldContext: {},
         targetPlatform: "telegram" as const,
         telegramUser: {
           id: 0,

@@ -77,9 +77,17 @@ export function injectContextOnReceive<
       ...processor,
       receiveRequest: async (request) => {
         const { targetID, targetPlatform } = request;
-        let oldContext = await contextDAO.getContext(targetID, targetPlatform);
-        oldContext = deepClone({ ...request.oldContext, ...oldContext });
-        return processor.receiveRequest({ ...request, oldContext });
+        let currentContext = await contextDAO.getContext(
+          targetID,
+          targetPlatform
+        );
+
+        currentContext = deepClone({
+          ...request.currentContext,
+          ...currentContext,
+        });
+
+        return processor.receiveRequest({ ...request, currentContext });
       },
     };
   };
@@ -105,9 +113,9 @@ export function saveUserForTargetID<
     return {
       ...processor,
       receiveRequest: async (request) => {
-        const { oldContext, targetID, targetPlatform } = request;
+        const { currentContext, targetID, targetPlatform } = request;
 
-        if (!oldContext || !(oldContext as any)["targetID"]) {
+        if (!currentContext || !(currentContext as any)["targetID"]) {
           const rawUser = await getUser(targetID);
 
           const {
@@ -121,7 +129,7 @@ export function saveUserForTargetID<
           });
         }
 
-        return processor.receiveRequest({ ...request, oldContext });
+        return processor.receiveRequest({ ...request, currentContext });
       },
     };
   };

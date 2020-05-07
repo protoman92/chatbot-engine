@@ -58,8 +58,8 @@ describe("Leaf selector", () => {
     await instance(selector).next({
       targetID,
       targetPlatform,
+      currentContext: {},
       input: [],
-      oldContext: {},
     });
 
     // Then
@@ -143,8 +143,8 @@ describe("Leaf selector", () => {
       await instance(selector).next({
         targetID,
         targetPlatform,
+        currentContext: {},
         input: [],
-        oldContext: {},
       });
 
       // Then

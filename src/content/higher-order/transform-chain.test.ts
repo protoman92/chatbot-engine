@@ -36,8 +36,8 @@ describe("Transform chain", () => {
     const nextResult = await transformed.next({
       targetID,
       targetPlatform,
+      currentContext: { a: 1, b: 2, error: new Error("") },
       input: {},
-      oldContext: { a: 1, b: 2, error: new Error("") },
     });
 
     await transformed.subscribe({ next: async () => NextResult.SUCCESS });
@@ -49,8 +49,8 @@ describe("Transform chain", () => {
         deepEqual({
           targetID,
           targetPlatform,
+          currentContext: { error, a: 1, b: 2 },
           input: {},
-          oldContext: { error, a: 1, b: 2 },
         })
       )
     ).once();
@@ -108,8 +108,8 @@ describe("Transform chain", () => {
     await trasformedLeaf.next({
       targetID,
       targetPlatform,
+      currentContext: { error: new Error("") },
       input: {},
-      oldContext: { error: new Error("") },
     });
 
     // Then

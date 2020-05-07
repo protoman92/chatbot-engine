@@ -5,11 +5,12 @@ export type BaseRequest<Context> = Readonly<{
   readonly targetID: string;
 }> &
   (
-    | Readonly<{ oldContext: Context }>
+    | Readonly<{ currentContext: Context }>
     /** Use this type to represent a context change notification */
     | Readonly<{
-        oldContext: Context;
+        currentContext: Context;
         newContext: Context;
+        oldContext: Context;
         changedContext: Partial<Context>;
       }>
   );

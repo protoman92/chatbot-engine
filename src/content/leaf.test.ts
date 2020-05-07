@@ -35,8 +35,8 @@ describe("Create leaf with observer", () => {
     const request: AmbiguousRequestPerInput<{}> = {
       targetID,
       targetPlatform,
+      currentContext: {},
       input: {},
-      oldContext: {},
     };
 
     // When
@@ -57,8 +57,8 @@ describe("Default error leaf", () => {
     const { output } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
+      currentContext: { error },
       input: {},
-      oldContext: { error },
     });
 
     // Then
@@ -107,8 +107,8 @@ describe("Leaf for platforms", () => {
     // When
     await platformLeaf.next({
       targetID,
+      currentContext: {},
       input: {},
-      oldContext: {},
       targetPlatform: "facebook",
     });
 
@@ -119,8 +119,8 @@ describe("Leaf for platforms", () => {
         first_name: "",
         username: "",
       },
+      currentContext: {},
       input: {},
-      oldContext: {},
       targetPlatform: "telegram",
       telegramUser: {
         id: 1,
@@ -150,9 +150,9 @@ describe("Leaf for platforms", () => {
     try {
       await platformObserver.next({
         targetID,
-        targetPlatform: "facebook",
+        currentContext: {},
         input: {},
-        oldContext: {},
+        targetPlatform: "facebook",
       });
 
       throw new Error("Never should have come here");
@@ -167,8 +167,8 @@ describe("Leaf for platforms", () => {
           first_name: "",
           username: "",
         },
+        currentContext: {},
         input: {},
-        oldContext: {},
         targetPlatform: "telegram",
         telegramUser: {
           id: 1,

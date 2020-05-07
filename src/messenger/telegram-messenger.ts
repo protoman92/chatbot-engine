@@ -134,9 +134,9 @@ function createTelegramRequest<Context>(
       currentBot,
       targetPlatform: "telegram",
       telegramUser,
+      currentContext: {} as Context,
       input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
-      oldContext: {} as Context,
     },
   ];
 }
@@ -275,10 +275,10 @@ export async function createTelegramMessageProcessor<Context>(
 
   return {
     ...baseProcessor,
-    receiveRequest: async ({ oldContext, ...args }) => {
+    receiveRequest: async ({ currentContext, ...args }) => {
       return baseProcessor.receiveRequest({
         ...args,
-        oldContext: { ...oldContext, currentBot },
+        currentContext: { ...currentContext, currentBot },
       });
     },
     sendResponse: async (response) => {

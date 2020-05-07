@@ -115,11 +115,11 @@ function createFacebookRequest<Context>(
 
         return Object.entries(groupedRequests).map(([targetID, requests]) => ({
           targetID,
-          targetPlatform: "facebook",
-          oldContext: {} as any,
+          currentContext: {} as any,
           input: requests
             .map((req) => processRequest(req, targetPlatform))
             .reduce((acc, items) => acc.concat(items), []),
+          targetPlatform: "facebook",
         }));
       }
   }

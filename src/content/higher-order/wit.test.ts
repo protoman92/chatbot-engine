@@ -30,8 +30,8 @@ describe("Wit higher order function", () => {
     await transformed.next({
       targetID,
       targetPlatform,
+      currentContext: {},
       input: { inputText: "some-text" },
-      oldContext: {},
     });
 
     // Then
@@ -66,8 +66,8 @@ describe("Wit higher order function", () => {
     await transformed.next({
       targetID,
       targetPlatform,
+      currentContext: {},
       input: { inputText },
-      oldContext: {},
     });
 
     // Then
@@ -78,8 +78,8 @@ describe("Wit higher order function", () => {
         deepEqual({
           targetID,
           targetPlatform,
+          currentContext: { witEntities },
           input: { inputText },
-          oldContext: { witEntities },
         })
       )
     ).once();

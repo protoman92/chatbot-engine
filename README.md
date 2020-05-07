@@ -6,7 +6,7 @@ Experimental chatbot engine to build cross-platform chatbots.
 
 ### Receive platform request
 
-Request is received from a supported platform, and mapped to an `Array` of `AmbiguousRequest`. An `AmbiguousRequest` contains the `senderID`, `oldContext` and supported data.
+Request is received from a supported platform, and mapped to an `Array` of `AmbiguousRequest`. An `AmbiguousRequest` contains the `senderID`, `currentContext` and supported data.
 
 ### Feed request to leaf selector
 

@@ -68,8 +68,8 @@ describe("Save context on send", () => {
       targetID,
       additionalContext,
       originalRequest: {
+        currentContext: {},
         input: {},
-        oldContext: {},
         targetID: "some-other-id",
         targetPlatform: "facebook",
       },
@@ -131,7 +131,7 @@ describe("Inject context on receive", () => {
     const genericRequest: AmbiguousRequest<{}> = {
       targetID,
       targetPlatform,
-      oldContext: {},
+      currentContext: {},
       input: [],
     };
 
@@ -143,7 +143,7 @@ describe("Inject context on receive", () => {
 
     verify(
       msgProcessor.receiveRequest(
-        deepEqual({ ...genericRequest, oldContext: expectedContext })
+        deepEqual({ ...genericRequest, currentContext: expectedContext })
       )
     ).once();
   });
@@ -177,7 +177,7 @@ describe("Save user for target ID", () => {
     const genericRequest: AmbiguousRequest<{}> = {
       targetID,
       targetPlatform,
-      oldContext: {},
+      currentContext: {},
       input: [],
     };
 
@@ -195,7 +195,7 @@ describe("Save user for target ID", () => {
 
     verify(
       msgProcessor.receiveRequest(
-        deepEqual({ ...genericRequest, oldContext: {} })
+        deepEqual({ ...genericRequest, currentContext: {} })
       )
     ).once();
   });
@@ -232,8 +232,8 @@ describe("Save Telegram user for target ID", () => {
     // When
     await transformed.receiveRequest({
       currentBot: { id: 0, first_name: "", username: "" },
+      currentContext: {},
       input: [],
-      oldContext: {},
       targetID: `${targetID}`,
       targetPlatform: "telegram",
       telegramUser: {
@@ -276,8 +276,8 @@ describe("Set typing indicator", () => {
       targetPlatform,
       originalRequest: {
         targetID,
+        currentContext: {},
         input: {},
-        oldContext: {},
         targetPlatform: "facebook",
       },
       output: [],

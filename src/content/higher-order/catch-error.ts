@@ -7,13 +7,13 @@ export function catchError<Context>(
   fallbackLeaf: AmbiguousLeaf<Context & ErrorContext>
 ): LeafTransformer<Context, Context> {
   return async (leaf) => ({
-    next: async ({ oldContext, ...request }) => {
+    next: async ({ currentContext, ...request }) => {
       try {
-        return await leaf.next({ ...request, oldContext });
+        return await leaf.next({ ...request, currentContext });
       } catch (error) {
         return fallbackLeaf.next({
           ...request,
-          oldContext: { ...oldContext, error },
+          currentContext: { ...currentContext, error },
         });
       }
     },

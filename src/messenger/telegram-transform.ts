@@ -15,9 +15,14 @@ export function saveTelegramUser<Context>(
     return {
       ...processor,
       receiveRequest: async (request) => {
-        const { targetID, targetPlatform, telegramUser, oldContext } = request;
+        const {
+          currentContext,
+          targetID,
+          targetPlatform,
+          telegramUser,
+        } = request;
 
-        if (!oldContext || !(oldContext as any)["targetID"]) {
+        if (!currentContext || !(currentContext as any)["targetID"]) {
           const {
             additionalContext = {} as Partial<Context>,
             telegramUserID,
