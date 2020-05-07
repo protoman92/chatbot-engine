@@ -1,12 +1,17 @@
 import { DynamoDB } from "aws-sdk";
-import { requireAllTruthy } from "../common/utils";
-import { ContextDAO, AmbiguousPlatform } from "../type";
 import { AttributeMap } from "aws-sdk/clients/dynamodb";
+import { requireAllTruthy } from "../common/utils";
+import { AmbiguousPlatform, ContextDAO } from "../type";
 
-export function createDynamoDBContextDAO<Context>(
-  ddb: DynamoDB,
-  tableName: string
-): ContextDAO<Context> {
+interface CreateDynamoDBContextDAOConfig {
+  readonly dynamoDB: DynamoDB;
+  readonly tableName: string;
+}
+
+export function createDynamoDBContextDAO<Context>({
+  dynamoDB: ddb,
+  tableName,
+}: CreateDynamoDBContextDAOConfig): ContextDAO<Context> {
   function getTableKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return {
       targetID: { S: targetID },
@@ -38,85 +43,49 @@ export function createDynamoDBContextDAO<Context>(
   }
 
   function mapAttributeMapToContext(attrMap: AttributeMap) {
-    const resolved = Object.entries(attrMap).reduce(
+    return Object.entries(attrMap).reduce(
       (acc, [key, value]) => ({
         ...acc,
         [key]: Object.values(value)[0],
       }),
       {} as Context
     );
-
-    return resolved;
   }
 
   const contextDAO: ContextDAO<Context> = {
-    getContext: (targetID, targetPlatform) =>
-      new Promise((resolve, reject) => {
-        ddb.getItem(
-          {
-            Key: getTableKey(targetID, targetPlatform),
-            TableName: tableName,
-          },
-          (err, data) => {
-            if (!!err) {
-              reject(err);
-              return;
-            }
+    getContext: async (targetID, targetPlatform) => {
+      const { Item = {} } = await ddb
+        .getItem({
+          Key: getTableKey(targetID, targetPlatform),
+          TableName: tableName,
+        })
+        .promise();
 
-            const { Item = {} } = data;
-            const resolved = mapAttributeMapToContext(Item);
-            resolve(resolved);
-          }
-        );
-      }),
-    appendContext: (targetID, targetPlatform, context) =>
-      new Promise(async (resolve, reject) => {
-        let oldContext: Context;
+      return mapAttributeMapToContext(Item);
+    },
+    appendContext: async (targetID, targetPlatform, context) => {
+      const oldContext = await contextDAO.getContext(targetID, targetPlatform);
 
-        try {
-          oldContext = await contextDAO.getContext(targetID, targetPlatform);
-        } catch (e) {
-          reject(e);
-          return;
-        }
+      const { Attributes = {} } = await ddb
+        .updateItem({
+          Key: getTableKey(targetID, targetPlatform),
+          ReturnValues: "NONE",
+          TableName: tableName,
+          ...getUpdateExpression(context),
+        })
+        .promise();
 
-        ddb.updateItem(
-          {
-            Key: getTableKey(targetID, targetPlatform),
-            ReturnValues: "NONE",
-            TableName: tableName,
-            ...getUpdateExpression(context),
-          },
-          (err, data) => {
-            if (!!err) {
-              reject(err);
-              return;
-            }
-
-            const { Attributes = {} } = data;
-            const newContext = mapAttributeMapToContext(Attributes);
-            resolve({ newContext, oldContext });
-          }
-        );
-      }),
-    resetContext: (targetID, targetPlatform) =>
-      new Promise((resolve, reject) => {
-        ddb.deleteItem(
-          {
-            Key: getTableKey(targetID, targetPlatform),
-            ReturnValues: "NONE",
-            TableName: tableName,
-          },
-          (err, data) => {
-            if (!!err) {
-              reject(err);
-              return;
-            }
-
-            resolve(data);
-          }
-        );
-      }),
+      const newContext = mapAttributeMapToContext(Attributes);
+      return { newContext, oldContext };
+    },
+    resetContext: async (targetID, targetPlatform) =>
+      ddb
+        .deleteItem({
+          Key: getTableKey(targetID, targetPlatform),
+          ReturnValues: "NONE",
+          TableName: tableName,
+        })
+        .promise(),
   };
 
   return contextDAO;
@@ -124,12 +93,16 @@ export function createDynamoDBContextDAO<Context>(
 
 export default function<Context>() {
   const {
+    AWS_ACCESS_KEY_ID = "",
+    AWS_SECRET_ACCESS_KEY = "",
     DYNAMO_DB_ENDPOINT = "",
     DYNAMO_DB_REGION = "",
     DYNAMO_DB_TABLE_NAME = "",
   } = process.env;
 
   requireAllTruthy({
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
     DYNAMO_DB_ENDPOINT,
     DYNAMO_DB_REGION,
     DYNAMO_DB_TABLE_NAME,
@@ -137,13 +110,19 @@ export default function<Context>() {
 
   const ddb = new DynamoDB({
     apiVersion: "latest",
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    },
     endpoint: DYNAMO_DB_ENDPOINT,
     region: DYNAMO_DB_REGION,
   });
 
-  const contextDAO = createDynamoDBContextDAO<Context>(
-    ddb,
-    DYNAMO_DB_TABLE_NAME
-  );
-  return { contextDAO, dynamoDBClient: ddb };
+  return {
+    contextDAO: createDynamoDBContextDAO<Context>({
+      dynamoDB: ddb,
+      tableName: DYNAMO_DB_TABLE_NAME,
+    }),
+    dynamoDBClient: ddb,
+  };
 }

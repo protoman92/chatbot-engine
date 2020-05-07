@@ -77,6 +77,7 @@ export function injectContextOnReceive<
       ...processor,
       receiveRequest: async (request) => {
         const { targetID, targetPlatform } = request;
+
         let currentContext = await contextDAO.getContext(
           targetID,
           targetPlatform
