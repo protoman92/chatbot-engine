@@ -28,7 +28,7 @@ export async function createMessageProcessor<
   Context,
   RawRequest,
   RawResponse,
-  AmbRequest extends AmbiguousRequest<Context>
+  GenRequest extends AmbiguousRequest<Context>
 >(
   {
     targetPlatform,
@@ -36,21 +36,21 @@ export async function createMessageProcessor<
     client,
     mapRequest,
     mapResponse,
-  }: BaseMessageProcessor.Configs<Context, RawRequest, RawResponse, AmbRequest>,
+  }: BaseMessageProcessor.Configs<Context, RawRequest, RawResponse, GenRequest>,
   ...middlewares: readonly MessageProcessorMiddleware<
-    BaseMessageProcessor<Context, RawRequest, AmbRequest>
+    BaseMessageProcessor<Context, RawRequest, GenRequest>
   >[]
-): Promise<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
+): Promise<BaseMessageProcessor<Context, RawRequest, GenRequest>> {
   let finalMessageProcessor: BaseMessageProcessor<
     Context,
     RawRequest,
-    AmbRequest
+    GenRequest
   >;
 
   const middlewareInput: MessageProcessorMiddleware.Input<BaseMessageProcessor<
     Context,
     RawRequest,
-    AmbRequest
+    GenRequest
   >> = {
     getFinalMessageProcessor: () => finalMessageProcessor,
   };
@@ -100,9 +100,9 @@ export function createMessenger<
   Context,
   RawRequest,
   RawResponse,
-  AmbRequest extends AmbiguousRequest<Context>
+  GenRequest extends AmbiguousRequest<Context>
 >(
-  processor: BaseMessageProcessor<Context, RawRequest, AmbRequest>
+  processor: BaseMessageProcessor<Context, RawRequest, GenRequest>
 ): Messenger<RawRequest, RawResponse> {
   return {
     processRawRequest: async (platformReq) => {

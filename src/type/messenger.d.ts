@@ -13,7 +13,7 @@ declare namespace BaseMessageProcessor {
     Context,
     RawRequest,
     RawResponse,
-    AmbRequest extends AmbiguousRequest<Context>
+    GenRequest extends AmbiguousRequest<Context>
   > {
     readonly targetPlatform: AmbiguousPlatform;
     readonly leafSelector: LeafSelector<Context>;
@@ -21,7 +21,7 @@ declare namespace BaseMessageProcessor {
     readonly mapRequest: BaseMessageProcessor<
       Context,
       RawRequest,
-      AmbRequest
+      GenRequest
     >["generalizeRequest"];
     mapResponse: (
       res: AmbiguousResponse<Context>

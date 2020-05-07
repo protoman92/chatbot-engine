@@ -17,12 +17,12 @@ import { AmbiguousRequest } from "../type/request";
 export function saveContextOnSend<
   Context,
   RawRequest,
-  AmbRequest extends AmbiguousRequest<Context>
+  GenRequest extends AmbiguousRequest<Context>
 >(
   contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">,
   onContextChangeCallback?: OnContextChangeCallback<Context>
 ): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, AmbRequest>
+  BaseMessageProcessor<Context, RawRequest, GenRequest>
 > {
   return () => async (processor) => {
     return {
@@ -76,11 +76,11 @@ export function notifyLeavesOnContextChange<
 export function injectContextOnReceive<
   Context,
   RawRequest,
-  AmbRequest extends AmbiguousRequest<Context>
+  GenRequest extends AmbiguousRequest<Context>
 >(
   contextDAO: Pick<ContextDAO<Context>, "getContext">
 ): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, AmbRequest>
+  BaseMessageProcessor<Context, RawRequest, GenRequest>
 > {
   return () => async (processor) => {
     return {
@@ -103,8 +103,8 @@ export function injectContextOnReceive<
 export function saveUserForTargetID<
   Context,
   RawRequest,
-  AmbRequest extends AmbiguousRequest<Context>,
-  Processor extends BaseMessageProcessor<Context, RawRequest, AmbRequest>,
+  GenRequest extends AmbiguousRequest<Context>,
+  Processor extends BaseMessageProcessor<Context, RawRequest, GenRequest>,
   RawUser
 >(
   contextDAO: ContextDAO<Context>,
@@ -145,11 +145,11 @@ export function setTypingIndicator<
   Context,
   RawRequest,
   RawResponse,
-  AmbRequest extends AmbiguousRequest<Context>
+  GenRequest extends AmbiguousRequest<Context>
 >(
   client: PlatformClient<RawResponse>
 ): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, AmbRequest>
+  BaseMessageProcessor<Context, RawRequest, GenRequest>
 > {
   return () => async (processor) => {
     return {

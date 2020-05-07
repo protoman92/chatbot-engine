@@ -1,5 +1,5 @@
 import { facebookError, isType } from "../common/utils";
-import { Transformer } from "../type/common";
+import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
   FacebookRawRequest,
@@ -9,7 +9,6 @@ import {
   FacebookResponseOutput,
 } from "../type/facebook";
 import { createMessageProcessor } from "./generic-messenger";
-import { MessageProcessorMiddleware } from "../type";
 
 /** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>(
