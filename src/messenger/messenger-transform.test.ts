@@ -1,20 +1,17 @@
-import expectJs from "expect.js";
 import { beforeEach, describe } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { compose } from "../common/utils";
+import { compose, joinObjects } from "../common/utils";
 import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
   MessageProcessorMiddleware,
-  OnContextChangeCallback,
 } from "../type/messenger";
-import { AmbiguousRequest, AmbiguousRequestPerInput } from "../type/request";
+import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
 import {
   injectContextOnReceive,
-  notifyLeavesOnContextChange,
   saveContextOnSend,
   saveUserForTargetID,
   setTypingIndicator,
@@ -54,34 +51,30 @@ describe("Save context on send", () => {
   it("Should save context on send", async () => {
     // Setup
     const oldCtx: {} = { a: 1, b: 2 };
-    when(contextDAO.getContext(targetID, targetPlatform)).thenResolve(oldCtx);
+    const additionalContext: {} = { a: 1, b: 2, c: 3 };
+    const finalContext = joinObjects(oldCtx, additionalContext);
     when(
-      contextDAO.appendContext(targetID, targetPlatform, anything())
-    ).thenResolve({ newContext: {} });
+      contextDAO.appendContext(anything(), anything(), anything())
+    ).thenResolve({ newContext: finalContext });
     when(msgProcessor.sendResponse(anything())).thenResolve();
-    let callbackParameters: Parameters<OnContextChangeCallback<{}>> | undefined;
+    when(msgProcessor.receiveRequest(anything())).thenResolve();
 
     const transformed = await compose(
       instance(msgProcessor),
-      saveContextOnSend(
-        instance(contextDAO),
-        async (...args) => (callbackParameters = args)
-      )(middlewareInput)
+      saveContextOnSend(instance(contextDAO))(middlewareInput)
     );
-
-    const additionalContext: Partial<{}> = { a: 1, b: 2 };
 
     const response: AmbiguousResponse<{}> = {
       targetID,
-      targetPlatform,
       additionalContext,
       originalRequest: {
-        targetID,
         input: {},
         oldContext: {},
+        targetID: "some-other-id",
         targetPlatform: "facebook",
       },
       output: [],
+      targetPlatform: "telegram",
     };
 
     // When
@@ -91,47 +84,20 @@ describe("Save context on send", () => {
     verify(
       contextDAO.appendContext(
         targetID,
-        targetPlatform,
+        "telegram",
         deepEqual(additionalContext)
       )
     ).once();
 
     verify(msgProcessor.sendResponse(deepEqual(response))).once();
-    expectJs(callbackParameters).to.eql([{ response, newContext: {} }]);
-  });
 
-  it("Should notify leaves when context changes", async () => {
-    // Setup
-    const newContext = { a: 1, b: 2 };
-
-    const originalRequest: AmbiguousRequestPerInput<{}> = {
-      targetID,
-      input: {},
-      oldContext: {},
-      targetPlatform: "facebook",
-    };
-
-    const messengerFn = () => instance(msgProcessor);
-    when(msgProcessor.receiveRequest(anything())).thenResolve({});
-
-    // When
-    await notifyLeavesOnContextChange(messengerFn)({
-      newContext,
-      response: {
-        originalRequest,
-        targetID,
-        output: [],
-        targetPlatform: "telegram",
-      },
-    });
-
-    // Then
     verify(
       msgProcessor.receiveRequest(
         deepEqual({
-          ...originalRequest,
-          newContext,
+          ...response.originalRequest,
+          changedContext: additionalContext,
           input: [{}],
+          newContext: finalContext,
           targetPlatform: "facebook",
         })
       )

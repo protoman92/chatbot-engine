@@ -9,7 +9,6 @@ export { saveFacebookUser } from "./facebook-transform";
 export { createCrossPlatformMessenger } from "./generic-messenger";
 export {
   injectContextOnReceive,
-  notifyLeavesOnContextChange,
   saveContextOnSend,
   saveUserForTargetID,
   setTypingIndicator,

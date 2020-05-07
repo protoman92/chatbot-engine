@@ -4,7 +4,6 @@ import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
   MessageProcessorMiddleware,
-  OnContextChangeCallback,
   SaveUserForTargetIDContext,
 } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
@@ -19,16 +18,21 @@ export function saveContextOnSend<
   RawRequest,
   GenRequest extends AmbiguousRequest<Context>
 >(
-  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">,
-  onContextChangeCallback?: OnContextChangeCallback<Context>
+  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">
 ): MessageProcessorMiddleware<
   BaseMessageProcessor<Context, RawRequest, GenRequest>
 > {
-  return () => async (processor) => {
+  return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
       sendResponse: async (response) => {
-        const { targetID, targetPlatform, additionalContext } = response;
+        const {
+          targetID,
+          targetPlatform,
+          additionalContext,
+          originalRequest,
+        } = response;
+
         const result = await processor.sendResponse(response);
 
         if (additionalContext != null) {
@@ -38,34 +42,19 @@ export function saveContextOnSend<
             additionalContext
           );
 
-          if (onContextChangeCallback != null) {
-            await onContextChangeCallback({ newContext, response });
-          }
+          const finalProcessor = getFinalMessageProcessor();
+
+          await finalProcessor.receiveRequest(({
+            ...originalRequest,
+            newContext,
+            changedContext: additionalContext,
+            input: [{}],
+          } as unknown) as GenRequest);
         }
 
         return result;
       },
     };
-  };
-}
-
-/** When the context changes, notify leaves to catch the new context */
-export function notifyLeavesOnContextChange<
-  Context,
-  Processor extends BaseMessageProcessor<
-    Context,
-    unknown,
-    AmbiguousRequest<Context>
-  >
->(fn: () => Processor): OnContextChangeCallback<Context> {
-  return async function({ newContext, response: { originalRequest } }) {
-    const messageProcessor = fn();
-
-    await messageProcessor.receiveRequest({
-      ...originalRequest,
-      newContext,
-      input: [{}],
-    } as AmbiguousRequest<Context>);
   };
 }
 

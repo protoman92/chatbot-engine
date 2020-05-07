@@ -7,7 +7,11 @@ export type BaseRequest<Context> = Readonly<{
   (
     | Readonly<{ oldContext: Context }>
     /** Use this type to represent a context change notification */
-    | Readonly<{ oldContext: Context; newContext: Context }>
+    | Readonly<{
+        oldContext: Context;
+        newContext: Context;
+        changedContext: Partial<Context>;
+      }>
   );
 
 export type AmbiguousRequest<Context> =
