@@ -49,7 +49,7 @@ export function createDynamoDBContextDAO<Context>(
     return resolved;
   }
 
-  return {
+  const contextDAO: ContextDAO<Context> = {
     getContext: (targetID, targetPlatform) =>
       new Promise((resolve, reject) => {
         ddb.getItem(
@@ -70,7 +70,16 @@ export function createDynamoDBContextDAO<Context>(
         );
       }),
     appendContext: (targetID, targetPlatform, context) =>
-      new Promise((resolve, reject) => {
+      new Promise(async (resolve, reject) => {
+        let oldContext: Context;
+
+        try {
+          oldContext = await contextDAO.getContext(targetID, targetPlatform);
+        } catch (e) {
+          reject(e);
+          return;
+        }
+
         ddb.updateItem(
           {
             Key: getTableKey(targetID, targetPlatform),
@@ -86,7 +95,7 @@ export function createDynamoDBContextDAO<Context>(
 
             const { Attributes = {} } = data;
             const newContext = mapAttributeMapToContext(Attributes);
-            resolve({ newContext });
+            resolve({ newContext, oldContext });
           }
         );
       }),
@@ -109,6 +118,8 @@ export function createDynamoDBContextDAO<Context>(
         );
       }),
   };
+
+  return contextDAO;
 }
 
 export default function<Context>() {

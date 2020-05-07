@@ -33,7 +33,7 @@ export function createRedisContextDAO<Context>(
         JSON.stringify(newContext)
       );
 
-      return { newContext };
+      return { newContext, oldContext };
     },
     resetContext: (targetID, targetPlatform) => {
       return del(getCacheKey(targetID, targetPlatform));

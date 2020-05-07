@@ -67,7 +67,7 @@ describe("Redis context DAO", () => {
     const newContext = joinObjects<{}>(oldContext, additionalContext);
     const cacheKey = getCacheKey(targetID);
     verify(redis.set(cacheKey, JSON.stringify(newContext), anything())).once();
-    expectJs(result).to.eql({ newContext });
+    expectJs(result).to.eql({ newContext, oldContext });
   });
 
   it("Should clear context on reset call", async () => {

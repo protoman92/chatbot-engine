@@ -50,12 +50,12 @@ describe("Save context on send", () => {
 
   it("Should save context on send", async () => {
     // Setup
-    const oldCtx: {} = { a: 1, b: 2 };
+    const oldContext: {} = { a: 1, b: 2 };
     const additionalContext: {} = { a: 1, b: 2, c: 3 };
-    const finalContext = joinObjects(oldCtx, additionalContext);
+    const finalContext = joinObjects(oldContext, additionalContext);
     when(
       contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ newContext: finalContext });
+    ).thenResolve({ oldContext, newContext: finalContext });
     when(msgProcessor.sendResponse(anything())).thenResolve();
     when(msgProcessor.receiveRequest(anything())).thenResolve();
 
@@ -95,6 +95,7 @@ describe("Save context on send", () => {
       msgProcessor.receiveRequest(
         deepEqual({
           ...response.originalRequest,
+          oldContext,
           changedContext: additionalContext,
           input: [{}],
           newContext: finalContext,
@@ -155,7 +156,7 @@ describe("Save user for target ID", () => {
     // Setup
     when(
       contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ newContext: {} });
+    ).thenResolve({ newContext: {}, oldContext: {} });
 
     when(msgProcessor.receiveRequest(anything())).thenResolve({
       targetID,
@@ -216,7 +217,7 @@ describe("Save Telegram user for target ID", () => {
     // Setup
     when(
       contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ newContext: {} });
+    ).thenResolve({ newContext: {}, oldContext: {} });
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
     const additionalContext = { a: 1, b: 2 };

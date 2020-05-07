@@ -36,7 +36,7 @@ export function saveContextOnSend<
         const result = await processor.sendResponse(response);
 
         if (additionalContext != null) {
-          const { newContext } = await contextDAO.appendContext(
+          const { newContext, oldContext } = await contextDAO.appendContext(
             targetID,
             targetPlatform,
             additionalContext
@@ -47,6 +47,7 @@ export function saveContextOnSend<
           await finalProcessor.receiveRequest(({
             ...originalRequest,
             newContext,
+            oldContext,
             changedContext: additionalContext,
             input: [{}],
           } as unknown) as GenRequest);
