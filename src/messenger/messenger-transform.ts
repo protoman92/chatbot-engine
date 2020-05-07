@@ -1,9 +1,9 @@
 import { deepClone } from "../common/utils";
 import { PlatformClient } from "../type/client";
-import { Transformer } from "../type/common";
 import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
+  MessageProcessorMiddleware,
   OnContextChangeCallback,
   SaveUserForTargetIDContext,
 } from "../type/messenger";
@@ -21,8 +21,10 @@ export function saveContextOnSend<
 >(
   contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">,
   onContextChangeCallback?: OnContextChangeCallback<Context>
-): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
-  return async (processor) => {
+): MessageProcessorMiddleware<
+  BaseMessageProcessor<Context, RawRequest, AmbRequest>
+> {
+  return () => async (processor) => {
     return {
       ...processor,
       sendResponse: async (response) => {
@@ -77,8 +79,10 @@ export function injectContextOnReceive<
   AmbRequest extends AmbiguousRequest<Context>
 >(
   contextDAO: Pick<ContextDAO<Context>, "getContext">
-): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
-  return async (processor) => {
+): MessageProcessorMiddleware<
+  BaseMessageProcessor<Context, RawRequest, AmbRequest>
+> {
+  return () => async (processor) => {
     return {
       ...processor,
       receiveRequest: async (request) => {
@@ -100,14 +104,14 @@ export function saveUserForTargetID<
   Context,
   RawRequest,
   AmbRequest extends AmbiguousRequest<Context>,
-  Messenger extends BaseMessageProcessor<Context, RawRequest, AmbRequest>,
+  Processor extends BaseMessageProcessor<Context, RawRequest, AmbRequest>,
   RawUser
 >(
   contextDAO: ContextDAO<Context>,
   getUser: (targetID: string) => Promise<RawUser>,
   saveUser: (rawUser: RawUser) => Promise<SaveUserForTargetIDContext<Context>>
-): Transformer<Messenger> {
-  return async (processor) => {
+): MessageProcessorMiddleware<Processor> {
+  return () => async (processor) => {
     return {
       ...processor,
       receiveRequest: async (request) => {
@@ -144,8 +148,10 @@ export function setTypingIndicator<
   AmbRequest extends AmbiguousRequest<Context>
 >(
   client: PlatformClient<RawResponse>
-): Transformer<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
-  return async (processor) => {
+): MessageProcessorMiddleware<
+  BaseMessageProcessor<Context, RawRequest, AmbRequest>
+> {
+  return () => async (processor) => {
     return {
       ...processor,
       sendResponse: async (response) => {

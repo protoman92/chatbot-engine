@@ -6,6 +6,7 @@ import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
+  MessageProcessorMiddleware,
   OnContextChangeCallback,
 } from "../type/messenger";
 import { AmbiguousRequest, AmbiguousRequestPerInput } from "../type/request";
@@ -21,12 +22,13 @@ import {
 import { saveTelegramUser } from "./telegram-transform";
 
 const targetPlatform = "facebook";
-let messenger: BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>;
+let msgProcessor: BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>;
 let client: PlatformClient<unknown>;
 let contextDAO: ContextDAO<{}>;
+let middlewareInput: MessageProcessorMiddleware.Input<typeof msgProcessor>;
 
 beforeEach(async () => {
-  messenger = spy<BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>>({
+  msgProcessor = spy<BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>>({
     generalizeRequest: () => Promise.reject(""),
     receiveRequest: () => Promise.reject(""),
     sendResponse: () => Promise.reject(""),
@@ -42,6 +44,8 @@ beforeEach(async () => {
     appendContext: () => Promise.reject(""),
     resetContext: () => Promise.reject(""),
   });
+
+  middlewareInput = { getFinalMessageProcessor: () => instance(msgProcessor) };
 });
 
 describe("Save context on send", () => {
@@ -54,15 +58,15 @@ describe("Save context on send", () => {
     when(
       contextDAO.appendContext(targetID, targetPlatform, anything())
     ).thenResolve({ newContext: {} });
-    when(messenger.sendResponse(anything())).thenResolve();
+    when(msgProcessor.sendResponse(anything())).thenResolve();
     let callbackParameters: Parameters<OnContextChangeCallback<{}>> | undefined;
 
     const transformed = await compose(
-      instance(messenger),
+      instance(msgProcessor),
       saveContextOnSend(
         instance(contextDAO),
         async (...args) => (callbackParameters = args)
-      )
+      )(middlewareInput)
     );
 
     const additionalContext: Partial<{}> = { a: 1, b: 2 };
@@ -92,7 +96,7 @@ describe("Save context on send", () => {
       )
     ).once();
 
-    verify(messenger.sendResponse(deepEqual(response))).once();
+    verify(msgProcessor.sendResponse(deepEqual(response))).once();
     expectJs(callbackParameters).to.eql([{ response, newContext: {} }]);
   });
 
@@ -107,8 +111,8 @@ describe("Save context on send", () => {
       targetPlatform: "facebook",
     };
 
-    const messengerFn = () => instance(messenger);
-    when(messenger.receiveRequest(anything())).thenResolve({});
+    const messengerFn = () => instance(msgProcessor);
+    when(msgProcessor.receiveRequest(anything())).thenResolve({});
 
     // When
     await notifyLeavesOnContextChange(messengerFn)({
@@ -123,7 +127,7 @@ describe("Save context on send", () => {
 
     // Then
     verify(
-      messenger.receiveRequest(
+      msgProcessor.receiveRequest(
         deepEqual({
           ...originalRequest,
           newContext,
@@ -142,7 +146,7 @@ describe("Inject context on receive", () => {
     // Setup
     const expectedContext = { a: 1, b: 2 };
 
-    when(messenger.receiveRequest(anything())).thenResolve({
+    when(msgProcessor.receiveRequest(anything())).thenResolve({
       targetID,
       newContext: expectedContext,
       visualContents: [],
@@ -153,8 +157,8 @@ describe("Inject context on receive", () => {
     );
 
     const transformed = await compose(
-      instance(messenger),
-      injectContextOnReceive(instance(contextDAO))
+      instance(msgProcessor),
+      injectContextOnReceive(instance(contextDAO))(middlewareInput)
     );
 
     const genericRequest: AmbiguousRequest<{}> = {
@@ -171,7 +175,7 @@ describe("Inject context on receive", () => {
     verify(contextDAO.getContext(targetID, targetPlatform)).once();
 
     verify(
-      messenger.receiveRequest(
+      msgProcessor.receiveRequest(
         deepEqual({ ...genericRequest, oldContext: expectedContext })
       )
     ).once();
@@ -187,7 +191,7 @@ describe("Save user for target ID", () => {
       contextDAO.appendContext(anything(), anything(), anything())
     ).thenResolve({ newContext: {} });
 
-    when(messenger.receiveRequest(anything())).thenResolve({
+    when(msgProcessor.receiveRequest(anything())).thenResolve({
       targetID,
       visualContents: [],
     });
@@ -195,12 +199,12 @@ describe("Save user for target ID", () => {
     const additionalContext = { a: 1, b: 2 };
 
     const transformed = await compose(
-      instance(messenger),
+      instance(msgProcessor),
       saveUserForTargetID(
         instance(contextDAO),
         async () => ({ id: targetID }),
         async () => ({ additionalContext, targetUserID: targetID })
-      )
+      )(middlewareInput)
     );
 
     const genericRequest: AmbiguousRequest<{}> = {
@@ -223,7 +227,9 @@ describe("Save user for target ID", () => {
     ).once();
 
     verify(
-      messenger.receiveRequest(deepEqual({ ...genericRequest, oldContext: {} }))
+      msgProcessor.receiveRequest(
+        deepEqual({ ...genericRequest, oldContext: {} })
+      )
     ).once();
   });
 });
@@ -253,7 +259,7 @@ describe("Save Telegram user for target ID", () => {
       instance(tlMessenger),
       saveTelegramUser(instance(contextDAO), () =>
         Promise.resolve({ additionalContext, telegramUserID: targetID })
-      )
+      )({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
@@ -289,12 +295,12 @@ describe("Set typing indicator", () => {
 
   it("Should set typing indicator when response is being sent", async () => {
     // Setup
-    when(messenger.sendResponse(anything())).thenResolve();
+    when(msgProcessor.sendResponse(anything())).thenResolve();
     when(client.setTypingIndicator(targetID, anything())).thenResolve();
 
     const transformed = await compose(
-      instance(messenger),
-      setTypingIndicator(instance(client))
+      instance(msgProcessor),
+      setTypingIndicator(instance(client))(middlewareInput)
     );
 
     // When

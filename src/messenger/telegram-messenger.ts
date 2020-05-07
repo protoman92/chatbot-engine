@@ -1,6 +1,6 @@
 import { Omit } from "ts-essentials";
 import { isType, telegramError } from "../common/utils";
-import { Transformer } from "../type/common";
+import { MessageProcessorMiddleware } from "../type";
 import {
   TelegramBot,
   TelegramMessageProcessor,
@@ -253,7 +253,9 @@ function createTelegramResponse<Context>({
 /** Create a Telegram message processor */
 export async function createTelegramMessageProcessor<Context>(
   { leafSelector, client }: TelegramMessageProcessor.Configs<Context>,
-  ...transformers: readonly Transformer<TelegramMessageProcessor<Context>>[]
+  ...middlewares: readonly MessageProcessorMiddleware<
+    TelegramMessageProcessor<Context>
+  >[]
 ): Promise<TelegramMessageProcessor<Context>> {
   await client.setWebhook();
   const currentBot = await client.getCurrentBot();
@@ -268,7 +270,7 @@ export async function createTelegramMessageProcessor<Context>(
         return createTelegramResponse(res as TelegramResponse<Context>);
       },
     },
-    ...transformers
+    ...middlewares
   );
 
   return {

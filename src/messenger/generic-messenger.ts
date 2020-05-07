@@ -5,7 +5,6 @@ import {
   mapSeries,
 } from "../common/utils";
 import { NextResult } from "../stream";
-import { Transformer } from "../type/common";
 import {
   FacebookMessageProcessor,
   FacebookRawRequest,
@@ -14,6 +13,7 @@ import {
 import {
   AmbiguousPlatform,
   BaseMessageProcessor,
+  MessageProcessorMiddleware,
   Messenger,
 } from "../type/messenger";
 import { AmbiguousRequest, AmbiguousRequestPerInput } from "../type/request";
@@ -37,18 +37,28 @@ export async function createMessageProcessor<
     mapRequest,
     mapResponse,
   }: BaseMessageProcessor.Configs<Context, RawRequest, RawResponse, AmbRequest>,
-  ...transformers: readonly Transformer<
+  ...middlewares: readonly MessageProcessorMiddleware<
     BaseMessageProcessor<Context, RawRequest, AmbRequest>
   >[]
 ): Promise<BaseMessageProcessor<Context, RawRequest, AmbRequest>> {
-  const reversedTransformers = [...transformers];
-  reversedTransformers.reverse();
-
-  const processor: BaseMessageProcessor<
+  let finalMessageProcessor: BaseMessageProcessor<
     Context,
     RawRequest,
     AmbRequest
-  > = await compose(
+  >;
+
+  const middlewareInput: MessageProcessorMiddleware.Input<BaseMessageProcessor<
+    Context,
+    RawRequest,
+    AmbRequest
+  >> = {
+    getFinalMessageProcessor: () => finalMessageProcessor,
+  };
+
+  const reversedTransformers = [...middlewares.map((m) => m(middlewareInput))];
+  reversedTransformers.reverse();
+
+  finalMessageProcessor = await compose(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
       receiveRequest: ({ input, ...request }) => {
@@ -73,7 +83,7 @@ export async function createMessageProcessor<
   await leafSelector.subscribe({
     next: async (request) => {
       if (request.targetPlatform === targetPlatform) {
-        await processor.sendResponse(request);
+        await finalMessageProcessor.sendResponse(request);
         return NextResult.SUCCESS;
       }
 
@@ -82,7 +92,7 @@ export async function createMessageProcessor<
     complete: async () => {},
   });
 
-  return processor;
+  return finalMessageProcessor;
 }
 
 /** Create a messenger */

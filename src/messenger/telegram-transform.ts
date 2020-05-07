@@ -1,4 +1,4 @@
-import { Transformer } from "../type/common";
+import { MessageProcessorMiddleware } from "../type";
 import { ContextDAO } from "../type/context-dao";
 import {
   SaveTelegramUserContext,
@@ -10,8 +10,8 @@ import {
 export function saveTelegramUser<Context>(
   contextDAO: ContextDAO<Context>,
   saveUser: (user: TelegramUser) => Promise<SaveTelegramUserContext<Context>>
-): Transformer<TelegramMessageProcessor<Context>> {
-  return async (processor) => {
+): MessageProcessorMiddleware<TelegramMessageProcessor<Context>> {
+  return () => async (processor) => {
     return {
       ...processor,
       receiveRequest: async (request) => {

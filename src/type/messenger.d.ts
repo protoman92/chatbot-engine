@@ -2,6 +2,7 @@ import { PlatformClient } from "./client";
 import { LeafSelector } from "./leaf";
 import { AmbiguousRequest } from "./request";
 import { AmbiguousResponse } from "./response";
+import { Transformer } from "./common";
 
 /** Represents all supported platform identifiers */
 export type AmbiguousPlatform = "facebook" | "telegram";
@@ -61,6 +62,17 @@ export interface Messenger<RawRequest, RawResponse> {
   /** Process a platform request from end-to-end */
   processRawRequest(req: RawRequest): Promise<unknown>;
 }
+
+declare namespace MessageProcessorMiddleware {
+  interface Input<Processor> {
+    getFinalMessageProcessor(): Processor;
+  }
+}
+
+/** Similar in concept to middlewares in systems such as Redux */
+export type MessageProcessorMiddleware<Processor> = (
+  input: MessageProcessorMiddleware.Input<Processor>
+) => Transformer<Processor>;
 
 export interface SaveUserForTargetIDContext<Context> {
   readonly additionalContext?: Partial<Context>;

@@ -9,6 +9,7 @@ import {
   FacebookResponseOutput,
 } from "../type/facebook";
 import { createMessageProcessor } from "./generic-messenger";
+import { MessageProcessorMiddleware } from "../type";
 
 /** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>(
@@ -346,7 +347,9 @@ function createFacebookResponse<Context>({
 /** Create a Facebook message processor */
 export async function createFacebookMessageProcessor<Context>(
   { leafSelector, client }: FacebookMessageProcessor.Configs<Context>,
-  ...transformers: readonly Transformer<FacebookMessageProcessor<Context>>[]
+  ...middlewares: readonly MessageProcessorMiddleware<
+    FacebookMessageProcessor<Context>
+  >[]
 ): Promise<FacebookMessageProcessor<Context>> {
   return createMessageProcessor(
     {
@@ -364,6 +367,6 @@ export async function createFacebookMessageProcessor<Context>(
         return createFacebookResponse(res as FacebookResponse<Context>);
       },
     },
-    ...transformers
+    ...middlewares
   );
 }
