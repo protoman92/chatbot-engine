@@ -16,15 +16,16 @@ export type FacebookRequestInput = DeepReadonly<
   | { stickerID: string }
 >;
 
-export interface FacebookRequest<Context> extends BaseRequest<Context> {
-  readonly targetPlatform: "facebook";
-  readonly input: readonly FacebookRequestInput[];
-}
+type CommonFacebookRequest<Context> = DeepReadonly<{
+  targetPlatform: "facebook";
+}> &
+  BaseRequest<Context>;
 
-export interface FacebookRequestPerInput<Context> extends BaseRequest<Context> {
-  readonly targetPlatform: "facebook";
-  readonly input: FacebookRequestInput;
-}
+export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
+  Readonly<{ input: readonly FacebookRequestInput[] }>;
+
+export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
+  Readonly<{ input: FacebookRequestInput }>;
 
 export interface FacebookResponse<Context>
   extends BaseResponse<Context & FacebookDefaultContext> {

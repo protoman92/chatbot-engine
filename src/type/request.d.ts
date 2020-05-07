@@ -1,18 +1,14 @@
-import {
-  FacebookRequest,
-  FacebookRequestInput,
-  FacebookRequestPerInput,
-} from "./facebook";
-import {
-  TelegramRequest,
-  TelegramRequestInput,
-  TelegramRequestPerInput,
-} from "./telegram";
+import { FacebookRequest, FacebookRequestPerInput } from "./facebook";
+import { TelegramRequest, TelegramRequestPerInput } from "./telegram";
 
-export interface BaseRequest<Context> {
+export type BaseRequest<Context> = Readonly<{
   readonly targetID: string;
-  readonly oldContext: Context;
-}
+}> &
+  (
+    | Readonly<{ oldContext: Context }>
+    /** Use this type to represent a context change notification */
+    | Readonly<{ oldContext: Context; newContext: Context }>
+  );
 
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>

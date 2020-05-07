@@ -61,8 +61,8 @@ export function notifyLeavesOnContextChange<
 
     await messageProcessor.receiveRequest({
       ...originalRequest,
+      newContext,
       input: [{}],
-      oldContext: newContext,
     } as AmbiguousRequest<Context>);
   };
 }

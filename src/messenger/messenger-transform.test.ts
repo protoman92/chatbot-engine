@@ -126,8 +126,8 @@ describe("Save context on send", () => {
       messenger.receiveRequest(
         deepEqual({
           ...originalRequest,
+          newContext,
           input: [{}],
-          oldContext: newContext,
           targetPlatform: "facebook",
         })
       )

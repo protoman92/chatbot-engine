@@ -19,19 +19,18 @@ export type TelegramRequestInput = DeepReadonly<
   | { newChatMembers: (TelegramBot | TelegramUser)[] }
 >;
 
-export interface TelegramRequest<Context> extends BaseRequest<Context> {
-  readonly currentBot: TelegramBot;
-  readonly targetPlatform: "telegram";
-  readonly telegramUser: TelegramUser;
-  readonly input: readonly TelegramRequestInput[];
-}
+type CommonTelegramRequest<Context> = DeepReadonly<{
+  currentBot: TelegramBot;
+  targetPlatform: "telegram";
+  telegramUser: TelegramUser;
+}> &
+  BaseRequest<Context>;
 
-export interface TelegramRequestPerInput<Context> extends BaseRequest<Context> {
-  readonly currentBot: TelegramBot;
-  readonly targetPlatform: "telegram";
-  readonly telegramUser: TelegramUser;
-  readonly input: TelegramRequestInput;
-}
+export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
+  Readonly<{ input: readonly TelegramRequestInput[] }>;
+
+export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
+  Readonly<{ input: TelegramRequestInput }>;
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
   readonly output: readonly TelegramResponseOutput[];
