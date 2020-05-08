@@ -5,9 +5,9 @@ import {
   FacebookRawRequest as RawRequest,
   FacebookRawResponse,
   FacebookRequest,
+  FacebookRequestInput,
   FacebookResponse,
   FacebookResponseOutput,
-  FacebookRequestInput,
 } from "../type/facebook";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -117,6 +117,7 @@ function createFacebookRequest<Context>(
             .map((req) => processRequest(req))
             .reduce((acc, items) => acc.concat(items), []),
           targetPlatform: "facebook",
+          type: "message_trigger",
         }));
       }
   }

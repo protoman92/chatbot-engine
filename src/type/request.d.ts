@@ -8,6 +8,7 @@ export interface BaseContextChangeRequest<Context> {
   readonly newContext: Context;
   readonly oldContext: Context;
   readonly changedContext: Partial<Context>;
+  readonly type: "context_trigger";
 }
 
 export type AmbiguousRequest<Context> =

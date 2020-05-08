@@ -130,6 +130,7 @@ function createTelegramRequest<Context>(
       currentContext: {} as Context,
       input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
+      type: "message_trigger",
     },
   ];
 }

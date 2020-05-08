@@ -72,6 +72,7 @@ describe("Save context on send", () => {
         input: {},
         targetID: "some-other-id",
         targetPlatform: "facebook",
+        type: "message_trigger",
       },
       output: [],
       targetPlatform: "telegram",
@@ -100,6 +101,7 @@ describe("Save context on send", () => {
           input: [{}],
           newContext: finalContext,
           targetPlatform: "facebook",
+          type: "context_trigger",
         })
       )
     ).once();
@@ -109,7 +111,7 @@ describe("Save context on send", () => {
 describe("Inject context on receive", () => {
   const targetID = "target-id";
 
-  it("Should not inject context on receive if currentContext is not available", async () => {
+  it("Should not inject context on receive if invalid request type", async () => {
     // Setup
     when(msgProcessor.receiveRequest(anything())).thenResolve({});
 
@@ -126,6 +128,7 @@ describe("Inject context on receive", () => {
       input: [{}],
       oldContext: {},
       newContext: {},
+      type: "context_trigger",
     });
 
     // Then
@@ -152,6 +155,7 @@ describe("Inject context on receive", () => {
       targetPlatform,
       currentContext: {},
       input: [],
+      type: "message_trigger",
     };
 
     // When
@@ -171,7 +175,7 @@ describe("Inject context on receive", () => {
 describe("Save user for target ID", () => {
   const targetID = "target-id";
 
-  it("Should not save user when currentContext is not available", async () => {
+  it("Should not save user if invalid request type", async () => {
     // Setup
     when(msgProcessor.receiveRequest(anything())).thenResolve({});
 
@@ -192,6 +196,7 @@ describe("Save user for target ID", () => {
       input: [],
       oldContext: {},
       newContext: {},
+      type: "context_trigger",
     });
 
     // Then
@@ -229,6 +234,7 @@ describe("Save user for target ID", () => {
       targetPlatform,
       currentContext: {},
       input: [],
+      type: "message_trigger",
     };
 
     // When
@@ -263,7 +269,7 @@ describe("Save Telegram user for target ID", () => {
     });
   });
 
-  it("Should not save user if currentContext is not available", async () => {
+  it("Should not save user if invalid request", async () => {
     // Setup
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
@@ -282,6 +288,7 @@ describe("Save Telegram user for target ID", () => {
       newContext: {},
       targetID: `${targetID}`,
       targetPlatform: "telegram",
+      type: "context_trigger",
     });
 
     // Then
@@ -322,6 +329,7 @@ describe("Save Telegram user for target ID", () => {
         language_code: "en" as const,
         is_bot: false,
       },
+      type: "message_trigger",
     });
 
     // Then
@@ -363,6 +371,7 @@ describe("Save Telegram user for target ID", () => {
         language_code: "en" as const,
         is_bot: false,
       },
+      type: "message_trigger",
     });
 
     // Then
@@ -398,6 +407,7 @@ describe("Set typing indicator", () => {
         currentContext: {},
         input: {},
         targetPlatform: "facebook",
+        type: "message_trigger",
       },
       output: [],
     });

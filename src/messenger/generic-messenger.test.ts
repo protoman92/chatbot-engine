@@ -72,6 +72,7 @@ describe("Generic message processor", () => {
         currentContext: {},
         input: {},
         targetPlatform: "facebook",
+        type: "message_trigger",
       },
       output: [],
     };
@@ -114,6 +115,7 @@ describe("Generic message processor", () => {
         currentContext: {},
         input: {},
         targetPlatform: "facebook",
+        type: "message_trigger",
       },
       output: [],
     });
@@ -161,13 +163,20 @@ describe("Generic message processor", () => {
       input,
       targetID,
       targetPlatform,
+      type: "message_trigger",
     });
 
     // Then
     input.forEach((input) =>
       verify(
         leafSelector.next(
-          deepEqual({ currentContext, input, targetID, targetPlatform })
+          deepEqual({
+            currentContext,
+            input,
+            targetID,
+            targetPlatform,
+            type: "message_trigger",
+          })
         )
       ).once()
     );
@@ -210,6 +219,7 @@ describe("Cross platform message processor", () => {
         currentContext: {},
         input: [],
         targetPlatform: "facebook",
+        type: "message_trigger",
       },
     ]);
 
@@ -228,6 +238,7 @@ describe("Cross platform message processor", () => {
           language_code: "en" as const,
           is_bot: false,
         },
+        type: "message_trigger",
       },
     ]);
 

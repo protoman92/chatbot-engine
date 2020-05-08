@@ -56,7 +56,8 @@ export function createDefaultErrorLeaf<Context = {}>(
 ): Promise<AmbiguousLeaf<Context & ErrorContext>> {
   return createLeafWithObserver(async (observer) => ({
     next: async (request) => {
-      if (!("currentContext" in request)) return NextResult.FALLTHROUGH;
+      if (request.type === "context_trigger") return NextResult.FALLTHROUGH;
+
       const {
         currentContext: { error },
       } = request;

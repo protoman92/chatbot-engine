@@ -37,6 +37,7 @@ describe("Create leaf with observer", () => {
       targetPlatform,
       currentContext: {},
       input: {},
+      type: "message_trigger",
     };
 
     // When
@@ -59,6 +60,7 @@ describe("Default error leaf", () => {
       targetPlatform,
       currentContext: { error },
       input: {},
+      type: "message_trigger",
     });
 
     // Then
@@ -110,6 +112,7 @@ describe("Leaf for platforms", () => {
       currentContext: {},
       input: {},
       targetPlatform: "facebook",
+      type: "message_trigger",
     });
 
     await platformLeaf.next({
@@ -130,6 +133,7 @@ describe("Leaf for platforms", () => {
         is_bot: false,
         username: "",
       },
+      type: "message_trigger",
     });
 
     await platformLeaf.complete!();
@@ -153,6 +157,7 @@ describe("Leaf for platforms", () => {
         currentContext: {},
         input: {},
         targetPlatform: "facebook",
+        type: "message_trigger",
       });
 
       throw new Error("Never should have come here");
@@ -178,6 +183,7 @@ describe("Leaf for platforms", () => {
           is_bot: false,
           username: "",
         },
+        type: "message_trigger",
       });
 
       throw new Error("Never should have come here");

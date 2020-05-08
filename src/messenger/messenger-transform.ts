@@ -44,13 +44,14 @@ export function saveContextOnSend<
 
           const finalProcessor = getFinalMessageProcessor();
 
-          await finalProcessor.receiveRequest(({
+          await finalProcessor.receiveRequest({
             ...originalRequest,
             newContext,
             oldContext,
             changedContext: additionalContext,
             input: [{}],
-          } as unknown) as GenRequest);
+            type: "context_trigger",
+          } as any);
         }
 
         return result;
@@ -71,9 +72,12 @@ export function injectContextOnReceive<Context, RawRequest>(
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (req) => {
-        if (!("currentContext" in req)) return processor.receiveRequest(req);
-        const { targetID, targetPlatform } = req;
+      receiveRequest: async (request) => {
+        if (request.type === "context_trigger") {
+          return processor.receiveRequest(request);
+        }
+
+        const { targetID, targetPlatform } = request;
 
         let currentContext = await contextDAO.getContext(
           targetID,
@@ -81,11 +85,11 @@ export function injectContextOnReceive<Context, RawRequest>(
         );
 
         currentContext = deepClone({
-          ...req.currentContext,
+          ...request.currentContext,
           ...currentContext,
         });
 
-        return processor.receiveRequest({ ...req, currentContext });
+        return processor.receiveRequest({ ...request, currentContext });
       },
     };
   };
@@ -113,9 +117,12 @@ export function saveUserForTargetID<
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (req) => {
-        if (!("currentContext" in req)) return processor.receiveRequest(req);
-        const { currentContext, targetID, targetPlatform } = req;
+      receiveRequest: async (request) => {
+        if (request.type === "context_trigger") {
+          return processor.receiveRequest(request);
+        }
+
+        const { currentContext, targetID, targetPlatform } = request;
 
         if (!currentContext || !(currentContext as any)["targetID"]) {
           const rawUser = await getUser(targetID);
@@ -131,7 +138,7 @@ export function saveUserForTargetID<
           });
         }
 
-        return processor.receiveRequest({ ...req, currentContext });
+        return processor.receiveRequest({ ...request, currentContext });
       },
     };
   };

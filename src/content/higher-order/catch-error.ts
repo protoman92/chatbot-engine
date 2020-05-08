@@ -8,7 +8,7 @@ export function catchError<Context>(
 ): LeafTransformer<Context, Context> {
   return async (leaf) => ({
     next: async (request) => {
-      if (!("currentContext" in request)) return NextResult.FALLTHROUGH;
+      if (request.type === "context_trigger") return NextResult.FALLTHROUGH;
       const { currentContext } = request;
 
       try {

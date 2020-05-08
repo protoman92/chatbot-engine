@@ -15,7 +15,7 @@ export function saveTelegramUser<Context>(
     return {
       ...processor,
       receiveRequest: async (request) => {
-        if (!("currentContext" in request) || !("telegramUser" in request)) {
+        if (request.type !== "message_trigger") {
           return processor.receiveRequest(request);
         }
 

@@ -22,7 +22,7 @@ describe("Wit higher order function", () => {
     });
   });
 
-  it("Should fallthrough if currentContext is not available", async () => {
+  it("Should fallthrough if invalid request type", async () => {
     // Setup
     when(rootLeaf.next(anything())).thenResolve(NextResult.BREAK);
     const transformer = await retryWithWit(instance(comm));
@@ -36,6 +36,7 @@ describe("Wit higher order function", () => {
       input: [{}],
       newContext: {},
       oldContext: {},
+      type: "context_trigger",
     });
 
     // Then
@@ -53,6 +54,7 @@ describe("Wit higher order function", () => {
       targetPlatform,
       currentContext: {},
       input: { inputText: "some-text" },
+      type: "message_trigger",
     });
 
     // Then
@@ -89,6 +91,7 @@ describe("Wit higher order function", () => {
       targetPlatform,
       currentContext: {},
       input: { inputText },
+      type: "message_trigger",
     });
 
     // Then
@@ -101,6 +104,7 @@ describe("Wit higher order function", () => {
           targetPlatform,
           currentContext: { witEntities },
           input: { inputText },
+          type: "message_trigger",
         })
       )
     ).once();

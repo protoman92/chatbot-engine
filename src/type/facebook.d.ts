@@ -30,6 +30,12 @@ export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
     | Readonly<{
         currentContext: Context;
         input: readonly FacebookRequestInput[];
+        type: "message_trigger";
+      }>
+    | Readonly<{
+        currentContext: Context;
+        input: readonly FacebookRequestInput[];
+        type: "manual_trigger";
       }>
     | BaseContextChangeRequest<Context>
   );
@@ -39,6 +45,12 @@ export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
     | Readonly<{
         currentContext: Context;
         input: FacebookRequestInput;
+        type: "message_trigger";
+      }>
+    | Readonly<{
+        currentContext: Context;
+        input: FacebookRequestInput;
+        type: "manual_trigger";
       }>
     | BaseContextChangeRequest<Context>
   );

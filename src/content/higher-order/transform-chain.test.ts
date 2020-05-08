@@ -38,6 +38,7 @@ describe("Transform chain", () => {
       targetPlatform,
       currentContext: { a: 1, b: 2, error: new Error("") },
       input: {},
+      type: "message_trigger",
     });
 
     await transformed.subscribe({ next: async () => NextResult.BREAK });
@@ -51,6 +52,7 @@ describe("Transform chain", () => {
           targetPlatform,
           currentContext: { error, a: 1, b: 2 },
           input: {},
+          type: "message_trigger",
         })
       )
     ).once();
@@ -110,6 +112,7 @@ describe("Transform chain", () => {
       targetPlatform,
       currentContext: { error: new Error("") },
       input: {},
+      type: "message_trigger",
     });
 
     // Then
