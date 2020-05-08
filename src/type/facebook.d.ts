@@ -378,11 +378,7 @@ declare namespace FacebookMessageProcessor {
 
 /** Represents a Facebook-specific messenger */
 export interface FacebookMessageProcessor<Context>
-  extends BaseMessageProcessor<
-    Context,
-    FacebookRawRequest,
-    FacebookRequest<Context>
-  > {}
+  extends BaseMessageProcessor<Context> {}
 
 export type FacebookDefaultContext = {};
 

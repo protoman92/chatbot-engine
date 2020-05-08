@@ -9,23 +9,14 @@ export type AmbiguousPlatform = "facebook" | "telegram";
 
 declare namespace BaseMessageProcessor {
   /** Configurations to set up a generic messenger */
-  interface Configs<
-    Context,
-    RawRequest,
-    RawResponse,
-    GenRequest extends AmbiguousRequest<Context>
-  > {
+  interface Configs<Context> {
     readonly targetPlatform: AmbiguousPlatform;
     readonly leafSelector: LeafSelector<Context>;
-    readonly client: PlatformClient<RawResponse>;
-    readonly mapRequest: BaseMessageProcessor<
-      Context,
-      RawRequest,
-      GenRequest
-    >["generalizeRequest"];
+    readonly client: PlatformClient<unknown>;
+    readonly mapRequest: BaseMessageProcessor<Context>["generalizeRequest"];
     mapResponse: (
       res: AmbiguousResponse<Context>
-    ) => Promise<readonly RawResponse[]>;
+    ) => Promise<readonly unknown[]>;
   }
 }
 
@@ -38,16 +29,14 @@ declare namespace BaseMessageProcessor {
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface BaseMessageProcessor<
-  Context,
-  RawRequest = unknown,
-  AmbRequest extends AmbiguousRequest<Context> = AmbiguousRequest<Context>
-> {
+export interface BaseMessageProcessor<Context> {
   /** Generalize a raw request into a generic request */
-  generalizeRequest(request: RawRequest): Promise<readonly AmbRequest[]>;
+  generalizeRequest(
+    request: unknown
+  ): Promise<readonly AmbiguousRequest<Context>[]>;
 
   /** Receive an incoming generic request */
-  receiveRequest(request: AmbRequest): Promise<{}>;
+  receiveRequest(request: AmbiguousRequest<Context>): Promise<{}>;
 
   /** Send an outgoing platform response */
   sendResponse(response: AmbiguousResponse<Context>): Promise<{}>;

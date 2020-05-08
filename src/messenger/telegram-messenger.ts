@@ -260,7 +260,7 @@ export async function createTelegramMessageProcessor<Context>(
       client,
       targetPlatform: "telegram",
       mapRequest: async (req) => {
-        return createTelegramRequest(req, currentBot);
+        return createTelegramRequest(req as RawRequest, currentBot);
       },
       mapResponse: async (res) => {
         return createTelegramResponse(res as TelegramResponse<Context>);

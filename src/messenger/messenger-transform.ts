@@ -6,22 +6,15 @@ import {
   MessageProcessorMiddleware,
   SaveUserForTargetIDContext,
 } from "../type/messenger";
-import { AmbiguousRequest } from "../type/request";
 
 /**
  * Save the context every time a message group is sent to a target ID. If
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  */
-export function saveContextOnSend<
-  Context,
-  RawRequest,
-  GenRequest extends AmbiguousRequest<Context>
->(
+export function saveContextOnSend<Context>(
   contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">
-): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, GenRequest>
-> {
+): MessageProcessorMiddleware<BaseMessageProcessor<Context>> {
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
@@ -51,7 +44,7 @@ export function saveContextOnSend<
             changedContext: additionalContext,
             input: [{}],
             type: "context_trigger",
-          } as any);
+          });
         }
 
         return result;
@@ -66,9 +59,7 @@ export function saveContextOnSend<
  */
 export function injectContextOnReceive<Context, RawRequest>(
   contextDAO: Pick<ContextDAO<Context>, "getContext">
-): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, AmbiguousRequest<Context>>
-> {
+): MessageProcessorMiddleware<BaseMessageProcessor<Context>> {
   return () => async (processor) => {
     return {
       ...processor,
@@ -102,12 +93,7 @@ export function injectContextOnReceive<Context, RawRequest>(
  */
 export function saveUserForTargetID<
   Context,
-  RawRequest,
-  Processor extends BaseMessageProcessor<
-    Context,
-    RawRequest,
-    AmbiguousRequest<Context>
-  >,
+  Processor extends BaseMessageProcessor<Context>,
   RawUser
 >(
   contextDAO: ContextDAO<Context>,
@@ -148,16 +134,9 @@ export function saveUserForTargetID<
  * Set typing indicator on or off at the beginning and end of the messaging
  * process.
  */
-export function setTypingIndicator<
-  Context,
-  RawRequest,
-  RawResponse,
-  GenRequest extends AmbiguousRequest<Context>
->(
-  client: PlatformClient<RawResponse>
-): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, GenRequest>
-> {
+export function setTypingIndicator<Context>(
+  client: PlatformClient<unknown>
+): MessageProcessorMiddleware<BaseMessageProcessor<Context>> {
   return () => async (processor) => {
     return {
       ...processor,

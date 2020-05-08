@@ -294,11 +294,7 @@ declare namespace TelegramMessageProcessor {
 
 /** Represents a Telegram-specific message processor */
 export interface TelegramMessageProcessor<Context>
-  extends BaseMessageProcessor<
-    Context,
-    TelegramRawRequest,
-    TelegramRequest<Context>
-  > {}
+  extends BaseMessageProcessor<Context> {}
 
 export type TelegramDefaultContext = {};
 

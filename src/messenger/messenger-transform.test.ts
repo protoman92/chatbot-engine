@@ -19,13 +19,13 @@ import {
 import { saveTelegramUser } from "./telegram-transform";
 
 const targetPlatform = "facebook";
-let msgProcessor: BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>;
+let msgProcessor: BaseMessageProcessor<{}>;
 let client: PlatformClient<unknown>;
 let contextDAO: ContextDAO<{}>;
 let middlewareInput: MessageProcessorMiddleware.Input<typeof msgProcessor>;
 
 beforeEach(async () => {
-  msgProcessor = spy<BaseMessageProcessor<{}, unknown, AmbiguousRequest<{}>>>({
+  msgProcessor = spy<BaseMessageProcessor<{}>>({
     generalizeRequest: () => Promise.reject(""),
     receiveRequest: () => Promise.reject(""),
     sendResponse: () => Promise.reject(""),
@@ -269,7 +269,33 @@ describe("Save Telegram user for target ID", () => {
     });
   });
 
-  it("Should not save user if invalid request", async () => {
+  it("Should not save user if invalid target platform", async () => {
+    // Setup
+    when(tlMessenger.receiveRequest(anything())).thenResolve({});
+
+    const transformed = await compose(
+      instance(tlMessenger),
+      saveTelegramUser(instance(contextDAO), async () => ({
+        telegramUserID: targetID,
+      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      currentContext: {},
+      input: [{}],
+      targetID: `${targetID}`,
+      targetPlatform: "facebook",
+      type: "message_trigger",
+    });
+
+    // Then
+    verify(
+      contextDAO.appendContext(anything(), anything(), anything())
+    ).never();
+  });
+
+  it("Should not save user if invalid request type", async () => {
     // Setup
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 

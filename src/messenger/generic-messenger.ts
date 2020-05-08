@@ -16,7 +16,7 @@ import {
   MessageProcessorMiddleware,
   Messenger,
 } from "../type/messenger";
-import { AmbiguousRequest, AmbiguousRequestPerInput } from "../type/request";
+import { AmbiguousRequestPerInput } from "../type/request";
 import {
   TelegramMessageProcessor,
   TelegramRawRequest,
@@ -24,33 +24,22 @@ import {
 } from "../type/telegram";
 
 /** Create a generic message processor */
-export async function createMessageProcessor<
-  Context,
-  RawRequest,
-  RawResponse,
-  GenRequest extends AmbiguousRequest<Context>
->(
+export async function createMessageProcessor<Context>(
   {
     targetPlatform,
     leafSelector,
     client,
     mapRequest,
     mapResponse,
-  }: BaseMessageProcessor.Configs<Context, RawRequest, RawResponse, GenRequest>,
+  }: BaseMessageProcessor.Configs<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<
-    BaseMessageProcessor<Context, RawRequest, GenRequest>
+    BaseMessageProcessor<Context>
   >[]
-): Promise<BaseMessageProcessor<Context, RawRequest, GenRequest>> {
-  let finalMessageProcessor: BaseMessageProcessor<
-    Context,
-    RawRequest,
-    GenRequest
-  >;
+): Promise<BaseMessageProcessor<Context>> {
+  let finalMessageProcessor: BaseMessageProcessor<Context>;
 
   const middlewareInput: MessageProcessorMiddleware.Input<BaseMessageProcessor<
-    Context,
-    RawRequest,
-    GenRequest
+    Context
   >> = {
     getFinalMessageProcessor: () => finalMessageProcessor,
   };
@@ -93,14 +82,9 @@ export async function createMessageProcessor<
 }
 
 /** Create a messenger */
-export function createMessenger<
-  Context,
-  RawRequest,
-  RawResponse,
-  GenRequest extends AmbiguousRequest<Context>
->(
-  processor: BaseMessageProcessor<Context, RawRequest, GenRequest>
-): Messenger<RawRequest> {
+export function createMessenger<Context>(
+  processor: BaseMessageProcessor<Context>
+): Messenger<Context> {
   return {
     processRawRequest: async (platformReq) => {
       const genericReq = await processor.generalizeRequest(platformReq);
@@ -122,7 +106,7 @@ export function createCrossPlatformMessageProcessor<Context>(
     telegram?: TelegramMessageProcessor<Context>;
   }>,
   getPlatform: (platformReq: unknown) => AmbiguousPlatform = getRequestPlatform
-): BaseMessageProcessor<Context, unknown, AmbiguousRequest<Context>> {
+): BaseMessageProcessor<Context> {
   function switchPlatform<FBR, TLR>(
     platform: AmbiguousPlatform,
     {

@@ -15,7 +15,10 @@ export function saveTelegramUser<Context>(
     return {
       ...processor,
       receiveRequest: async (request) => {
-        if (request.type !== "message_trigger") {
+        if (
+          request.targetPlatform !== "telegram" ||
+          request.type !== "message_trigger"
+        ) {
           return processor.receiveRequest(request);
         }
 
