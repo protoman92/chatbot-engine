@@ -1,0 +1,10 @@
+{
+  "os": "linux",
+  "dist": "trusty",
+  "group": "stable",
+  "script": ["npm run test"],
+  "node_js": "node",
+  "language": "node_js",
+  "after_success": ["npm run coveralls", "npm pack"],
+  "before_script": ["npm install", "npm run build"],
+}
