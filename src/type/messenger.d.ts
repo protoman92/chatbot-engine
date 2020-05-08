@@ -40,8 +40,8 @@ declare namespace BaseMessageProcessor {
  */
 export interface BaseMessageProcessor<
   Context,
-  RawRequest,
-  AmbRequest extends AmbiguousRequest<Context>
+  RawRequest = unknown,
+  AmbRequest extends AmbiguousRequest<Context> = AmbiguousRequest<Context>
 > {
   /** Generalize a raw request into a generic request */
   generalizeRequest(request: RawRequest): Promise<readonly AmbRequest[]>;
@@ -58,7 +58,7 @@ export interface BaseMessageProcessor<
  * handling data to sending response. Note that each generic messenger should
  * have a generic messenger that handles requests one-by-one.
  */
-export interface Messenger<RawRequest, RawResponse> {
+export interface Messenger<RawRequest = unknown> {
   /** Process a platform request from end-to-end */
   processRawRequest(req: RawRequest): Promise<unknown>;
 }

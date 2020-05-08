@@ -103,7 +103,7 @@ export function createMessenger<
   GenRequest extends AmbiguousRequest<Context>
 >(
   processor: BaseMessageProcessor<Context, RawRequest, GenRequest>
-): Messenger<RawRequest, RawResponse> {
+): Messenger<RawRequest> {
   return {
     processRawRequest: async (platformReq) => {
       const genericReq = await processor.generalizeRequest(platformReq);
@@ -113,10 +113,10 @@ export function createMessenger<
 }
 
 /**
- * Create a cross-platform batch messenger that delegates to the appropriate
+ * Create a cross-platform message processor that delegates to the appropriate
  * platform-specific message processor when a request arrives.
  */
-export function createCrossPlatformMessenger<Context>(
+export function createCrossPlatformMessageProcessor<Context>(
   {
     facebook,
     telegram,
@@ -125,7 +125,7 @@ export function createCrossPlatformMessenger<Context>(
     telegram?: TelegramMessageProcessor<Context>;
   }>,
   getPlatform: (platformReq: unknown) => AmbiguousPlatform = getRequestPlatform
-): Messenger<unknown, unknown> {
+): BaseMessageProcessor<Context, unknown, AmbiguousRequest<Context>> {
   function switchPlatform<FBR, TLR>(
     platform: AmbiguousPlatform,
     {
@@ -153,7 +153,7 @@ export function createCrossPlatformMessenger<Context>(
     throw genericError(`Unsupported platform ${platform}`);
   }
 
-  return createMessenger<Context, unknown, unknown, AmbiguousRequest<Context>>({
+  return {
     generalizeRequest: async (platformReq) => {
       const targetPlatform = getPlatform(platformReq);
 
@@ -178,5 +178,5 @@ export function createCrossPlatformMessenger<Context>(
         telegramCallback: (processor) => processor.sendResponse(response),
       });
     },
-  });
+  };
 }

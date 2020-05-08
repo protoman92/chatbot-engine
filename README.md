@@ -113,15 +113,17 @@ const tlMessageProcessor = await createTelegramMessageProcessor(
 );
 ```
 
-### Set up a master cross-platform messenger
+### Set up a master cross-platform message processor
 
-A messenger is an abstraction that uses platform message processors under the hood. A cross-platform messenger allows platforms to send messages to each other using `targetPlatform` variable in the request input:
+A cross-platform message processor allows platforms to send messages to each other using `targetPlatform` variable in the request input. It can then be fed to a messenger, an abstraction that uses a message processor under the hood.
 
 ```javascript
-const crossMessenger = createCrossPlatformMessenger({
+const crossProcessor = createCrossPlatformMessageProcessor({
   facebook: fbMessenger,
   telegram: tlMessenger,
 });
+
+const messenger = createMessenger(crossProcessor);
 ```
 
 ### Set up the server
@@ -138,20 +140,13 @@ app.get("/api/facebook", async ({ query }, res) => {
 });
 
 app.post("/api/facebook", async ({ body }, res) => {
-  try {
-    await crossMessenger.processPlatformRequest(body);
-  } catch (e) {
-    res.status(404).json({ error: e.message });
-  }
+  await messenger.processPlatformRequest(body);
+  res.sendStatus(204);
 });
 
 app.post("/api/telegram", async ({ body }, res) => {
-  try {
-    await crossMessenger.processPlatformRequest(body);
-    res.status(200).send("Message sent");
-  } catch (e) {
-    res.status(404).json({ error: e.message });
-  }
+  await messenger.processPlatformRequest(body);
+  res.sendStatus(204);
 });
 
 const port = process.env.PORT || 8000;

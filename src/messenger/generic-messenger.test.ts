@@ -21,8 +21,9 @@ import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
 import {
-  createCrossPlatformMessenger,
+  createCrossPlatformMessageProcessor,
   createMessageProcessor,
+  createMessenger,
 } from "./generic-messenger";
 
 const targetID = "target-id";
@@ -173,10 +174,10 @@ describe("Generic message processor", () => {
   });
 });
 
-describe("Cross platform messenger", () => {
+describe("Cross platform message processor", () => {
   let fbProcessor: FacebookMessageProcessor<{}>;
   let tlProcessor: TelegramMessageProcessor<{}>;
-  let processors: Parameters<typeof createCrossPlatformMessenger>[0];
+  let processors: Parameters<typeof createCrossPlatformMessageProcessor>[0];
   let processorInstances: typeof processors;
 
   beforeEach(() => {
@@ -234,12 +235,13 @@ describe("Cross platform messenger", () => {
 
     // When
     for (const targetPlatform of platforms) {
-      const crossMessenger = createCrossPlatformMessenger(
+      const crossProcessor = createCrossPlatformMessageProcessor(
         processorInstances,
         () => targetPlatform
       );
 
-      await crossMessenger.processRawRequest({});
+      const messenger = createMessenger(crossProcessor);
+      await messenger.processRawRequest({});
 
       // Then
       verify(processors[targetPlatform]!.generalizeRequest(anything())).once();
@@ -249,17 +251,18 @@ describe("Cross platform messenger", () => {
 
   it("Should throw error if platform is not available", async () => {
     // Setup
-    const platformMessenger = await createCrossPlatformMessenger({});
+    const crossProcessor = createCrossPlatformMessageProcessor({});
+    const messenger = await createMessenger(crossProcessor);
 
     // When && Then: Facebook
     try {
-      await platformMessenger.processRawRequest({ object: "", entry: {} });
+      await messenger.processRawRequest({ object: "", entry: {} });
       throw new Error("Never should have come here");
     } catch (e) {}
 
     // When && Then: Telegram
     try {
-      await platformMessenger.processRawRequest({ update_id: "" });
+      await messenger.processRawRequest({ update_id: "" });
       throw new Error("Never should have come here");
     } catch (e) {}
   });

@@ -6,7 +6,7 @@ export { createAxiosClient } from "./axios-client";
 export { createFacebookClient } from "./facebook-client";
 export { createFacebookMessageProcessor } from "./facebook-messenger";
 export { saveFacebookUser } from "./facebook-transform";
-export { createCrossPlatformMessenger } from "./generic-messenger";
+export { createCrossPlatformMessageProcessor } from "./generic-messenger";
 export {
   injectContextOnReceive,
   saveContextOnSend,
