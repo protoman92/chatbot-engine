@@ -2,25 +2,25 @@ import { facebookError, isType } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
-  FacebookRawRequest,
+  FacebookRawRequest as RawRequest,
   FacebookRawResponse,
   FacebookRequest,
   FacebookResponse,
   FacebookResponseOutput,
+  FacebookRequestInput,
 } from "../type/facebook";
 import { createMessageProcessor } from "./generic-messenger";
 
 /** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>(
-  webhook: FacebookRawRequest,
-  targetPlatform: "facebook"
+  webhook: RawRequest
 ): readonly FacebookRequest<Context>[] {
   const { object, entry } = webhook;
 
   /** Group requests based on target ID */
-  function groupRequests(reqs: readonly FacebookRawRequest.Entry.Messaging[]) {
+  function groupRequests(reqs: readonly RawRequest.Entry.Messaging[]) {
     const requestMap: {
-      [K: string]: readonly FacebookRawRequest.Entry.Messaging[];
+      [K: string]: readonly RawRequest.Entry.Messaging[];
     } = {};
 
     reqs.forEach((req) => {
@@ -32,71 +32,68 @@ function createFacebookRequest<Context>(
   }
 
   function processRequest(
-    request: FacebookRawRequest.Entry.Messaging,
-    targetPlatform: "facebook"
-  ): FacebookRequest<Context>["input"] {
-    if (
-      isType<FacebookRawRequest.Entry.Messaging.Postback>(request, "postback")
-    ) {
-      return [{ targetPlatform, inputText: request.postback.payload }];
+    request: RawRequest.Entry.Messaging
+  ): FacebookRequestInput[] {
+    if (isType<RawRequest.Entry.Messaging.Postback>(request, "postback")) {
+      return [{ inputText: request.postback.payload }];
     }
 
-    if (
-      isType<FacebookRawRequest.Entry.Messaging.Message>(request, "message")
-    ) {
+    if (isType<RawRequest.Entry.Messaging.Message>(request, "message")) {
       const { message } = request;
 
       if (
-        isType<FacebookRawRequest.Entry.Messaging.Message.QuickReply>(
+        isType<RawRequest.Entry.Messaging.Message.QuickReply>(
           message,
           "quick_reply"
         )
       ) {
-        return [{ targetPlatform, inputText: message.quick_reply.payload }];
+        return [{ inputText: message.quick_reply.payload }];
       }
 
       if (
-        isType<FacebookRawRequest.Entry.Messaging.Message.Text["message"]>(
+        isType<RawRequest.Entry.Messaging.Message.Text["message"]>(
           message,
           "text"
         )
       ) {
-        return [{ targetPlatform, inputText: message.text }];
+        return [{ inputText: message.text }];
       }
 
       if (
-        isType<
-          FacebookRawRequest.Entry.Messaging.Message.Attachment["message"]
-        >(message, "attachments")
+        isType<RawRequest.Entry.Messaging.Message.Attachment["message"]>(
+          message,
+          "attachments"
+        )
       ) {
         const { attachments } = message;
 
-        return attachments.map((attachment) => {
-          switch (attachment.type) {
-            case "image":
-              return {
-                targetPlatform,
-                inputText: attachment.payload.url,
-                inputImageURL: attachment.payload.url,
-                stickerID: (() => {
-                  if (
-                    isType<
-                      FacebookRawRequest.Entry.Messaging.Message.Attachment.Attachment.StickerImage
-                    >(attachment.payload, "sticker_id")
-                  ) {
-                    return `${attachment.payload.sticker_id}`;
-                  }
+        return attachments.map(
+          (attachment): FacebookRequestInput => {
+            switch (attachment.type) {
+              case "image":
+                return {
+                  inputText: attachment.payload.url,
+                  inputImageURL: attachment.payload.url,
+                  stickerID: (() => {
+                    if (
+                      isType<
+                        RawRequest.Entry.Messaging.Message.Attachment.Attachment.StickerImage
+                      >(attachment.payload, "sticker_id")
+                    ) {
+                      return `${attachment.payload.sticker_id}`;
+                    }
 
-                  return "";
-                })(),
-              };
+                    return "";
+                  })(),
+                };
 
-            case "location":
-              const { lat, long } = attachment.payload.coordinates;
-              const coordinates = { lat, lng: long };
-              return { targetPlatform, inputCoordinate: coordinates };
+              case "location":
+                const { lat, long } = attachment.payload.coordinates;
+                const coordinates = { lat, lng: long };
+                return { inputCoordinate: coordinates };
+            }
           }
-        });
+        );
       }
     }
 
@@ -117,7 +114,7 @@ function createFacebookRequest<Context>(
           targetID,
           currentContext: {} as any,
           input: requests
-            .map((req) => processRequest(req, targetPlatform))
+            .map((req) => processRequest(req))
             .reduce((acc, items) => acc.concat(items), []),
           targetPlatform: "facebook",
         }));
@@ -356,8 +353,8 @@ export async function createFacebookMessageProcessor<Context>(
       client,
       targetPlatform: "facebook",
       mapRequest: async (req) => {
-        if (isType<FacebookRawRequest>(req, "object", "entry")) {
-          return createFacebookRequest(req, "facebook");
+        if (isType<RawRequest>(req, "object", "entry")) {
+          return createFacebookRequest(req);
         }
 
         throw facebookError(`Invalid webhook ${JSON.stringify(req)}`);

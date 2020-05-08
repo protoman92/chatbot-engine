@@ -1,19 +1,14 @@
 import { FacebookRequest, FacebookRequestPerInput } from "./facebook";
 import { TelegramRequest, TelegramRequestPerInput } from "./telegram";
 
-export type BaseRequest<Context> = Readonly<{
-  readonly targetID: string;
-}> &
-  (
-    | Readonly<{ currentContext: Context }>
-    /** Use this type to represent a context change notification */
-    | Readonly<{
-        currentContext: Context;
-        newContext: Context;
-        oldContext: Context;
-        changedContext: Partial<Context>;
-      }>
-  );
+export type BaseRequest<Context> = Readonly<{ targetID: string }>;
+
+export interface BaseContextChangeRequest<Context> {
+  readonly input: readonly {}[];
+  readonly newContext: Context;
+  readonly oldContext: Context;
+  readonly changedContext: Partial<Context>;
+}
 
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>

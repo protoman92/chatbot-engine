@@ -61,16 +61,13 @@ export async function createMessageProcessor<
   finalMessageProcessor = await compose(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
-      receiveRequest: ({ input, ...request }) => {
-        return mapSeries(
-          input as AmbiguousRequest<Context>["input"],
-          (input) => {
-            return leafSelector.next({
-              ...request,
-              input,
-            } as AmbiguousRequestPerInput<Context>);
-          }
-        );
+      receiveRequest: (request) => {
+        return mapSeries(request.input, (input) => {
+          return leafSelector.next({
+            ...request,
+            input,
+          } as AmbiguousRequestPerInput<Context>);
+        });
       },
       sendResponse: async (response) => {
         const data = await mapResponse(response);

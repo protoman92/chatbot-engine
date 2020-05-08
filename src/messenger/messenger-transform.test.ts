@@ -109,15 +109,34 @@ describe("Save context on send", () => {
 describe("Inject context on receive", () => {
   const targetID = "target-id";
 
+  it("Should not inject context on receive if currentContext is not available", async () => {
+    // Setup
+    when(msgProcessor.receiveRequest(anything())).thenResolve({});
+
+    const transformed = await compose(
+      instance(msgProcessor),
+      injectContextOnReceive(instance(contextDAO))(middlewareInput)
+    );
+
+    // When
+    await transformed.receiveRequest({
+      targetID,
+      targetPlatform,
+      changedContext: {},
+      input: [{}],
+      oldContext: {},
+      newContext: {},
+    });
+
+    // Then
+    verify(contextDAO.getContext(anything(), anything())).never();
+    verify(msgProcessor.receiveRequest(anything())).once();
+  });
+
   it("Should inject context on receive", async () => {
     // Setup
     const expectedContext = { a: 1, b: 2 };
-
-    when(msgProcessor.receiveRequest(anything())).thenResolve({
-      targetID,
-      newContext: expectedContext,
-      visualContents: [],
-    });
+    when(msgProcessor.receiveRequest(anything())).thenResolve({});
 
     when(contextDAO.getContext(targetID, targetPlatform)).thenResolve(
       expectedContext
@@ -151,6 +170,37 @@ describe("Inject context on receive", () => {
 
 describe("Save user for target ID", () => {
   const targetID = "target-id";
+
+  it("Should not save user when currentContext is not available", async () => {
+    // Setup
+    when(msgProcessor.receiveRequest(anything())).thenResolve({});
+
+    const transformed = await compose(
+      instance(msgProcessor),
+      saveUserForTargetID(
+        instance(contextDAO),
+        async () => ({ id: targetID }),
+        async () => ({ targetUserID: targetID })
+      )(middlewareInput)
+    );
+
+    // When
+    await transformed.receiveRequest({
+      targetID,
+      targetPlatform,
+      changedContext: {},
+      input: [],
+      oldContext: {},
+      newContext: {},
+    });
+
+    // Then
+    verify(
+      contextDAO.appendContext(anything(), anything(), anything())
+    ).never();
+
+    verify(msgProcessor.receiveRequest(anything())).once();
+  });
 
   it("Should save user when no user ID is present in context", async () => {
     // Setup
@@ -211,6 +261,33 @@ describe("Save Telegram user for target ID", () => {
       receiveRequest: () => Promise.reject(""),
       sendResponse: () => Promise.reject(""),
     });
+  });
+
+  it("Should not save user if currentContext is not available", async () => {
+    // Setup
+    when(tlMessenger.receiveRequest(anything())).thenResolve({});
+
+    const transformed = await compose(
+      instance(tlMessenger),
+      saveTelegramUser(instance(contextDAO), async () => ({
+        telegramUserID: targetID,
+      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      changedContext: {},
+      input: [{}],
+      oldContext: {},
+      newContext: {},
+      targetID: `${targetID}`,
+      targetPlatform: "telegram",
+    });
+
+    // Then
+    verify(
+      contextDAO.appendContext(anything(), anything(), anything())
+    ).never();
   });
 
   it("Should save user when no user ID is present in context", async () => {

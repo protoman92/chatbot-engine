@@ -3,7 +3,7 @@ import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest } from "./request";
+import { BaseRequest, BaseContextChangeRequest } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
@@ -19,18 +19,40 @@ export type TelegramRequestInput = DeepReadonly<
   | { newChatMembers: (TelegramBot | TelegramUser)[] }
 >;
 
-type CommonTelegramRequest<Context> = DeepReadonly<{
-  currentBot: TelegramBot;
+type CommonTelegramRequest<Context> = Readonly<{
   targetPlatform: "telegram";
-  telegramUser: TelegramUser;
 }> &
   BaseRequest<Context>;
 
 export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
-  Readonly<{ input: readonly TelegramRequestInput[] }>;
+  (
+    | Readonly<{
+        currentBot: TelegramBot;
+        currentContext: Context;
+        telegramUser: TelegramUser;
+        input: readonly TelegramRequestInput[];
+      }>
+    | Readonly<{
+        currentContext: Context;
+        input: readonly TelegramRequestInput[];
+      }>
+    | BaseContextChangeRequest<Context>
+  );
 
 export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
-  Readonly<{ input: TelegramRequestInput }>;
+  (
+    | Readonly<{
+        currentBot: TelegramBot;
+        currentContext: Context;
+        telegramUser: TelegramUser;
+        input: TelegramRequestInput;
+      }>
+    | Readonly<{
+        currentContext: Context;
+        input: TelegramRequestInput;
+      }>
+    | BaseContextChangeRequest<Context>
+  );
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
   readonly output: readonly TelegramResponseOutput[];

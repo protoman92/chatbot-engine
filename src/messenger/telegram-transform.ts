@@ -15,6 +15,10 @@ export function saveTelegramUser<Context>(
     return {
       ...processor,
       receiveRequest: async (request) => {
+        if (!("currentContext" in request) || !("telegramUser" in request)) {
+          return processor.receiveRequest(request);
+        }
+
         const {
           currentContext,
           targetID,

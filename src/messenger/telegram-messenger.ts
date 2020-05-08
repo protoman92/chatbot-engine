@@ -10,6 +10,7 @@ import {
   TelegramResponse,
   TelegramResponseOutput,
   TelegramUser,
+  TelegramRequestInput,
 } from "../type/telegram";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -52,7 +53,7 @@ function createTelegramRequest<Context>(
   function processMessageRequest({
     message: { chat, from: user, ...message },
   }: RawRequest.Message):
-    | [TelegramUser, RawRequest.Chat, TelegramRequest<Context>["input"]]
+    | [TelegramUser, RawRequest.Chat, TelegramRequestInput[]]
     | undefined {
     if (isType<RawRequest.Message.Text>(message, "text")) {
       const { text } = message;
@@ -89,11 +90,7 @@ function createTelegramRequest<Context>(
   function processCallbackRequest({
     callback_query: { data, from: user },
   }: RawRequest.Callback):
-    | [
-        TelegramUser,
-        RawRequest.Chat | undefined,
-        TelegramRequest<Context>["input"]
-      ]
+    | [TelegramUser, RawRequest.Chat | undefined, TelegramRequestInput[]]
     | undefined {
     return [user, undefined, [{ inputText: data }]];
   }
@@ -101,11 +98,7 @@ function createTelegramRequest<Context>(
   function processRequest(
     request: RawRequest
   ):
-    | [
-        TelegramUser,
-        RawRequest.Chat | undefined,
-        TelegramRequest<Context>["input"]
-      ]
+    | [TelegramUser, RawRequest.Chat | undefined, TelegramRequestInput[]]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
@@ -277,12 +270,6 @@ export async function createTelegramMessageProcessor<Context>(
 
   return {
     ...baseProcessor,
-    receiveRequest: async ({ currentContext, ...args }) => {
-      return baseProcessor.receiveRequest({
-        ...args,
-        currentContext: { ...currentContext, currentBot },
-      });
-    },
     sendResponse: async (response) => {
       const { targetID } = response;
 

@@ -63,20 +63,17 @@ export function saveContextOnSend<
  * Inject the relevant context for a target every time a message group is
  * processed.
  */
-export function injectContextOnReceive<
-  Context,
-  RawRequest,
-  GenRequest extends AmbiguousRequest<Context>
->(
+export function injectContextOnReceive<Context, RawRequest>(
   contextDAO: Pick<ContextDAO<Context>, "getContext">
 ): MessageProcessorMiddleware<
-  BaseMessageProcessor<Context, RawRequest, GenRequest>
+  BaseMessageProcessor<Context, RawRequest, AmbiguousRequest<Context>>
 > {
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (request) => {
-        const { targetID, targetPlatform } = request;
+      receiveRequest: async (req) => {
+        if (!("currentContext" in req)) return processor.receiveRequest(req);
+        const { targetID, targetPlatform } = req;
 
         let currentContext = await contextDAO.getContext(
           targetID,
@@ -84,11 +81,11 @@ export function injectContextOnReceive<
         );
 
         currentContext = deepClone({
-          ...request.currentContext,
+          ...req.currentContext,
           ...currentContext,
         });
 
-        return processor.receiveRequest({ ...request, currentContext });
+        return processor.receiveRequest({ ...req, currentContext });
       },
     };
   };
@@ -102,8 +99,11 @@ export function injectContextOnReceive<
 export function saveUserForTargetID<
   Context,
   RawRequest,
-  GenRequest extends AmbiguousRequest<Context>,
-  Processor extends BaseMessageProcessor<Context, RawRequest, GenRequest>,
+  Processor extends BaseMessageProcessor<
+    Context,
+    RawRequest,
+    AmbiguousRequest<Context>
+  >,
   RawUser
 >(
   contextDAO: ContextDAO<Context>,
@@ -113,8 +113,9 @@ export function saveUserForTargetID<
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (request) => {
-        const { currentContext, targetID, targetPlatform } = request;
+      receiveRequest: async (req) => {
+        if (!("currentContext" in req)) return processor.receiveRequest(req);
+        const { currentContext, targetID, targetPlatform } = req;
 
         if (!currentContext || !(currentContext as any)["targetID"]) {
           const rawUser = await getUser(targetID);
@@ -130,7 +131,7 @@ export function saveUserForTargetID<
           });
         }
 
-        return processor.receiveRequest({ ...request, currentContext });
+        return processor.receiveRequest({ ...req, currentContext });
       },
     };
   };

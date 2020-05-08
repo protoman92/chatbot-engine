@@ -3,7 +3,7 @@ import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest } from "./request";
+import { BaseRequest, BaseContextChangeRequest } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
@@ -13,7 +13,11 @@ export type FacebookRequestInput = DeepReadonly<
   | { inputCoordinate: Coordinates }
   | { inputText: string }
   | { inputImageURL: string }
-  | { stickerID: string }
+  | {
+      inputText: string;
+      inputImageURL: string;
+      stickerID: string;
+    }
 >;
 
 type CommonFacebookRequest<Context> = DeepReadonly<{
@@ -22,10 +26,22 @@ type CommonFacebookRequest<Context> = DeepReadonly<{
   BaseRequest<Context>;
 
 export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
-  Readonly<{ input: readonly FacebookRequestInput[] }>;
+  (
+    | Readonly<{
+        currentContext: Context;
+        input: readonly FacebookRequestInput[];
+      }>
+    | BaseContextChangeRequest<Context>
+  );
 
 export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
-  Readonly<{ input: FacebookRequestInput }>;
+  (
+    | Readonly<{
+        currentContext: Context;
+        input: FacebookRequestInput;
+      }>
+    | BaseContextChangeRequest<Context>
+  );
 
 export interface FacebookResponse<Context>
   extends BaseResponse<Context & FacebookDefaultContext> {

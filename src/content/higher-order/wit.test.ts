@@ -1,3 +1,4 @@
+import expectJs from "expect.js";
 import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../../stream";
@@ -19,6 +20,26 @@ describe("Wit higher order function", () => {
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });
+  });
+
+  it("Should fallthrough if currentContext is not available", async () => {
+    // Setup
+    when(rootLeaf.next(anything())).thenResolve(NextResult.BREAK);
+    const transformer = await retryWithWit(instance(comm));
+    const transformed = await transformer(instance(rootLeaf));
+
+    // When
+    const result = await transformed.next({
+      targetID,
+      targetPlatform,
+      changedContext: {},
+      input: [{}],
+      newContext: {},
+      oldContext: {},
+    });
+
+    // Then
+    expectJs(result).to.eql(NextResult.FALLTHROUGH);
   });
 
   it("Wit engine should not fire if no error", async () => {
