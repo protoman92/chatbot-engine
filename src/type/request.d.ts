@@ -1,7 +1,10 @@
 import { FacebookRequest, FacebookRequestPerInput } from "./facebook";
 import { TelegramRequest, TelegramRequestPerInput } from "./telegram";
 
-export type BaseRequest<Context> = Readonly<{ targetID: string }>;
+export type BaseRequest<Context> = Readonly<{
+  currentContext: Context;
+  targetID: string;
+}>;
 
 export interface BaseContextChangeRequest<Context> {
   readonly input: readonly {}[];

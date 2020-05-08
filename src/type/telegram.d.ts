@@ -28,13 +28,11 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
   (
     | Readonly<{
         currentBot: TelegramBot;
-        currentContext: Context;
         telegramUser: TelegramUser;
         input: readonly TelegramRequestInput[];
         type: "message_trigger";
       }>
     | Readonly<{
-        currentContext: Context;
         input: readonly TelegramRequestInput[];
         type: "manual_trigger";
       }>
@@ -45,13 +43,11 @@ export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
   (
     | Readonly<{
         currentBot: TelegramBot;
-        currentContext: Context;
         telegramUser: TelegramUser;
         input: TelegramRequestInput;
         type: "message_trigger";
       }>
     | Readonly<{
-        currentContext: Context;
         input: TelegramRequestInput;
         type: "manual_trigger";
       }>
