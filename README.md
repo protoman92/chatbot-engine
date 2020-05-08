@@ -1,8 +1,8 @@
 # chatbot-engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.org/protoman92/chatbot-engine.svg?branch=master&dummy=false)](https://travis-ci.org/protoman92/chatbot-engine?dummy=false)
-[![Coverage Status](https://coveralls.io/repos/github/protoman92/chatbot-engine/badge.svg?branch=master&dummy=false)](https://coveralls.io/github/protoman92/chatbot-engine?branch=master&dummy=false)
+[![Build Status](https://travis-ci.org/protoman92/chatbot-engine.svg?branch=master)](https://travis-ci.org/protoman92/chatbot-engine)
+[![Coverage Status](https://coveralls.io/repos/github/protoman92/chatbot-engine/badge.svg?branch=master)](https://coveralls.io/github/protoman92/chatbot-engine?branch=master)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 Experimental chatbot engine to build cross-platform chatbots.
