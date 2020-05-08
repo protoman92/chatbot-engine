@@ -224,9 +224,10 @@ describe("Save Telegram user for target ID", () => {
 
     const transformed = await compose(
       instance(tlMessenger),
-      saveTelegramUser(instance(contextDAO), () =>
-        Promise.resolve({ additionalContext, telegramUserID: targetID })
-      )({ getFinalMessageProcessor: () => instance(tlMessenger) })
+      saveTelegramUser(instance(contextDAO), async () => ({
+        additionalContext,
+        telegramUserID: targetID,
+      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
@@ -252,6 +253,47 @@ describe("Save Telegram user for target ID", () => {
         `${targetID}`,
         "telegram",
         deepEqual({ ...additionalContext, targetID: `${targetID}` })
+      )
+    ).once();
+  });
+
+  it("Should not save targetID if it's somehow null", async () => {
+    // Setup
+    when(
+      contextDAO.appendContext(anything(), anything(), anything())
+    ).thenResolve({ newContext: {}, oldContext: {} });
+    when(tlMessenger.receiveRequest(anything())).thenResolve({});
+
+    const transformed = await compose(
+      instance(tlMessenger),
+      saveTelegramUser(instance(contextDAO), async () => ({
+        telegramUserID: undefined as any,
+      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      currentBot: { id: 0, first_name: "", username: "" },
+      currentContext: {},
+      input: [],
+      targetID: `${targetID}`,
+      targetPlatform: "telegram",
+      telegramUser: {
+        id: 0,
+        first_name: "",
+        last_name: "",
+        username: "",
+        language_code: "en" as const,
+        is_bot: false,
+      },
+    });
+
+    // Then
+    verify(
+      contextDAO.appendContext(
+        `${targetID}`,
+        "telegram",
+        deepEqual({ targetID: undefined })
       )
     ).once();
   });

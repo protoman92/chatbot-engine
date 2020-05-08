@@ -30,7 +30,7 @@ export function saveTelegramUser<Context>(
 
           await contextDAO.appendContext(targetID, targetPlatform, {
             ...additionalContext,
-            targetID: `${telegramUserID}`,
+            targetID: telegramUserID == null ? undefined : `${telegramUserID}`,
           });
         }
 
