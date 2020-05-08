@@ -49,8 +49,8 @@ describe("Leaf selector", () => {
 
     when(selector.triggerLeaf(anything(), anything())).thenCall(
       async ({ currentLeafID }) => {
-        if (currentLeafID === `${validLeafID}`) return NextResult.SUCCESS;
-        return NextResult.FAILURE;
+        if (currentLeafID === `${validLeafID}`) return NextResult.BREAK;
+        return NextResult.FALLTHROUGH;
       }
     );
 
@@ -108,7 +108,7 @@ describe("Leaf selector", () => {
 
     // When
     await instance(selector).subscribe({
-      next: async () => NextResult.SUCCESS,
+      next: async () => NextResult.BREAK,
     });
 
     // Then
@@ -118,12 +118,12 @@ describe("Leaf selector", () => {
   it("Subscribing should increase subscribe count", async () => {
     // Setup && When
     await instance(selector).subscribe({
-      next: async () => NextResult.SUCCESS,
+      next: async () => NextResult.BREAK,
     });
 
     try {
       await instance(selector).subscribe({
-        next: async () => NextResult.SUCCESS,
+        next: async () => NextResult.BREAK,
       });
 
       expectJs().fail("Should have failed");
@@ -135,7 +135,7 @@ describe("Leaf selector", () => {
     when(selector.enumerateLeaves()).thenResolve([]);
 
     when(selector.triggerLeaf(anything(), anything())).thenResolve(
-      NextResult.SUCCESS
+      NextResult.BREAK
     );
 
     // When

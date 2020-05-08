@@ -23,7 +23,7 @@ describe("Wit higher order function", () => {
 
   it("Wit engine should not fire if no error", async () => {
     // Setup
-    when(rootLeaf.next(anything())).thenResolve(NextResult.SUCCESS);
+    when(rootLeaf.next(anything())).thenResolve(NextResult.BREAK);
     const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When

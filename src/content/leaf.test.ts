@@ -28,7 +28,7 @@ describe("Create leaf with observer", () => {
           targetPlatform: "facebook",
         });
 
-        return NextResult.SUCCESS;
+        return NextResult.BREAK;
       },
     }));
 
@@ -99,9 +99,9 @@ describe("Leaf for platforms", () => {
 
   it("Should work for different platforms", async () => {
     // Setup
-    when(fbLeaf.next(anything())).thenResolve(NextResult.SUCCESS);
+    when(fbLeaf.next(anything())).thenResolve(NextResult.BREAK);
     when(fbLeaf.complete!()).thenResolve({});
-    when(tlLeaf.next(anything())).thenResolve(NextResult.SUCCESS);
+    when(tlLeaf.next(anything())).thenResolve(NextResult.BREAK);
     when(tlLeaf.complete!()).thenResolve({});
 
     // When
@@ -133,7 +133,7 @@ describe("Leaf for platforms", () => {
     });
 
     await platformLeaf.complete!();
-    await platformLeaf.subscribe({ next: async () => NextResult.SUCCESS });
+    await platformLeaf.subscribe({ next: async () => NextResult.BREAK });
 
     // Then
     verify(fbLeaf.next(anything())).once();

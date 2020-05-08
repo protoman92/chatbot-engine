@@ -118,7 +118,7 @@ describe("Generic message processor", () => {
     });
 
     // Then
-    expectJs(nextResult).to.eql(NextResult.FAILURE);
+    expectJs(nextResult).to.eql(NextResult.FALLTHROUGH);
     expectJs(complete).to.be.ok();
     verify(messageProcessor.sendResponse(anything())).never();
   });

@@ -14,7 +14,7 @@ describe("Content stream and subject", () => {
     const subscription = await subject.subscribe({
       next: async () => {
         nextCount += 1;
-        return NextResult.SUCCESS;
+        return NextResult.BREAK;
       },
       complete: async () => (completeCount += 1),
     });
@@ -39,7 +39,7 @@ describe("Content stream and subject", () => {
     await subject.subscribe({
       next: async () => {
         nextCount += 1;
-        return NextResult.SUCCESS;
+        return NextResult.BREAK;
       },
       complete: async () => (completeCount += 1),
     });
@@ -70,7 +70,7 @@ describe("Content stream and subject", () => {
     const subscription = await mergeObservables(...subjects).subscribe({
       next: async (content) => {
         receivedValues.push(content);
-        return NextResult.SUCCESS;
+        return NextResult.BREAK;
       },
       complete: async () => (completedCount += 1),
     });

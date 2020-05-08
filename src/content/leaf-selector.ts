@@ -86,10 +86,10 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
         );
 
         switch (nextResult) {
-          case NextResult.SUCCESS:
+          case NextResult.BREAK:
             return nextResult;
 
-          case NextResult.FAILURE:
+          case NextResult.FALLTHROUGH:
             break;
         }
       }

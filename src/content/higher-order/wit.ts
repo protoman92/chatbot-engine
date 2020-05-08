@@ -13,7 +13,7 @@ export function retryWithWit<Context>(
   return async (leaf) => ({
     ...leaf,
     next: async ({ currentContext, input, ...request }) => {
-      if (!("inputText" in input)) return NextResult.FAILURE;
+      if (!("inputText" in input)) return NextResult.FALLTHROUGH;
 
       const result = await leaf.next({
         ...request,

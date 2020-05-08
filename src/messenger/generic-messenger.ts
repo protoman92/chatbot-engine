@@ -84,10 +84,10 @@ export async function createMessageProcessor<
     next: async (request) => {
       if (request.targetPlatform === targetPlatform) {
         await finalMessageProcessor.sendResponse(request);
-        return NextResult.SUCCESS;
+        return NextResult.BREAK;
       }
 
-      return NextResult.FAILURE;
+      return NextResult.FALLTHROUGH;
     },
     complete: async () => {},
   });

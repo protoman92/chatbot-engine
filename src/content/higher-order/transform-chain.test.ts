@@ -23,7 +23,7 @@ describe("Transform chain", () => {
     });
 
     const fallbackLeaf = spy<AmbiguousLeaf<ErrorContext>>({
-      next: () => Promise.resolve(NextResult.SUCCESS),
+      next: () => Promise.resolve(NextResult.BREAK),
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
@@ -40,7 +40,7 @@ describe("Transform chain", () => {
       input: {},
     });
 
-    await transformed.subscribe({ next: async () => NextResult.SUCCESS });
+    await transformed.subscribe({ next: async () => NextResult.BREAK });
     await transformed.complete!();
 
     // Then
@@ -59,7 +59,7 @@ describe("Transform chain", () => {
     verify(fallbackLeaf.subscribe(anything())).once();
     verify(errorLeaf.complete!()).once();
     verify(errorLeaf.subscribe(anything())).once;
-    expectJs(nextResult).to.eql(NextResult.SUCCESS);
+    expectJs(nextResult).to.eql(NextResult.BREAK);
   });
 
   it("Create leaf with pipe chain", async () => {
@@ -71,10 +71,10 @@ describe("Transform chain", () => {
           const previousResult = await leaf.next(request);
 
           switch (previousResult) {
-            case NextResult.SUCCESS:
+            case NextResult.BREAK:
               return previousResult;
 
-            case NextResult.FAILURE:
+            case NextResult.FALLTHROUGH:
               throw new Error("some-error");
           }
         },
@@ -101,7 +101,7 @@ describe("Transform chain", () => {
       next: async () => {
         valueDeliveredCount += 1;
         /** Make sure the pipe transformer gets invoked */
-        return NextResult.FAILURE;
+        return NextResult.FALLTHROUGH;
       },
     });
 

@@ -12,8 +12,8 @@ import {
  * operation.
  */
 export enum NextResult {
-  SUCCESS = "SUCCESS",
-  FAILURE = "FAILURE",
+  BREAK = "SUCCESS",
+  FALLTHROUGH = "FAILURE",
 }
 
 /** Create a subscription with custom unsubscribe logic */
@@ -62,14 +62,14 @@ export function createContentSubject<T>(): ContentSubject<T> {
       });
     },
     next: async (contents) => {
-      if (isCompleted) return NextResult.FAILURE;
+      if (isCompleted) return NextResult.FALLTHROUGH;
 
       return mapSeries(Object.entries(observerMap), ([, obs]) => {
         return obs.next(contents);
       }).then((results) =>
-        results.every((result) => result === NextResult.SUCCESS)
-          ? NextResult.SUCCESS
-          : NextResult.FAILURE
+        results.every((result) => result === NextResult.BREAK)
+          ? NextResult.BREAK
+          : NextResult.FALLTHROUGH
       );
     },
     complete: async () => {
@@ -113,7 +113,7 @@ export function bridgeEmission<I, O>(
         next: async (content) => {
           resolve(content);
           await subscription.unsubscribe();
-          return NextResult.SUCCESS;
+          return NextResult.BREAK;
         },
       });
 
