@@ -6,8 +6,4 @@ export interface Coordinates {
   readonly lng: number;
 }
 
-export interface ErrorContext {
-  readonly error: Error;
-}
-
 export type Transformer<T> = (original: T) => Promise<T>;

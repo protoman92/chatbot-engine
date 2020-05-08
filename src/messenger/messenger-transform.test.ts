@@ -125,6 +125,7 @@ describe("Inject context on receive", () => {
       targetID,
       targetPlatform,
       changedContext: {},
+      currentContext: {},
       input: [{}],
       oldContext: {},
       newContext: {},
@@ -193,7 +194,8 @@ describe("Save user for target ID", () => {
       targetID,
       targetPlatform,
       changedContext: {},
-      input: [],
+      currentContext: {},
+      input: [{}],
       oldContext: {},
       newContext: {},
       type: "context_trigger",
@@ -309,6 +311,7 @@ describe("Save Telegram user for target ID", () => {
     // When
     await transformed.receiveRequest({
       changedContext: {},
+      currentContext: {},
       input: [{}],
       oldContext: {},
       newContext: {},

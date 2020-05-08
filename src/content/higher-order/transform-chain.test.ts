@@ -2,7 +2,7 @@ import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription, NextResult } from "../../stream";
-import { ErrorContext } from "../../type/common";
+import {} from "../../type/common";
 import { AmbiguousLeaf } from "../../type/leaf";
 import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
 import { catchError } from "./catch-error";
@@ -22,7 +22,7 @@ describe("Transform chain", () => {
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
 
-    const fallbackLeaf = spy<AmbiguousLeaf<ErrorContext>>({
+    const fallbackLeaf = spy<AmbiguousLeaf<{}>>({
       next: () => Promise.resolve(NextResult.BREAK),
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
@@ -36,8 +36,8 @@ describe("Transform chain", () => {
     const nextResult = await transformed.next({
       targetID,
       targetPlatform,
-      currentContext: { a: 1, b: 2, error: new Error("") },
-      input: {},
+      currentContext: { a: 1, b: 2 },
+      input: { error: new Error("This error should be ignored") },
       type: "message_trigger",
     });
 
@@ -50,8 +50,8 @@ describe("Transform chain", () => {
         deepEqual({
           targetID,
           targetPlatform,
-          currentContext: { error, a: 1, b: 2 },
-          input: {},
+          currentContext: { a: 1, b: 2 },
+          input: { error },
           type: "message_trigger",
         })
       )
@@ -66,7 +66,7 @@ describe("Transform chain", () => {
 
   it("Create leaf with pipe chain", async () => {
     // Setup
-    const trasformedLeaf: AmbiguousLeaf<ErrorContext> = await createTransformChain()
+    const trasformedLeaf: AmbiguousLeaf<{}> = await createTransformChain()
       .pipe<{}>(async (leaf) => ({
         ...leaf,
         next: async (request) => {

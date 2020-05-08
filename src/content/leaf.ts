@@ -1,7 +1,6 @@
 import { Omit } from "ts-essentials";
 import { genericError } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
-import { ErrorContext } from "../type/common";
 import { FacebookLeafObserver } from "../type/facebook";
 import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
@@ -53,14 +52,11 @@ export async function createLeafWithObserver<Context = {}>(
  */
 export function createDefaultErrorLeaf<Context = {}>(
   fn?: (e: Error) => Promise<unknown>
-): Promise<AmbiguousLeaf<Context & ErrorContext>> {
+): Promise<AmbiguousLeaf<Context>> {
   return createLeafWithObserver(async (observer) => ({
-    next: async (request) => {
-      if (request.type === "context_trigger") return NextResult.FALLTHROUGH;
-
-      const {
-        currentContext: { error },
-      } = request;
+    next: async ({ input, ...request }) => {
+      if (!("error" in input)) return NextResult.FALLTHROUGH;
+      const { error } = input;
 
       !!fn && (await fn(error));
 

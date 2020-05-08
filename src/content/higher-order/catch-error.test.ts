@@ -1,7 +1,7 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
+import { capture, instance, spy } from "ts-mockito";
 import { NextResult } from "../../stream";
-import { ErrorContext } from "../../type/common";
 import { createLeafWithObserver } from "../leaf";
 import { catchError } from "./catch-error";
 
@@ -9,20 +9,29 @@ describe("catchError higher-order function", () => {
   const targetID = "target-id";
   const targetPlatform = "facebook" as const;
 
-  it("Should fallthrough if invalid request type", async () => {
+  it("Should add error to input if error is encountered", async () => {
     // Setup
-    const fallbackLeaf = await createLeafWithObserver<ErrorContext>(
-      async () => ({ next: async () => NextResult.BREAK })
-    );
+    let fallbackLeaf = await createLeafWithObserver<{}>(async () => ({
+      next: async () => NextResult.BREAK,
+    }));
 
-    const transformer = await catchError(fallbackLeaf);
-    const transformed = await transformer(fallbackLeaf);
+    fallbackLeaf = spy(fallbackLeaf);
+
+    const leafToBeTransformed = await createLeafWithObserver(async () => ({
+      next: async () => {
+        throw new Error("");
+      },
+    }));
+
+    const transformer = await catchError(instance(fallbackLeaf));
+    const transformed = await transformer(leafToBeTransformed);
 
     // When
     const result = await transformed.next({
       targetID,
       targetPlatform,
       changedContext: {},
+      currentContext: {},
       input: [{}],
       newContext: {},
       oldContext: {},
@@ -30,6 +39,8 @@ describe("catchError higher-order function", () => {
     });
 
     // Then
-    expectJs(result).to.eql(NextResult.FALLTHROUGH);
+    const [{ input }] = capture(fallbackLeaf.next).first();
+    expectJs(result).to.eql(NextResult.BREAK);
+    expectJs(input).to.have.key("error");
   });
 });

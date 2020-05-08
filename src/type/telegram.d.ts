@@ -10,6 +10,7 @@ import { BaseResponseOutput } from "./visual-content";
 
 export type TelegramRequestInput = DeepReadonly<
   | {}
+  | { error: Error }
   | { inputCommand: string; inputText: string }
   | { inputText: string }
   | { inputCoordinate: Coordinates }
@@ -36,7 +37,7 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
         input: readonly TelegramRequestInput[];
         type: "manual_trigger";
       }>
-    | BaseContextChangeRequest<Context>
+    | (BaseContextChangeRequest<Context> & Readonly<{ input: readonly [{}] }>)
   );
 
 export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
@@ -51,7 +52,7 @@ export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
         input: TelegramRequestInput;
         type: "manual_trigger";
       }>
-    | BaseContextChangeRequest<Context>
+    | (BaseContextChangeRequest<Context> & Readonly<{ input: {} }>)
   );
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {

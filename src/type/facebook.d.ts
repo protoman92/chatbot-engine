@@ -10,6 +10,7 @@ import { BaseResponseOutput } from "./visual-content";
 
 export type FacebookRequestInput = DeepReadonly<
   | {}
+  | { error: Error }
   | { inputCoordinate: Coordinates }
   | { inputText: string }
   | { inputImageURL: string }
@@ -35,7 +36,7 @@ export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
         input: readonly FacebookRequestInput[];
         type: "manual_trigger";
       }>
-    | BaseContextChangeRequest<Context>
+    | (BaseContextChangeRequest<Context> & Readonly<{ input: readonly [{}] }>)
   );
 
 export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
@@ -48,7 +49,7 @@ export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
         input: FacebookRequestInput;
         type: "manual_trigger";
       }>
-    | BaseContextChangeRequest<Context>
+    | (BaseContextChangeRequest<Context> & Readonly<{ input: {} }>)
   );
 
 export interface FacebookResponse<Context>

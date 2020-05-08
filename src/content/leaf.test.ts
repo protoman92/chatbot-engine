@@ -58,8 +58,8 @@ describe("Default error leaf", () => {
     const { output } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
-      currentContext: { error },
-      input: {},
+      currentContext: {},
+      input: { error },
       type: "message_trigger",
     });
 

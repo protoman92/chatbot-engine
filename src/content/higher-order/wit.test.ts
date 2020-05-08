@@ -33,6 +33,7 @@ describe("Wit higher order function", () => {
       targetID,
       targetPlatform,
       changedContext: {},
+      currentContext: {},
       input: [{}],
       newContext: {},
       oldContext: {},

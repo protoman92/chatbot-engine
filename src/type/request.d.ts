@@ -7,7 +7,6 @@ export type BaseRequest<Context> = Readonly<{
 }>;
 
 export interface BaseContextChangeRequest<Context> {
-  readonly input: readonly {}[];
   readonly newContext: Context;
   readonly oldContext: Context;
   readonly changedContext: Partial<Context>;
