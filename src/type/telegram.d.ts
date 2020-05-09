@@ -96,13 +96,19 @@ declare namespace TelegramResponseOutput {
 
 declare namespace TelegramResponseOutput {
   namespace Content {
+    interface Image {
+      readonly imageURL: string;
+      readonly text: string;
+      readonly type: "image";
+    }
+
     interface Text {
       readonly text: string;
       readonly type: "text";
     }
   }
 
-  type Content = Content.Text;
+  type Content = Content.Image | Content.Text;
 }
 
 export interface TelegramResponseOutput extends BaseResponseOutput {
@@ -228,59 +234,70 @@ export type TelegramRawRequest =
   | TelegramRawRequest.Callback;
 
 declare namespace TelegramRawResponse {
-  namespace SendMessage {
-    namespace ReplyMarkup {
-      namespace ReplyKeyboardMarkup {
-        interface Button {
-          readonly text: string;
-          readonly request_contact: boolean | undefined;
-          readonly request_location: boolean | undefined;
-        }
-      }
+  type ParseMode = "html" | "markdown";
 
-      interface ReplyKeyboardMarkup {
-        readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
-        readonly resize_keyboard: boolean | undefined;
-        readonly one_time_keyboard: boolean | undefined;
-        readonly selective: boolean | undefined;
-      }
-
-      namespace InlineKeyboardMarkup {
-        namespace Button {
-          interface Postback {
-            readonly callback_data: string;
-            readonly text: string;
-          }
-
-          interface URL {
-            readonly url: string;
-            readonly text: string;
-          }
-        }
-
-        type Button = Button.Postback | Button.URL;
-      }
-
-      interface InlineKeyboardMarkup {
-        readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
+  namespace ReplyMarkup {
+    namespace ReplyKeyboardMarkup {
+      interface Button {
+        readonly text: string;
+        readonly request_contact: boolean | undefined;
+        readonly request_location: boolean | undefined;
       }
     }
 
-    type ReplyMarkup =
-      | ReplyMarkup.ReplyKeyboardMarkup
-      | ReplyMarkup.InlineKeyboardMarkup;
+    interface ReplyKeyboardMarkup {
+      readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
+      readonly resize_keyboard: boolean | undefined;
+      readonly one_time_keyboard: boolean | undefined;
+      readonly selective: boolean | undefined;
+    }
+
+    namespace InlineKeyboardMarkup {
+      namespace Button {
+        interface Postback {
+          readonly callback_data: string;
+          readonly text: string;
+        }
+
+        interface URL {
+          readonly url: string;
+          readonly text: string;
+        }
+      }
+
+      type Button = Button.Postback | Button.URL;
+    }
+
+    interface InlineKeyboardMarkup {
+      readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
+    }
   }
+
+  type ReplyMarkup =
+    | ReplyMarkup.ReplyKeyboardMarkup
+    | ReplyMarkup.InlineKeyboardMarkup;
 
   interface SendMessage {
     readonly action: "sendMessage";
     readonly chat_id: string;
-    readonly parseMode?: "html" | "markdown";
-    readonly reply_markup: SendMessage.ReplyMarkup | undefined;
+    readonly parseMode?: ParseMode;
+    readonly reply_markup: ReplyMarkup | undefined;
     readonly text: string;
+  }
+
+  interface SendPhoto {
+    readonly action: "sendPhoto";
+    readonly caption: string;
+    readonly chat_id: string;
+    readonly parseMode?: ParseMode;
+    readonly photo: string;
+    readonly reply_markup: ReplyMarkup | undefined;
   }
 }
 
-export type TelegramRawResponse = TelegramRawResponse.SendMessage;
+export type TelegramRawResponse =
+  | TelegramRawResponse.SendMessage
+  | TelegramRawResponse.SendPhoto;
 
 declare namespace TelegramMessageProcessor {
   interface Configs<Context> {
@@ -348,6 +365,9 @@ export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
 
   /** Get the URL to a file in Telegram */
   getFileURL(filePath: string): Promise<string>;
+
+  /** Convenience method to get a file's URL using its ID */
+  getFileURLFromID(fileID: string): Promise<string>;
 
   /** Check if a bot is a member of a group */
   isMember(chatID: string, botID: string): Promise<boolean>;

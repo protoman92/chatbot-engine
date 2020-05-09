@@ -57,7 +57,6 @@ export function createDefaultErrorLeaf<Context = {}>(
     next: async ({ input, ...request }) => {
       if (!("error" in input)) return NextResult.FALLTHROUGH;
       const { error } = input;
-
       !!fn && (await fn(error));
 
       return observer.next({

@@ -14,8 +14,13 @@ export function createTelegramClient(
   { authToken, defaultParseMode, webhookURL }: TelegramConfigs
 ): TelegramClient {
   function formatURL(action: string, query?: {}) {
-    const qs = stringify(query);
-    return `https://api.telegram.org/bot${authToken}/${action}?${qs}`;
+    let qs = stringify(query);
+    qs = !!qs.length ? `?${qs}` : "";
+    return `https://api.telegram.org/bot${authToken}/${action}${qs}`;
+  }
+
+  function formatFileURL(filePath: string) {
+    return `https://api.telegram.org/file/bot${authToken}/${filePath}`;
   }
 
   async function communicate<Result>(
@@ -34,7 +39,7 @@ export function createTelegramClient(
     }
   }
 
-  return {
+  const telegramClient: TelegramClient = {
     getCurrentBot: () =>
       communicate<TelegramBot>({ url: formatURL("getMe"), method: "GET" }),
     getFile: (file_id) =>
@@ -43,7 +48,13 @@ export function createTelegramClient(
         method: "GET",
         query: { file_id },
       }),
-    getFileURL: async (filePath) => formatURL(filePath),
+    getFileURL: async (filePath) => formatFileURL(filePath),
+    getFileURLFromID: async (fileID) => {
+      const { file_path } = await telegramClient.getFile(fileID);
+      const fileURL = await telegramClient.getFileURL(file_path);
+      console.log(fileURL);
+      return fileURL;
+    },
     isMember: (chat_id, user_id) =>
       communicate<{ status: string }>({
         url: formatURL("getChatMember"),
@@ -83,6 +94,8 @@ export function createTelegramClient(
       });
     },
   };
+
+  return telegramClient;
 }
 
 export default function(args?: Pick<TelegramConfigs, "defaultParseMode">) {

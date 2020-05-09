@@ -140,17 +140,29 @@ function createTelegramResponse<Context>({
   targetID,
   output,
 }: TelegramResponse<Context>): readonly TelegramRawResponse[] {
+  function createImageResponse(
+    chat_id: string,
+    { imageURL: photo, text: caption }: TelegramResponseOutput.Content.Image
+  ): Omit<TelegramRawResponse.SendPhoto, "reply_markup"> {
+    return {
+      caption,
+      chat_id,
+      photo,
+      action: "sendPhoto",
+    };
+  }
+
   function createTextResponse(
-    targetID: string,
+    chat_id: string,
     { text }: TelegramResponseOutput.Content.Text
   ): Omit<TelegramRawResponse.SendMessage, "reply_markup"> {
-    return { text, action: "sendMessage", chat_id: targetID };
+    return { chat_id, text, action: "sendMessage" };
   }
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
     quickReplies: TelegramResponseOutput.InlineMarkupMatrix
-  ): TelegramRawResponse.SendMessage.ReplyMarkup.InlineKeyboardMarkup {
+  ): TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: quickReplies.map((qrs) =>
         qrs.map((qr) => {
@@ -171,7 +183,7 @@ function createTelegramResponse<Context>({
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
     quickReplyMatrix: TelegramResponseOutput.ReplyMarkupMatrix
-  ): TelegramRawResponse.SendMessage.ReplyMarkup.ReplyKeyboardMarkup {
+  ): TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: quickReplyMatrix.map((quickReplies) =>
         quickReplies.map((quickReply) => {
@@ -210,7 +222,7 @@ function createTelegramResponse<Context>({
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
     quickReply: TelegramResponseOutput.QuickReply
-  ): TelegramRawResponse.SendMessage.ReplyMarkup {
+  ): TelegramRawResponse.ReplyMarkup {
     switch (quickReply.type) {
       case "inline_markup":
         return createInlineMarkups(quickReply.content);
@@ -228,16 +240,20 @@ function createTelegramResponse<Context>({
       parseMode,
     }: TelegramResponse<Context>["output"][number]
   ): TelegramRawResponse {
-    switch (content.type) {
-      case "text":
-        return {
-          ...createTextResponse(targetID, content),
-          parseMode,
-          reply_markup: quickReplies && createQuickReplies(quickReplies),
-        };
+    const reply_markup = quickReplies && createQuickReplies(quickReplies);
 
-      default:
-        throw telegramError(`Unsupported content ${JSON.stringify(content)}`);
+    if (content.type === "image") {
+      return {
+        ...createImageResponse(targetID, content),
+        parseMode,
+        reply_markup,
+      };
+    } else {
+      return {
+        ...createTextResponse(targetID, content),
+        parseMode,
+        reply_markup,
+      };
     }
   }
 
