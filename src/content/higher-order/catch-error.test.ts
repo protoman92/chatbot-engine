@@ -1,7 +1,8 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { capture, instance, spy } from "ts-mockito";
-import { NextResult } from "../../stream";
+import { createSubscription, NextResult } from "../../stream";
+import { AmbiguousLeaf } from "../../type";
 import { createLeafWithObserver } from "../leaf";
 import { catchError } from "./catch-error";
 
@@ -46,5 +47,45 @@ describe("catchError higher-order function", () => {
     expectJs(request).to.have.property("currentLeafName", currentLeafName);
     expectJs(input).to.have.key("error");
     expectJs(input).to.have.property("erroredLeaf", currentLeafName);
+  });
+
+  it("Should get currentLeafName from error object if applicable", async () => {
+    // Setup
+    const overrideLeafName = "error_leaf_name";
+
+    let fallbackLeaf = await createLeafWithObserver<{}>(async () => ({
+      next: async () => NextResult.BREAK,
+    }));
+
+    fallbackLeaf = spy(fallbackLeaf);
+
+    const leafToBeTransformed: AmbiguousLeaf<{}> = {
+      next: async () => {
+        const error: any = new Error("");
+        error.currentLeafName = overrideLeafName;
+        throw error;
+      },
+      subscribe: async () => createSubscription(async () => {}),
+    };
+
+    const transformer = await catchError(instance(fallbackLeaf));
+    const transformed = await transformer(leafToBeTransformed);
+
+    // When
+    await transformed.next({
+      targetID,
+      targetPlatform,
+      changedContext: {},
+      currentContext: {},
+      currentLeafName: "should_be_ignored",
+      input: [{}],
+      newContext: {},
+      oldContext: {},
+      type: "context_trigger",
+    });
+
+    // Then
+    const [{ input }] = capture(fallbackLeaf.next).first();
+    expectJs(input).to.have.property("erroredLeaf", overrideLeafName);
   });
 });

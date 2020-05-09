@@ -46,6 +46,33 @@ describe("Create leaf with observer", () => {
     // Then
     expectJs(originalRequest).to.eql(request);
   });
+
+  it("Should add currentLeafName to error if error encountered", async () => {
+    // Setup
+    const currentLeafName = "current_leaf_name";
+    const error = new Error("some_error");
+
+    const leaf = await createLeafWithObserver(async () => ({
+      next: async () => {
+        throw error;
+      },
+    }));
+
+    try {
+      // When
+      await leaf.next({
+        currentLeafName,
+        targetID,
+        targetPlatform,
+        currentContext: {},
+        input: {},
+        type: "message_trigger",
+      });
+    } catch (e) {
+      // Then
+      expectJs(e).to.have.property("currentLeafName", currentLeafName);
+    }
+  });
 });
 
 describe("Default error leaf", () => {

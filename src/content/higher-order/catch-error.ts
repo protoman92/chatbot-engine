@@ -10,10 +10,19 @@ export function catchError<Context>(
       try {
         return await leaf.next({ ...request, currentLeafName, input });
       } catch (error) {
+        let erroredLeaf = currentLeafName;
+
+        if (
+          "currentLeafName" in error &&
+          typeof error.currentLeafName === "string"
+        ) {
+          erroredLeaf = error.currentLeafName;
+        }
+
         return fallbackLeaf.next({
           ...request,
           currentLeafName,
-          input: { error, erroredLeaf: currentLeafName },
+          input: { error, erroredLeaf },
         });
       }
     },

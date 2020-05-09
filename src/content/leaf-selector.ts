@@ -1,4 +1,4 @@
-import { deepClone, mapSeries } from "../common/utils";
+import { mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import { Branch } from "../type/branch";
 import { KV } from "../type/common";
@@ -77,13 +77,8 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
     next: async (request: Parameters<LeafSelector<Context>["next"]>[0]) => {
       const enumeratedLeaves = await selector.enumerateLeaves();
 
-      for (const enumeratedLeaf of enumeratedLeaves) {
-        const clonedRequest = deepClone(request);
-
-        const nextResult = await selector.triggerLeaf(
-          enumeratedLeaf,
-          clonedRequest
-        );
+      for (const enumLeaf of enumeratedLeaves) {
+        const nextResult = await selector.triggerLeaf(enumLeaf, request);
 
         switch (nextResult) {
           case NextResult.BREAK:

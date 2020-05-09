@@ -37,7 +37,14 @@ export async function createLeafWithObserver<Context = {}>(
   return {
     next: async (request) => {
       originalRequest = request;
-      return baseLeaf.next(request);
+
+      try {
+        const result = await baseLeaf.next(request);
+        return result;
+      } catch (error) {
+        error.currentLeafName = request.currentLeafName;
+        throw error;
+      }
     },
     complete: async () => {
       !!baseLeaf.complete && (await baseLeaf.complete());
