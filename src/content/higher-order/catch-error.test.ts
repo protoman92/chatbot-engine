@@ -23,6 +23,7 @@ describe("catchError higher-order function", () => {
       },
     }));
 
+    leafToBeTransformed.name = "LeafToBeTransformed";
     const transformer = await catchError(instance(fallbackLeaf));
     const transformed = await transformer(leafToBeTransformed);
 
@@ -42,5 +43,6 @@ describe("catchError higher-order function", () => {
     const [{ input }] = capture(fallbackLeaf.next).first();
     expectJs(result).to.eql(NextResult.BREAK);
     expectJs(input).to.have.key("error");
+    expectJs(input).to.have.property("erroredLeaf", leafToBeTransformed.name);
   });
 });

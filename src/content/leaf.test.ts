@@ -1,9 +1,10 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { Omit } from "ts-essentials";
-import { anything, instance, spy, verify, when } from "ts-mockito";
+import { anything, capture, instance, spy, verify, when } from "ts-mockito";
 import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
+import { AmbiguousRequestPerInput } from "../type";
 import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousLeaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
@@ -12,7 +13,6 @@ import {
   createLeafObserverForPlatforms,
   createLeafWithObserver,
 } from "./leaf";
-import { AmbiguousRequestPerInput } from "../type";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
@@ -51,19 +51,35 @@ describe("Create leaf with observer", () => {
 describe("Default error leaf", () => {
   it("Should work correctly", async () => {
     // Setup
-    const errorLeaf = await createDefaultErrorLeaf();
+    const errorHandler = spy({
+      handleError: (async () => {}) as NonNullable<
+        Parameters<typeof createDefaultErrorLeaf>[0]
+      >,
+    });
+
+    const errorLeafName = "error_leaf";
     const error = new Error("some-error");
+
+    const errorLeaf = await createDefaultErrorLeaf(
+      instance(errorHandler).handleError
+    );
 
     // When
     const { output } = await bridgeEmission(errorLeaf)({
       targetID,
       targetPlatform,
       currentContext: {},
-      input: { error },
+      input: { error, erroredLeaf: errorLeafName },
       type: "message_trigger",
     });
 
     // Then
+    const [{ error: handledError, erroredLeaf: handledErrorLeaf }] = capture(
+      errorHandler.handleError
+    ).first();
+
+    expectJs(handledError).to.eql(error);
+    expectJs(handledErrorLeaf).to.eql(errorLeafName);
     expectJs(output).to.have.length(1);
     const [{ content: response }] = output;
 

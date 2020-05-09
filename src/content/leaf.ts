@@ -3,6 +3,7 @@ import { genericError } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
 import { FacebookLeafObserver } from "../type/facebook";
 import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
+import { BaseErrorRequestInput } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
 import { TelegramLeafObserver } from "../type/telegram";
@@ -16,7 +17,7 @@ export async function createLeafWithObserver<Context = {}>(
     observer: NextContentObserver<
       Omit<AmbiguousResponse<Context>, "originalRequest">
     >
-  ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
+  ) => Promise<Omit<AmbiguousLeaf<Context>, "name" | "subscribe">>
 ): Promise<AmbiguousLeaf<Context>> {
   let originalRequest: AmbiguousResponse<Context>["originalRequest"];
   const baseSubject = createContentSubject<AmbiguousResponse<Context>>();
@@ -51,13 +52,15 @@ export async function createLeafWithObserver<Context = {}>(
  * other leaf can handle the error.
  */
 export function createDefaultErrorLeaf<Context = {}>(
-  fn?: (e: Error) => Promise<unknown>
+  fn?: (
+    e: Pick<BaseErrorRequestInput, "error" | "erroredLeaf">
+  ) => Promise<unknown>
 ): Promise<AmbiguousLeaf<Context>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ input, ...request }) => {
       if (!("error" in input)) return NextResult.FALLTHROUGH;
-      const { error } = input;
-      !!fn && (await fn(error));
+      const { error, erroredLeaf } = input;
+      !!fn && (await fn({ error, erroredLeaf }));
 
       return observer.next({
         ...request,

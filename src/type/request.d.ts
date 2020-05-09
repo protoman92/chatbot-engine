@@ -13,6 +13,11 @@ export interface BaseContextChangeRequest<Context> {
   readonly type: "context_trigger";
 }
 
+export interface BaseErrorRequestInput {
+  readonly error: Error;
+  readonly erroredLeaf?: string;
+}
+
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>
   | TelegramRequest<Context>;

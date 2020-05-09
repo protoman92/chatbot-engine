@@ -3,14 +3,18 @@ import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest, BaseContextChangeRequest } from "./request";
+import {
+  BaseContextChangeRequest,
+  BaseErrorRequestInput,
+  BaseRequest,
+} from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
 export type TelegramRequestInput = DeepReadonly<
   | {}
-  | { error: Error }
+  | BaseErrorRequestInput
   | { inputCommand: string; inputText: string }
   | { inputText: string }
   | { inputCoordinate: Coordinates }

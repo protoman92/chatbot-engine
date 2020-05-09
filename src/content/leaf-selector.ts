@@ -30,6 +30,7 @@ export function enumerateLeaves<Context>(
       if (!!leafEntries.length) {
         for (const [currentLeafID, currentLeaf] of leafEntries) {
           if (!currentLeaf) continue;
+          currentLeaf.name = currentLeafID;
 
           inputs.push({
             parentBranch,

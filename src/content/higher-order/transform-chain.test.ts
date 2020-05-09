@@ -1,6 +1,6 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
-import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
+import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { createSubscription, NextResult } from "../../stream";
 import {} from "../../type/common";
 import { AmbiguousLeaf } from "../../type/leaf";
@@ -12,9 +12,10 @@ const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("Transform chain", () => {
-  it("Catch error should work correctly", async () => {
+  it("Catching error in transform chain should work correctly", async () => {
     // Setup
     const error = new Error("Something happened");
+    const erroredLeafName = "error_leaf";
 
     const errorLeaf = spy<AmbiguousLeaf<{}>>({
       next: () => Promise.reject(error),
@@ -27,6 +28,8 @@ describe("Transform chain", () => {
       complete: () => Promise.resolve({}),
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
+
+    when(errorLeaf.name).thenReturn(erroredLeafName);
 
     const transformed = await createTransformChain()
       .pipe(catchError(instance(fallbackLeaf)))
@@ -51,7 +54,7 @@ describe("Transform chain", () => {
           targetID,
           targetPlatform,
           currentContext: { a: 1, b: 2 },
-          input: { error },
+          input: { error, erroredLeaf: erroredLeafName },
           type: "message_trigger",
         })
       )

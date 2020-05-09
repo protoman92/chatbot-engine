@@ -50,6 +50,9 @@ export interface LeafTransformChain<InContext, OutContext> {
 export interface AmbiguousLeafObserver<T>
   extends ContentObserver<AmbiguousRequestPerInput<T>> {}
 
+type _AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
+  ContentObservable<AmbiguousResponse<T>>;
+
 /**
  * Represents a sequence of messenges that have some commonalities among each
  * other. When the user replies to a trigger message, they enter a leaf.
@@ -57,7 +60,5 @@ export interface AmbiguousLeafObserver<T>
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
-  ContentObservable<AmbiguousResponse<T>>;
-
-export type LeafSelector<T> = AmbiguousLeaf<T>;
+export type AmbiguousLeaf<T> = _AmbiguousLeaf<T> & { name?: string };
+export type LeafSelector<T> = _AmbiguousLeaf<T>;

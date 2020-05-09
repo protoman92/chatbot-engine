@@ -10,7 +10,10 @@ export function catchError<Context>(
       try {
         return await leaf.next({ ...request, input });
       } catch (error) {
-        return fallbackLeaf.next({ ...request, input: { error } });
+        return fallbackLeaf.next({
+          ...request,
+          input: { error, erroredLeaf: leaf?.name },
+        });
       }
     },
     complete: async () => {
