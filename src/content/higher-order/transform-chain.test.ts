@@ -1,6 +1,6 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
-import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
+import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription, NextResult } from "../../stream";
 import {} from "../../type/common";
 import { AmbiguousLeaf } from "../../type/leaf";
@@ -29,8 +29,6 @@ describe("Transform chain", () => {
       subscribe: () => Promise.resolve(createSubscription(async () => {})),
     });
 
-    when(errorLeaf.name).thenReturn(erroredLeafName);
-
     const transformed = await createTransformChain()
       .pipe(catchError(instance(fallbackLeaf)))
       .transform(instance(errorLeaf));
@@ -40,6 +38,7 @@ describe("Transform chain", () => {
       targetID,
       targetPlatform,
       currentContext: { a: 1, b: 2 },
+      currentLeafName: erroredLeafName,
       input: { error: new Error("This error should be ignored") },
       type: "message_trigger",
     });
@@ -54,6 +53,7 @@ describe("Transform chain", () => {
           targetID,
           targetPlatform,
           currentContext: { a: 1, b: 2 },
+          currentLeafName: erroredLeafName,
           input: { error, erroredLeaf: erroredLeafName },
           type: "message_trigger",
         })
@@ -67,7 +67,7 @@ describe("Transform chain", () => {
     expectJs(nextResult).to.eql(NextResult.BREAK);
   });
 
-  it("Create leaf with pipe chain", async () => {
+  it("Leaf with pipe chain should trigger all wrapped leaves", async () => {
     // Setup
     const trasformedLeaf: AmbiguousLeaf<{}> = await createTransformChain()
       .pipe<{}>(async (leaf) => ({
@@ -114,6 +114,7 @@ describe("Transform chain", () => {
       targetID,
       targetPlatform,
       currentContext: { error: new Error("") },
+      currentLeafName: "",
       input: {},
       type: "message_trigger",
     });

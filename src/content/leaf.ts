@@ -17,7 +17,7 @@ export async function createLeafWithObserver<Context = {}>(
     observer: NextContentObserver<
       Omit<AmbiguousResponse<Context>, "originalRequest">
     >
-  ) => Promise<Omit<AmbiguousLeaf<Context>, "name" | "subscribe">>
+  ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
 ): Promise<AmbiguousLeaf<Context>> {
   let originalRequest: AmbiguousResponse<Context>["originalRequest"];
   const baseSubject = createContentSubject<AmbiguousResponse<Context>>();

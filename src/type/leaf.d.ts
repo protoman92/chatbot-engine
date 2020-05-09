@@ -11,7 +11,7 @@ export interface LeafEnumeration<Context> {
   readonly parentBranch: Branch<Context>;
   readonly prefixLeafPaths: readonly string[];
   readonly currentLeaf: AmbiguousLeaf<Context>;
-  readonly currentLeafID: string;
+  readonly currentLeafName: string;
 }
 
 /**
@@ -48,10 +48,9 @@ export interface LeafTransformChain<InContext, OutContext> {
 }
 
 export interface AmbiguousLeafObserver<T>
-  extends ContentObserver<AmbiguousRequestPerInput<T>> {}
-
-type _AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
-  ContentObservable<AmbiguousResponse<T>>;
+  extends ContentObserver<
+    AmbiguousRequestPerInput<T> & Readonly<{ currentLeafName: string }>
+  > {}
 
 /**
  * Represents a sequence of messenges that have some commonalities among each
@@ -60,5 +59,8 @@ type _AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export type AmbiguousLeaf<T> = _AmbiguousLeaf<T> & { name?: string };
-export type LeafSelector<T> = _AmbiguousLeaf<T>;
+export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
+  ContentObservable<AmbiguousResponse<T>>;
+
+export type LeafSelector<T> = ContentObserver<AmbiguousRequestPerInput<T>> &
+  ContentObservable<AmbiguousResponse<T>>;

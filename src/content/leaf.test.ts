@@ -4,7 +4,6 @@ import { Omit } from "ts-essentials";
 import { anything, capture, instance, spy, verify, when } from "ts-mockito";
 import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
-import { AmbiguousRequestPerInput } from "../type";
 import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousLeaf } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
@@ -32,12 +31,13 @@ describe("Create leaf with observer", () => {
       },
     }));
 
-    const request: AmbiguousRequestPerInput<{}> = {
+    const request = {
       targetID,
       targetPlatform,
       currentContext: {},
+      currentLeafName: "",
       input: {},
-      type: "message_trigger",
+      type: "message_trigger" as const,
     };
 
     // When
@@ -69,17 +69,15 @@ describe("Default error leaf", () => {
       targetID,
       targetPlatform,
       currentContext: {},
+      currentLeafName: errorLeafName,
       input: { error, erroredLeaf: errorLeafName },
       type: "message_trigger",
     });
 
     // Then
-    const [{ error: handledError, erroredLeaf: handledErrorLeaf }] = capture(
-      errorHandler.handleError
-    ).first();
-
-    expectJs(handledError).to.eql(error);
-    expectJs(handledErrorLeaf).to.eql(errorLeafName);
+    const [handledError] = capture(errorHandler.handleError).first();
+    expectJs(handledError).to.have.property("error", error);
+    expectJs(handledError).to.have.property("erroredLeaf", errorLeafName);
     expectJs(output).to.have.length(1);
     const [{ content: response }] = output;
 
@@ -126,6 +124,7 @@ describe("Leaf for platforms", () => {
     await platformLeaf.next({
       targetID,
       currentContext: {},
+      currentLeafName: "",
       input: {},
       targetPlatform: "facebook",
       type: "message_trigger",
@@ -139,6 +138,7 @@ describe("Leaf for platforms", () => {
         username: "",
       },
       currentContext: {},
+      currentLeafName: "",
       input: {},
       targetPlatform: "telegram",
       telegramUser: {
@@ -171,6 +171,7 @@ describe("Leaf for platforms", () => {
       await platformObserver.next({
         targetID,
         currentContext: {},
+        currentLeafName: "",
         input: {},
         targetPlatform: "facebook",
         type: "message_trigger",
@@ -189,6 +190,7 @@ describe("Leaf for platforms", () => {
           username: "",
         },
         currentContext: {},
+        currentLeafName: "",
         input: {},
         targetPlatform: "telegram",
         telegramUser: {

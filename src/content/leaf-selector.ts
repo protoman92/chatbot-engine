@@ -28,14 +28,13 @@ export function enumerateLeaves<Context>(
       const leafEntries = Object.entries(leaves);
 
       if (!!leafEntries.length) {
-        for (const [currentLeafID, currentLeaf] of leafEntries) {
+        for (const [currentLeafName, currentLeaf] of leafEntries) {
           if (!currentLeaf) continue;
-          currentLeaf.name = currentLeafID;
 
           inputs.push({
             parentBranch,
             currentLeaf,
-            currentLeafID,
+            currentLeafName,
             prefixLeafPaths,
           });
         }
@@ -70,10 +69,10 @@ export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
      * its success.
      */
     triggerLeaf: (
-      { currentLeaf }: LeafEnumeration<Context>,
+      { currentLeafName, currentLeaf }: LeafEnumeration<Context>,
       request: Parameters<LeafSelector<Context>["next"]>[0]
     ) => {
-      return currentLeaf.next(request);
+      return currentLeaf.next({ ...request, currentLeafName });
     },
     next: async (request: Parameters<LeafSelector<Context>["next"]>[0]) => {
       const enumeratedLeaves = await selector.enumerateLeaves();

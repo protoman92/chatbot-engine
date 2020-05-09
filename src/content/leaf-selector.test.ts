@@ -40,7 +40,7 @@ describe("Leaf selector", () => {
       ...Array(iteration).keys(),
     ].map((i) => ({
       currentLeaf: instance(currentLeaf),
-      currentLeafID: `${i}`,
+      currentLeafName: `${i}`,
       parentBranch: {},
       prefixLeafPaths: [],
     }));
@@ -48,8 +48,8 @@ describe("Leaf selector", () => {
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 
     when(selector.triggerLeaf(anything(), anything())).thenCall(
-      async ({ currentLeafID }) => {
-        if (currentLeafID === `${validLeafID}`) return NextResult.BREAK;
+      async ({ currentLeafName }: LeafEnumeration<{}>) => {
+        if (currentLeafName === `${validLeafID}`) return NextResult.BREAK;
         return NextResult.FALLTHROUGH;
       }
     );
@@ -75,7 +75,7 @@ describe("Leaf selector", () => {
       ...Array(1000).keys(),
     ].map((i) => ({
       currentLeaf: instance(currentLeaf),
-      currentLeafID: `${i}`,
+      currentLeafName: `${i}`,
       parentBranch: {},
       prefixLeafPaths: [],
     }));
@@ -100,7 +100,7 @@ describe("Leaf selector", () => {
       ...Array(1000).keys(),
     ].map((i) => ({
       currentLeaf: instance(currentLeaf),
-      currentLeafID: `${i}`,
+      currentLeafName: `${i}`,
       parentBranch: {},
       prefixLeafPaths: [],
     }));
