@@ -103,6 +103,8 @@ describe("Default error leaf", () => {
 
     // Then
     const [handledError] = capture(errorHandler.handleError).first();
+    expectJs(handledError).to.have.property("targetID", targetID);
+    expectJs(handledError).to.have.property("targetPlatform", targetPlatform);
     expectJs(handledError).to.have.property("error", error);
     expectJs(handledError).to.have.property("erroredLeaf", errorLeafName);
     expectJs(output).to.have.length(1);

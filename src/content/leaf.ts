@@ -1,6 +1,7 @@
 import { Omit } from "ts-essentials";
 import { genericError } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
+import { AmbiguousPlatform } from "../type";
 import { FacebookLeafObserver } from "../type/facebook";
 import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
 import { BaseErrorRequestInput } from "../type/request";
@@ -60,18 +61,20 @@ export async function createLeafWithObserver<Context = {}>(
  */
 export function createDefaultErrorLeaf<Context = {}>(
   fn?: (
-    e: Pick<BaseErrorRequestInput, "error" | "erroredLeaf">
+    e: Pick<BaseErrorRequestInput, "error" | "erroredLeaf"> &
+      Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>
   ) => Promise<unknown>
 ): Promise<AmbiguousLeaf<Context>> {
   return createLeafWithObserver(async (observer) => ({
-    next: async ({ input, ...request }) => {
+    next: async ({ input, targetID, targetPlatform, ...request }) => {
       if (!("error" in input)) return NextResult.FALLTHROUGH;
       const { error, erroredLeaf } = input;
-      !!fn && (await fn({ error, erroredLeaf }));
+      !!fn && (await fn({ error, erroredLeaf, targetID, targetPlatform }));
 
       return observer.next({
         ...request,
-        targetPlatform: request.targetPlatform,
+        targetID,
+        targetPlatform,
         output: [
           {
             content: {
