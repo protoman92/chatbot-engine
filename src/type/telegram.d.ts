@@ -95,7 +95,8 @@ declare namespace TelegramResponseOutput {
 
   type QuickReply =
     | { content: ReplyMarkupMatrix; type: "reply_markup" }
-    | { content: InlineMarkupMatrix; type: "inline_markup" };
+    | { content: InlineMarkupMatrix; type: "inline_markup" }
+    | { type: "remove_reply_keyboard" };
 }
 
 declare namespace TelegramResponseOutput {
@@ -275,11 +276,16 @@ declare namespace TelegramRawResponse {
     interface InlineKeyboardMarkup {
       readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
     }
+
+    interface ReplyKeyboardRemove {
+      readonly remove_keyboard: true;
+    }
   }
 
   type ReplyMarkup =
     | ReplyMarkup.ReplyKeyboardMarkup
-    | ReplyMarkup.InlineKeyboardMarkup;
+    | ReplyMarkup.InlineKeyboardMarkup
+    | ReplyMarkup.ReplyKeyboardRemove;
 
   interface SendMessage {
     readonly action: "sendMessage";
@@ -338,7 +344,7 @@ export interface TelegramUser extends TelegramBot {
 /** Represents Telegram configurations */
 export interface TelegramConfigs {
   readonly authToken: string;
-  readonly defaultParseMode?: "html" | "markdown";
+  readonly defaultParseMode?: TelegramRawResponse.ParseMode;
   readonly webhookURL: string;
 }
 

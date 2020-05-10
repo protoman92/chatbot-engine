@@ -44,7 +44,7 @@ export function extractInputCommand(
 }
 
 /** Map platform request to generic request for generic processing */
-function createTelegramRequest<Context>(
+function createGenericTelegramRequest<Context>(
   webhook: RawRequest,
   currentBot: TelegramBot
 ): readonly TelegramRequest<Context>[] {
@@ -136,7 +136,7 @@ function createTelegramRequest<Context>(
 }
 
 /** Create a Telegram response from multiple generic responses */
-function createTelegramResponse<Context>({
+function createRawTelegramResponse<Context>({
   targetID,
   output,
 }: TelegramResponse<Context>): readonly TelegramRawResponse[] {
@@ -229,10 +229,13 @@ function createTelegramResponse<Context>({
 
       case "reply_markup":
         return createReplyMarkups(quickReply.content);
+
+      case "remove_reply_keyboard":
+        return { remove_keyboard: true };
     }
   }
 
-  function createPlatformResponse(
+  function createRawResponse(
     targetID: string,
     {
       content,
@@ -257,7 +260,7 @@ function createTelegramResponse<Context>({
     }
   }
 
-  return output.map((o) => createPlatformResponse(targetID, o));
+  return output.map((o) => createRawResponse(targetID, o));
 }
 
 /** Create a Telegram message processor */
@@ -276,10 +279,10 @@ export async function createTelegramMessageProcessor<Context>(
       client,
       targetPlatform: "telegram",
       mapRequest: async (req) => {
-        return createTelegramRequest(req as RawRequest, currentBot);
+        return createGenericTelegramRequest(req as RawRequest, currentBot);
       },
       mapResponse: async (res) => {
-        return createTelegramResponse(res as TelegramResponse<Context>);
+        return createRawTelegramResponse(res as TelegramResponse<Context>);
       },
     },
     ...middlewares
