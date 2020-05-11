@@ -84,7 +84,13 @@ describe("Transform chain", () => {
           }
         },
       }))
-      .pipe(catchError(await createDefaultErrorLeaf()))
+      .pipe(
+        catchError(
+          await createDefaultErrorLeaf({
+            formatErrorMessage: ({ message }) => message,
+          })
+        )
+      )
       .transform(
         await createLeafWithObserver(async (observer) => ({
           next: async ({ targetID, targetPlatform, input }) => {

@@ -1,11 +1,11 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { Omit } from "ts-essentials";
-import { anything, capture, instance, spy, verify, when } from "ts-mockito";
+import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
 import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
-import { AmbiguousLeaf } from "../type/leaf";
+import { AmbiguousLeaf, ErrorLeafConfig } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
 import {
   createDefaultErrorLeaf,
@@ -78,18 +78,14 @@ describe("Create leaf with observer", () => {
 describe("Default error leaf", () => {
   it("Should work correctly", async () => {
     // Setup
-    const errorHandler = spy({
-      handleError: (async () => {}) as NonNullable<
-        Parameters<typeof createDefaultErrorLeaf>[0]
-      >,
+    const errorConfig: ErrorLeafConfig = spy({
+      formatErrorMessage: ({ message }) => message,
+      trackError: () => {},
     });
 
     const errorLeafName = "error_leaf";
     const error = new Error("some-error");
-
-    const errorLeaf = await createDefaultErrorLeaf(
-      instance(errorHandler).handleError
-    );
+    const errorLeaf = await createDefaultErrorLeaf(instance(errorConfig));
 
     // When
     const { output } = await bridgeEmission(errorLeaf)({
@@ -102,11 +98,19 @@ describe("Default error leaf", () => {
     });
 
     // Then
-    const [handledError] = capture(errorHandler.handleError).first();
-    expectJs(handledError).to.have.property("targetID", targetID);
-    expectJs(handledError).to.have.property("targetPlatform", targetPlatform);
-    expectJs(handledError).to.have.property("error", error);
-    expectJs(handledError).to.have.property("erroredLeaf", errorLeafName);
+    verify(errorConfig.formatErrorMessage(error)).once();
+
+    verify(
+      errorConfig.trackError!(
+        deepEqual({
+          error,
+          targetID,
+          targetPlatform,
+          erroredLeaf: errorLeafName,
+        })
+      )
+    ).once();
+
     expectJs(output).to.have.length(1);
     const [{ content: response }] = output;
 

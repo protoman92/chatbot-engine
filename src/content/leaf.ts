@@ -1,10 +1,9 @@
 import { Omit } from "ts-essentials";
 import { genericError } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
-import { AmbiguousPlatform } from "../type";
+import { ErrorLeafConfig } from "../type";
 import { FacebookLeafObserver } from "../type/facebook";
 import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
-import { BaseErrorRequestInput } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { NextContentObserver } from "../type/stream";
 import { TelegramLeafObserver } from "../type/telegram";
@@ -59,17 +58,18 @@ export async function createLeafWithObserver<Context = {}>(
  * Create an error leaf that will be used to deliver error messages if no
  * other leaf can handle the error.
  */
-export function createDefaultErrorLeaf<Context = {}>(
-  fn?: (
-    e: Pick<BaseErrorRequestInput, "error" | "erroredLeaf"> &
-      Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>
-  ) => Promise<void>
-): Promise<AmbiguousLeaf<Context>> {
+export function createDefaultErrorLeaf<Context = {}>({
+  formatErrorMessage,
+  trackError,
+}: ErrorLeafConfig): Promise<AmbiguousLeaf<Context>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ input, targetID, targetPlatform, ...request }) => {
       if (!("error" in input)) return NextResult.FALLTHROUGH;
       const { error, erroredLeaf } = input;
-      !!fn && (await fn({ error, erroredLeaf, targetID, targetPlatform }));
+
+      if (!!trackError) {
+        trackError({ error, erroredLeaf, targetID, targetPlatform });
+      }
 
       return observer.next({
         ...request,
@@ -79,7 +79,7 @@ export function createDefaultErrorLeaf<Context = {}>(
           {
             content: {
               type: "text",
-              text: `Encountered an error: '${error.message}'`,
+              text: formatErrorMessage(error),
             },
           },
         ],
