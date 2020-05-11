@@ -370,11 +370,9 @@ export type FacebookRawResponse = Omit<FacebookRawResponse.Message, "message"> &
     } & FacebookRawResponse.Message["message"];
   }>;
 
-declare namespace FacebookMessageProcessor {
-  interface Configs<Context> {
-    readonly leafSelector: LeafSelector<Context>;
-    readonly client: FacebookClient;
-  }
+export interface FacebookMessageProcessorConfig<Context> {
+  readonly leafSelector: LeafSelector<Context>;
+  readonly client: FacebookClient;
 }
 
 /** Represents a Facebook-specific messenger */
@@ -399,7 +397,7 @@ export interface FacebookUser {
 }
 
 /** Represents Facebook configurations */
-export interface FacebookConfigs {
+export interface FacebookConfig {
   readonly apiVersion: string;
   readonly pageToken: string;
   readonly verifyToken: string;

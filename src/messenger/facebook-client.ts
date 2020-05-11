@@ -1,17 +1,17 @@
 import { facebookError, requireAllTruthy } from "../common/utils";
 import { HTTPClient } from "../type/client";
-import { FacebookClient, FacebookConfigs } from "../type/facebook";
+import { FacebookClient, FacebookConfig } from "../type/facebook";
 import defaultAxiosClient from "./axios-client";
 
 /** Create a platform client for Facebook */
 export function createFacebookClient(
   client: HTTPClient,
-  configs: FacebookConfigs
+  config: FacebookConfig
 ): FacebookClient {
   function formatURL(...additionalPaths: string[]) {
     return `https://graph.facebook.com/v${
-      configs.apiVersion
-    }/${additionalPaths.join("/")}?access_token=${configs.pageToken}`;
+      config.apiVersion
+    }/${additionalPaths.join("/")}?access_token=${config.pageToken}`;
   }
 
   async function get<T>(...additionalPaths: string[]) {
@@ -41,7 +41,7 @@ export function createFacebookClient(
       "hub.challenge": challenge = -1,
       "hub.verify_token": token = "",
     }) => {
-      if (mode === "subscribe" && token === configs.verifyToken) {
+      if (mode === "subscribe" && token === config.verifyToken) {
         return challenge;
       }
 

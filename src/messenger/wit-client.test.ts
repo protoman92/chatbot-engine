@@ -1,17 +1,17 @@
 import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
-import { WitClient, WitConfigs } from "../type/wit";
+import { WitClient, WitConfig } from "../type/wit";
 import { createWitClient } from "./wit-client";
 
 describe("Wit client", () => {
   let comm: HTTPClient;
-  let witConfig: WitConfigs;
+  let witConfig: WitConfig;
   let witClient: WitClient;
 
   beforeEach(() => {
     comm = spy<HTTPClient>({ communicate: () => Promise.reject("") });
-    witConfig = spy<WitConfigs>({ authorizationToken: "" });
+    witConfig = spy<WitConfig>({ authorizationToken: "" });
     witClient = createWitClient(instance(comm), instance(witConfig));
   });
 

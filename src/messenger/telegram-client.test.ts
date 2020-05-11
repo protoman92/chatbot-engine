@@ -2,12 +2,12 @@ import expectJs from "expect.js";
 import { beforeEach, describe, it } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
-import { TelegramClient, TelegramConfigs } from "../type/telegram";
+import { TelegramClient, TelegramConfig } from "../type/telegram";
 import { createTelegramClient } from "./telegram-client";
 
 describe("Telegram client", () => {
   let client: HTTPClient;
-  let configs: TelegramConfigs;
+  let config: TelegramConfig;
   let tlClient: TelegramClient;
 
   beforeEach(() => {
@@ -15,13 +15,13 @@ describe("Telegram client", () => {
       communicate: () => Promise.reject(""),
     });
 
-    configs = spy<TelegramConfigs>({
+    config = spy<TelegramConfig>({
       authToken: "",
       defaultParseMode: "markdown",
       webhookURL: "",
     });
 
-    tlClient = createTelegramClient(instance(client), instance(configs));
+    tlClient = createTelegramClient(instance(client), instance(config));
   });
 
   it("Should return result if ok is true", async () => {

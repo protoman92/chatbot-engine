@@ -13,6 +13,7 @@ import {
 import {
   AmbiguousPlatform,
   BaseMessageProcessor,
+  BaseMessageProcessorConfig,
   MessageProcessorMiddleware,
   Messenger,
 } from "../type/messenger";
@@ -31,7 +32,7 @@ export async function createMessageProcessor<Context>(
     client,
     mapRequest,
     mapResponse,
-  }: BaseMessageProcessor.Configs<Context>,
+  }: BaseMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<
     BaseMessageProcessor<Context>
   >[]

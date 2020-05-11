@@ -2,6 +2,7 @@ import { facebookError, isType } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
+  FacebookMessageProcessorConfig,
   FacebookRawRequest as RawRequest,
   FacebookRawResponse,
   FacebookRequest,
@@ -343,7 +344,7 @@ function createFacebookResponse<Context>({
 
 /** Create a Facebook message processor */
 export async function createFacebookMessageProcessor<Context>(
-  { leafSelector, client }: FacebookMessageProcessor.Configs<Context>,
+  { leafSelector, client }: FacebookMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<
     FacebookMessageProcessor<Context>
   >[]

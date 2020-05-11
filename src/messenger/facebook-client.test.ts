@@ -2,12 +2,12 @@ import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { instance, spy, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
-import { FacebookClient, FacebookConfigs } from "../type/facebook";
+import { FacebookClient, FacebookConfig } from "../type/facebook";
 import { createFacebookClient } from "./facebook-client";
 
 describe("Facebook client", () => {
   let client: HTTPClient;
-  let configs: FacebookConfigs;
+  let config: FacebookConfig;
   let fbClient: FacebookClient;
 
   beforeEach(async () => {
@@ -15,20 +15,20 @@ describe("Facebook client", () => {
       communicate: () => Promise.reject(""),
     });
 
-    configs = spy<FacebookConfigs>({
+    config = spy<FacebookConfig>({
       apiVersion: "",
       pageToken: "",
       verifyToken: "",
     });
 
-    fbClient = createFacebookClient(instance(client), instance(configs));
+    fbClient = createFacebookClient(instance(client), instance(config));
   });
 
   it("Should resolve hub challenge if token matches", async () => {
     // Setup
     const verifyToken = "verify-token";
     const hubChallenge = 1000;
-    when(configs.verifyToken).thenReturn(verifyToken);
+    when(config.verifyToken).thenReturn(verifyToken);
 
     // When
     const challenge = await fbClient.resolveVerifyChallenge({
@@ -44,7 +44,7 @@ describe("Facebook client", () => {
   it("Should fail hub challenge if hub mode is wrong", async () => {
     // Setup
     const verifyToken = "verify-token";
-    when(configs.verifyToken).thenReturn(verifyToken);
+    when(config.verifyToken).thenReturn(verifyToken);
 
     try {
       // When && Then
@@ -60,7 +60,7 @@ describe("Facebook client", () => {
   it("Should fail hub challenge if token does not match", async () => {
     // Setup
     const hubChallenge = 1000;
-    when(configs.verifyToken).thenReturn("verify-token");
+    when(config.verifyToken).thenReturn("verify-token");
 
     try {
       // When && Then

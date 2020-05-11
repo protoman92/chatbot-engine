@@ -7,17 +7,12 @@ import { Transformer } from "./common";
 /** Represents all supported platform identifiers */
 export type AmbiguousPlatform = "facebook" | "telegram";
 
-declare namespace BaseMessageProcessor {
-  /** Configurations to set up a generic messenger */
-  interface Configs<Context> {
-    readonly targetPlatform: AmbiguousPlatform;
-    readonly leafSelector: LeafSelector<Context>;
-    readonly client: PlatformClient<unknown>;
-    readonly mapRequest: BaseMessageProcessor<Context>["generalizeRequest"];
-    mapResponse: (
-      res: AmbiguousResponse<Context>
-    ) => Promise<readonly unknown[]>;
-  }
+interface BaseMessageProcessorConfig<Context> {
+  readonly targetPlatform: AmbiguousPlatform;
+  readonly leafSelector: LeafSelector<Context>;
+  readonly client: PlatformClient<unknown>;
+  readonly mapRequest: BaseMessageProcessor<Context>["generalizeRequest"];
+  mapResponse: (res: AmbiguousResponse<Context>) => Promise<readonly unknown[]>;
 }
 
 /**

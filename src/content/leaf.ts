@@ -63,7 +63,7 @@ export function createDefaultErrorLeaf<Context = {}>(
   fn?: (
     e: Pick<BaseErrorRequestInput, "error" | "erroredLeaf"> &
       Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>
-  ) => Promise<unknown>
+  ) => Promise<void>
 ): Promise<AmbiguousLeaf<Context>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ input, targetID, targetPlatform, ...request }) => {

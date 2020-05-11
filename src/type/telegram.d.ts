@@ -309,11 +309,9 @@ export type TelegramRawResponse =
   | TelegramRawResponse.SendMessage
   | TelegramRawResponse.SendPhoto;
 
-declare namespace TelegramMessageProcessor {
-  interface Configs<Context> {
-    readonly leafSelector: LeafSelector<Context>;
-    readonly client: TelegramClient;
-  }
+interface TelegramMessageProcessorConfig<Context> {
+  readonly leafSelector: LeafSelector<Context>;
+  readonly client: TelegramClient;
 }
 
 /** Represents a Telegram-specific message processor */
@@ -342,7 +340,7 @@ export interface TelegramUser extends TelegramBot {
 }
 
 /** Represents Telegram configurations */
-export interface TelegramConfigs {
+export interface TelegramConfig {
   readonly authToken: string;
   readonly defaultParseMode?: TelegramRawResponse.ParseMode;
   readonly webhookURL: string;

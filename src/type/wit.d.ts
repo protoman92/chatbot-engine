@@ -1,7 +1,7 @@
 import { DeepReadonly } from "ts-essentials";
 import { KV } from "./common";
 
-export interface WitConfigs {
+export interface WitConfig {
   readonly authorizationToken: string;
 }
 

@@ -4,13 +4,14 @@ import { MessageProcessorMiddleware } from "../type";
 import {
   TelegramBot,
   TelegramMessageProcessor,
+  TelegramMessageProcessorConfig,
   TelegramRawRequest as RawRequest,
   TelegramRawResponse,
   TelegramRequest,
+  TelegramRequestInput,
   TelegramResponse,
   TelegramResponseOutput,
   TelegramUser,
-  TelegramRequestInput,
 } from "../type/telegram";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -265,7 +266,7 @@ function createRawTelegramResponse<Context>({
 
 /** Create a Telegram message processor */
 export async function createTelegramMessageProcessor<Context>(
-  { leafSelector, client }: TelegramMessageProcessor.Configs<Context>,
+  { leafSelector, client }: TelegramMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<
     TelegramMessageProcessor<Context>
   >[]

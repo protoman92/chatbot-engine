@@ -4,14 +4,14 @@ import { HTTPClient } from "../type/client";
 import {
   TelegramBot,
   TelegramClient,
-  TelegramConfigs,
+  TelegramConfig,
   TelegramRawRequest,
 } from "../type/telegram";
 import defaultAxiosClient from "./axios-client";
 
 export function createTelegramClient(
   client: HTTPClient,
-  { authToken, defaultParseMode, webhookURL }: TelegramConfigs
+  { authToken, defaultParseMode, webhookURL }: TelegramConfig
 ): TelegramClient {
   function formatURL(action: string, query?: {}) {
     let qs = stringify(query);
@@ -98,7 +98,7 @@ export function createTelegramClient(
   return telegramClient;
 }
 
-export default function(args?: Pick<TelegramConfigs, "defaultParseMode">) {
+export default function(args?: Pick<TelegramConfig, "defaultParseMode">) {
   const { TELEGRAM_AUTH_TOKEN = "", TELEGRAM_WEBHOOK_URL = "" } = process.env;
 
   const {
