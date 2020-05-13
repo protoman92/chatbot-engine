@@ -45,7 +45,7 @@ export function extractInputCommand(
 }
 
 /** Map platform request to generic request for generic processing */
-function createGenericTelegramRequest<Context>(
+export function createGenericTelegramRequest<Context>(
   webhook: RawRequest,
   currentBot: TelegramBot
 ): readonly TelegramRequest<Context>[] {
@@ -60,7 +60,11 @@ function createGenericTelegramRequest<Context>(
       const { text } = message;
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
-      return [user, chat, [{ inputCommand, inputText, type: "command" }]];
+      if (!!inputCommand) {
+        return [user, chat, [{ inputCommand, inputText, type: "command" }]];
+      } else {
+        return [user, chat, [{ inputText, type: "text" }]];
+      }
     }
 
     if (isType<RawRequest.Message.Document>(message, "document")) {
@@ -126,15 +130,15 @@ function createGenericTelegramRequest<Context>(
     return [];
   }
 
-  const [telegramUser, chat, data] = processed;
+  const [telegramUser, chat, input] = processed;
 
   return [
     {
       currentBot,
+      input,
       targetPlatform: "telegram",
       telegramUser,
       currentContext: {} as Context,
-      input: data,
       targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
       type: "message_trigger",
     },

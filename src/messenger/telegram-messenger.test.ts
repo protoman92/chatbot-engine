@@ -1,6 +1,72 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
-import { extractInputCommand } from "./telegram-messenger";
+import { TelegramBot, TelegramRawRequest, TelegramUser } from "../type";
+import {
+  createGenericTelegramRequest,
+  extractInputCommand,
+} from "./telegram-messenger";
+
+describe("Create generic Telegram requests", async () => {
+  const currentBot: TelegramBot = { first_name: "", id: 0, username: "" };
+  const chat: TelegramRawRequest.Chat = { id: 0, type: "private" };
+
+  const from: TelegramUser = {
+    first_name: "",
+    language_code: "en",
+    last_name: "",
+    id: 0,
+    is_bot: false,
+    username: "",
+  };
+
+  it("Should return command input type if command is valid", async () => {
+    // Setup && When
+    const request = createGenericTelegramRequest(
+      {
+        message: { chat, from, message_id: 0, text: "/test me" },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [{ inputCommand: "test", inputText: "me", type: "command" }],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return text input type if no command specified", async () => {
+    // Setup && When
+    const request = createGenericTelegramRequest(
+      {
+        message: { chat, from, message_id: 0, text: "test" },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [{ inputText: "test", type: "text" }],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+});
 
 describe("Utilities", () => {
   it("Should extract input command and text correctly", async () => {
