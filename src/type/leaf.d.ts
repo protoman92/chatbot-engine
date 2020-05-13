@@ -66,12 +66,14 @@ export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
 export type LeafSelector<T> = ContentObserver<AmbiguousRequestPerInput<T>> &
   ContentObservable<AmbiguousResponse<T>>;
 
+interface ErrorLeafTrackErrorArgs
+  extends Pick<BaseErrorRequestInput, "error" | "erroredLeaf"> {
+  readonly targetID: string;
+  readonly targetPlatform: AmbiguousPlatform;
+}
+
 export interface ErrorLeafConfig {
   /** Customize error message to show to user */
   formatErrorMessage(error: Error): string;
-
-  trackError?(
-    errorData: Pick<BaseErrorRequestInput, "error" | "erroredLeaf"> &
-      Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>
-  ): void;
+  trackError?(errorData: ErrorLeafTrackErrorArgs): void;
 }

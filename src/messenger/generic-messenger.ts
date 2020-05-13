@@ -17,7 +17,6 @@ import {
   MessageProcessorMiddleware,
   Messenger,
 } from "../type/messenger";
-import { AmbiguousRequestPerInput } from "../type/request";
 import {
   TelegramMessageProcessor,
   TelegramRawRequest,
@@ -53,10 +52,7 @@ export async function createMessageProcessor<Context>(
       generalizeRequest: (platformReq) => mapRequest(platformReq),
       receiveRequest: (request) => {
         return mapSeries(request.input, (input) => {
-          return leafSelector.next({
-            ...request,
-            input,
-          } as AmbiguousRequestPerInput<Context>);
+          return leafSelector.next({ ...request, input });
         });
       },
       sendResponse: async (response) => {
