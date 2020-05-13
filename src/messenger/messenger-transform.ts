@@ -38,11 +38,13 @@ export function saveContextOnSend<Context>(
           const finalProcessor = getFinalMessageProcessor();
 
           await finalProcessor.receiveRequest({
-            ...originalRequest,
             newContext,
             oldContext,
             changedContext: additionalContext,
-            input: [{}],
+            currentContext: originalRequest.currentContext,
+            input: [{ type: "placebo" }],
+            targetID: originalRequest.targetID,
+            targetPlatform: originalRequest.targetPlatform,
             type: "context_trigger",
           });
         }

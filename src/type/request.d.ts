@@ -6,16 +6,44 @@ export type BaseRequest<Context> = Readonly<{
   targetID: string;
 }>;
 
-export interface BaseContextChangeRequest<Context> {
+interface PlaceholderRequestInput {
+  readonly type: "placebo";
+}
+
+interface BaseCommonContextChangeRequest<Context> extends BaseRequest<Context> {
   readonly newContext: Context;
   readonly oldContext: Context;
   readonly changedContext: Partial<Context>;
   readonly type: "context_trigger";
 }
 
-export interface BaseErrorRequestInput {
+interface BaseContextChangeRequest<Context>
+  extends BaseCommonContextChangeRequest<Context> {
+  readonly input: readonly PlaceholderRequestInput[];
+}
+
+interface BaseContextChangeRequestPerInput<Context>
+  extends BaseCommonContextChangeRequest<Context> {
+  readonly input: PlaceholderRequestInput;
+}
+
+interface ErrorRequestInput {
   readonly error: Error;
   readonly erroredLeaf?: string;
+  readonly type: "error";
+}
+
+interface BaseCommonErrorRequest<Context> extends BaseRequest<Context> {
+  readonly type: "manual_trigger";
+}
+
+interface BaseErrorRequest<Context> extends BaseCommonErrorRequest<Context> {
+  readonly input: readonly ErrorRequestInput[];
+}
+
+interface BaseErrorRequestPerInput<Context>
+  extends BaseCommonErrorRequest<Context> {
+  readonly input: ErrorRequestInput;
 }
 
 export type AmbiguousRequest<Context> =

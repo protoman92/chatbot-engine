@@ -39,7 +39,7 @@ export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
 
 /** Map a series of values to a series of promises, and maintain their order */
 export async function mapSeries<T1, T2>(
-  data: readonly T1[],
+  data: T1[] | readonly T1[],
   fn: (datum: T1, index: number) => Promise<T2>
 ): Promise<readonly T2[]> {
   const mappedData: T2[] = [];

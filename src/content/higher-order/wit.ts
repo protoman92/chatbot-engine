@@ -12,23 +12,23 @@ export function retryWithWit<Context>(
 ): LeafTransformer<Context & WitContext, Context> {
   return async (leaf) => ({
     ...leaf,
-    next: async ({ input, ...request }) => {
+    next: async (request) => {
       if (request.type === "context_trigger") return NextResult.FALLTHROUGH;
-      if (!("inputText" in input)) return NextResult.FALLTHROUGH;
+      if (request.input.type !== "text") return NextResult.FALLTHROUGH;
       const { currentContext } = request;
 
       const result = await leaf.next({
         ...request,
-        input,
         currentContext: { ...currentContext, witEntities: {} },
       });
 
       if (isNullOrUndefined(result)) {
-        const { entities: witEntities } = await comm.validate(input.inputText);
+        const { entities: witEntities } = await comm.validate(
+          request.input.inputText
+        );
 
         return leaf.next({
           ...request,
-          input,
           currentContext: { ...currentContext, witEntities },
         });
       }

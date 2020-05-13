@@ -35,7 +35,7 @@ describe("Wit higher order function", () => {
       changedContext: {},
       currentContext: {},
       currentLeafName: "",
-      input: [{}],
+      input: { type: "placebo" },
       newContext: {},
       oldContext: {},
       type: "context_trigger",
@@ -56,7 +56,7 @@ describe("Wit higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: { inputText: "some-text" },
+      input: { inputText: "some-text", type: "text" },
       type: "message_trigger",
     });
 
@@ -94,7 +94,7 @@ describe("Wit higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: { inputText },
+      input: { inputText, type: "text" },
       type: "message_trigger",
     });
 
@@ -108,7 +108,7 @@ describe("Wit higher order function", () => {
           targetPlatform,
           currentContext: { witEntities },
           currentLeafName: "",
-          input: { inputText },
+          input: { inputText, type: "text" },
           type: "message_trigger",
         })
       )

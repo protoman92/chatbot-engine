@@ -59,7 +59,7 @@ describe("Leaf selector", () => {
       targetID,
       targetPlatform,
       currentContext: {},
-      input: [],
+      input: { inputText: "", type: "text" },
       type: "message_trigger",
     });
 
@@ -145,7 +145,7 @@ describe("Leaf selector", () => {
         targetID,
         targetPlatform,
         currentContext: {},
-        input: [],
+        input: { inputText: "", type: "text" },
         type: "message_trigger",
       });
 

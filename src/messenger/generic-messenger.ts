@@ -51,7 +51,7 @@ export async function createMessageProcessor<Context>(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
       receiveRequest: (request) => {
-        return mapSeries(request.input, (input) => {
+        return mapSeries(request.input as any[], (input) => {
           return leafSelector.next({ ...request, input });
         });
       },

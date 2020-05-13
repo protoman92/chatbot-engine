@@ -1,59 +1,51 @@
-import { DeepReadonly, Omit } from "ts-essentials";
+import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import {
   BaseContextChangeRequest,
-  BaseErrorRequestInput,
+  BaseContextChangeRequestPerInput,
+  BaseErrorRequest,
+  BaseErrorRequestPerInput,
   BaseRequest,
 } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
-export type FacebookRequestInput = DeepReadonly<
-  | {}
-  | BaseErrorRequestInput
-  | { inputCoordinate: Coordinates }
-  | { inputText: string }
-  | { inputImageURL: string }
-  | {
+export type FacebookRequestInput =
+  | Readonly<{ inputCoordinate: Coordinates; type: "location" }>
+  | Readonly<{ inputText: string; type: "text" }>
+  | Readonly<{ inputImageURL: string; type: "image" }>
+  | Readonly<{
       inputText: string;
       inputImageURL: string;
       stickerID: string;
-    }
->;
+      type: "sticker";
+    }>;
 
-type CommonFacebookRequest<Context> = DeepReadonly<{
-  targetPlatform: "facebook";
-}> &
+type CommonFacebookRequest<Context> = Readonly<{ targetPlatform: "facebook" }> &
   BaseRequest<Context>;
 
 export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
   (
     | Readonly<{
         input: readonly FacebookRequestInput[];
-        type: "message_trigger";
+        type: "message_trigger" | "manual_trigger";
       }>
-    | Readonly<{
-        input: readonly FacebookRequestInput[];
-        type: "manual_trigger";
-      }>
-    | (BaseContextChangeRequest<Context> & Readonly<{ input: readonly [{}] }>)
+    | BaseContextChangeRequest<Context>
+    | BaseErrorRequest<Context>
   );
 
 export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
   (
     | Readonly<{
         input: FacebookRequestInput;
-        type: "message_trigger";
+        type: "message_trigger" | "manual_trigger";
       }>
-    | Readonly<{
-        input: FacebookRequestInput;
-        type: "manual_trigger";
-      }>
-    | (BaseContextChangeRequest<Context> & Readonly<{ input: {} }>)
+    | BaseContextChangeRequestPerInput<Context>
+    | BaseErrorRequestPerInput<Context>
   );
 
 export interface FacebookResponse<Context>
@@ -192,8 +184,8 @@ declare namespace FacebookRawRequest {
               readonly type: "location";
               readonly title: string;
               readonly url: string;
-              readonly payload: DeepReadonly<{
-                coordinates: { lat: number; long: number };
+              readonly payload: Readonly<{
+                coordinates: Readonly<{ lat: number; long: number }>;
               }>;
             }
           }
@@ -282,14 +274,14 @@ declare namespace FacebookRawResponse {
 
     interface Button {
       readonly messaging_type: "RESPONSE";
-      readonly message: DeepReadonly<{
+      readonly message: Readonly<{
         attachment: {
           type: "template";
-          payload: {
+          payload: Readonly<{
             buttons: readonly Button.Button[];
             template_type: "button";
             text: string;
-          };
+          }>;
         };
       }>;
     }
@@ -305,13 +297,13 @@ declare namespace FacebookRawResponse {
 
     interface Carousel {
       readonly messaging_type: "RESPONSE";
-      readonly message: DeepReadonly<{
+      readonly message: Readonly<{
         attachment: {
           type: "template";
-          payload: {
+          payload: Readonly<{
             elements: readonly Carousel.Element[];
             template_type: "generic";
-          };
+          }>;
         };
       }>;
     }
@@ -326,25 +318,25 @@ declare namespace FacebookRawResponse {
 
     interface List {
       readonly messaging_type: "RESPONSE";
-      readonly message: DeepReadonly<{
+      readonly message: Readonly<{
         attachment: {
-          payload: {
+          payload: Readonly<{
             buttons: readonly Button.Button[] | undefined;
             elements: readonly List.Element[];
             template_type: "list";
             top_element_style: "compact";
-          };
+          }>;
           type: "template";
         };
       }>;
     }
 
     interface Media {
-      readonly message: DeepReadonly<{
-        attachment: {
+      readonly message: Readonly<{
+        attachment: Readonly<{
           type: "image" | "video";
-          payload: { is_reusable: boolean; url: string };
-        };
+          payload: Readonly<{ is_reusable: boolean; url: string }>;
+        }>;
       }>;
     }
 
@@ -363,8 +355,8 @@ declare namespace FacebookRawResponse {
 }
 
 export type FacebookRawResponse = Omit<FacebookRawResponse.Message, "message"> &
-  DeepReadonly<{
-    recipient: { id: string };
+  Readonly<{
+    recipient: Readonly<{ id: string }>;
     message: {
       quick_replies: readonly FacebookRawResponse.QuickReply[] | undefined;
     } & FacebookRawResponse.Message["message"];

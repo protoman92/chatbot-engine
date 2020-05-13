@@ -60,29 +60,34 @@ function createGenericTelegramRequest<Context>(
       const { text } = message;
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
-      return [user, chat, [{ inputCommand, inputText }]];
+      return [user, chat, [{ inputCommand, inputText, type: "command" }]];
     }
 
     if (isType<RawRequest.Message.Document>(message, "document")) {
       const { document } = message;
-      return [user, chat, [{ inputDocument: document }]];
+      return [user, chat, [{ inputDocument: document, type: "document" }]];
     }
 
     if (isType<RawRequest.Message.NewChatMember>(message, "new_chat_members")) {
       const { new_chat_members: newChatMembers } = message;
-      return [user, chat, [{ newChatMembers }]];
+      return [user, chat, [{ newChatMembers, type: "joined_chat" }]];
     }
 
     if (
       isType<RawRequest.Message.LeftChatMember>(message, "left_chat_member")
     ) {
       const { left_chat_member } = message;
-      return [user, chat, [{ leftChatMembers: [left_chat_member] }]];
+
+      return [
+        user,
+        chat,
+        [{ leftChatMembers: [left_chat_member], type: "left_chat" }],
+      ];
     }
 
     if (isType<RawRequest.Message.Photo>(message, "photo")) {
       const { photo: inputPhotos } = message;
-      return [user, chat, [{ inputPhotos }]];
+      return [user, chat, [{ inputPhotos, type: "image" }]];
     }
 
     return undefined;
@@ -93,7 +98,7 @@ function createGenericTelegramRequest<Context>(
   }: RawRequest.Callback):
     | [TelegramUser, RawRequest.Chat | undefined, TelegramRequestInput[]]
     | undefined {
-    return [user, undefined, [{ inputText: data }]];
+    return [user, undefined, [{ inputText: data, type: "text" }]];
   }
 
   function processRequest(

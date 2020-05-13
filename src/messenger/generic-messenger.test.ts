@@ -70,7 +70,7 @@ describe("Generic message processor", () => {
       originalRequest: {
         targetID,
         currentContext: {},
-        input: {},
+        input: { inputText: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -113,7 +113,7 @@ describe("Generic message processor", () => {
       originalRequest: {
         targetID,
         currentContext: {},
-        input: {},
+        input: { inputText: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -133,20 +133,8 @@ describe("Generic message processor", () => {
     const currentContext = { a: 1, b: 2 };
 
     const input: readonly FacebookRequestInput[] = [
-      {
-        targetPlatform,
-        inputText: "text-1",
-        inputImageURL: "image-1",
-        inputCoordinate: { lat: 0, lng: 0 },
-        stickerID: "",
-      },
-      {
-        targetPlatform,
-        inputText: "text-2",
-        inputImageURL: "image-2",
-        inputCoordinate: { lat: 1, lng: 1 },
-        stickerID: "",
-      },
+      { inputText: "text-1", type: "text" },
+      { inputText: "text-2", type: "text" },
     ];
 
     // When

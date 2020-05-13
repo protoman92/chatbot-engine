@@ -36,7 +36,7 @@ describe("Create leaf with observer", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: {},
+      input: { inputText: "", type: "text" as const },
       type: "message_trigger" as const,
     };
 
@@ -65,7 +65,7 @@ describe("Create leaf with observer", () => {
         targetID,
         targetPlatform,
         currentContext: {},
-        input: {},
+        input: { inputText: "", type: "text" },
         type: "message_trigger",
       });
     } catch (e) {
@@ -93,8 +93,8 @@ describe("Default error leaf", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: errorLeafName,
-      input: { error, erroredLeaf: errorLeafName },
-      type: "message_trigger",
+      input: { error, erroredLeaf: errorLeafName, type: "error" },
+      type: "manual_trigger",
     });
 
     // Then
@@ -158,7 +158,7 @@ describe("Leaf for platforms", () => {
       targetID,
       currentContext: {},
       currentLeafName: "",
-      input: {},
+      input: { inputText: "", type: "text" },
       targetPlatform: "facebook",
       type: "message_trigger",
     });
@@ -172,7 +172,7 @@ describe("Leaf for platforms", () => {
       },
       currentContext: {},
       currentLeafName: "",
-      input: {},
+      input: { inputText: "", type: "text" },
       targetPlatform: "telegram",
       telegramUser: {
         id: 1,
@@ -205,7 +205,7 @@ describe("Leaf for platforms", () => {
         targetID,
         currentContext: {},
         currentLeafName: "",
-        input: {},
+        input: { inputText: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       });
@@ -224,7 +224,7 @@ describe("Leaf for platforms", () => {
         },
         currentContext: {},
         currentLeafName: "",
-        input: {},
+        input: { inputText: "", type: "text" },
         targetPlatform: "telegram",
         telegramUser: {
           id: 1,

@@ -1,28 +1,39 @@
-import { DeepReadonly } from "ts-essentials";
+import {} from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import {
   BaseContextChangeRequest,
-  BaseErrorRequestInput,
+  BaseContextChangeRequestPerInput,
+  BaseErrorRequest,
+  BaseErrorRequestPerInput,
   BaseRequest,
 } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
-export type TelegramRequestInput = DeepReadonly<
-  | {}
-  | BaseErrorRequestInput
-  | { inputCommand: string; inputText: string }
-  | { inputText: string }
-  | { inputCoordinate: Coordinates }
-  | { inputDocument: TelegramRawRequest.DocumentDetails }
-  | { inputPhotos: TelegramRawRequest.PhotoDetails[] }
-  | { leftChatMembers: (TelegramBot | TelegramUser)[] }
-  | { newChatMembers: (TelegramBot | TelegramUser)[] }
->;
+export type TelegramRequestInput =
+  | Readonly<{ inputCommand: string; inputText?: string; type: "command" }>
+  | Readonly<{ inputText: string; type: "text" }>
+  | Readonly<{ inputCoordinate: Coordinates; type: "location" }>
+  | Readonly<{
+      inputDocument: TelegramRawRequest.DocumentDetails;
+      type: "document";
+    }>
+  | Readonly<{
+      inputPhotos: readonly TelegramRawRequest.PhotoDetails[];
+      type: "image";
+    }>
+  | Readonly<{
+      leftChatMembers: readonly (TelegramBot | TelegramUser)[];
+      type: "left_chat";
+    }>
+  | Readonly<{
+      newChatMembers: readonly (TelegramBot | TelegramUser)[];
+      type: "joined_chat";
+    }>;
 
 type CommonTelegramRequest<Context> = Readonly<{
   targetPlatform: "telegram";
@@ -41,7 +52,8 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
         input: readonly TelegramRequestInput[];
         type: "manual_trigger";
       }>
-    | (BaseContextChangeRequest<Context> & Readonly<{ input: readonly [{}] }>)
+    | BaseContextChangeRequest<Context>
+    | BaseErrorRequest<Context>
   );
 
 export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
@@ -56,7 +68,8 @@ export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
         input: TelegramRequestInput;
         type: "manual_trigger";
       }>
-    | (BaseContextChangeRequest<Context> & Readonly<{ input: {} }>)
+    | BaseContextChangeRequestPerInput<Context>
+    | BaseErrorRequestPerInput<Context>
   );
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
@@ -222,7 +235,7 @@ declare namespace TelegramRawRequest {
 
   /** Payload that includes callback field, usually for quick replies */
   interface Callback {
-    readonly callback_query: DeepReadonly<{
+    readonly callback_query: Readonly<{
       id: string;
       from: TelegramUser;
       chat_instance: string;

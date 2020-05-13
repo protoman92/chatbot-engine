@@ -39,8 +39,12 @@ describe("Transform chain", () => {
       targetPlatform,
       currentContext: { a: 1, b: 2 },
       currentLeafName: erroredLeafName,
-      input: { error: new Error("This error should be ignored") },
-      type: "message_trigger",
+      input: {
+        error: new Error("This error should be ignored"),
+        erroredLeaf: "",
+        type: "error",
+      },
+      type: "manual_trigger",
     });
 
     await transformed.subscribe({ next: async () => NextResult.BREAK });
@@ -54,8 +58,8 @@ describe("Transform chain", () => {
           targetPlatform,
           currentContext: { a: 1, b: 2 },
           currentLeafName: erroredLeafName,
-          input: { error, erroredLeaf: erroredLeafName },
-          type: "message_trigger",
+          input: { error, erroredLeaf: erroredLeafName, type: "error" },
+          type: "manual_trigger",
         })
       )
     ).once();
@@ -121,7 +125,7 @@ describe("Transform chain", () => {
       targetPlatform,
       currentContext: { error: new Error("") },
       currentLeafName: "",
-      input: {},
+      input: { inputText: "", type: "text" },
       type: "message_trigger",
     });
 

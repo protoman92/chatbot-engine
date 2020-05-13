@@ -64,7 +64,7 @@ export function createDefaultErrorLeaf<Context = {}>({
 }: ErrorLeafConfig): Promise<AmbiguousLeaf<Context>> {
   return createLeafWithObserver(async (observer) => ({
     next: async ({ input, targetID, targetPlatform, ...request }) => {
-      if (!("error" in input)) return NextResult.FALLTHROUGH;
+      if (input.type !== "error") return NextResult.FALLTHROUGH;
       const { error, erroredLeaf } = input;
 
       if (!!trackError) {
