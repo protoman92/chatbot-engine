@@ -1,5 +1,5 @@
-import { createCompositeSubscription } from "../../stream";
-import { AmbiguousLeaf, LeafTransformer } from "../../type/leaf";
+import { createCompositeSubscription } from "../stream";
+import { AmbiguousLeaf, LeafTransformer } from "../type/leaf";
 
 /** If a leaf throws error while producing content, switch to fallback leaf */
 export function catchError<Context>(

@@ -10,21 +10,13 @@ interface PlaceholderRequestInput {
   readonly type: "placebo";
 }
 
-interface BaseCommonContextChangeRequest<Context> extends BaseRequest<Context> {
+interface BaseContextChangeRequestPerInput<Context>
+  extends BaseRequest<Context> {
+  readonly input: PlaceholderRequestInput;
   readonly newContext: Context;
   readonly oldContext: Context;
   readonly changedContext: Partial<Context>;
   readonly type: "context_trigger";
-}
-
-interface BaseContextChangeRequest<Context>
-  extends BaseCommonContextChangeRequest<Context> {
-  readonly input: readonly PlaceholderRequestInput[];
-}
-
-interface BaseContextChangeRequestPerInput<Context>
-  extends BaseCommonContextChangeRequest<Context> {
-  readonly input: PlaceholderRequestInput;
 }
 
 interface ErrorRequestInput {
@@ -33,17 +25,9 @@ interface ErrorRequestInput {
   readonly type: "error";
 }
 
-interface BaseCommonErrorRequest<Context> extends BaseRequest<Context> {
-  readonly type: "manual_trigger";
-}
-
-interface BaseErrorRequest<Context> extends BaseCommonErrorRequest<Context> {
-  readonly input: readonly ErrorRequestInput[];
-}
-
-interface BaseErrorRequestPerInput<Context>
-  extends BaseCommonErrorRequest<Context> {
+interface BaseErrorRequestPerInput<Context> extends BaseRequest<Context> {
   readonly input: ErrorRequestInput;
+  readonly type: "manual_trigger";
 }
 
 export type AmbiguousRequest<Context> =

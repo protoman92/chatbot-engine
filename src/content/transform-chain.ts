@@ -1,5 +1,5 @@
-import { compose } from "../../common/utils";
-import { LeafTransformChain, LeafTransformer } from "../../type/leaf";
+import { compose } from "../common/utils";
+import { LeafTransformChain, LeafTransformer } from "../type/leaf";
 
 /** Create a leaf transform chain to transform a leaf declaratively */
 export function createTransformChain<

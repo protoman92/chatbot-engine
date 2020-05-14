@@ -13,6 +13,7 @@ import {
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
+import { BaseWitRequestPerInput } from "./wit";
 
 export type FacebookRequestInput =
   | Readonly<{ inputCoordinate: Coordinates; type: "location" }>
@@ -35,7 +36,6 @@ export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
         type: "message_trigger" | "manual_trigger";
       }>
     | BaseContextChangeRequest<Context>
-    | BaseErrorRequest<Context>
   );
 
 export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
@@ -46,6 +46,7 @@ export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
       }>
     | BaseContextChangeRequestPerInput<Context>
     | BaseErrorRequestPerInput<Context>
+    | BaseWitRequestPerInput<Context>
   );
 
 export interface FacebookResponse<Context>

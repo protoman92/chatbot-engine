@@ -1,10 +1,10 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { capture, instance, spy } from "ts-mockito";
-import { createSubscription, NextResult } from "../../stream";
-import { AmbiguousLeaf } from "../../type";
-import { createLeafWithObserver } from "../leaf";
+import { createSubscription, NextResult } from "../stream";
+import { AmbiguousLeaf } from "../type";
 import { catchError } from "./catch-error";
+import { createLeafWithObserver } from "./leaf";
 
 describe("catchError higher-order function", () => {
   const targetID = "target-id";

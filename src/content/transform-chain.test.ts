@@ -1,11 +1,10 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
-import { createSubscription, NextResult } from "../../stream";
-import {} from "../../type/common";
-import { AmbiguousLeaf } from "../../type/leaf";
-import { createDefaultErrorLeaf, createLeafWithObserver } from "../leaf";
+import { createSubscription, NextResult } from "../stream";
+import { AmbiguousLeaf } from "../type/leaf";
 import { catchError } from "./catch-error";
+import { createDefaultErrorLeaf, createLeafWithObserver } from "./leaf";
 import { createTransformChain } from "./transform-chain";
 
 const targetID = "target-id";

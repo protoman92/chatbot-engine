@@ -6,13 +6,13 @@ import { BaseMessageProcessor } from "./messenger";
 import {
   BaseContextChangeRequest,
   BaseContextChangeRequestPerInput,
-  BaseErrorRequest,
   BaseErrorRequestPerInput,
   BaseRequest,
 } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
+import { BaseWitRequestPerInput } from "./wit";
 
 export type TelegramRequestInput =
   | Readonly<{ inputCommand: string; inputText?: string; type: "command" }>
@@ -53,7 +53,6 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
         type: "manual_trigger";
       }>
     | BaseContextChangeRequest<Context>
-    | BaseErrorRequest<Context>
   );
 
 export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
@@ -70,6 +69,7 @@ export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
       }>
     | BaseContextChangeRequestPerInput<Context>
     | BaseErrorRequestPerInput<Context>
+    | BaseWitRequestPerInput<Context>
   );
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
