@@ -1,8 +1,7 @@
-import { mapSeries } from "../common/utils";
+import { isType, mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import { Branch } from "../type/branch";
-import { KV } from "../type/common";
-import { LeafEnumeration, LeafSelector } from "../type/leaf";
+import { AmbiguousLeaf, LeafEnumeration, LeafSelector } from "../type/leaf";
 import { AmbiguousResponse } from "../type/response";
 import { ContentObservable, ContentObserver } from "../type/stream";
 
@@ -12,43 +11,33 @@ import { ContentObservable, ContentObserver } from "../type/stream";
  * it contains valid content to deliver to the user.
  */
 export function enumerateLeaves<Context>(
-  branches: KV<Branch<Context>>
+  branch: Branch<Context>
 ): readonly LeafEnumeration<Context>[] {
   function enumerate(
-    allBranches: KV<Branch<Context>>,
+    branch: Branch<Context>,
     prefixPaths?: readonly string[]
   ): readonly LeafEnumeration<Context>[] {
     let inputs: LeafEnumeration<Context>[] = [];
-    const branchEntries = Object.entries(allBranches);
 
-    for (const [branchID, parentBranch] of branchEntries) {
-      if (!parentBranch) continue;
-      const prefixLeafPaths = [...(prefixPaths || []), branchID];
-      const { subBranches, ...leaves } = parentBranch;
-      const leafEntries = Object.entries(leaves);
+    for (const [leafOrBranchID, leafOrBranch] of Object.entries(branch)) {
+      const prefixLeafPaths = [...(prefixPaths || []), leafOrBranchID];
 
-      if (!!leafEntries.length) {
-        for (const [currentLeafName, currentLeaf] of leafEntries) {
-          if (!currentLeaf) continue;
-
-          inputs.push({
-            parentBranch,
-            currentLeaf,
-            currentLeafName,
-            prefixLeafPaths,
-          });
-        }
-      }
-
-      if (subBranches !== undefined && subBranches !== null) {
-        inputs = inputs.concat(enumerate(subBranches, prefixLeafPaths));
+      if (isType<AmbiguousLeaf<Context>>(leafOrBranch, "next", "subscribe")) {
+        inputs.push({
+          parentBranch: branch,
+          currentLeaf: leafOrBranch,
+          currentLeafName: leafOrBranchID,
+          prefixLeafPaths,
+        });
+      } else {
+        inputs = inputs.concat(enumerate(leafOrBranch, prefixLeafPaths));
       }
     }
 
     return inputs;
   }
 
-  return enumerate(branches);
+  return enumerate(branch);
 }
 
 /**
@@ -56,8 +45,8 @@ export function enumerateLeaves<Context>(
  * appropriate leaf out of all available leaves, based on the user's input.
  * Said leaf's content will be delivered to the user.
  */
-export function createLeafSelector<Context>(allBranches: KV<Branch<Context>>) {
-  const _enumeratedLeaves = enumerateLeaves(allBranches);
+export function createLeafSelector<Context>(branch: Branch<Context>) {
+  const _enumeratedLeaves = enumerateLeaves(branch);
   let outputObservable: ContentObservable<AmbiguousResponse<Context>>;
   let _subscribeCount = 0;
 

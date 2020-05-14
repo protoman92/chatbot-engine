@@ -4,17 +4,58 @@ import { anything, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
 import { createLeafWithObserver } from "./leaf";
-import { createLeafSelector } from "./leaf-selector";
+import { createLeafSelector, enumerateLeaves } from "./leaf-selector";
 
 type TestLeafSelector = ReturnType<
   typeof import("./leaf-selector")["createLeafSelector"]
 >;
 
-const targetID = "target-id";
-const targetPlatform = "facebook";
+describe("Leaf enumeration", () => {
+  it("Should enumerate leaves correctly", async () => {
+    // Setup && When
+    const enumerated = enumerateLeaves({
+      branch1: {
+        branch12: {
+          leaf12: await createLeafWithObserver(async () => ({
+            next: async () => NextResult.BREAK,
+          })),
+          branch123: {},
+        },
+      },
+      branch2: {
+        branch21: {
+          branch213: {},
+          branch223: {
+            leaf223: await createLeafWithObserver(async () => ({
+              next: async () => NextResult.BREAK,
+            })),
+          },
+        },
+      },
+    });
+
+    expectJs(
+      enumerated.map(({ currentLeafName, prefixLeafPaths }) => ({
+        currentLeafName,
+        prefixLeafPaths,
+      }))
+    ).to.eql([
+      {
+        currentLeafName: "leaf12",
+        prefixLeafPaths: ["branch1", "branch12", "leaf12"],
+      },
+      {
+        currentLeafName: "leaf223",
+        prefixLeafPaths: ["branch2", "branch21", "branch223", "leaf223"],
+      },
+    ]);
+  });
+});
 
 describe("Leaf selector", () => {
   interface Context {}
+  const targetID = "target-id";
+  const targetPlatform = "facebook";
   let currentLeaf: AmbiguousLeaf<Context>;
   let selector: TestLeafSelector;
 
