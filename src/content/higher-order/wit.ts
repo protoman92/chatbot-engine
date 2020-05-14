@@ -1,4 +1,3 @@
-import { isNullOrUndefined } from "util";
 import { NextResult } from "../../stream";
 import { LeafTransformer } from "../../type/leaf";
 import { WitClient, WitContext } from "../../type/wit";
@@ -17,17 +16,17 @@ export function retryWithWit<Context>(
       if (request.input.type !== "text") return NextResult.FALLTHROUGH;
       const { currentContext } = request;
 
-      const result = await leaf.next({
+      let result = await leaf.next({
         ...request,
         currentContext: { ...currentContext, witEntities: {} },
       });
 
-      if (isNullOrUndefined(result)) {
+      if (result !== NextResult.BREAK) {
         const { entities: witEntities } = await comm.validate(
           request.input.inputText
         );
 
-        return leaf.next({
+        result = await leaf.next({
           ...request,
           currentContext: { ...currentContext, witEntities },
         });

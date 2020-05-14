@@ -74,10 +74,10 @@ describe("Wit higher order function", () => {
 
     when(rootLeaf.next(anything())).thenCall(async ({ witEntities = {} }) => {
       if (Object.entries(witEntities).length === 0) {
-        return undefined;
+        return NextResult.FALLTHROUGH;
       }
 
-      return {};
+      return NextResult.BREAK;
     });
 
     when(comm.validate(anything())).thenResolve({
