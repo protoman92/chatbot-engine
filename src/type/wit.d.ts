@@ -4,13 +4,13 @@ export interface WitConfig {
   readonly authorizationToken: string;
 }
 
-interface WitValue {
+export interface WitTraitValue {
   readonly confidence: number;
   readonly value: string;
   readonly type: "value";
 }
 
-interface WitIntent {
+export interface WitIntent {
   readonly confidence: number;
   readonly id: string;
   readonly name: string;
@@ -19,10 +19,14 @@ interface WitIntent {
 export interface WitResponse {
   readonly _text: string;
   readonly msg_id: string;
-  readonly entities: { [x: string]: readonly WitValue[] };
+  readonly entities: { [x: string]: readonly WitTraitValue[] };
   readonly intents: readonly WitIntent[];
-  readonly traits: { [x: string]: readonly WitValue[] };
+  readonly traits: { [x: string]: readonly WitTraitValue[] };
 }
+
+export type WitHighestConfidence =
+  | (WitIntent & Readonly<{ witType: "intent" }>)
+  | (WitTraitValue & Readonly<{ trait: string; witType: "trait" }>);
 
 /** Client to access wit APIs */
 export interface WitClient {
@@ -32,6 +36,7 @@ export interface WitClient {
 
 export interface WitRequestInput
   extends Pick<WitResponse, "entities" | "intents" | "traits"> {
+  readonly highestConfidence?: WitHighestConfidence;
   readonly type: "wit";
 }
 

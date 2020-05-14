@@ -4,7 +4,7 @@ import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
 import { WitClient, WitResponse } from "../type/wit";
-import { retryWithWit } from "./retry_wit";
+import { retryWithWit, getHighestConfidence } from "./retry_wit";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
@@ -21,6 +21,33 @@ describe("Wit higher order function", () => {
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });
+  });
+
+  it("Getting highest confidence should work", async () => {
+    expectJs(
+      getHighestConfidence({
+        intents: [{ confidence: 0.1, id: "0", name: "intent1" }],
+        traits: {
+          trait1: [{ confidence: 0.2, value: "true", type: "value" }],
+          trait2: [{ confidence: 0.3, value: "true", type: "value" }],
+        },
+      })
+    ).to.eql({
+      confidence: 0.3,
+      value: "true",
+      type: "value",
+      witType: "trait",
+    });
+
+    expectJs(
+      getHighestConfidence({
+        intents: [{ confidence: 0.3, id: "0", name: "intent1" }],
+        traits: {
+          trait1: [{ confidence: 0.2, value: "true", type: "value" }],
+          trait2: [{ confidence: 0.1, value: "true", type: "value" }],
+        },
+      })
+    ).to.eql({ confidence: 0.3, id: "0", name: "intent1", witType: "intent" });
   });
 
   it("Should return original request result if invalid input type", async () => {
