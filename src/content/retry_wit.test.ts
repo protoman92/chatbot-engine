@@ -83,6 +83,8 @@ describe("Wit higher order function", () => {
 
     when(comm.validate(anything())).thenResolve({
       entities,
+      intents: {},
+      traits: {},
       _text: inputText,
       msg_id: "",
     });
@@ -109,7 +111,7 @@ describe("Wit higher order function", () => {
           targetPlatform,
           currentContext: {},
           currentLeafName: "",
-          input: { entities, type: "wit" },
+          input: { entities, intents: {}, traits: {}, type: "wit" },
           type: "manual_trigger",
         })
       )

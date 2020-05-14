@@ -4,26 +4,28 @@ export interface WitConfig {
   readonly authorizationToken: string;
 }
 
-export interface WitEntity {
+export interface WitValue {
   readonly confidence: number;
   readonly value: string;
   readonly type: "value";
 }
 
-export interface WitResponse<Entities extends string = string> {
+export interface WitResponse {
   readonly _text: string;
   readonly msg_id: string;
-  readonly entities: { [K in Entities]: readonly WitEntity[] };
+  readonly entities: { [x: string]: readonly WitValue[] };
+  readonly intents: { [x: string]: readonly WitValue[] };
+  readonly traits: { [x: string]: readonly WitValue[] };
 }
 
 /** Client to access wit APIs */
 export interface WitClient {
   /** Validate a query with wit */
-  validate<E extends string>(message: string): Promise<WitResponse<E>>;
+  validate(message: string): Promise<WitResponse>;
 }
 
-export interface WitRequestInput {
-  readonly entities: Readonly<{ [x: string]: readonly WitEntity[] }>;
+export interface WitRequestInput
+  extends Pick<WitResponse, "entities" | "intents" | "traits"> {
   readonly type: "wit";
 }
 

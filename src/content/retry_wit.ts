@@ -16,11 +16,13 @@ export function retryWithWit<Context>(
       let result = await leaf.next(request);
 
       if (result !== NextResult.BREAK) {
-        const { entities } = await comm.validate(request.input.inputText);
+        const { entities, intents, traits } = await comm.validate(
+          request.input.inputText
+        );
 
         result = await leaf.next({
           ...(request as Omit<typeof request, "input" | "type">),
-          input: { entities, type: "wit" },
+          input: { entities, intents, traits, type: "wit" },
           targetPlatform: request.targetPlatform as any,
           type: "manual_trigger",
         });
