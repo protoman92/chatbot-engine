@@ -61,7 +61,17 @@ export function createGenericTelegramRequest<Context>(
       const [inputCommand, inputText] = extractInputCommand(username, text);
 
       if (!!inputCommand) {
-        return [user, chat, [{ inputCommand, inputText, type: "command" }]];
+        return [
+          user,
+          chat,
+          [
+            {
+              inputCommand,
+              inputText: !!inputText ? inputText : undefined,
+              type: "command",
+            },
+          ],
+        ];
       } else {
         return [user, chat, [{ inputText, type: "text" }]];
       }

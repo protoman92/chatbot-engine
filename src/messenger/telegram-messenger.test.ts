@@ -43,6 +43,32 @@ describe("Create generic Telegram requests", async () => {
     ]);
   });
 
+  it("Should return command input type with no input text if input text is invalid", async () => {
+    // Setup && When
+    const request = createGenericTelegramRequest(
+      {
+        message: { chat, from, message_id: 0, text: "/test" },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [
+          { inputCommand: "test", inputText: undefined, type: "command" },
+        ],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
   it("Should return text input type if no command specified", async () => {
     // Setup && When
     const request = createGenericTelegramRequest(
@@ -59,6 +85,139 @@ describe("Create generic Telegram requests", async () => {
         currentBot,
         currentContext: {},
         input: [{ inputText: "test", type: "text" }],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return document input type if document is attached", async () => {
+    // Setup
+    const document: TelegramRawRequest.DocumentDetails = {
+      file_id: "0",
+      file_name: "",
+      file_size: 0,
+      file_unique_id: "",
+      mime_type: "",
+      thumb: {
+        file_id: "0",
+        file_size: 0,
+        file_unique_id: "",
+        height: 0,
+        width: 0,
+      },
+    };
+
+    // When
+    const request = createGenericTelegramRequest(
+      {
+        message: { chat, from, date: 0, document, message_id: 0 },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [{ inputDocument: document, type: "document" }],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return photo input type if photos are attached", async () => {
+    // Setup
+    const photo: TelegramRawRequest.PhotoDetails = {
+      file_id: "0",
+      file_size: 0,
+      file_unique_id: "",
+      height: 0,
+      width: 0,
+    };
+
+    // When
+    const request = createGenericTelegramRequest(
+      {
+        message: { chat, from, date: 0, message_id: 0, photo: [photo] },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [{ inputPhotos: [photo], type: "image" }],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return new chat members if new members joined", async () => {
+    // Setup && When
+    const request = createGenericTelegramRequest(
+      {
+        message: {
+          chat,
+          from,
+          date: 0,
+          message_id: 0,
+          new_chat_members: [from],
+        },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [{ newChatMembers: [from], type: "joined_chat" }],
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return left chat members if one member left", async () => {
+    // Setup && When
+    const request = createGenericTelegramRequest(
+      {
+        message: {
+          chat,
+          from,
+          date: 0,
+          left_chat_member: from,
+          message_id: 0,
+        },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expectJs(request).to.eql([
+      {
+        currentBot,
+        currentContext: {},
+        input: [{ leftChatMembers: [from], type: "left_chat" }],
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,

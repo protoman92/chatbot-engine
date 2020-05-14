@@ -193,7 +193,6 @@ declare namespace TelegramRawRequest {
       readonly chat: Chat;
       readonly from: TelegramUser;
       readonly message_id: number;
-      readonly left_chat_participant: TelegramBot | TelegramUser;
       readonly left_chat_member: TelegramBot | TelegramUser;
     }
 
@@ -201,8 +200,6 @@ declare namespace TelegramRawRequest {
       readonly chat: Chat;
       readonly from: TelegramUser;
       readonly message_id: number;
-      readonly new_chat_participant: TelegramBot | TelegramUser;
-      readonly new_chat_member: TelegramBot | TelegramUser;
       readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
     }
 
