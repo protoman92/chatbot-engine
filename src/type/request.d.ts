@@ -10,13 +10,21 @@ interface PlaceholderRequestInput {
   readonly type: "placebo";
 }
 
-interface BaseContextChangeRequestPerInput<Context>
-  extends BaseRequest<Context> {
-  readonly input: PlaceholderRequestInput;
+interface BaseCommonContextChangeRequest<Context> {
   readonly newContext: Context;
   readonly oldContext: Context;
   readonly changedContext: Partial<Context>;
   readonly type: "context_trigger";
+}
+
+interface BaseContextChangeRequest<Context>
+  extends BaseCommonContextChangeRequest<Context> {
+  readonly input: readonly PlaceholderRequestInput[];
+}
+
+interface BaseContextChangeRequestPerInput<Context>
+  extends BaseCommonContextChangeRequest<Context> {
+  readonly input: PlaceholderRequestInput;
 }
 
 interface ErrorRequestInput {

@@ -6,7 +6,6 @@ import { BaseMessageProcessor } from "./messenger";
 import {
   BaseContextChangeRequest,
   BaseContextChangeRequestPerInput,
-  BaseErrorRequest,
   BaseErrorRequestPerInput,
   BaseRequest,
 } from "./request";
@@ -35,7 +34,7 @@ export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
         input: readonly FacebookRequestInput[];
         type: "message_trigger" | "manual_trigger";
       }>
-    | BaseContextChangeRequest<Context>
+    | BaseContextChangeRequest
   );
 
 export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &

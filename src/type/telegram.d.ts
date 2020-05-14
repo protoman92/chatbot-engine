@@ -52,7 +52,7 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
         input: readonly TelegramRequestInput[];
         type: "manual_trigger";
       }>
-    | BaseContextChangeRequest<Context>
+    | BaseContextChangeRequest
   );
 
 export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
