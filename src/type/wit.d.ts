@@ -4,17 +4,23 @@ export interface WitConfig {
   readonly authorizationToken: string;
 }
 
-export interface WitValue {
+interface WitValue {
   readonly confidence: number;
   readonly value: string;
   readonly type: "value";
+}
+
+interface WitIntent {
+  readonly confidence: number;
+  readonly id: string;
+  readonly name: string;
 }
 
 export interface WitResponse {
   readonly _text: string;
   readonly msg_id: string;
   readonly entities: { [x: string]: readonly WitValue[] };
-  readonly intents: readonly WitValue[];
+  readonly intents: readonly WitIntent[];
   readonly traits: { [x: string]: readonly WitValue[] };
 }
 

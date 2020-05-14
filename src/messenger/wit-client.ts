@@ -9,12 +9,13 @@ export function createWitClient(
   config: WitConfig
 ): WitClient {
   return {
-    validate: (message) =>
-      client.communicate<WitResponse>({
+    validate: (message) => {
+      return client.communicate<WitResponse>({
         method: "GET",
-        url: `https://api.wit.ai/message?q=${message}`,
+        url: `https://api.wit.ai/message?q=${encodeURI(message)}`,
         headers: { Authorization: `Bearer ${config.authorizationToken}` },
-      }),
+      });
+    },
   };
 }
 
