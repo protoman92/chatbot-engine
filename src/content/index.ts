@@ -6,4 +6,4 @@ export {
 } from "./leaf";
 export { createLeafSelector } from "./leaf-selector";
 export { createTransformChain } from "./transform-chain";
-export { retryWithWit } from "./wit";
+export { retryWithWit } from "./retry_wit";

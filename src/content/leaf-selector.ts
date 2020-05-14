@@ -78,7 +78,7 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
         }
       }
 
-      throw new Error("This bot has nothing to say");
+      return NextResult.FALLTHROUGH;
     },
     complete: async () => {
       const enumeratedLeaves = await selector.enumerateLeaves();

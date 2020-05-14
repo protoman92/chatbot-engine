@@ -4,7 +4,7 @@ import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
 import { WitClient, WitResponse } from "../type/wit";
-import { retryWithWit } from "./wit";
+import { retryWithWit } from "./retry_wit";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
