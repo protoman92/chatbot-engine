@@ -12,10 +12,10 @@ export function retryWithWit<Context>(
   return async (leaf) => ({
     ...leaf,
     next: async (request) => {
-      if (request.input.type !== "text") return NextResult.FALLTHROUGH;
       let result = await leaf.next(request);
+      if (result === NextResult.BREAK) return result;
 
-      if (result !== NextResult.BREAK) {
+      if (request.input.type === "text") {
         const { entities, intents, traits } = await comm.validate(
           request.input.inputText
         );

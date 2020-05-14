@@ -12,7 +12,7 @@ import { TelegramLeafObserver } from "../type/telegram";
  * Create a leaf from a base leaf with a default subject for broadcasting
  * contents.
  */
-export async function createLeafWithObserver<Context = {}>(
+export async function createLeafWithObserver<Context>(
   fn: (
     observer: NextContentObserver<
       Omit<AmbiguousResponse<Context>, "originalRequest">
@@ -58,7 +58,7 @@ export async function createLeafWithObserver<Context = {}>(
  * Create an error leaf that will be used to deliver error messages if no
  * other leaf can handle the error.
  */
-export function createDefaultErrorLeaf<Context = {}>({
+export function createDefaultErrorLeaf<Context>({
   formatErrorMessage,
   trackError,
 }: ErrorLeafConfig): Promise<AmbiguousLeaf<Context>> {
@@ -92,7 +92,7 @@ export function createDefaultErrorLeaf<Context = {}>({
  * Create a leaf observer that handles content for different platforms, based
  * on the leaf input.
  */
-export async function createLeafObserverForPlatforms<Context = {}>({
+export async function createLeafObserverForPlatforms<Context>({
   facebook,
   telegram,
 }: Readonly<{

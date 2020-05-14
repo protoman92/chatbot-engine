@@ -1,3 +1,4 @@
+export { catchAll } from "./catch-all";
 export { catchError } from "./catch-error";
 export {
   createDefaultErrorLeaf,
@@ -5,5 +6,5 @@ export {
   createLeafWithObserver,
 } from "./leaf";
 export { createLeafSelector } from "./leaf-selector";
-export { createTransformChain } from "./transform-chain";
 export { retryWithWit } from "./retry_wit";
+export { createTransformChain } from "./transform-chain";

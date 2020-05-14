@@ -14,7 +14,7 @@ export interface WitResponse {
   readonly _text: string;
   readonly msg_id: string;
   readonly entities: { [x: string]: readonly WitValue[] };
-  readonly intents: { [x: string]: readonly WitValue[] };
+  readonly intents: readonly WitValue[];
   readonly traits: { [x: string]: readonly WitValue[] };
 }
 

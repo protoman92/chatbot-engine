@@ -12,8 +12,8 @@ import {
  * operation.
  */
 export enum NextResult {
-  BREAK = "SUCCESS",
-  FALLTHROUGH = "FAILURE",
+  BREAK = "BREAK",
+  FALLTHROUGH = "FALLTHROUGH",
 }
 
 /** Create a subscription with custom unsubscribe logic */

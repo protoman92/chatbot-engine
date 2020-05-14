@@ -23,9 +23,9 @@ describe("Wit higher order function", () => {
     });
   });
 
-  it("Should fallthrough if invalid request type", async () => {
+  it("Should return original request result if invalid input type", async () => {
     // Setup
-    when(rootLeaf.next(anything())).thenResolve(NextResult.BREAK);
+    when(rootLeaf.next(anything())).thenResolve(NextResult.FALLTHROUGH);
     const transformer = await retryWithWit(instance(comm));
     const transformed = await transformer(instance(rootLeaf));
 
@@ -83,7 +83,7 @@ describe("Wit higher order function", () => {
 
     when(comm.validate(anything())).thenResolve({
       entities,
-      intents: {},
+      intents: [],
       traits: {},
       _text: inputText,
       msg_id: "",
@@ -111,7 +111,7 @@ describe("Wit higher order function", () => {
           targetPlatform,
           currentContext: {},
           currentLeafName: "",
-          input: { entities, intents: {}, traits: {}, type: "wit" },
+          input: { entities, intents: [], traits: {}, type: "wit" },
           type: "manual_trigger",
         })
       )

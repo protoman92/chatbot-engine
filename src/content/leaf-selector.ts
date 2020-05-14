@@ -68,14 +68,7 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
 
       for (const enumLeaf of enumeratedLeaves) {
         const nextResult = await selector.triggerLeaf(enumLeaf, request);
-
-        switch (nextResult) {
-          case NextResult.BREAK:
-            return nextResult;
-
-          case NextResult.FALLTHROUGH:
-            break;
-        }
+        if (nextResult === NextResult.BREAK) return NextResult.BREAK;
       }
 
       return NextResult.FALLTHROUGH;

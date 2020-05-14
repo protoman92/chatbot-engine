@@ -52,7 +52,6 @@ export function createTelegramClient(
     getFileURLFromID: async (fileID) => {
       const { file_path } = await telegramClient.getFile(fileID);
       const fileURL = await telegramClient.getFileURL(file_path);
-      console.log(fileURL);
       return fileURL;
     },
     isMember: (chat_id, user_id) =>
