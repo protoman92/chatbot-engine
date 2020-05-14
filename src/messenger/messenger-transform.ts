@@ -1,4 +1,3 @@
-import { deepClone } from "../common/utils";
 import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import {
@@ -77,11 +76,7 @@ export function injectContextOnReceive<Context, RawRequest>(
           targetPlatform
         );
 
-        currentContext = deepClone({
-          ...request.currentContext,
-          ...currentContext,
-        });
-
+        currentContext = { ...request.currentContext, ...currentContext };
         return processor.receiveRequest({ ...request, currentContext });
       },
     };

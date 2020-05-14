@@ -9,7 +9,11 @@ export function catchAll<Context>(
     ...leaf,
     next: async (request) => {
       const result = await leaf.next(request);
-      if (result === NextResult.BREAK) return result;
+
+      if (request.type === "context_trigger" || result === NextResult.BREAK) {
+        return result;
+      }
+
       onCatchAll(request);
       return NextResult.BREAK;
     },

@@ -34,7 +34,7 @@ export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
         input: readonly FacebookRequestInput[];
         type: "message_trigger" | "manual_trigger";
       }>
-    | BaseContextChangeRequest
+    | BaseContextChangeRequest<Context>
   );
 
 export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &

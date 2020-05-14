@@ -43,6 +43,30 @@ describe("catchAll higher order function", () => {
     verify(catchHandler.onCatchAll(anything())).never();
   });
 
+  it("Should not catch all if invalid request type", async () => {
+    // Setup
+    when(rootLeaf.next(anything())).thenResolve(NextResult.FALLTHROUGH);
+    const transformer = await catchAll(instance(catchHandler).onCatchAll);
+    const transformed = await transformer(instance(rootLeaf));
+
+    // When
+    const result = await transformed.next({
+      targetID,
+      targetPlatform,
+      currentContext: {},
+      currentLeafName: "",
+      changedContext: {},
+      input: { type: "placebo" },
+      newContext: {},
+      oldContext: {},
+      type: "context_trigger",
+    });
+
+    // Then
+    expectJs(result).to.eql(NextResult.FALLTHROUGH);
+    verify(catchHandler.onCatchAll(anything())).never();
+  });
+
   it("Should catch if if root leaf falls through", async () => {
     // Setup
     when(rootLeaf.next(anything())).thenResolve(NextResult.FALLTHROUGH);
