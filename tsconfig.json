@@ -15,11 +15,12 @@
     "noUnusedParameters": false,
     "outDir": "dist",
     "removeComments": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "target": "es2017"
-  }
+  },
+  "exclude": ["./node_modules/*"]
 }

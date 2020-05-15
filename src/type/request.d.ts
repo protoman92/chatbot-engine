@@ -6,38 +6,6 @@ export type BaseRequest<Context> = Readonly<{
   targetID: string;
 }>;
 
-interface PlaceholderRequestInput {
-  readonly type: "placebo";
-}
-
-interface BaseCommonContextChangeRequest<Context> {
-  readonly newContext: Context;
-  readonly oldContext: Context;
-  readonly changedContext: Partial<Context>;
-  readonly type: "context_trigger";
-}
-
-interface BaseContextChangeRequest<Context>
-  extends BaseCommonContextChangeRequest<Context> {
-  readonly input: readonly PlaceholderRequestInput[];
-}
-
-interface BaseContextChangeRequestPerInput<Context>
-  extends BaseCommonContextChangeRequest<Context> {
-  readonly input: PlaceholderRequestInput;
-}
-
-interface ErrorRequestInput {
-  readonly error: Error;
-  readonly erroredLeaf?: string;
-  readonly type: "error";
-}
-
-interface BaseErrorRequestPerInput<Context> extends BaseRequest<Context> {
-  readonly input: ErrorRequestInput;
-  readonly type: "manual_trigger";
-}
-
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>
   | TelegramRequest<Context>;

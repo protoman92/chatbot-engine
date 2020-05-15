@@ -1,14 +1,14 @@
 import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import { LeafSelector } from "./leaf";
-import { BaseMessageProcessor } from "./messenger";
 import {
   BaseContextChangeRequest,
   BaseContextChangeRequestPerInput,
-  BaseErrorRequestPerInput,
-  BaseRequest,
-} from "./request";
+} from "./context";
+import { BaseErrorRequestPerInput } from "./error";
+import { LeafSelector } from "./leaf";
+import { BaseMessageProcessor } from "./messenger";
+import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";

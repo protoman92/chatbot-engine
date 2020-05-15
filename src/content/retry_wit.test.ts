@@ -35,6 +35,7 @@ describe("Wit higher order function", () => {
     ).to.eql({
       confidence: 0.3,
       value: "true",
+      trait: "trait2",
       type: "value",
       witType: "trait",
     });
@@ -92,7 +93,7 @@ describe("Wit higher order function", () => {
     verify(comm.validate(anything())).never();
   });
 
-  it("Wit engine should intercept fallthroughs from text leaf", async () => {
+  it("Wit engine should intercept fallthrough from text leaf", async () => {
     // Setup
     const entities: WitResponse["entities"] = {
       a: [{ confidence: 1, value: "some-value", type: "value" }],
@@ -138,7 +139,13 @@ describe("Wit higher order function", () => {
           targetPlatform,
           currentContext: {},
           currentLeafName: "",
-          input: { entities, intents: [], traits: {}, type: "wit" },
+          input: {
+            entities,
+            highestConfidence: undefined,
+            intents: [],
+            traits: {},
+            type: "wit",
+          },
           type: "manual_trigger",
         })
       )

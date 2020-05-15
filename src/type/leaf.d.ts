@@ -1,6 +1,7 @@
 import { AmbiguousPlatform } from ".";
 import { Branch } from "./branch";
-import { AmbiguousRequestPerInput, BaseErrorRequestInput } from "./request";
+import { ErrorRequestInput } from "./error";
+import { AmbiguousRequestPerInput } from "./request";
 import { AmbiguousResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 
@@ -67,7 +68,7 @@ export type LeafSelector<T> = ContentObserver<AmbiguousRequestPerInput<T>> &
   ContentObservable<AmbiguousResponse<T>>;
 
 interface ErrorLeafTrackErrorArgs
-  extends Pick<BaseErrorRequestInput, "error" | "erroredLeaf"> {
+  extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {
   readonly targetID: string;
   readonly targetPlatform: AmbiguousPlatform;
 }
