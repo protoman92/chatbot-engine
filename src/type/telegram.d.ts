@@ -15,15 +15,15 @@ import { BaseResponseOutput } from "./visual-content";
 import { BaseWitRequestPerInput } from "./wit";
 
 export type TelegramRequestInput =
-  | Readonly<{ inputCommand: string; inputText?: string; type: "command" }>
-  | Readonly<{ inputText: string; type: "text" }>
-  | Readonly<{ inputCoordinate: Coordinates; type: "location" }>
+  | Readonly<{ command: string; text?: string; type: "command" }>
+  | Readonly<{ text: string; type: "text" }>
+  | Readonly<{ coordinate: Coordinates; type: "location" }>
   | Readonly<{
-      inputDocument: TelegramRawRequest.DocumentDetails;
+      document: TelegramRawRequest.DocumentDetails;
       type: "document";
     }>
   | Readonly<{
-      inputPhotos: readonly TelegramRawRequest.PhotoDetails[];
+      images: readonly TelegramRawRequest.PhotoDetails[];
       type: "image";
     }>
   | Readonly<{

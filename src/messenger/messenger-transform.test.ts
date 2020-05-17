@@ -69,7 +69,7 @@ describe("Save context on send", () => {
       additionalContext,
       originalRequest: {
         currentContext: {},
-        input: { inputText: "", type: "text" },
+        input: { text: "", type: "text" },
         targetID: "some-other-id",
         targetPlatform: "facebook",
         type: "message_trigger",
@@ -285,7 +285,7 @@ describe("Save Telegram user for target ID", () => {
     // When
     await transformed.receiveRequest({
       currentContext: {},
-      input: [{ inputText: "", type: "text" }],
+      input: [{ text: "", type: "text" }],
       targetID: `${targetID}`,
       targetPlatform: "facebook",
       type: "message_trigger",
@@ -434,7 +434,7 @@ describe("Set typing indicator", () => {
       originalRequest: {
         targetID,
         currentContext: {},
-        input: { inputText: "", type: "text" },
+        input: { text: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       },

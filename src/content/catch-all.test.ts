@@ -34,7 +34,7 @@ describe("catchAll higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: { inputText: "", type: "text" },
+      input: { text: "", type: "text" },
       type: "message_trigger",
     });
 
@@ -79,7 +79,7 @@ describe("catchAll higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: { inputText: "", type: "text" as const },
+      input: { text: "", type: "text" as const },
       type: "message_trigger" as const,
     };
 

@@ -97,7 +97,7 @@ describe("Transform chain", () => {
       .transform(
         await createLeafWithObserver(async (observer) => ({
           next: async ({ targetID, targetPlatform, input }) => {
-            const text = (input as { inputText: string }).inputText;
+            const text = (input as { text: string }).text;
 
             return observer.next({
               targetID,
@@ -124,7 +124,7 @@ describe("Transform chain", () => {
       targetPlatform,
       currentContext: { error: new Error("") },
       currentLeafName: "",
-      input: { inputText: "", type: "text" },
+      input: { text: "", type: "text" },
       type: "message_trigger",
     });
 

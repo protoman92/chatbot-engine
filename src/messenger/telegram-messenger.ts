@@ -21,24 +21,25 @@ import { createMessageProcessor } from "./generic-messenger";
  * should give [start, 123], i.e. the command and the instruction. If the
  * command does not exist, fallback to the base input text for instruction.
  */
-export function extractInputCommand(
+export function extractcommand(
   username: string,
-  inputText: string
+  textWithCommand: string
 ): [string, string] {
   const usernamePing = `@${username}`;
 
-  if (inputText.includes(usernamePing)) {
+  if (textWithCommand.includes(usernamePing)) {
     /** In this case, the bot is in a group, so it needs to be pinged */
-    const [, command = "", text = inputText] =
-      inputText.match(
+    const [, command = "", text = textWithCommand] =
+      textWithCommand.match(
         new RegExp(`^\\/\(\\w*\)\\s*${usernamePing}\\s*\(\(.|\\s\)*\)$`, "im")
       ) || [];
 
     return [command.trim(), text.trim()];
   } else {
-    const [, command = "", text = inputText] =
-      inputText.match(new RegExp(`^\\/\(\\w*\)\\s*\(\(.|\\s\)*\)$`, "im")) ||
-      [];
+    const [, command = "", text = textWithCommand] =
+      textWithCommand.match(
+        new RegExp(`^\\/\(\\w*\)\\s*\(\(.|\\s\)*\)$`, "im")
+      ) || [];
 
     return [command.trim(), text.trim()];
   }
@@ -57,29 +58,29 @@ export function createGenericTelegramRequest<Context>(
     | [TelegramUser, RawRequest.Chat, TelegramRequestInput[]]
     | undefined {
     if (isType<RawRequest.Message.Text>(message, "text")) {
-      const { text } = message;
-      const [inputCommand, inputText] = extractInputCommand(username, text);
+      const { text: textWithCommand } = message;
+      const [command, text] = extractcommand(username, textWithCommand);
 
-      if (!!inputCommand) {
+      if (!!command) {
         return [
           user,
           chat,
           [
             {
-              inputCommand,
-              inputText: !!inputText ? inputText : undefined,
+              command,
+              text: !!text ? text : undefined,
               type: "command",
             },
           ],
         ];
       } else {
-        return [user, chat, [{ inputText, type: "text" }]];
+        return [user, chat, [{ text, type: "text" }]];
       }
     }
 
     if (isType<RawRequest.Message.Document>(message, "document")) {
       const { document } = message;
-      return [user, chat, [{ inputDocument: document, type: "document" }]];
+      return [user, chat, [{ document: document, type: "document" }]];
     }
 
     if (isType<RawRequest.Message.NewChatMember>(message, "new_chat_members")) {
@@ -100,8 +101,8 @@ export function createGenericTelegramRequest<Context>(
     }
 
     if (isType<RawRequest.Message.Photo>(message, "photo")) {
-      const { photo: inputPhotos } = message;
-      return [user, chat, [{ inputPhotos, type: "image" }]];
+      const { photo: images } = message;
+      return [user, chat, [{ images, type: "image" }]];
     }
 
     return undefined;
@@ -112,7 +113,7 @@ export function createGenericTelegramRequest<Context>(
   }: RawRequest.Callback):
     | [TelegramUser, RawRequest.Chat | undefined, TelegramRequestInput[]]
     | undefined {
-    return [user, undefined, [{ inputText: data, type: "text" }]];
+    return [user, undefined, [{ text: data, type: "text" }]];
   }
 
   function processRequest(

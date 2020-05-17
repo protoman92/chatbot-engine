@@ -42,7 +42,7 @@ export function retryWithWit<Context>(
       if (result === NextResult.BREAK) return result;
 
       if (request.input.type === "text") {
-        const response = await comm.validate(request.input.inputText);
+        const response = await comm.validate(request.input.text);
         const { entities, intents, traits } = response;
         const highestConfidence = getHighestConfidence(response);
 

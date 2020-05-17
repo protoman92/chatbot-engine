@@ -15,12 +15,12 @@ import { BaseResponseOutput } from "./visual-content";
 import { BaseWitRequestPerInput } from "./wit";
 
 export type FacebookRequestInput =
-  | Readonly<{ inputCoordinate: Coordinates; type: "location" }>
-  | Readonly<{ inputText: string; type: "text" }>
-  | Readonly<{ inputImageURL: string; type: "image" }>
+  | Readonly<{ coordinate: Coordinates; type: "location" }>
+  | Readonly<{ text: string; type: "text" }>
+  | Readonly<{ imageURL: string; type: "image" }>
   | Readonly<{
-      inputText: string;
-      inputImageURL: string;
+      text: string;
+      imageURL: string;
       stickerID: string;
       type: "sticker";
     }>;

@@ -70,7 +70,7 @@ describe("Generic message processor", () => {
       originalRequest: {
         targetID,
         currentContext: {},
-        input: { inputText: "", type: "text" },
+        input: { text: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -113,7 +113,7 @@ describe("Generic message processor", () => {
       originalRequest: {
         targetID,
         currentContext: {},
-        input: { inputText: "", type: "text" },
+        input: { text: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -133,8 +133,8 @@ describe("Generic message processor", () => {
     const currentContext = { a: 1, b: 2 };
 
     const input: readonly FacebookRequestInput[] = [
-      { inputText: "text-1", type: "text" },
-      { inputText: "text-2", type: "text" },
+      { text: "text-1", type: "text" },
+      { text: "text-2", type: "text" },
     ];
 
     // When

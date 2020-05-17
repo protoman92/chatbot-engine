@@ -36,7 +36,7 @@ function createFacebookRequest<Context>(
     request: RawRequest.Entry.Messaging
   ): FacebookRequestInput[] {
     if (isType<RawRequest.Entry.Messaging.Postback>(request, "postback")) {
-      return [{ inputText: request.postback.payload, type: "text" }];
+      return [{ text: request.postback.payload, type: "text" }];
     }
 
     if (isType<RawRequest.Entry.Messaging.Message>(request, "message")) {
@@ -48,7 +48,7 @@ function createFacebookRequest<Context>(
           "quick_reply"
         )
       ) {
-        return [{ inputText: message.quick_reply.payload, type: "text" }];
+        return [{ text: message.quick_reply.payload, type: "text" }];
       }
 
       if (
@@ -57,7 +57,7 @@ function createFacebookRequest<Context>(
           "text"
         )
       ) {
-        return [{ inputText: message.text, type: "text" }];
+        return [{ text: message.text, type: "text" }];
       }
 
       if (
@@ -73,8 +73,8 @@ function createFacebookRequest<Context>(
             switch (attachment.type) {
               case "image":
                 return {
-                  inputText: attachment.payload.url,
-                  inputImageURL: attachment.payload.url,
+                  text: attachment.payload.url,
+                  imageURL: attachment.payload.url,
                   stickerID: (() => {
                     if (
                       isType<
@@ -92,7 +92,7 @@ function createFacebookRequest<Context>(
               case "location":
                 const { lat, long } = attachment.payload.coordinates;
                 const coordinates = { lat, lng: long };
-                return { inputCoordinate: coordinates, type: "location" };
+                return { coordinate: coordinates, type: "location" };
             }
           }
         );

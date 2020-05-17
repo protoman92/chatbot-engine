@@ -100,7 +100,7 @@ describe("Leaf selector", () => {
       targetID,
       targetPlatform,
       currentContext: {},
-      input: { inputText: "", type: "text" },
+      input: { text: "", type: "text" },
       type: "message_trigger",
     });
 
@@ -186,7 +186,7 @@ describe("Leaf selector", () => {
         targetID,
         targetPlatform,
         currentContext: {},
-        input: { inputText: "", type: "text" },
+        input: { text: "", type: "text" },
         type: "message_trigger",
       });
 

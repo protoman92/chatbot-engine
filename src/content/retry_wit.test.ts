@@ -85,7 +85,7 @@ describe("Wit higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: { inputText: "some-text", type: "text" },
+      input: { text: "some-text", type: "text" },
       type: "message_trigger",
     });
 
@@ -99,7 +99,7 @@ describe("Wit higher order function", () => {
       a: [{ confidence: 1, value: "some-value", type: "value" }],
     };
 
-    const inputText = "some-text";
+    const text = "some-text";
 
     when(rootLeaf.next(anything())).thenCall(async ({ witEntities = {} }) => {
       if (Object.entries(witEntities).length === 0) {
@@ -113,7 +113,7 @@ describe("Wit higher order function", () => {
       entities,
       intents: [],
       traits: {},
-      _text: inputText,
+      _text: text,
       msg_id: "",
     });
 
@@ -125,12 +125,12 @@ describe("Wit higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      input: { inputText, type: "text" },
+      input: { text, type: "text" },
       type: "message_trigger",
     });
 
     // Then
-    verify(comm.validate(inputText)).once();
+    verify(comm.validate(text)).once();
 
     verify(
       rootLeaf.next(
