@@ -1,29 +1,42 @@
+/* istanbul ignore file */
 import { joinObjects } from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
-import { AmbiguousPlatform } from "../type/messenger";
 
 /** Create an in-memory context DAO store. This is useful for debugging */
-export function createInMemoryContextDAO<Context>(): ContextDAO<Context> {
-  const storage: { [K: string]: Context } = {};
+export function createInMemoryContextDAO<Context>() {
+  let storage: { [K: string]: { [K: string]: Context } } = {};
 
-  function getCacheKey(targetID: string, targetPlatform: AmbiguousPlatform) {
-    return `${targetPlatform}-${targetID}`;
-  }
-
-  return {
+  const contextDAO: ContextDAO<Context> = {
     getContext: async (targetID, targetPlatform) => {
-      const cacheKey = getCacheKey(targetID, targetPlatform);
-      return storage[cacheKey] || ({} as Context);
+      if (storage[targetPlatform] == null) {
+        storage[targetPlatform] = {};
+      }
+
+      if (storage[targetPlatform][targetID] == null) {
+        storage[targetPlatform][targetID] = {} as Context;
+      }
+
+      return storage[targetPlatform][targetID];
     },
     appendContext: async (targetID, targetPlatform, context) => {
-      const cacheKey = getCacheKey(targetID, targetPlatform);
-      const oldContext = storage[cacheKey];
-      storage[cacheKey] = joinObjects(storage[cacheKey], context);
-      return { oldContext, newContext: storage[cacheKey] };
+      const oldContext = await contextDAO.getContext(targetID, targetPlatform);
+      const newContext = joinObjects(oldContext, context);
+      storage[targetPlatform][targetID] = newContext;
+      return { oldContext, newContext };
     },
     resetContext: async () => {
       const keys = Object.keys(storage);
       keys.forEach((key) => delete storage[key]);
+    },
+  };
+
+  return {
+    ...contextDAO,
+    overrideStorage: async (customStorage: typeof storage) => {
+      storage = customStorage;
+    },
+    resetStorage: async () => {
+      storage = {};
     },
   };
 }
