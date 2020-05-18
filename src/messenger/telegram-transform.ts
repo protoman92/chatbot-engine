@@ -1,16 +1,12 @@
 import { MessageProcessorMiddleware } from "../type";
 import { ContextDAO } from "../type/context-dao";
-import {
-  SaveTelegramUserContext,
-  TelegramMessageProcessor,
-  TelegramUser,
-} from "../type/telegram";
+import { SaveTelegramUserContext, TelegramUser } from "../type/telegram";
 
 /** Save a Telegram user in backend if targetID is not found in context */
 export function saveTelegramUser<Context>(
   contextDAO: ContextDAO<Context>,
   saveUser: (user: TelegramUser) => Promise<SaveTelegramUserContext<Context>>
-): MessageProcessorMiddleware<TelegramMessageProcessor<Context>> {
+): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,

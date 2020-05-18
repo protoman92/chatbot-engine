@@ -1,7 +1,6 @@
 import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import {
-  BaseMessageProcessor,
   MessageProcessorMiddleware,
   SaveUserForTargetIDContext,
 } from "../type/messenger";
@@ -13,7 +12,7 @@ import {
  */
 export function saveContextOnSend<Context>(
   contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">
-): MessageProcessorMiddleware<BaseMessageProcessor<Context>> {
+): MessageProcessorMiddleware<Context> {
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
@@ -58,9 +57,9 @@ export function saveContextOnSend<Context>(
  * Inject the relevant context for a target every time a message group is
  * processed.
  */
-export function injectContextOnReceive<Context, RawRequest>(
+export function injectContextOnReceive<Context>(
   contextDAO: Pick<ContextDAO<Context>, "getContext">
-): MessageProcessorMiddleware<BaseMessageProcessor<Context>> {
+): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,
@@ -88,15 +87,11 @@ export function injectContextOnReceive<Context, RawRequest>(
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  */
-export function saveUserForTargetID<
-  Context,
-  Processor extends BaseMessageProcessor<Context>,
-  RawUser
->(
+export function saveUserForTargetID<Context, RawUser>(
   contextDAO: ContextDAO<Context>,
   getUser: (targetID: string) => Promise<RawUser>,
   saveUser: (rawUser: RawUser) => Promise<SaveUserForTargetIDContext<Context>>
-): MessageProcessorMiddleware<Processor> {
+): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,
@@ -134,7 +129,7 @@ export function saveUserForTargetID<
  */
 export function setTypingIndicator<Context>(
   client: PlatformClient<unknown>
-): MessageProcessorMiddleware<BaseMessageProcessor<Context>> {
+): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,

@@ -346,9 +346,7 @@ function createFacebookResponse<Context>({
 /** Create a Facebook message processor */
 export async function createFacebookMessageProcessor<Context>(
   { leafSelector, client }: FacebookMessageProcessorConfig<Context>,
-  ...middlewares: readonly MessageProcessorMiddleware<
-    FacebookMessageProcessor<Context>
-  >[]
+  ...middlewares: readonly MessageProcessorMiddleware<Context>[]
 ): Promise<FacebookMessageProcessor<Context>> {
   return createMessageProcessor(
     {

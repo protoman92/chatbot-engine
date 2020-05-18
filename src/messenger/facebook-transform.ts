@@ -1,9 +1,5 @@
 import { ContextDAO } from "../type/context-dao";
-import {
-  FacebookClient,
-  FacebookMessageProcessor,
-  FacebookUser,
-} from "../type/facebook";
+import { FacebookClient, FacebookUser } from "../type/facebook";
 import {
   MessageProcessorMiddleware,
   SaveUserForTargetIDContext,
@@ -17,7 +13,7 @@ export function saveFacebookUser<Context>(
   saveUser: (
     facebookUser: FacebookUser
   ) => Promise<SaveUserForTargetIDContext<Context>>
-): MessageProcessorMiddleware<FacebookMessageProcessor<Context>> {
+): MessageProcessorMiddleware<Context> {
   return saveUserForTargetID(
     contextDAO,
     (targetID) => client.getUser(targetID),

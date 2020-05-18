@@ -32,15 +32,11 @@ export async function createMessageProcessor<Context>(
     mapRequest,
     mapResponse,
   }: BaseMessageProcessorConfig<Context>,
-  ...middlewares: readonly MessageProcessorMiddleware<
-    BaseMessageProcessor<Context>
-  >[]
+  ...middlewares: readonly MessageProcessorMiddleware<Context>[]
 ): Promise<BaseMessageProcessor<Context>> {
   let finalMessageProcessor: BaseMessageProcessor<Context>;
 
-  const middlewareInput: MessageProcessorMiddleware.Input<BaseMessageProcessor<
-    Context
-  >> = {
+  const middlewareInput: MessageProcessorMiddleware.Input<Context> = {
     getFinalMessageProcessor: () => finalMessageProcessor,
   };
 

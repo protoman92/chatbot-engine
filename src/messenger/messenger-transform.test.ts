@@ -18,14 +18,15 @@ import {
 } from "./messenger-transform";
 import { saveTelegramUser } from "./telegram-transform";
 
+interface Context {}
 const targetPlatform = "facebook";
 let msgProcessor: BaseMessageProcessor<{}>;
 let client: PlatformClient<unknown>;
 let contextDAO: ContextDAO<{}>;
-let middlewareInput: MessageProcessorMiddleware.Input<typeof msgProcessor>;
+let middlewareInput: MessageProcessorMiddleware.Input<Context>;
 
 beforeEach(async () => {
-  msgProcessor = spy<BaseMessageProcessor<{}>>({
+  msgProcessor = spy<BaseMessageProcessor<Context>>({
     generalizeRequest: () => Promise.reject(""),
     receiveRequest: () => Promise.reject(""),
     sendResponse: () => Promise.reject(""),
@@ -36,7 +37,7 @@ beforeEach(async () => {
     setTypingIndicator: () => Promise.reject(""),
   });
 
-  contextDAO = spy<ContextDAO<{}>>({
+  contextDAO = spy<ContextDAO<Context>>({
     getContext: () => Promise.reject(""),
     appendContext: () => Promise.reject(""),
     resetContext: () => Promise.reject(""),
