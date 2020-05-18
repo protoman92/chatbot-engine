@@ -1,8 +1,8 @@
 import {
   compose,
-  genericError,
   getRequestPlatform,
   mapSeries,
+  requireNotNull,
 } from "../common/utils";
 import { NextResult } from "../stream";
 import {
@@ -116,15 +116,11 @@ export function createCrossPlatformMessageProcessor<Context>(
   ) {
     switch (platform) {
       case "facebook":
-        if (!facebook) break;
-        return facebookCallback(facebook);
+        return facebookCallback(requireNotNull(facebook));
 
       case "telegram":
-        if (!telegram) break;
-        return telegramCallback(telegram);
+        return telegramCallback(requireNotNull(telegram));
     }
-
-    throw genericError(`Unsupported platform ${platform}`);
   }
 
   return {

@@ -1,5 +1,5 @@
 import { Omit } from "ts-essentials";
-import { genericError } from "../common/utils";
+import { requireNotNull } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
 import { ErrorLeafConfig } from "../type";
 import { FacebookLeafObserver } from "../type/facebook";
@@ -103,15 +103,11 @@ export async function createLeafObserverForPlatforms<Context>({
     next: async (request) => {
       switch (request.targetPlatform) {
         case "facebook":
-          if (!facebook) break;
-          return facebook.next(request);
+          return requireNotNull(facebook).next(request);
 
         case "telegram":
-          if (!telegram) break;
-          return telegram.next(request);
+          return requireNotNull(telegram).next(request);
       }
-
-      throw genericError(`Unhandled platform ${request.targetPlatform}`);
     },
     complete: async () => {
       !!facebook && !!facebook.complete && (await facebook.complete());

@@ -1,7 +1,22 @@
 import { Transformer } from "../type/common";
-import { FacebookRawRequest } from "../type/facebook";
+import { FacebookRawRequest, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousPlatform } from "../type/messenger";
-import { TelegramRawRequest } from "../type/telegram";
+import { TelegramRawRequest, TelegramResponseOutput } from "../type/telegram";
+
+/**
+ * Use this to get a cross-platform output, so as to reuse logic everywhere
+ * else.
+ */
+export function getCrossPlatformOutput(
+  args: Readonly<{
+    facebook?: readonly FacebookResponseOutput[];
+    telegram?: readonly TelegramResponseOutput[];
+  }>
+): <P extends AmbiguousPlatform>(platform: P) => NonNullable<typeof args[P]> {
+  return <P extends AmbiguousPlatform>(platform: P) => {
+    return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
+  };
+}
 
 /** Check if an object is of a certain type */
 export function isType<
@@ -99,6 +114,11 @@ export function promisify2<
   return function(this: any, p1, p2) {
     return promisify(fn.bind(this, p1, p2))();
   };
+}
+
+export function requireNotNull<T>(obj: T | null | undefined): T {
+  if (obj == null) throw new Error("");
+  return obj;
 }
 
 /** Request all values of an object to be truthy, and throw an error otherwise */
