@@ -6,20 +6,18 @@ import { ContextDAO } from "../type/context-dao";
 export function createInMemoryContextDAO<Context>() {
   let storage: { [K: string]: { [K: string]: Context } } = {};
 
-  const contextDAO: ContextDAO<Context> = {
-    getContext: async (targetID, targetPlatform) => {
-      if (storage[targetPlatform] == null) {
-        storage[targetPlatform] = {};
+  const dao: ContextDAO<Context> = {
+    getContext: async ({ targetPlatform: platform, targetID }) => {
+      if (storage[platform] == null) storage[platform] = {};
+
+      if (storage[platform][targetID] == null) {
+        storage[platform][targetID] = {} as Context;
       }
 
-      if (storage[targetPlatform][targetID] == null) {
-        storage[targetPlatform][targetID] = {} as Context;
-      }
-
-      return storage[targetPlatform][targetID];
+      return storage[platform][targetID];
     },
-    appendContext: async (targetID, targetPlatform, context) => {
-      const oldContext = await contextDAO.getContext(targetID, targetPlatform);
+    appendContext: async ({ context, targetPlatform, targetID }) => {
+      const oldContext = await dao.getContext({ targetPlatform, targetID });
       const newContext = joinObjects(oldContext, context);
       storage[targetPlatform][targetID] = newContext;
       return { oldContext, newContext };
@@ -31,7 +29,7 @@ export function createInMemoryContextDAO<Context>() {
   };
 
   return {
-    ...contextDAO,
+    ...dao,
     overrideStorage: async (customStorage: typeof storage) => {
       storage = customStorage;
     },

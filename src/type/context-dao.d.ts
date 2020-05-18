@@ -7,15 +7,21 @@ import { AmbiguousPlatform } from "./messenger";
  */
 export interface ContextDAO<Context> {
   /** Get the whole context in storage */
-  getContext(targetID: string, platform: AmbiguousPlatform): Promise<Context>;
+  getContext(
+    args: Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>
+  ): Promise<Context>;
 
   /** Append to the current context in storage */
   appendContext(
-    targetID: string,
-    platform: AmbiguousPlatform,
-    context: Partial<Context>
+    args: Readonly<{
+      context: Partial<Context>;
+      targetID: string;
+      targetPlatform: AmbiguousPlatform;
+    }>
   ): Promise<Readonly<{ newContext: Context; oldContext: Context }>>;
 
   /** Reset all context to factory */
-  resetContext(targetID: string, platform: AmbiguousPlatform): Promise<unknown>;
+  resetContext(
+    args: Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>
+  ): Promise<unknown>;
 }

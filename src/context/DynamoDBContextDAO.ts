@@ -20,8 +20,8 @@ export function createDynamoDBContextDAO<Context>({
 
   const strContextKey = "context";
 
-  const contextDAO: ContextDAO<Context> = {
-    getContext: async (targetID, targetPlatform) => {
+  const dao: ContextDAO<Context> = {
+    getContext: async ({ targetID, targetPlatform }) => {
       const { Item = {} } = await ddb
         .getItem({
           Key: getTableKey(targetID, targetPlatform),
@@ -32,8 +32,8 @@ export function createDynamoDBContextDAO<Context>({
       const strContext = Item[strContextKey]?.S || "{}";
       return JSON.parse(strContext);
     },
-    appendContext: async (targetID, targetPlatform, context) => {
-      const oldContext = await contextDAO.getContext(targetID, targetPlatform);
+    appendContext: async ({ context, targetID, targetPlatform }) => {
+      const oldContext = await dao.getContext({ targetPlatform, targetID });
       const newContext = joinObjects(oldContext, context);
       const strContext = JSON.stringify(newContext);
 
@@ -50,7 +50,7 @@ export function createDynamoDBContextDAO<Context>({
 
       return { newContext, oldContext };
     },
-    resetContext: async (targetID, targetPlatform) =>
+    resetContext: async ({ targetID, targetPlatform }) =>
       ddb
         .deleteItem({
           Key: getTableKey(targetID, targetPlatform),
@@ -60,7 +60,7 @@ export function createDynamoDBContextDAO<Context>({
         .promise(),
   };
 
-  return contextDAO;
+  return dao;
 }
 
 export default function<Context>() {

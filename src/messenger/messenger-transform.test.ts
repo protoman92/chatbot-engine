@@ -53,9 +53,12 @@ describe("Save context on send", () => {
     const oldContext: {} = { a: 1, b: 2 };
     const additionalContext: {} = { a: 1, b: 2, c: 3 };
     const finalContext = joinObjects(oldContext, additionalContext);
-    when(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ oldContext, newContext: finalContext });
+
+    when(contextDAO.appendContext(anything())).thenResolve({
+      oldContext,
+      newContext: finalContext,
+    });
+
     when(msgProcessor.sendResponse(anything())).thenResolve();
     when(msgProcessor.receiveRequest(anything())).thenResolve();
 
@@ -84,9 +87,11 @@ describe("Save context on send", () => {
     // Then
     verify(
       contextDAO.appendContext(
-        targetID,
-        "telegram",
-        deepEqual(additionalContext)
+        deepEqual({
+          targetID,
+          context: additionalContext,
+          targetPlatform: "telegram",
+        })
       )
     ).once();
 
@@ -133,7 +138,7 @@ describe("Inject context on receive", () => {
     });
 
     // Then
-    verify(contextDAO.getContext(anything(), anything())).never();
+    verify(contextDAO.getContext(anything())).never();
     verify(msgProcessor.receiveRequest(anything())).once();
   });
 
@@ -142,9 +147,9 @@ describe("Inject context on receive", () => {
     const expectedContext = { a: 1, b: 2 };
     when(msgProcessor.receiveRequest(anything())).thenResolve({});
 
-    when(contextDAO.getContext(targetID, targetPlatform)).thenResolve(
-      expectedContext
-    );
+    when(
+      contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
+    ).thenResolve(expectedContext);
 
     const transformed = await compose(
       instance(msgProcessor),
@@ -163,7 +168,9 @@ describe("Inject context on receive", () => {
     await transformed.receiveRequest(genericRequest);
 
     // Then
-    verify(contextDAO.getContext(targetID, targetPlatform)).once();
+    verify(
+      contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
+    ).once();
 
     verify(
       msgProcessor.receiveRequest(
@@ -202,18 +209,16 @@ describe("Save user for target ID", () => {
     });
 
     // Then
-    verify(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).never();
-
+    verify(contextDAO.appendContext(anything())).never();
     verify(msgProcessor.receiveRequest(anything())).once();
   });
 
   it("Should save user when no user ID is present in context", async () => {
     // Setup
-    when(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ newContext: {}, oldContext: {} });
+    when(contextDAO.appendContext(anything())).thenResolve({
+      newContext: {},
+      oldContext: {},
+    });
 
     when(msgProcessor.receiveRequest(anything())).thenResolve({
       targetID,
@@ -245,9 +250,11 @@ describe("Save user for target ID", () => {
     // Then
     verify(
       contextDAO.appendContext(
-        targetID,
-        targetPlatform,
-        deepEqual({ ...additionalContext, targetID })
+        deepEqual({
+          targetID,
+          context: { ...additionalContext, targetID },
+          targetPlatform: targetPlatform,
+        })
       )
     ).once();
 
@@ -292,9 +299,7 @@ describe("Save Telegram user for target ID", () => {
     });
 
     // Then
-    verify(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).never();
+    verify(contextDAO.appendContext(anything())).never();
   });
 
   it("Should not save user if invalid request type", async () => {
@@ -321,16 +326,16 @@ describe("Save Telegram user for target ID", () => {
     });
 
     // Then
-    verify(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).never();
+    verify(contextDAO.appendContext(anything())).never();
   });
 
   it("Should save user when no user ID is present in context", async () => {
     // Setup
-    when(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ newContext: {}, oldContext: {} });
+    when(contextDAO.appendContext(anything())).thenResolve({
+      newContext: {},
+      oldContext: {},
+    });
+
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
     const additionalContext = { a: 1, b: 2 };
@@ -364,18 +369,22 @@ describe("Save Telegram user for target ID", () => {
     // Then
     verify(
       contextDAO.appendContext(
-        `${targetID}`,
-        "telegram",
-        deepEqual({ ...additionalContext, targetID: `${targetID}` })
+        deepEqual({
+          context: { ...additionalContext, targetID: `${targetID}` },
+          targetID: `${targetID}`,
+          targetPlatform: "telegram",
+        })
       )
     ).once();
   });
 
   it("Should not save targetID if it's somehow null", async () => {
     // Setup
-    when(
-      contextDAO.appendContext(anything(), anything(), anything())
-    ).thenResolve({ newContext: {}, oldContext: {} });
+    when(contextDAO.appendContext(anything())).thenResolve({
+      newContext: {},
+      oldContext: {},
+    });
+
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
 
     const transformed = await compose(
@@ -406,9 +415,11 @@ describe("Save Telegram user for target ID", () => {
     // Then
     verify(
       contextDAO.appendContext(
-        `${targetID}`,
-        "telegram",
-        deepEqual({ targetID: undefined })
+        deepEqual({
+          context: { targetID: undefined },
+          targetID: `${targetID}`,
+          targetPlatform: "telegram",
+        })
       )
     ).once();
   });

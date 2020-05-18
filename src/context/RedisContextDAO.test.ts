@@ -36,7 +36,10 @@ describe("Redis context DAO", () => {
     });
 
     // When
-    const storedContext = await contextDAO.getContext(targetID, targetPlatform);
+    const storedContext = await contextDAO.getContext({
+      targetID,
+      targetPlatform,
+    });
 
     // Then
     verify(redis.get(getCacheKey(targetID), anything())).once();
@@ -57,11 +60,11 @@ describe("Redis context DAO", () => {
     ).thenCall((...[, , param3]) => param3(null, "OK"));
 
     // When
-    const result = await contextDAO.appendContext(
+    const result = await contextDAO.appendContext({
       targetID,
       targetPlatform,
-      additionalContext
-    );
+      context: additionalContext,
+    });
 
     // Then
     const newContext = joinObjects<{}>(oldContext, additionalContext);
@@ -77,7 +80,7 @@ describe("Redis context DAO", () => {
     });
 
     // When
-    const result = await contextDAO.resetContext(targetID, targetPlatform);
+    const result = await contextDAO.resetContext({ targetID, targetPlatform });
 
     // Then
     verify(redis.del(getCacheKey(targetID), anything())).once();

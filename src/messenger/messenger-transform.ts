@@ -28,11 +28,11 @@ export function saveContextOnSend<Context>(
         const result = await processor.sendResponse(response);
 
         if (additionalContext != null) {
-          const { newContext, oldContext } = await contextDAO.appendContext(
+          const { newContext, oldContext } = await contextDAO.appendContext({
             targetID,
             targetPlatform,
-            additionalContext
-          );
+            context: additionalContext,
+          });
 
           const finalProcessor = getFinalMessageProcessor();
 
@@ -71,10 +71,10 @@ export function injectContextOnReceive<Context, RawRequest>(
 
         const { targetID, targetPlatform } = request;
 
-        let currentContext = await contextDAO.getContext(
+        let currentContext = await contextDAO.getContext({
           targetID,
-          targetPlatform
-        );
+          targetPlatform,
+        });
 
         currentContext = { ...request.currentContext, ...currentContext };
         return processor.receiveRequest({ ...request, currentContext });
@@ -115,9 +115,10 @@ export function saveUserForTargetID<
             targetUserID,
           } = await saveUser(rawUser);
 
-          await contextDAO.appendContext(targetID, targetPlatform, {
-            ...additionalContext,
-            targetID: `${targetUserID}`,
+          await contextDAO.appendContext({
+            targetID,
+            targetPlatform,
+            context: { ...additionalContext, targetID: `${targetUserID}` },
           });
         }
 

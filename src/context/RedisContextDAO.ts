@@ -19,13 +19,13 @@ export function createRedisContextDAO<Context>(
   const set = promisify2(redis.set).bind(redis);
   const del = promisify1(redis.del).bind(redis);
 
-  const contextDAO: ContextDAO<Context> = {
-    getContext: async (targetID, targetPlatform) => {
-      const context = await get(getCacheKey(targetID, targetPlatform));
+  const dao: ContextDAO<Context> = {
+    getContext: async ({ targetPlatform: platform, targetID }) => {
+      const context = await get(getCacheKey(targetID, platform));
       return JSON.parse(context);
     },
-    appendContext: async (targetID, targetPlatform, context) => {
-      const oldContext = await contextDAO.getContext(targetID, targetPlatform);
+    appendContext: async ({ context, targetID, targetPlatform }) => {
+      const oldContext = await dao.getContext({ targetID, targetPlatform });
       const newContext = joinObjects(oldContext, context);
 
       await set(
@@ -35,12 +35,12 @@ export function createRedisContextDAO<Context>(
 
       return { newContext, oldContext };
     },
-    resetContext: (targetID, targetPlatform) => {
-      return del(getCacheKey(targetID, targetPlatform));
+    resetContext: ({ targetPlatform: platform, targetID }) => {
+      return del(getCacheKey(targetID, platform));
     },
   };
 
-  return contextDAO;
+  return dao;
 }
 
 export default function<Context>() {
