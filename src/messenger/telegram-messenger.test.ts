@@ -34,7 +34,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ command: "test", text: "me", type: "command" }],
+        input: { command: "test", text: "me", type: "command" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -58,7 +58,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ command: "test", text: undefined, type: "command" }],
+        input: { command: "test", text: undefined, type: "command" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -82,7 +82,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ text: "test", type: "text" }],
+        input: { text: "test", type: "text" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -122,7 +122,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ document: document, type: "document" }],
+        input: { document: document, type: "document" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -155,7 +155,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ images: [photo], type: "image" }],
+        input: { images: [photo], type: "image" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -185,7 +185,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ newChatMembers: [from], type: "joined_chat" }],
+        input: { newChatMembers: [from], type: "joined_chat" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -215,7 +215,7 @@ describe("Create generic Telegram requests", async () => {
       {
         currentBot,
         currentContext: {},
-        input: [{ leftChatMembers: [from], type: "left_chat" }],
+        input: { leftChatMembers: [from], type: "left_chat" },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,

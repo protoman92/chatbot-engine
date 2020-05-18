@@ -6,16 +6,16 @@ describe("Common utilities", () => {
   it("Getting cross platform output should work", async () => {
     // Setup && When
     const fbOutput = await getCrossPlatformOutput({
-      facebook: [{ content: { text: "test", type: "text" } }],
+      facebook: [{ content: { text: "", type: "text" } }],
     })("facebook");
 
     const tlOutput = await getCrossPlatformOutput({
-      telegram: [{ content: { text: "test", type: "text" } }],
+      telegram: [{ content: { text: "", type: "text" } }],
     })("telegram");
 
     // Then
-    expectJs(fbOutput).to.eql({ text: "test", type: "text" });
-    expectJs(tlOutput).to.eql({ text: "test", type: "text" });
+    expectJs(fbOutput).to.eql([{ content: { text: "", type: "text" } }]);
+    expectJs(tlOutput).to.eql([{ content: { text: "", type: "text" } }]);
   });
 
   it("Map series should maintain order", async function() {
@@ -42,6 +42,6 @@ describe("Common utilities", () => {
 
   it("Require not null should work", async () => {
     expectJs(requireNotNull(1)).to.eql(1);
-    expectJs(requireNotNull(null)).to.throwError();
+    expectJs(() => requireNotNull(null)).to.throwError();
   });
 });

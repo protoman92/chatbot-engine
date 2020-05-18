@@ -141,19 +141,17 @@ export function createGenericTelegramRequest<Context>(
     return [];
   }
 
-  const [telegramUser, chat, input] = processed;
+  const [telegramUser, chat, inputs] = processed;
 
-  return [
-    {
-      currentBot,
-      input,
-      targetPlatform: "telegram",
-      telegramUser,
-      currentContext: {} as Context,
-      targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
-      type: "message_trigger",
-    },
-  ];
+  return inputs.map((input) => ({
+    currentBot,
+    input,
+    targetPlatform: "telegram",
+    telegramUser,
+    currentContext: {} as Context,
+    targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
+    type: "message_trigger",
+  }));
 }
 
 /** Create a Telegram response from multiple generic responses */

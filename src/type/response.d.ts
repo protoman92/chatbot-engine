@@ -1,10 +1,10 @@
 import { FacebookResponse } from "./facebook";
-import { AmbiguousRequestPerInput } from "./request";
+import { AmbiguousRequest } from "./request";
 import { TelegramResponse } from "./telegram";
 
 export interface BaseResponse<Context> {
   readonly additionalContext?: Partial<Context>;
-  readonly originalRequest: AmbiguousRequestPerInput<Context>;
+  readonly originalRequest: AmbiguousRequest<Context>;
   readonly targetID: string;
 }
 

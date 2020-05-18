@@ -40,7 +40,7 @@ export interface WitRequestInput
   readonly type: "wit";
 }
 
-export interface BaseWitRequestPerInput<Context> extends BaseRequest<Context> {
+export interface BaseWitRequest<Context> extends BaseRequest<Context> {
   readonly input: WitRequestInput;
   readonly type: "manual_trigger";
 }

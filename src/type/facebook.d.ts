@@ -1,18 +1,15 @@
 import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import {
-  BaseContextChangeRequest,
-  BaseContextChangeRequestPerInput,
-} from "./context";
-import { BaseErrorRequestPerInput } from "./error";
+import { BaseContextChangeRequest } from "./context";
+import { BaseErrorRequest } from "./error";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
-import { BaseWitRequestPerInput } from "./wit";
+import { BaseWitRequest } from "./wit";
 
 export type FacebookRequestInput =
   | Readonly<{ coordinate: Coordinates; type: "location" }>
@@ -31,21 +28,12 @@ type CommonFacebookRequest<Context> = Readonly<{ targetPlatform: "facebook" }> &
 export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
   (
     | Readonly<{
-        input: readonly FacebookRequestInput[];
-        type: "message_trigger" | "manual_trigger";
-      }>
-    | BaseContextChangeRequest<Context>
-  );
-
-export type FacebookRequestPerInput<Context> = CommonFacebookRequest<Context> &
-  (
-    | Readonly<{
         input: FacebookRequestInput;
         type: "message_trigger" | "manual_trigger";
       }>
-    | BaseContextChangeRequestPerInput<Context>
-    | BaseErrorRequestPerInput<Context>
-    | BaseWitRequestPerInput<Context>
+    | BaseContextChangeRequest<Context>
+    | BaseErrorRequest<Context>
+    | BaseWitRequest<Context>
   );
 
 export interface FacebookResponse<Context>
@@ -374,7 +362,7 @@ export interface FacebookMessageProcessor<Context>
 export type FacebookDefaultContext = {};
 
 export type FacebookLeafObserver<T> = ContentObserver<
-  FacebookRequestPerInput<T & FacebookDefaultContext>
+  FacebookRequest<T & FacebookDefaultContext>
 >;
 
 export type FacebookLeaf<T> = FacebookLeafObserver<T> &

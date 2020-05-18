@@ -1,5 +1,5 @@
-import { FacebookRequest, FacebookRequestPerInput } from "./facebook";
-import { TelegramRequest, TelegramRequestPerInput } from "./telegram";
+import { FacebookRequest } from "./facebook";
+import { TelegramRequest } from "./telegram";
 
 export type BaseRequest<Context> = Readonly<{
   currentContext: Context;
@@ -9,7 +9,3 @@ export type BaseRequest<Context> = Readonly<{
 export type AmbiguousRequest<Context> =
   | FacebookRequest<Context>
   | TelegramRequest<Context>;
-
-export type AmbiguousRequestPerInput<Context> =
-  | FacebookRequestPerInput<Context>
-  | TelegramRequestPerInput<Context>;

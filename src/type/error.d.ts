@@ -7,12 +7,6 @@ export interface ErrorRequestInput {
 }
 
 export interface BaseErrorRequest<Context> extends BaseRequest<Context> {
-  readonly input: readonly ErrorRequestInput[];
+  readonly input: ErrorRequestInput;
   readonly type: "manual_trigger";
 }
-
-export type BaseErrorRequestPerInput<Context> = Omit<
-  BaseErrorRequest<Context>,
-  "input"
-> &
-  Readonly<{ input: BaseErrorRequest<Context>["input"][0] }>;

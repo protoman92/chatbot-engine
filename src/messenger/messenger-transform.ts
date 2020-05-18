@@ -40,7 +40,7 @@ export function saveContextOnSend<Context>(
             oldContext,
             changedContext: additionalContext,
             currentContext: originalRequest.currentContext,
-            input: [{ type: "placebo" }],
+            input: { type: "placebo" },
             targetID: originalRequest.targetID,
             targetPlatform: originalRequest.targetPlatform,
             type: "context_trigger",

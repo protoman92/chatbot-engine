@@ -104,7 +104,7 @@ function createFacebookRequest<Context>(
 
   switch (object) {
     case "page":
-      if (entry !== undefined && entry !== null) {
+      if (entry != null) {
         const allRequests = entry
           .map(({ messaging }) => messaging)
           .filter((messaging) => !!messaging)
@@ -112,15 +112,25 @@ function createFacebookRequest<Context>(
 
         const groupedRequests = groupRequests(allRequests);
 
-        return Object.entries(groupedRequests).map(([targetID, requests]) => ({
-          targetID,
-          currentContext: {} as any,
-          input: requests
-            .map((req) => processRequest(req))
-            .reduce((acc, items) => acc.concat(items), []),
-          targetPlatform: "facebook",
-          type: "message_trigger",
-        }));
+        return Object.entries(groupedRequests).reduce(
+          (acc, [targetID, requests]) => [
+            ...acc,
+            ...requests.map(processRequest).reduce(
+              (acc1, inputs) => [
+                ...acc1,
+                ...inputs.map((input) => ({
+                  input,
+                  targetID,
+                  currentContext: {} as any,
+                  targetPlatform: "facebook" as const,
+                  type: "message_trigger" as const,
+                })),
+              ],
+              [] as FacebookRequest<Context>[]
+            ),
+          ],
+          [] as FacebookRequest<Context>[]
+        );
       }
   }
 

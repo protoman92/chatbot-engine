@@ -46,11 +46,7 @@ export async function createMessageProcessor<Context>(
   finalMessageProcessor = await compose(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
-      receiveRequest: (request) => {
-        return mapSeries(request.input as any[], (input) => {
-          return leafSelector.next({ ...request, input });
-        });
-      },
+      receiveRequest: (request) => leafSelector.next(request),
       sendResponse: async (response) => {
         const data = await mapResponse(response);
         return mapSeries(data, (datum) => client.sendResponse(datum));

@@ -11,10 +11,7 @@ import {
 } from "ts-mockito";
 import { NextResult } from "../stream";
 import { PlatformClient } from "../type/client";
-import {
-  FacebookMessageProcessor,
-  FacebookRequestInput,
-} from "../type/facebook";
+import { FacebookMessageProcessor } from "../type/facebook";
 import { LeafSelector } from "../type/leaf";
 import { AmbiguousPlatform } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
@@ -126,16 +123,11 @@ describe("Generic message processor", () => {
     verify(messageProcessor.sendResponse(anything())).never();
   });
 
-  it("Should process input when receiving request", async () => {
+  it("Should send input to leaf selector when receiving request", async () => {
     // Setup
     when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
     const currentContext = { a: 1, b: 2 };
-
-    const input: readonly FacebookRequestInput[] = [
-      { text: "text-1", type: "text" },
-      { text: "text-2", type: "text" },
-    ];
 
     // When
     const messageProcessor = await createMessageProcessor({
@@ -148,26 +140,24 @@ describe("Generic message processor", () => {
 
     await messageProcessor.receiveRequest({
       currentContext,
-      input,
       targetID,
       targetPlatform,
+      input: { text: "", type: "text" },
       type: "message_trigger",
     });
 
     // Then
-    input.forEach((input) =>
-      verify(
-        leafSelector.next(
-          deepEqual({
-            currentContext,
-            input,
-            targetID,
-            targetPlatform,
-            type: "message_trigger",
-          })
-        )
-      ).once()
-    );
+    verify(
+      leafSelector.next(
+        deepEqual({
+          currentContext,
+          targetID,
+          targetPlatform,
+          input: { text: "", type: "text" },
+          type: "message_trigger",
+        })
+      )
+    ).once();
   });
 });
 
@@ -205,7 +195,7 @@ describe("Cross platform message processor", () => {
       {
         targetID,
         currentContext: {},
-        input: [],
+        input: { text: "", type: "text" },
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -216,7 +206,7 @@ describe("Cross platform message processor", () => {
         targetID,
         currentBot: { id: 0, first_name: "", username: "" },
         currentContext: {},
-        input: [],
+        input: { text: "", type: "text" },
         targetPlatform: "telegram" as const,
         telegramUser: {
           id: 0,

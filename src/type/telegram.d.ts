@@ -1,18 +1,15 @@
 import {} from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import {
-  BaseContextChangeRequest,
-  BaseContextChangeRequestPerInput,
-} from "./context";
-import { BaseErrorRequestPerInput } from "./error";
+import { BaseContextChangeRequest } from "./context";
+import { BaseErrorRequest } from "./error";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
-import { BaseWitRequestPerInput } from "./wit";
+import { BaseWitRequest } from "./wit";
 
 export type TelegramRequestInput =
   | Readonly<{ command: string; text?: string; type: "command" }>
@@ -45,31 +42,16 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
     | Readonly<{
         currentBot: TelegramBot;
         telegramUser: TelegramUser;
-        input: readonly TelegramRequestInput[];
+        input: TelegramRequestInput;
         type: "message_trigger";
       }>
     | Readonly<{
-        input: readonly TelegramRequestInput[];
+        input: TelegramRequestInput;
         type: "manual_trigger";
       }>
     | BaseContextChangeRequest<Context>
-  );
-
-export type TelegramRequestPerInput<Context> = CommonTelegramRequest<Context> &
-  (
-    | Readonly<{
-        currentBot: TelegramBot;
-        telegramUser: TelegramUser;
-        input: TelegramRequestInput;
-        type: "message_trigger";
-      }>
-    | Readonly<{
-        input: TelegramRequestInput;
-        type: "manual_trigger";
-      }>
-    | BaseContextChangeRequestPerInput<Context>
-    | BaseErrorRequestPerInput<Context>
-    | BaseWitRequestPerInput<Context>
+    | BaseErrorRequest<Context>
+    | BaseWitRequest<Context>
   );
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {
@@ -331,7 +313,7 @@ export interface TelegramMessageProcessor<Context>
 export type TelegramDefaultContext = {};
 
 export type TelegramLeafObserver<T> = ContentObserver<
-  TelegramRequestPerInput<T & TelegramDefaultContext>
+  TelegramRequest<T & TelegramDefaultContext>
 >;
 
 export type TelegramLeaf<T> = TelegramLeafObserver<T> &

@@ -20,9 +20,9 @@ import { saveTelegramUser } from "./telegram-transform";
 
 interface Context {}
 const targetPlatform = "facebook";
-let msgProcessor: BaseMessageProcessor<{}>;
+let msgProcessor: BaseMessageProcessor<Context>;
 let client: PlatformClient<unknown>;
-let contextDAO: ContextDAO<{}>;
+let contextDAO: ContextDAO<Context>;
 let middlewareInput: MessageProcessorMiddleware.Input<Context>;
 
 beforeEach(async () => {
@@ -104,7 +104,7 @@ describe("Save context on send", () => {
           ...response.originalRequest,
           oldContext,
           changedContext: additionalContext,
-          input: [{ type: "placebo" }],
+          input: { type: "placebo" },
           newContext: finalContext,
           targetPlatform: "facebook",
           type: "context_trigger",
@@ -132,7 +132,7 @@ describe("Inject context on receive", () => {
       targetPlatform,
       changedContext: {},
       currentContext: {},
-      input: [{ type: "placebo" }],
+      input: { type: "placebo" },
       oldContext: {},
       newContext: {},
       type: "context_trigger",
@@ -161,7 +161,7 @@ describe("Inject context on receive", () => {
       targetID,
       targetPlatform,
       currentContext: {},
-      input: [],
+      input: { text: "", type: "text" },
       type: "message_trigger",
     };
 
@@ -203,7 +203,7 @@ describe("Save user for target ID", () => {
       targetPlatform,
       changedContext: {},
       currentContext: {},
-      input: [{ type: "placebo" }],
+      input: { type: "placebo" },
       oldContext: {},
       newContext: {},
       type: "context_trigger",
@@ -241,7 +241,7 @@ describe("Save user for target ID", () => {
       targetID,
       targetPlatform,
       currentContext: {},
-      input: [],
+      input: { text: "", type: "text" },
       type: "message_trigger",
     };
 
@@ -293,7 +293,7 @@ describe("Save Telegram user for target ID", () => {
     // When
     await transformed.receiveRequest({
       currentContext: {},
-      input: [{ text: "", type: "text" }],
+      input: { text: "", type: "text" },
       targetID: `${targetID}`,
       targetPlatform: "facebook",
       type: "message_trigger",
@@ -318,7 +318,7 @@ describe("Save Telegram user for target ID", () => {
     await transformed.receiveRequest({
       changedContext: {},
       currentContext: {},
-      input: [{ type: "placebo" }],
+      input: { type: "placebo" },
       oldContext: {},
       newContext: {},
       targetID: `${targetID}`,
@@ -353,7 +353,7 @@ describe("Save Telegram user for target ID", () => {
     await transformed.receiveRequest({
       currentBot: { id: 0, first_name: "", username: "" },
       currentContext: {},
-      input: [],
+      input: { text: "", type: "text" },
       targetID: `${targetID}`,
       targetPlatform: "telegram",
       telegramUser: {
@@ -399,7 +399,7 @@ describe("Save Telegram user for target ID", () => {
     await transformed.receiveRequest({
       currentBot: { id: 0, first_name: "", username: "" },
       currentContext: {},
-      input: [],
+      input: { text: "", type: "text" },
       targetID: `${targetID}`,
       targetPlatform: "telegram",
       telegramUser: {
