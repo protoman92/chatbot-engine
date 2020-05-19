@@ -9,6 +9,7 @@ import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
 export type FacebookRequestInput<Context> =
+  | Readonly<{ param: string; type: "deeplink" }>
   | Readonly<{ coordinate: Coordinates; type: "location" }>
   | Readonly<{ imageURL: string; type: "image" }>
   | Readonly<{
@@ -142,6 +143,31 @@ export interface FacebookResponseOutput extends BaseResponseOutput {
 }
 
 declare namespace FacebookRawRequest {
+  namespace Attachment {
+    interface Image {
+      readonly type: "image";
+      readonly payload: Readonly<{ url: string }>;
+    }
+
+    interface StickerImage extends Image {
+      readonly sticker_id: number;
+    }
+
+    interface Location {
+      readonly type: "location";
+      readonly title: string;
+      readonly url: string;
+      readonly payload: Readonly<{
+        coordinates: Readonly<{ lat: number; long: number }>;
+      }>;
+    }
+  }
+
+  type Attachment =
+    | Attachment.Image
+    | Attachment.StickerImage
+    | Attachment.Location;
+
   namespace Entry {
     namespace Messaging {
       interface Postback {
@@ -152,47 +178,22 @@ declare namespace FacebookRawRequest {
       }
 
       namespace Message {
-        namespace Attachment {
-          namespace Attachment {
-            interface Image {
-              readonly type: "image";
-              readonly payload: Readonly<{ url: string }>;
-            }
-
-            interface StickerImage extends Image {
-              readonly sticker_id: number;
-            }
-
-            interface Location {
-              readonly type: "location";
-              readonly title: string;
-              readonly url: string;
-              readonly payload: Readonly<{
-                coordinates: Readonly<{ lat: number; long: number }>;
-              }>;
-            }
-          }
-
-          type Attachment =
-            | Attachment.Image
-            | Attachment.StickerImage
-            | Attachment.Location;
-        }
-
         interface Attachment {
           readonly message: Readonly<{
-            attachments: readonly Attachment.Attachment[];
+            attachments: readonly FacebookRawRequest.Attachment[];
             message: Readonly<{ mid: string; seq: number }>;
           }>;
-
           readonly sender: Readonly<{ id: string }>;
           readonly recipient: Readonly<{ id: string }>;
           readonly timestamp: number;
         }
 
         interface QuickReply {
-          readonly quick_reply: Readonly<{ payload: string }>;
-          readonly message: Readonly<{ mid: string; seq: number }>;
+          readonly message: Readonly<{
+            mid: string;
+            quick_reply: Readonly<{ payload: string }>;
+            seq: number;
+          }>;
           readonly sender: Readonly<{ id: string }>;
           readonly recipient: Readonly<{ id: string }>;
           readonly timestamp: number;
@@ -203,7 +204,6 @@ declare namespace FacebookRawRequest {
             text: string;
             message: Readonly<{ mid: string; seq: number }>;
           }>;
-
           readonly sender: Readonly<{ id: string }>;
           readonly recipient: Readonly<{ id: string }>;
           readonly timestamp: number;
@@ -211,22 +211,32 @@ declare namespace FacebookRawRequest {
       }
 
       type Message = Message.Attachment | Message.Text | Message.QuickReply;
+
+      interface Referral {
+        readonly recipient: Readonly<{ id: string }>;
+        readonly referral: Readonly<{
+          ref: string;
+          source: "SHORTLINK";
+          type: "OPEN_THREAD";
+        }>;
+        readonly sender: Readonly<{ id: string }>;
+      }
     }
 
     /** Represents possible combinations of Facebook requests */
-    type Messaging = Messaging.Message | Messaging.Postback;
+    type Messaging =
+      | Messaging.Message
+      | Messaging.Postback
+      | Messaging.Referral;
   }
 }
 
 /** Represents a webhook request */
 export interface FacebookRawRequest {
   readonly object: "page";
-  readonly entry:
-    | Readonly<{
-        messaging: readonly FacebookRawRequest.Entry.Messaging[];
-      }>[]
-    | undefined
-    | null;
+  readonly entry?: Readonly<{
+    messaging: readonly FacebookRawRequest.Entry.Messaging[];
+  }>[];
 }
 
 declare namespace FacebookRawResponse {

@@ -35,68 +35,56 @@ function createFacebookRequest<Context>(
   function processRequest(
     request: RawRequest.Entry.Messaging
   ): FacebookRequestInput<Context>[] {
-    if (isType<RawRequest.Entry.Messaging.Postback>(request, "postback")) {
+    if ("postback" in request) {
       return [{ text: request.postback.payload, type: "text" }];
     }
 
-    if (isType<RawRequest.Entry.Messaging.Message>(request, "message")) {
+    if ("message" in request) {
       const { message } = request;
 
-      if (
-        isType<RawRequest.Entry.Messaging.Message.QuickReply>(
-          message,
-          "quick_reply"
-        )
-      ) {
+      if ("quick_reply" in message) {
         return [{ text: message.quick_reply.payload, type: "text" }];
       }
 
-      if (
-        isType<RawRequest.Entry.Messaging.Message.Text["message"]>(
-          message,
-          "text"
-        )
-      ) {
+      if ("text" in message) {
         return [{ text: message.text, type: "text" }];
       }
 
-      if (
-        isType<RawRequest.Entry.Messaging.Message.Attachment["message"]>(
-          message,
-          "attachments"
-        )
-      ) {
+      if ("attachments" in message) {
         const { attachments } = message;
 
-        return attachments.map(
-          (attachment): FacebookRequestInput<Context> => {
-            switch (attachment.type) {
-              case "image":
-                return {
-                  text: attachment.payload.url,
-                  imageURL: attachment.payload.url,
-                  stickerID: (() => {
-                    if (
-                      isType<
-                        RawRequest.Entry.Messaging.Message.Attachment.Attachment.StickerImage
-                      >(attachment.payload, "sticker_id")
-                    ) {
-                      return `${attachment.payload.sticker_id}`;
-                    }
+        return attachments.map((attachment) => {
+          switch (attachment.type) {
+            case "image":
+              return {
+                text: attachment.payload.url,
+                imageURL: attachment.payload.url,
+                stickerID: (() => {
+                  if (
+                    isType<RawRequest.Attachment.StickerImage>(
+                      attachment.payload,
+                      "sticker_id"
+                    )
+                  ) {
+                    return `${attachment.payload.sticker_id}`;
+                  }
 
-                    return "";
-                  })(),
-                  type: "sticker",
-                };
+                  return "";
+                })(),
+                type: "sticker",
+              };
 
-              case "location":
-                const { lat, long } = attachment.payload.coordinates;
-                const coordinates = { lat, lng: long };
-                return { coordinate: coordinates, type: "location" };
-            }
+            case "location":
+              const { lat, long } = attachment.payload.coordinates;
+              const coordinates = { lat, lng: long };
+              return { coordinate: coordinates, type: "location" };
           }
-        );
+        });
       }
+    }
+
+    if ("referral" in request) {
+      return [{ param: request.referral.ref, type: "deeplink" }];
     }
 
     throw facebookError(`Invalid request ${JSON.stringify(request)}`);

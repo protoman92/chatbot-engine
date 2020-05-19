@@ -1,5 +1,5 @@
 import { Omit } from "ts-essentials";
-import { isType, telegramError } from "../common/utils";
+import { telegramError } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   TelegramBot,
@@ -57,7 +57,7 @@ export function createGenericTelegramRequest<Context>(
   }: RawRequest.Message):
     | [TelegramUser, RawRequest.Chat, TelegramRequestInput<Context>[]]
     | undefined {
-    if (isType<RawRequest.Message.Text>(message, "text")) {
+    if ("text" in message) {
       const { text: textWithCommand } = message;
       const [command, text] = extractcommand(username, textWithCommand);
 
@@ -78,19 +78,17 @@ export function createGenericTelegramRequest<Context>(
       }
     }
 
-    if (isType<RawRequest.Message.Document>(message, "document")) {
+    if ("document" in message) {
       const { document } = message;
       return [user, chat, [{ document: document, type: "document" }]];
     }
 
-    if (isType<RawRequest.Message.NewChatMember>(message, "new_chat_members")) {
+    if ("new_chat_members" in message) {
       const { new_chat_members: newChatMembers } = message;
       return [user, chat, [{ newChatMembers, type: "joined_chat" }]];
     }
 
-    if (
-      isType<RawRequest.Message.LeftChatMember>(message, "left_chat_member")
-    ) {
+    if ("left_chat_member" in message) {
       const { left_chat_member } = message;
 
       return [
@@ -100,7 +98,7 @@ export function createGenericTelegramRequest<Context>(
       ];
     }
 
-    if (isType<RawRequest.Message.Photo>(message, "photo")) {
+    if ("photo" in message) {
       const { photo: images } = message;
       return [user, chat, [{ images, type: "image" }]];
     }
@@ -131,11 +129,11 @@ export function createGenericTelegramRequest<Context>(
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
-    if (isType<RawRequest.Message>(request, "message")) {
+    if ("message" in request) {
       result = processMessageRequest(request);
     }
 
-    if (isType<RawRequest.Callback>(request, "callback_query")) {
+    if ("callback_query" in request) {
       result = processCallbackRequest(request);
     }
 
