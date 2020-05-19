@@ -181,23 +181,15 @@ function createFacebookResponse<Context>({
           payload: {
             elements: items
               .slice(0, MAX_GENERIC_ELEMENT_COUNT)
-              .map(
-                ({
-                  title = "",
-                  description,
-                  // tslint:disable-next-line:variable-name
-                  mediaURL,
-                  actions: buttons,
-                }) => ({
-                  title,
-                  subtitle: description || undefined,
-                  image_url: mediaURL || undefined,
-                  buttons:
-                    !!buttons && buttons.length
-                      ? buttons.map((a) => createSingleAction(a))
-                      : undefined,
-                })
-              ),
+              .map(({ title = "", description, mediaURL, actions }) => ({
+                title,
+                subtitle: description || undefined,
+                image_url: mediaURL || undefined,
+                buttons:
+                  !!actions && actions.length
+                    ? actions.map((a) => createSingleAction(a))
+                    : undefined,
+              })),
             template_type: "generic",
           },
         },
@@ -230,16 +222,14 @@ function createFacebookResponse<Context>({
           payload: {
             elements: items
               .slice(0, MAX_LIST_ELEMENT_COUNT)
-              .map(
-                ({ title = "", description, actions: itemButtons = [] }) => ({
-                  title,
-                  subtitle: description || undefined,
-                  buttons:
-                    !!itemButtons && itemButtons.length
-                      ? itemButtons.map((a) => createSingleAction(a))
-                      : undefined,
-                })
-              ),
+              .map(({ title = "", description, actions = [] }) => ({
+                title,
+                subtitle: description || undefined,
+                buttons:
+                  !!actions && actions.length
+                    ? actions.map((a) => createSingleAction(a))
+                    : undefined,
+              })),
             template_type: "list",
             top_element_style: "compact",
             buttons:

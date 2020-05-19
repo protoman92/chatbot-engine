@@ -70,9 +70,9 @@ declare namespace FacebookResponseOutput {
       }
 
       interface URL {
-        readonly url: string;
         readonly text: string;
         readonly type: "url";
+        readonly url: string;
       }
     }
 
@@ -86,28 +86,24 @@ declare namespace FacebookResponseOutput {
     }
 
     interface Carousel {
-      readonly actions: readonly Action[] | undefined | null;
-
+      readonly actions?: readonly Action[];
       readonly items: Readonly<{
         title: string;
-        description: string | undefined | null;
-        mediaURL: string | undefined | null;
-        actions: readonly Action[] | undefined | null;
+        description?: string;
+        mediaURL?: string;
+        actions?: readonly Action[];
       }>[];
-
       readonly type: "carousel";
     }
 
     interface List {
-      readonly actions: readonly Action[] | undefined | null;
-
+      readonly actions?: readonly Action[];
       readonly items: Readonly<{
         title: string;
-        description: string | undefined | null;
+        description?: string;
         size: "large" | "small";
-        actions: readonly Action[] | undefined | null;
+        actions?: readonly Action[];
       }>[];
-
       readonly type: "list";
     }
 
