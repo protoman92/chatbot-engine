@@ -55,11 +55,13 @@ describe("catchAll higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
-      changedContext: {},
-      input: { type: "placebo" },
-      newContext: {},
-      oldContext: {},
-      type: "context_trigger",
+      input: {
+        changedContext: {},
+        newContext: {},
+        oldContext: {},
+        type: "context_change",
+      },
+      type: "manual_trigger",
     });
 
     // Then

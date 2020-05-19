@@ -4,7 +4,7 @@ import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
 import { WitClient, WitResponse } from "../type/wit";
-import { retryWithWit, getHighestConfidence } from "./retry_wit";
+import { getHighestConfidence, retryWithWit } from "./retry_wit";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
@@ -61,13 +61,15 @@ describe("Wit higher order function", () => {
     const result = await transformed.next({
       targetID,
       targetPlatform,
-      changedContext: {},
       currentContext: {},
       currentLeafName: "",
-      input: { type: "placebo" },
-      newContext: {},
-      oldContext: {},
-      type: "context_trigger",
+      input: {
+        changedContext: {},
+        newContext: {},
+        oldContext: {},
+        type: "context_change",
+      },
+      type: "manual_trigger",
     });
 
     // Then

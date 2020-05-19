@@ -1,5 +1,3 @@
-import { BaseRequest } from "./request";
-
 export interface WitConfig {
   readonly authorizationToken: string;
 }
@@ -38,9 +36,4 @@ export interface WitRequestInput
   extends Pick<WitResponse, "entities" | "intents" | "traits"> {
   readonly highestConfidence?: WitHighestConfidence;
   readonly type: "wit";
-}
-
-export interface BaseWitRequest<Context> extends BaseRequest<Context> {
-  readonly input: WitRequestInput;
-  readonly type: "manual_trigger";
 }

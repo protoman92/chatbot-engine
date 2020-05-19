@@ -1,26 +1,23 @@
 import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import { BaseContextChangeRequest } from "./context";
-import { BaseErrorRequest } from "./error";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest } from "./request";
+import { BaseRequest, CrossPlatformRequestInput } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
-import { BaseWitRequest } from "./wit";
 
-export type FacebookRequestInput =
+export type FacebookRequestInput<Context> =
   | Readonly<{ coordinate: Coordinates; type: "location" }>
-  | Readonly<{ text: string; type: "text" }>
   | Readonly<{ imageURL: string; type: "image" }>
   | Readonly<{
       text: string;
       imageURL: string;
       stickerID: string;
       type: "sticker";
-    }>;
+    }>
+  | CrossPlatformRequestInput<Context>;
 
 type CommonFacebookRequest<Context> = Readonly<{ targetPlatform: "facebook" }> &
   BaseRequest<Context>;
@@ -28,12 +25,10 @@ type CommonFacebookRequest<Context> = Readonly<{ targetPlatform: "facebook" }> &
 export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
   (
     | Readonly<{
-        input: FacebookRequestInput;
-        type: "message_trigger" | "manual_trigger";
+        input: FacebookRequestInput<Context>;
+        type: "message_trigger";
       }>
-    | BaseContextChangeRequest<Context>
-    | BaseErrorRequest<Context>
-    | BaseWitRequest<Context>
+    | Readonly<{ input: FacebookRequestInput<Context>; type: "manual_trigger" }>
   );
 
 export interface FacebookResponse<Context>

@@ -1,24 +1,17 @@
 import {} from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
-import { BaseContextChangeRequest } from "./context";
-import { BaseErrorRequest } from "./error";
 import { LeafSelector } from "./leaf";
 import { BaseMessageProcessor } from "./messenger";
-import { BaseRequest } from "./request";
+import { BaseRequest, CrossPlatformRequestInput } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
-import { BaseWitRequest } from "./wit";
 
-export type TelegramRequestInput =
+export type TelegramRequestInput<Context> =
   | Readonly<{ command: string; text?: string; type: "command" }>
-  | Readonly<{ text: string; type: "text" }>
   | Readonly<{ coordinate: Coordinates; type: "location" }>
-  | Readonly<{
-      document: TelegramRawRequest.DocumentDetails;
-      type: "document";
-    }>
+  | Readonly<{ document: TelegramRawRequest.DocumentDetails; type: "document" }>
   | Readonly<{
       images: readonly TelegramRawRequest.PhotoDetails[];
       type: "image";
@@ -30,7 +23,8 @@ export type TelegramRequestInput =
   | Readonly<{
       newChatMembers: readonly (TelegramBot | TelegramUser)[];
       type: "joined_chat";
-    }>;
+    }>
+  | CrossPlatformRequestInput<Context>;
 
 type CommonTelegramRequest<Context> = Readonly<{
   targetPlatform: "telegram";
@@ -42,16 +36,10 @@ export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
     | Readonly<{
         currentBot: TelegramBot;
         telegramUser: TelegramUser;
-        input: TelegramRequestInput;
+        input: TelegramRequestInput<Context>;
         type: "message_trigger";
       }>
-    | Readonly<{
-        input: TelegramRequestInput;
-        type: "manual_trigger";
-      }>
-    | BaseContextChangeRequest<Context>
-    | BaseErrorRequest<Context>
-    | BaseWitRequest<Context>
+    | Readonly<{ input: TelegramRequestInput<Context>; type: "manual_trigger" }>
   );
 
 export interface TelegramResponse<Context> extends BaseResponse<Context> {

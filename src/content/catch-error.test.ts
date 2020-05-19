@@ -33,12 +33,14 @@ describe("catchError higher-order function", () => {
       currentLeafName,
       targetID,
       targetPlatform,
-      changedContext: {},
       currentContext: {},
-      input: { type: "placebo" },
-      newContext: {},
-      oldContext: {},
-      type: "context_trigger",
+      input: {
+        changedContext: {},
+        newContext: {},
+        oldContext: {},
+        type: "context_change",
+      },
+      type: "manual_trigger",
     });
 
     // Then
@@ -75,13 +77,15 @@ describe("catchError higher-order function", () => {
     await transformed.next({
       targetID,
       targetPlatform,
-      changedContext: {},
       currentContext: {},
       currentLeafName: "should_be_ignored",
-      input: { type: "placebo" },
-      newContext: {},
-      oldContext: {},
-      type: "context_trigger",
+      input: {
+        changedContext: {},
+        newContext: {},
+        oldContext: {},
+        type: "context_change",
+      },
+      type: "manual_trigger",
     });
 
     // Then

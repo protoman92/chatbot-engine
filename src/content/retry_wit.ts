@@ -49,7 +49,7 @@ export function retryWithWit<Context>(
         result = await leaf.next({
           ...(request as Omit<typeof request, "input" | "type">),
           input: { entities, highestConfidence, intents, traits, type: "wit" },
-          targetPlatform: request.targetPlatform as any,
+          targetPlatform: request.targetPlatform,
           type: "manual_trigger",
         });
       }

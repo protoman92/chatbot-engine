@@ -10,7 +10,10 @@ export function catchAll<Context>(
     next: async (request) => {
       const result = await leaf.next(request);
 
-      if (request.type === "context_trigger" || result === NextResult.BREAK) {
+      if (
+        request.input.type === "context_change" ||
+        result === NextResult.BREAK
+      ) {
         return result;
       }
 

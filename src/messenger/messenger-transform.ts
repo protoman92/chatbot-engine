@@ -36,14 +36,16 @@ export function saveContextOnSend<Context>(
           const finalProcessor = getFinalMessageProcessor();
 
           await finalProcessor.receiveRequest({
-            newContext,
-            oldContext,
-            changedContext: additionalContext,
             currentContext: originalRequest.currentContext,
-            input: { type: "placebo" },
+            input: {
+              newContext,
+              oldContext,
+              changedContext: additionalContext,
+              type: "context_change",
+            },
             targetID: originalRequest.targetID,
             targetPlatform: originalRequest.targetPlatform,
-            type: "context_trigger",
+            type: "manual_trigger",
           });
         }
 
@@ -64,7 +66,7 @@ export function injectContextOnReceive<Context>(
     return {
       ...processor,
       receiveRequest: async (request) => {
-        if (request.type === "context_trigger") {
+        if (request.input.type === "context_change") {
           return processor.receiveRequest(request);
         }
 
@@ -75,7 +77,8 @@ export function injectContextOnReceive<Context>(
           targetPlatform,
         });
 
-        currentContext = { ...request.currentContext, ...currentContext };
+        /** Allow the request's context to override stored context */
+        currentContext = { ...currentContext, ...request.currentContext };
         return processor.receiveRequest({ ...request, currentContext });
       },
     };
@@ -96,7 +99,7 @@ export function saveUserForTargetID<Context, RawUser>(
     return {
       ...processor,
       receiveRequest: async (request) => {
-        if (request.type === "context_trigger") {
+        if (request.input.type === "context_change") {
           return processor.receiveRequest(request);
         }
 

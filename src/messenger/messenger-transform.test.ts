@@ -102,12 +102,14 @@ describe("Save context on send", () => {
       msgProcessor.receiveRequest(
         deepEqual({
           ...response.originalRequest,
-          oldContext,
-          changedContext: additionalContext,
-          input: { type: "placebo" },
-          newContext: finalContext,
+          input: {
+            oldContext,
+            changedContext: additionalContext,
+            newContext: finalContext,
+            type: "context_change",
+          },
           targetPlatform: "facebook",
-          type: "context_trigger",
+          type: "manual_trigger",
         })
       )
     ).once();
@@ -130,12 +132,14 @@ describe("Inject context on receive", () => {
     await transformed.receiveRequest({
       targetID,
       targetPlatform,
-      changedContext: {},
       currentContext: {},
-      input: { type: "placebo" },
-      oldContext: {},
-      newContext: {},
-      type: "context_trigger",
+      input: {
+        changedContext: {},
+        oldContext: {},
+        newContext: {},
+        type: "context_change",
+      },
+      type: "manual_trigger",
     });
 
     // Then
@@ -201,12 +205,14 @@ describe("Save user for target ID", () => {
     await transformed.receiveRequest({
       targetID,
       targetPlatform,
-      changedContext: {},
       currentContext: {},
-      input: { type: "placebo" },
-      oldContext: {},
-      newContext: {},
-      type: "context_trigger",
+      input: {
+        changedContext: {},
+        oldContext: {},
+        newContext: {},
+        type: "context_change",
+      },
+      type: "manual_trigger",
     });
 
     // Then
@@ -316,14 +322,16 @@ describe("Save Telegram user for target ID", () => {
 
     // When
     await transformed.receiveRequest({
-      changedContext: {},
       currentContext: {},
-      input: { type: "placebo" },
-      oldContext: {},
-      newContext: {},
+      input: {
+        changedContext: {},
+        oldContext: {},
+        newContext: {},
+        type: "context_change",
+      },
       targetID: `${targetID}`,
       targetPlatform: "telegram",
-      type: "context_trigger",
+      type: "manual_trigger",
     });
 
     // Then

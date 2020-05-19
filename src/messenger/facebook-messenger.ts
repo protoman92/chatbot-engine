@@ -34,7 +34,7 @@ function createFacebookRequest<Context>(
 
   function processRequest(
     request: RawRequest.Entry.Messaging
-  ): FacebookRequestInput[] {
+  ): FacebookRequestInput<Context>[] {
     if (isType<RawRequest.Entry.Messaging.Postback>(request, "postback")) {
       return [{ text: request.postback.payload, type: "text" }];
     }
@@ -69,7 +69,7 @@ function createFacebookRequest<Context>(
         const { attachments } = message;
 
         return attachments.map(
-          (attachment): FacebookRequestInput => {
+          (attachment): FacebookRequestInput<Context> => {
             switch (attachment.type) {
               case "image":
                 return {

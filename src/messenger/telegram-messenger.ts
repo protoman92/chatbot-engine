@@ -55,7 +55,7 @@ export function createGenericTelegramRequest<Context>(
   function processMessageRequest({
     message: { chat, from: user, ...message },
   }: RawRequest.Message):
-    | [TelegramUser, RawRequest.Chat, TelegramRequestInput[]]
+    | [TelegramUser, RawRequest.Chat, TelegramRequestInput<Context>[]]
     | undefined {
     if (isType<RawRequest.Message.Text>(message, "text")) {
       const { text: textWithCommand } = message;
@@ -111,7 +111,11 @@ export function createGenericTelegramRequest<Context>(
   function processCallbackRequest({
     callback_query: { data, from: user },
   }: RawRequest.Callback):
-    | [TelegramUser, RawRequest.Chat | undefined, TelegramRequestInput[]]
+    | [
+        TelegramUser,
+        RawRequest.Chat | undefined,
+        TelegramRequestInput<Context>[]
+      ]
     | undefined {
     return [user, undefined, [{ text: data, type: "text" }]];
   }
@@ -119,7 +123,11 @@ export function createGenericTelegramRequest<Context>(
   function processRequest(
     request: RawRequest
   ):
-    | [TelegramUser, RawRequest.Chat | undefined, TelegramRequestInput[]]
+    | [
+        TelegramUser,
+        RawRequest.Chat | undefined,
+        TelegramRequestInput<Context>[]
+      ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
@@ -180,16 +188,16 @@ function createRawTelegramResponse<Context>({
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    quickReplies: TelegramResponseOutput.InlineMarkupMatrix
+    matrix: TelegramResponseOutput.InlineMarkupMatrix
   ): TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
     return {
-      inline_keyboard: quickReplies.map((qrs) =>
-        qrs.map((qr) => {
-          const { text } = qr;
+      inline_keyboard: matrix.map((quickReplies) =>
+        quickReplies.map((quickReply) => {
+          const { text } = quickReply;
 
-          switch (qr.type) {
+          switch (quickReply.type) {
             case "postback":
-              return { text, callback_data: qr.payload };
+              return { text, callback_data: quickReply.payload };
 
             case "text":
               return { text, callback_data: text };
@@ -201,10 +209,10 @@ function createRawTelegramResponse<Context>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    quickReplyMatrix: TelegramResponseOutput.ReplyMarkupMatrix
+    matric: TelegramResponseOutput.ReplyMarkupMatrix
   ): TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
     return {
-      keyboard: quickReplyMatrix.map((quickReplies) =>
+      keyboard: matric.map((quickReplies) =>
         quickReplies.map((quickReply) => {
           const { text } = quickReply;
 
