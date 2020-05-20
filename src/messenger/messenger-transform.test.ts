@@ -68,7 +68,7 @@ describe("Save context on send", () => {
       saveContextOnSend(instance(contextDAO))(middlewareInput)
     );
 
-    const response: AmbiguousResponse<{}> = {
+    const response: AmbiguousResponse<Context> = {
       targetID,
       additionalContext,
       originalRequest: {
@@ -101,7 +101,7 @@ describe("Save context on send", () => {
     verify(
       msgProcessor.receiveRequest(
         deepEqual({
-          ...response.originalRequest,
+          ...response.originalRequest!,
           input: {
             oldContext,
             changedContext: additionalContext,

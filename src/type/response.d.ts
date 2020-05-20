@@ -4,7 +4,12 @@ import { TelegramResponse } from "./telegram";
 
 export interface BaseResponse<Context> {
   readonly additionalContext?: Partial<Context>;
-  readonly originalRequest: AmbiguousRequest<Context>;
+  /**
+   * If this response is sent organically (i.e. not manually invoked to send
+   * a custom message not triggered by the user), the original request will be
+   * available in order to trigger context change requests.
+   */
+  readonly originalRequest?: AmbiguousRequest<Context>;
   readonly targetID: string;
 }
 

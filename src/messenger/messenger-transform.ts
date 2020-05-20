@@ -33,20 +33,22 @@ export function saveContextOnSend<Context>(
             context: additionalContext,
           });
 
-          const finalProcessor = getFinalMessageProcessor();
+          if (originalRequest != null) {
+            const finalProcessor = getFinalMessageProcessor();
 
-          await finalProcessor.receiveRequest({
-            currentContext: originalRequest.currentContext,
-            input: {
-              newContext,
-              oldContext,
-              changedContext: additionalContext,
-              type: "context_change",
-            },
-            targetID: originalRequest.targetID,
-            targetPlatform: originalRequest.targetPlatform,
-            type: "manual_trigger",
-          });
+            await finalProcessor.receiveRequest({
+              currentContext: originalRequest.currentContext,
+              input: {
+                newContext,
+                oldContext,
+                changedContext: additionalContext,
+                type: "context_change",
+              },
+              targetID: originalRequest.targetID,
+              targetPlatform: originalRequest.targetPlatform,
+              type: "manual_trigger",
+            });
+          }
         }
 
         return result;
