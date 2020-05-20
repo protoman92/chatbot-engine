@@ -167,7 +167,7 @@ function createRawTelegramResponse<Context>({
 }: TelegramResponse<Context>): readonly TelegramRawResponse[] {
   function createImageResponse(
     chat_id: string,
-    { imageURL: photo, text: caption }: TelegramResponseOutput.Content.Image
+    { image: photo, text: caption }: TelegramResponseOutput.Content.Image
   ): Omit<TelegramRawResponse.SendPhoto, "reply_markup"> {
     return {
       caption,

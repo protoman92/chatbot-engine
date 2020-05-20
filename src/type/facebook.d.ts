@@ -89,7 +89,7 @@ declare namespace FacebookResponseOutput {
       readonly items: Readonly<{
         title: string;
         description?: string;
-        mediaURL?: string;
+        image?: string;
         actions?: readonly Action[];
       }>[];
       readonly type: "carousel";

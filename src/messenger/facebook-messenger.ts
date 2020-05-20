@@ -176,7 +176,7 @@ function createFacebookResponse<Context>({
           payload: {
             elements: items
               .slice(0, MAX_GENERIC_ELEMENT_COUNT)
-              .map(({ title = "", description, mediaURL, actions }) => ({
+              .map(({ title = "", description, image: mediaURL, actions }) => ({
                 title,
                 subtitle: description || undefined,
                 image_url: mediaURL || undefined,

@@ -85,7 +85,7 @@ declare namespace TelegramResponseOutput {
 declare namespace TelegramResponseOutput {
   namespace Content {
     interface Image {
-      readonly imageURL: string;
+      readonly image: string;
       readonly text: string;
       readonly type: "image";
     }
