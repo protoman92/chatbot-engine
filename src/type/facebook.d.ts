@@ -11,10 +11,9 @@ import { BaseResponseOutput } from "./visual-content";
 export type FacebookRequestInput<Context> =
   | Readonly<{ param: string; type: "deeplink" }>
   | Readonly<{ coordinate: Coordinates; type: "location" }>
-  | Readonly<{ imageURL: string; type: "image" }>
+  | Readonly<{ image: string; type: "image" }>
   | Readonly<{
-      text: string;
-      imageURL: string;
+      image: string;
       stickerID: string;
       type: "sticker";
     }>
@@ -96,6 +95,11 @@ declare namespace FacebookResponseOutput {
       readonly type: "carousel";
     }
 
+    interface Image {
+      readonly image: string;
+      readonly type: "image";
+    }
+
     interface List {
       readonly actions?: readonly Action[];
       readonly items: Readonly<{
@@ -107,30 +111,24 @@ declare namespace FacebookResponseOutput {
       readonly type: "list";
     }
 
-    namespace Media {
-      interface Media {
-        readonly type: "image" | "video";
-        readonly url: string;
-      }
-    }
-
-    interface Media {
-      readonly media: Media.Media;
-      readonly type: "media";
-    }
-
     interface Text {
       readonly text: string;
       readonly type: "text";
+    }
+
+    interface Video {
+      readonly type: "video";
+      readonly video: string;
     }
   }
 
   type Content =
     | Content.Button
     | Content.Carousel
+    | Content.Image
     | Content.List
-    | Content.Media
-    | Content.Text;
+    | Content.Text
+    | Content.Video;
 }
 
 export interface FacebookResponseOutput extends BaseResponseOutput {
@@ -142,11 +140,8 @@ declare namespace FacebookRawRequest {
   namespace Attachment {
     interface Image {
       readonly type: "image";
-      readonly payload: Readonly<{ url: string }>;
-    }
-
-    interface StickerImage extends Image {
-      readonly sticker_id: number;
+      readonly payload: Readonly<{ url: string }> &
+        ({} | Readonly<{ sticker_id: number }>);
     }
 
     interface Location {
@@ -159,10 +154,7 @@ declare namespace FacebookRawRequest {
     }
   }
 
-  type Attachment =
-    | Attachment.Image
-    | Attachment.StickerImage
-    | Attachment.Location;
+  type Attachment = Attachment.Image | Attachment.Location;
 
   namespace Entry {
     namespace Messaging {

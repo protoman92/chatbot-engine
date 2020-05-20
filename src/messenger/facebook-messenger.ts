@@ -56,23 +56,18 @@ function createFacebookRequest<Context>(
         return attachments.map((attachment) => {
           switch (attachment.type) {
             case "image":
-              return {
-                text: attachment.payload.url,
-                imageURL: attachment.payload.url,
-                stickerID: (() => {
-                  if (
-                    isType<RawRequest.Attachment.StickerImage>(
-                      attachment.payload,
-                      "sticker_id"
-                    )
-                  ) {
-                    return `${attachment.payload.sticker_id}`;
-                  }
-
-                  return "";
-                })(),
-                type: "sticker",
-              };
+              if ("sticker_id" in attachment.payload) {
+                return {
+                  image: attachment.payload.url,
+                  stickerID: `${attachment.payload.sticker_id}`,
+                  type: "sticker",
+                };
+              } else {
+                return {
+                  image: attachment.payload.url,
+                  type: "image",
+                };
+              }
 
             case "location":
               const { lat, long } = attachment.payload.coordinates;
@@ -242,22 +237,14 @@ function createFacebookResponse<Context>({
     };
   }
 
-  function createMediaResponse({
-    media: { type, url },
-  }: FacebookResponseOutput.Content.Media): FacebookRawResponse.Message.Media {
+  function createImageResponse({
+    image,
+  }: FacebookResponseOutput.Content.Image): FacebookRawResponse.Message.Media {
     return {
       message: {
         attachment: {
-          type: (() => {
-            switch (type) {
-              case "image":
-                return "image";
-
-              case "video":
-                return "video";
-            }
-          })(),
-          payload: { url, is_reusable: true },
+          type: "image",
+          payload: { is_reusable: true, url: image },
         },
       },
     };
@@ -267,6 +254,19 @@ function createFacebookResponse<Context>({
     text,
   }: FacebookResponseOutput.Content.Text): FacebookRawResponse.Message.Text {
     return { messaging_type: "RESPONSE", message: { text } };
+  }
+
+  function createVideoResponse({
+    video,
+  }: FacebookResponseOutput.Content.Video): FacebookRawResponse.Message.Media {
+    return {
+      message: {
+        attachment: {
+          type: "video",
+          payload: { is_reusable: true, url: video },
+        },
+      },
+    };
   }
 
   function createResponse(
@@ -279,14 +279,17 @@ function createFacebookResponse<Context>({
       case "carousel":
         return createCarouselResponse(content);
 
+      case "image":
+        return createImageResponse(content);
+
       case "list":
         return createListResponse(content);
 
-      case "media":
-        return createMediaResponse(content);
-
       case "text":
         return createTextResponse(content);
+
+      case "video":
+        return createVideoResponse(content);
     }
   }
 
