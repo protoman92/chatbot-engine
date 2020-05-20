@@ -374,7 +374,7 @@ export interface FacebookUser {
   readonly first_name?: string;
   readonly last_name?: string;
   readonly profile_pic?: string;
-  readonly id: string;
+  readonly id: number | string;
 }
 
 /** Represents Facebook configurations */

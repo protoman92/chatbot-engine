@@ -13,7 +13,7 @@ export function createDynamoDBContextDAO<Context>({
 }: CreateDynamoDBContextDAOConfig): ContextDAO<Context> {
   function getTableKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return {
-      targetID: { S: targetID },
+      targetID: { S: `${targetID}` },
       targetPlatform: { S: targetPlatform },
     };
   }
