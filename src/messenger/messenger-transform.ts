@@ -103,7 +103,7 @@ export function saveUserForTargetID<Context, RawUser>(
           return processor.receiveRequest(request);
         }
 
-        const { currentContext, targetID, targetPlatform } = request;
+        let { currentContext, targetID, targetPlatform } = request;
 
         if (!currentContext || !(currentContext as any)["targetID"]) {
           const rawUser = await getUser(targetID);
@@ -113,11 +113,13 @@ export function saveUserForTargetID<Context, RawUser>(
             targetUserID,
           } = await saveUser(rawUser);
 
-          await contextDAO.appendContext({
+          const { newContext } = await contextDAO.appendContext({
             targetID,
             targetPlatform,
             context: { ...additionalContext, targetID: `${targetUserID}` },
           });
+
+          currentContext = newContext;
         }
 
         return processor.receiveRequest({ ...request, currentContext });

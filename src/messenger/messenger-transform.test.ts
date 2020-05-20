@@ -222,8 +222,10 @@ describe("Save user for target ID", () => {
 
   it("Should save user when no user ID is present in context", async () => {
     // Setup
+    const additionalContext = { a: 1, b: 2 };
+
     when(contextDAO.appendContext(anything())).thenResolve({
-      newContext: {},
+      newContext: additionalContext,
       oldContext: {},
     });
 
@@ -231,8 +233,6 @@ describe("Save user for target ID", () => {
       targetID,
       visualContents: [],
     });
-
-    const additionalContext = { a: 1, b: 2 };
 
     const transformed = await compose(
       instance(msgProcessor),
@@ -267,7 +267,7 @@ describe("Save user for target ID", () => {
 
     verify(
       msgProcessor.receiveRequest(
-        deepEqual({ ...genericRequest, currentContext: {} })
+        deepEqual({ ...genericRequest, currentContext: additionalContext })
       )
     ).once();
   });
