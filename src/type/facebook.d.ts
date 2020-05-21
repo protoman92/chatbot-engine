@@ -10,13 +10,10 @@ import { BaseResponseOutput } from "./visual-content";
 
 export type FacebookRequestInput<Context> =
   | Readonly<{ param: string; type: "deeplink" }>
+  | Readonly<{ payload: string; type: "postback" }>
   | Readonly<{ coordinate: Coordinates; type: "location" }>
   | Readonly<{ image: string; type: "image" }>
-  | Readonly<{
-      image: string;
-      stickerID: string;
-      type: "sticker";
-    }>
+  | Readonly<{ image: string; stickerID: string; type: "sticker" }>
   | CrossPlatformRequestInput<Context>;
 
 type CommonFacebookRequest<Context> = Readonly<{ targetPlatform: "facebook" }> &

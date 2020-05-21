@@ -36,14 +36,14 @@ function createFacebookRequest<Context>(
     request: RawRequest.Entry.Messaging
   ): FacebookRequestInput<Context>[] {
     if ("postback" in request) {
-      return [{ text: request.postback.payload, type: "text" }];
+      return [{ payload: request.postback.payload, type: "postback" }];
     }
 
     if ("message" in request) {
       const { message } = request;
 
       if ("quick_reply" in message) {
-        return [{ text: message.quick_reply.payload, type: "text" }];
+        return [{ payload: message.quick_reply.payload, type: "postback" }];
       }
 
       if ("text" in message) {

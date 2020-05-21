@@ -24,6 +24,7 @@ export type TelegramRequestInput<Context> =
       newChatMembers: readonly (TelegramBot | TelegramUser)[];
       type: "joined_chat";
     }>
+  | Readonly<{ payload: string; type: "postback" }>
   | CrossPlatformRequestInput<Context>;
 
 type CommonTelegramRequest<Context> = Readonly<{

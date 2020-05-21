@@ -65,13 +65,7 @@ export function createGenericTelegramRequest<Context>(
         return [
           user,
           chat,
-          [
-            {
-              command,
-              text: !!text ? text : undefined,
-              type: "command",
-            },
-          ],
+          [{ command, text: !!text ? text : undefined, type: "command" }],
         ];
       } else {
         return [user, chat, [{ text, type: "text" }]];
@@ -108,14 +102,12 @@ export function createGenericTelegramRequest<Context>(
 
   function processCallbackRequest({
     callback_query: { data, from: user },
-  }: RawRequest.Callback):
-    | [
-        TelegramUser,
-        RawRequest.Chat | undefined,
-        TelegramRequestInput<Context>[]
-      ]
-    | undefined {
-    return [user, undefined, [{ text: data, type: "text" }]];
+  }: RawRequest.Callback): [
+    TelegramUser,
+    RawRequest.Chat | undefined,
+    TelegramRequestInput<Context>[]
+  ] {
+    return [user, undefined, [{ payload: data, type: "postback" }]];
   }
 
   function processRequest(
@@ -129,12 +121,12 @@ export function createGenericTelegramRequest<Context>(
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
-    if ("message" in request) {
-      result = processMessageRequest(request);
-    }
-
     if ("callback_query" in request) {
       result = processCallbackRequest(request);
+    }
+
+    if ("message" in request) {
+      result = processMessageRequest(request);
     }
 
     return result;
