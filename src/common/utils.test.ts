@@ -1,6 +1,11 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
-import { getCrossPlatformOutput, mapSeries, requireNotNull } from "./utils";
+import {
+  getCrossPlatformOutput,
+  mapSeries,
+  omitNull,
+  requireNotNull,
+} from "./utils";
 
 describe("Common utilities", () => {
   it("Getting cross platform output should work", async () => {
@@ -38,6 +43,10 @@ describe("Common utilities", () => {
 
     // Then
     expectJs(mappedData).to.eql(data);
+  });
+
+  it("Omit null should work", async () => {
+    expectJs(omitNull([null, 1, 2, undefined, 3])).to.eql([1, 2, 3]);
   });
 
   it("Require not null should work", async () => {

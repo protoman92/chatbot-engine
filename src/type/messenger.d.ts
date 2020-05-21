@@ -37,6 +37,10 @@ export interface BaseMessageProcessor<Context> {
   sendResponse(response: AmbiguousResponse<Context>): Promise<unknown>;
 }
 
+export interface MessengerConfig<Context> {
+  readonly processor: BaseMessageProcessor<Context>;
+}
+
 /**
  * Represents a messenger that deals with a platform request end-to-end, from
  * handling data to sending response. Note that each generic messenger should

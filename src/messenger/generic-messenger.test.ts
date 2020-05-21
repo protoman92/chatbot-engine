@@ -23,15 +23,16 @@ import {
   createMessenger,
 } from "./generic-messenger";
 
+interface Context {}
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("Generic message processor", () => {
-  let leafSelector: LeafSelector<{}>;
+  let leafSelector: LeafSelector<Context>;
   let client: PlatformClient<unknown>;
 
   beforeEach(async () => {
-    leafSelector = spy<LeafSelector<{}>>({
+    leafSelector = spy<LeafSelector<Context>>({
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });
@@ -61,7 +62,7 @@ describe("Generic message processor", () => {
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
-    const response: AmbiguousResponse<{}> = {
+    const response: AmbiguousResponse<Context> = {
       targetID,
       targetPlatform,
       originalRequest: {
@@ -162,19 +163,19 @@ describe("Generic message processor", () => {
 });
 
 describe("Cross platform message processor", () => {
-  let fbProcessor: FacebookMessageProcessor<{}>;
-  let tlProcessor: TelegramMessageProcessor<{}>;
+  let fbProcessor: FacebookMessageProcessor<Context>;
+  let tlProcessor: TelegramMessageProcessor<Context>;
   let processors: Parameters<typeof createCrossPlatformMessageProcessor>[0];
   let processorInstances: typeof processors;
 
   beforeEach(() => {
-    fbProcessor = spy<FacebookMessageProcessor<{}>>({
+    fbProcessor = spy<FacebookMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({}),
     });
 
-    tlProcessor = spy<TelegramMessageProcessor<{}>>({
+    tlProcessor = spy<TelegramMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
       sendResponse: () => Promise.resolve({}),
@@ -224,12 +225,12 @@ describe("Cross platform message processor", () => {
 
     // When
     for (const targetPlatform of platforms) {
-      const crossProcessor = createCrossPlatformMessageProcessor(
+      const processor = createCrossPlatformMessageProcessor(
         processorInstances,
         () => targetPlatform
       );
 
-      const messenger = createMessenger(crossProcessor);
+      const messenger = createMessenger({ processor });
       await messenger.processRawRequest({});
 
       // Then
@@ -240,8 +241,8 @@ describe("Cross platform message processor", () => {
 
   it("Should throw error if platform is not available", async () => {
     // Setup
-    const crossProcessor = createCrossPlatformMessageProcessor({});
-    const messenger = await createMessenger(crossProcessor);
+    const processor = createCrossPlatformMessageProcessor({});
+    const messenger = await createMessenger({ processor });
 
     // When && Then: Facebook
     try {

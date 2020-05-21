@@ -16,6 +16,7 @@ import {
   BaseMessageProcessorConfig,
   MessageProcessorMiddleware,
   Messenger,
+  MessengerConfig,
 } from "../type/messenger";
 import {
   TelegramMessageProcessor,
@@ -71,9 +72,9 @@ export async function createMessageProcessor<Context>(
 }
 
 /** Create a messenger */
-export function createMessenger<Context>(
-  processor: BaseMessageProcessor<Context>
-): Messenger<Context> {
+export function createMessenger<Context>({
+  processor,
+}: MessengerConfig<Context>): Messenger<Context> {
   return {
     processRawRequest: async (platformReq) => {
       const genericReq = await processor.generalizeRequest(platformReq);

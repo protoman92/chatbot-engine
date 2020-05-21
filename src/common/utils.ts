@@ -67,6 +67,13 @@ export async function mapSeries<T1, T2>(
   return mappedData;
 }
 
+/** Omit null/undefined values from an Array */
+export function omitNull<T>(
+  arr: readonly (T | null | undefined)[]
+): readonly T[] {
+  return arr.filter((object) => object != null) as readonly T[];
+}
+
 /** Promisify a callback-style function into one that supports promises */
 export function promisify<T>(
   fn: (callback: (err: Error | undefined | null, value: T) => any) => void

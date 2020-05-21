@@ -1,10 +1,10 @@
-import { facebookError, isType } from "../common/utils";
+import { facebookError, isType, omitNull } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
   FacebookMessageProcessorConfig,
   FacebookRawRequest as RawRequest,
-  FacebookRawResponse,
+  FacebookRawResponse as RawResponse,
   FacebookRequest,
   FacebookRequestInput,
   FacebookResponse,
@@ -120,32 +120,32 @@ function createFacebookRequest<Context>(
   throw facebookError(`Invalid webhook: ${JSON.stringify(webhook)}`);
 }
 
+function createSingleAction(
+  action: FacebookResponseOutput.Action
+): RawResponse.Button {
+  const { text: title } = action;
+
+  switch (action.type) {
+    case "postback":
+      return { title, type: "postback", payload: action.payload };
+
+    case "url":
+      return { title, type: "web_url", url: action.url };
+  }
+}
+
 /** Create a Facebook response from multiple generic responses */
 function createFacebookResponse<Context>({
   targetID,
   output,
-}: FacebookResponse<Context>): readonly FacebookRawResponse[] {
+}: FacebookResponse<Context>): readonly RawResponse[] {
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
-  function createSingleAction(
-    action: FacebookResponseOutput.Content.Action
-  ): FacebookRawResponse.Message.Button.Button {
-    const { text: title } = action;
-
-    switch (action.type) {
-      case "postback":
-        return { title, type: "postback", payload: action.payload };
-
-      case "url":
-        return { title, type: "web_url", url: action.url };
-    }
-  }
-
-  function createButtonResponse({
+  function createResponseButton({
     text,
     actions,
-  }: FacebookResponseOutput.Content.Button): FacebookRawResponse.Message.Button {
+  }: FacebookResponseOutput.Content.Button): RawResponse.Message.Button {
     return {
       messaging_type: "RESPONSE",
       message: {
@@ -161,9 +161,9 @@ function createFacebookResponse<Context>({
     };
   }
 
-  function createCarouselResponse({
+  function createResponseCarousel({
     items,
-  }: FacebookResponseOutput.Content.Carousel): FacebookRawResponse.Message.Carousel {
+  }: FacebookResponseOutput.Content.Carousel): RawResponse.Message.Carousel {
     if (!items.length) {
       throw facebookError("Not enough carousel items");
     }
@@ -182,7 +182,7 @@ function createFacebookResponse<Context>({
                 image_url: mediaURL || undefined,
                 buttons:
                   !!actions && actions.length
-                    ? actions.map((a) => createSingleAction(a))
+                    ? actions.map(createSingleAction)
                     : undefined,
               })),
             template_type: "generic",
@@ -192,9 +192,22 @@ function createFacebookResponse<Context>({
     };
   }
 
-  function createListResponse(
+  function createResponseImage({
+    image,
+  }: FacebookResponseOutput.Content.Image): RawResponse.Message.Media {
+    return {
+      message: {
+        attachment: {
+          type: "image",
+          payload: { is_reusable: true, url: image },
+        },
+      },
+    };
+  }
+
+  function createResponseList(
     content: FacebookResponseOutput.Content.List
-  ): FacebookRawResponse.Message.List {
+  ): RawResponse.Message.List {
     const { items, actions: listActions } = content;
 
     /**
@@ -202,7 +215,7 @@ function createFacebookResponse<Context>({
      * to carousel if possible.
      */
     if (items.length <= 1) {
-      return createCarouselResponse({
+      return createResponseCarousel({
         ...content,
         items: items.map((item) => ({ ...item, mediaURL: undefined })),
         type: "carousel",
@@ -222,14 +235,14 @@ function createFacebookResponse<Context>({
                 subtitle: description || undefined,
                 buttons:
                   !!actions && actions.length
-                    ? actions.map((a) => createSingleAction(a))
+                    ? actions.map(createSingleAction)
                     : undefined,
               })),
             template_type: "list",
             top_element_style: "compact",
             buttons:
               !!listActions && listActions.length
-                ? listActions.map((a) => createSingleAction(a))
+                ? listActions.map(createSingleAction)
                 : undefined,
           },
         },
@@ -237,28 +250,15 @@ function createFacebookResponse<Context>({
     };
   }
 
-  function createImageResponse({
-    image,
-  }: FacebookResponseOutput.Content.Image): FacebookRawResponse.Message.Media {
-    return {
-      message: {
-        attachment: {
-          type: "image",
-          payload: { is_reusable: true, url: image },
-        },
-      },
-    };
-  }
-
-  function createTextResponse({
+  function createResponseText({
     text,
-  }: FacebookResponseOutput.Content.Text): FacebookRawResponse.Message.Text {
+  }: FacebookResponseOutput.Content.Text): RawResponse.Message.Text {
     return { messaging_type: "RESPONSE", message: { text } };
   }
 
-  function createVideoResponse({
+  function createResponseVideo({
     video,
-  }: FacebookResponseOutput.Content.Video): FacebookRawResponse.Message.Media {
+  }: FacebookResponseOutput.Content.Video): RawResponse.Message.Media {
     return {
       message: {
         attachment: {
@@ -269,34 +269,34 @@ function createFacebookResponse<Context>({
     };
   }
 
-  function createResponse(
-    content: FacebookResponse<Context>["output"][number]["content"]
-  ): FacebookRawResponse.Message {
+  function createResponseMessage(
+    content: FacebookResponseOutput.Content
+  ): RawResponse.Message {
     switch (content.type) {
       case "button":
-        return createButtonResponse(content);
+        return createResponseButton(content);
 
       case "carousel":
-        return createCarouselResponse(content);
+        return createResponseCarousel(content);
 
       case "image":
-        return createImageResponse(content);
+        return createResponseImage(content);
 
       case "list":
-        return createListResponse(content);
+        return createResponseList(content);
 
       case "text":
-        return createTextResponse(content);
+        return createResponseText(content);
 
       case "video":
-        return createVideoResponse(content);
+        return createResponseVideo(content);
     }
   }
 
   /** Create a Facebook quick reply from a generic quick reply */
   function createQuickReply(
     quickReply: FacebookResponseOutput.QuickReply
-  ): FacebookRawResponse.QuickReply {
+  ): RawResponse.QuickReply {
     const { text } = quickReply;
 
     switch (quickReply.type) {
@@ -317,21 +317,31 @@ function createFacebookResponse<Context>({
 
   function createRawResponse(
     targetID: string,
-    { content, quickReplies = [] }: FacebookResponse<Context>["output"][number]
-  ): FacebookRawResponse {
-    const fbQuickReplies = quickReplies.map((qr) => createQuickReply(qr));
-    const fbResponse = createResponse(content);
-    const { message: baseMessage } = fbResponse;
+    response: FacebookResponse<Context>["output"][number]
+  ): RawResponse | null {
+    const recipient = { id: targetID };
 
-    const message = {
-      ...baseMessage,
-      quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined,
-    };
+    switch (response.content.type) {
+      case "menu":
+        return null;
 
-    return { ...fbResponse, message, recipient: { id: targetID } };
+      default:
+        const { content, quickReplies = [] } = response;
+        const fbQuickReplies = quickReplies.map((qr) => createQuickReply(qr));
+        const { message, ...fbResponse } = createResponseMessage(content);
+
+        return {
+          ...fbResponse,
+          recipient,
+          message: {
+            ...message,
+            quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined,
+          },
+        };
+    }
   }
 
-  return output.map((o) => createRawResponse(targetID, o));
+  return omitNull(output.map((o) => createRawResponse(targetID, o)));
 }
 
 /** Create a Facebook message processor */
@@ -339,7 +349,7 @@ export async function createFacebookMessageProcessor<Context>(
   { leafSelector, client }: FacebookMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<Context>[]
 ): Promise<FacebookMessageProcessor<Context>> {
-  return createMessageProcessor(
+  const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
       client,
@@ -357,4 +367,28 @@ export async function createFacebookMessageProcessor<Context>(
     },
     ...middlewares
   );
+
+  return {
+    ...baseProcessor,
+    sendResponse: async (response: FacebookResponse<Context>) => {
+      const { output: outputs, targetID } = response;
+
+      for (const output of outputs) {
+        if (output.content.type === "menu") {
+          await client.sendMenuSettings({
+            persistent_menu: [
+              {
+                call_to_actions: output.content.actions.map(createSingleAction),
+                composer_input_disabled: false,
+                locale: "default",
+              },
+            ],
+            psid: targetID,
+          });
+        }
+      }
+
+      return baseProcessor.sendResponse(response);
+    },
+  };
 }
