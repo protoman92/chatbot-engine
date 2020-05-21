@@ -49,6 +49,7 @@ export async function createMessageProcessor<Context>(
       generalizeRequest: (platformReq) => mapRequest(platformReq),
       receiveRequest: (request) => leafSelector.next(request),
       sendResponse: async (response) => {
+        if (response.targetPlatform !== targetPlatform) return;
         const data = await mapResponse(response);
         return mapSeries(data, (datum) => client.sendResponse(datum));
       },
@@ -56,25 +57,22 @@ export async function createMessageProcessor<Context>(
     ...reversedTransformers
   );
 
-  await leafSelector.subscribe({
-    next: async (request) => {
-      if (request.targetPlatform === targetPlatform) {
-        await finalMessageProcessor.sendResponse(request);
-        return NextResult.BREAK;
-      }
-
-      return NextResult.FALLTHROUGH;
-    },
-    complete: async () => {},
-  });
-
   return finalMessageProcessor;
 }
 
 /** Create a messenger */
-export function createMessenger<Context>({
+export async function createMessenger<Context>({
+  leafSelector,
   processor,
-}: MessengerConfig<Context>): Messenger<Context> {
+}: MessengerConfig<Context>): Promise<Messenger<Context>> {
+  await leafSelector.subscribe({
+    next: async (request) => {
+      await processor.sendResponse(request);
+      return NextResult.BREAK;
+    },
+    complete: async () => {},
+  });
+
   return {
     processRawRequest: async (platformReq) => {
       const genericReq = await processor.generalizeRequest(platformReq);

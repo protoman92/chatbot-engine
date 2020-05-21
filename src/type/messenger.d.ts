@@ -38,6 +38,7 @@ export interface BaseMessageProcessor<Context> {
 }
 
 export interface MessengerConfig<Context> {
+  readonly leafSelector: LeafSelector<Context>;
   readonly processor: BaseMessageProcessor<Context>;
 }
 

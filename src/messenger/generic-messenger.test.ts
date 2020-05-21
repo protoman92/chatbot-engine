@@ -9,11 +9,10 @@ import {
   verify,
   when,
 } from "ts-mockito";
-import { NextResult } from "../stream";
 import { PlatformClient } from "../type/client";
 import { FacebookMessageProcessor } from "../type/facebook";
 import { LeafSelector } from "../type/leaf";
-import { AmbiguousPlatform } from "../type/messenger";
+import { AmbiguousPlatform, BaseMessageProcessor } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
 import { TelegramMessageProcessor } from "../type/telegram";
@@ -43,11 +42,10 @@ describe("Generic message processor", () => {
     });
   });
 
-  it("Should trigger send with valid response", async () => {
+  it("Should trigger send with matching target platform", async () => {
     // Setup
-    when(leafSelector.subscribe(anything())).thenResolve();
     when(client.sendResponse(anything())).thenResolve();
-    const platformResponses = [{ a: 1 }, { b: 2 }];
+    const rawResponses = [{ a: 1 }, { b: 2 }];
 
     // When
     const messageProcessor = spy(
@@ -56,41 +54,23 @@ describe("Generic message processor", () => {
         leafSelector: instance(leafSelector),
         client: instance(client),
         mapRequest: async () => [],
-        mapResponse: async () => platformResponses,
+        mapResponse: async () => rawResponses,
       })
     );
 
-    const { next, complete } = capture(leafSelector.subscribe).first()[0];
-
-    const response: AmbiguousResponse<Context> = {
+    await messageProcessor.sendResponse({
       targetID,
       targetPlatform,
-      originalRequest: {
-        targetID,
-        currentContext: {},
-        input: { text: "", type: "text" },
-        targetPlatform: "facebook",
-        type: "message_trigger",
-      },
-      output: [],
-    };
-
-    await next(response);
+      output: [{ content: { text: "", type: "text" } }],
+    });
 
     // Then
-    expectJs(complete).to.be.ok();
-    verify(messageProcessor.sendResponse(deepEqual(response))).once();
-
-    platformResponses.forEach((response) => {
-      verify(client.sendResponse(deepEqual(response))).once();
-    });
+    rawResponses.forEach((r) => client.sendResponse(deepEqual(r)));
   });
 
   it("Should not trigger send without matching target platform", async () => {
     // Setup
-    when(leafSelector.subscribe(anything())).thenResolve();
     when(client.sendResponse(anything())).thenResolve();
-    const platformResponses = [{ a: 1 }, { b: 2 }];
 
     // When
     const messageProcessor = spy(
@@ -99,34 +79,22 @@ describe("Generic message processor", () => {
         leafSelector: instance(leafSelector),
         client: instance(client),
         mapRequest: async () => [],
-        mapResponse: async () => platformResponses,
+        mapResponse: async () => [{ a: 1 }, { b: 2 }],
       })
     );
 
-    const { next, complete } = capture(leafSelector.subscribe).first()[0];
-
-    const nextResult = await next({
+    await messageProcessor.sendResponse({
       targetID,
       targetPlatform,
-      originalRequest: {
-        targetID,
-        currentContext: {},
-        input: { text: "", type: "text" },
-        targetPlatform: "facebook",
-        type: "message_trigger",
-      },
-      output: [],
+      output: [{ content: { text: "", type: "text" } }],
     });
 
     // Then
-    expectJs(nextResult).to.eql(NextResult.FALLTHROUGH);
-    expectJs(complete).to.be.ok();
-    verify(messageProcessor.sendResponse(anything())).never();
+    verify(client.sendResponse(anything())).never();
   });
 
   it("Should send input to leaf selector when receiving request", async () => {
     // Setup
-    when(leafSelector.subscribe(anything())).thenResolve();
     when(leafSelector.next(anything())).thenResolve();
     const currentContext = { a: 1, b: 2 };
 
@@ -143,7 +111,7 @@ describe("Generic message processor", () => {
       currentContext,
       targetID,
       targetPlatform,
-      input: { text: "", type: "text" },
+      input: { type: "placebo" },
       type: "message_trigger",
     });
 
@@ -154,7 +122,7 @@ describe("Generic message processor", () => {
           currentContext,
           targetID,
           targetPlatform,
-          input: { text: "", type: "text" },
+          input: { type: "placebo" },
           type: "message_trigger",
         })
       )
@@ -163,12 +131,18 @@ describe("Generic message processor", () => {
 });
 
 describe("Cross platform message processor", () => {
+  let leafSelector: LeafSelector<Context>;
   let fbProcessor: FacebookMessageProcessor<Context>;
   let tlProcessor: TelegramMessageProcessor<Context>;
   let processors: Parameters<typeof createCrossPlatformMessageProcessor>[0];
   let processorInstances: typeof processors;
 
   beforeEach(() => {
+    leafSelector = spy<LeafSelector<Context>>({
+      next: () => Promise.reject(""),
+      subscribe: () => Promise.reject(""),
+    });
+
     fbProcessor = spy<FacebookMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve({}),
@@ -184,14 +158,14 @@ describe("Cross platform message processor", () => {
     processors = { facebook: fbProcessor, telegram: tlProcessor };
 
     processorInstances = Object.entries(processors)
-      .map(([key, value]) => ({
-        [key]: instance(value),
-      }))
+      .map(([key, value]) => ({ [key]: instance(value) }))
       .reduce((acc, item) => ({ ...acc, ...item })) as typeof processors;
   });
 
   it("Should invoke correct message processor", async () => {
     // Setup
+    when(leafSelector.subscribe(anything())).thenResolve();
+
     when(fbProcessor.generalizeRequest(anything())).thenResolve([
       {
         targetID,
@@ -230,7 +204,11 @@ describe("Cross platform message processor", () => {
         () => targetPlatform
       );
 
-      const messenger = createMessenger({ processor });
+      const messenger = await createMessenger({
+        processor,
+        leafSelector: instance(leafSelector),
+      });
+
       await messenger.processRawRequest({});
 
       // Then
@@ -241,8 +219,13 @@ describe("Cross platform message processor", () => {
 
   it("Should throw error if platform is not available", async () => {
     // Setup
+    when(leafSelector.subscribe(anything())).thenResolve();
     const processor = createCrossPlatformMessageProcessor({});
-    const messenger = await createMessenger({ processor });
+
+    const messenger = await createMessenger({
+      processor,
+      leafSelector: instance(leafSelector),
+    });
 
     // When && Then: Facebook
     try {
@@ -255,5 +238,56 @@ describe("Cross platform message processor", () => {
       await messenger.processRawRequest({ update_id: "" });
       throw new Error("Never should have come here");
     } catch (e) {}
+  });
+});
+
+describe("Generic messenger", () => {
+  let leafSelector: LeafSelector<Context>;
+  let processor: BaseMessageProcessor<Context>;
+
+  beforeEach(() => {
+    leafSelector = spy<LeafSelector<Context>>({
+      next: () => Promise.reject(""),
+      subscribe: () => Promise.reject(""),
+    });
+
+    processor = spy<BaseMessageProcessor<Context>>({
+      generalizeRequest: () => Promise.resolve([]),
+      receiveRequest: () => Promise.resolve({}),
+      sendResponse: () => Promise.resolve({}),
+    });
+  });
+
+  it("Should trigger send with valid response", async () => {
+    // Setup
+    when(leafSelector.subscribe(anything())).thenResolve();
+    when(processor.sendResponse(anything())).thenResolve();
+
+    // When
+    await createMessenger({
+      leafSelector: instance(leafSelector),
+      processor: instance(processor),
+    });
+
+    const { next, complete } = capture(leafSelector.subscribe).first()[0];
+
+    const response: AmbiguousResponse<Context> = {
+      targetID,
+      targetPlatform,
+      originalRequest: {
+        targetID,
+        currentContext: {},
+        input: { text: "", type: "text" },
+        targetPlatform: "facebook",
+        type: "message_trigger",
+      },
+      output: [],
+    };
+
+    await next(response);
+
+    // Then
+    expectJs(complete).to.be.ok();
+    verify(processor.sendResponse(deepEqual(response))).once();
   });
 });

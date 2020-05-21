@@ -1,6 +1,6 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
-import { instance, spy, when } from "ts-mockito";
+import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
 import { FacebookClient, FacebookConfig } from "../type/facebook";
 import { createFacebookClient } from "./facebook-client";
@@ -71,5 +71,81 @@ describe("Facebook client", () => {
 
       throw new Error("Never should have come here");
     } catch {}
+  });
+
+  it("Should send menu settings correctly", async () => {
+    // Setup
+    when(client.communicate(anything())).thenResolve({});
+
+    // When
+    await fbClient.sendMenuSettings({ persistent_menu: [], psid: "" });
+
+    // Then
+    verify(
+      client.communicate(
+        deepEqual({
+          body: { persistent_menu: [], psid: "" },
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          url:
+            "https://graph.facebook.com/v/me/custom_user_settings?access_token=",
+        })
+      )
+    ).once();
+  });
+
+  it("Should send messages correctly", async () => {
+    // Setup
+    when(client.communicate(anything())).thenResolve({});
+
+    // When
+    await fbClient.sendResponse({
+      message: { text: "" },
+      recipient: { id: "" },
+    });
+
+    // Then
+    verify(
+      client.communicate(
+        deepEqual({
+          body: { message: { text: "" }, recipient: { id: "" } },
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          url: "https://graph.facebook.com/v/me/messages?access_token=",
+        })
+      )
+    ).once();
+  });
+
+  it("Should set typing indicator correctly", async () => {
+    // Setup
+    when(client.communicate(anything())).thenResolve({});
+
+    // When
+    await fbClient.setTypingIndicator("", true);
+    await fbClient.setTypingIndicator("", false);
+
+    // Then
+    verify(
+      client.communicate(
+        deepEqual({
+          body: { recipient: { id: "" }, sender_action: "typing_on" },
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          url: "https://graph.facebook.com/v/me/messages?access_token=",
+        })
+      )
+    ).once();
+
+    verify(
+      client.communicate(
+        deepEqual({
+          body: { recipient: { id: "" }, sender_action: "typing_off" },
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          url: "https://graph.facebook.com/v/me/messages?access_token=",
+        })
+      )
+    ).once();
   });
 });

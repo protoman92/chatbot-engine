@@ -47,12 +47,8 @@ export function createFacebookClient(
 
       throw facebookError("Invalid mode or verify token");
     },
-    sendMenuSettings: (data) => {
-      return post(data, "me", "custom_user_settings");
-    },
-    sendResponse: (data) => {
-      return post(data, "me", "messages");
-    },
+    sendMenuSettings: (data) => post(data, "me", "custom_user_settings"),
+    sendResponse: (data) => post(data, "me", "messages"),
     setTypingIndicator: (targetID, enabled) => {
       return post(
         {
