@@ -311,16 +311,5 @@ export async function createTelegramMessageProcessor<Context>(
     ...middlewares
   );
 
-  return {
-    ...baseProcessor,
-    sendResponse: async (response) => {
-      const { targetID } = response;
-
-      if (!!(await client.isMember(targetID, `${currentBot.id}`))) {
-        return baseProcessor.sendResponse(response);
-      }
-
-      return {};
-    },
-  };
+  return baseProcessor;
 }

@@ -66,8 +66,8 @@ export async function createMessenger<Context>({
   processor,
 }: MessengerConfig<Context>): Promise<Messenger<Context>> {
   await leafSelector.subscribe({
-    next: async (request) => {
-      await processor.sendResponse(request);
+    next: async (response) => {
+      await processor.sendResponse(response);
       return NextResult.BREAK;
     },
     complete: async () => {},
