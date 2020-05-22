@@ -18,7 +18,7 @@ export function saveTelegramUser<Context>(
           return processor.receiveRequest(request);
         }
 
-        const {
+        let {
           currentContext,
           targetID,
           targetPlatform,
@@ -31,7 +31,7 @@ export function saveTelegramUser<Context>(
             telegramUserID,
           } = await saveUser(telegramUser);
 
-          await contextDAO.appendContext({
+          const { newContext } = await contextDAO.appendContext({
             targetID,
             targetPlatform,
             context: {
@@ -40,9 +40,11 @@ export function saveTelegramUser<Context>(
                 telegramUserID == null ? undefined : `${telegramUserID}`,
             },
           });
+
+          currentContext = newContext;
         }
 
-        return processor.receiveRequest(request);
+        return processor.receiveRequest({ ...request, currentContext });
       },
     };
   };
