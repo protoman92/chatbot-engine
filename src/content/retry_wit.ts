@@ -41,7 +41,8 @@ export function retryWithWit<Context>(
       let result = await leaf.next(request);
       if (result === NextResult.BREAK) return result;
 
-      if (request.input.type === "text") {
+      /** Wit allows only up to 280 chars */
+      if (request.input.type === "text" && request.input.text.length <= 280) {
         const response = await comm.validate(request.input.text);
         const { entities, intents, traits } = response;
         const highestConfidence = getHighestConfidence(response);
