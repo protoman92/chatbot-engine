@@ -71,19 +71,189 @@ const tlClient = createTelegramClient(client, {
 });
 ```
 
-### Set up the leaf selector
+### Set up branch/leaf logic
+
+#### Sample leaf implementation
+
+A branch contains many leaves, and potentially other sub-branches. Let's see how we can implement a simple leaf:
+
+```javascript
+export default async function() {
+  return {
+    sayHello: await createLeafWithObserver(async (observer) => ({
+      /**
+       * This request contains the information sent by the user, via the input
+       * field. It also tells you the user's platform and ID.
+       */
+      next: async (request) => {
+        /**
+         * The target platform abstraction allows you to handle messages from
+         * different platforms mostly the same way (i.e. when the input type
+         * is common across all platforms, such as a text input type).
+         *
+         * Remember that the context object is an arbitrary key-value object.
+         * It can be anything you want.
+         */
+        const { currentContext, input, targetID, targetPlatform } = request;
+
+        if (input.type !== "text" || input.text.match(/hello/) == null) {
+          /**
+           * This leaf does not satisfy user's need, so fall through to the
+           * next leaf.
+           */
+          return NextResult.FALLTHROUGH;
+        }
+
+        /**
+         * A leaf is similar to an RX subject. Calling next on the observer
+         * will trigger a message to be sent to this user.
+         */
+        await observer.next({
+          targetID,
+          targetPlatform,
+          /**
+           * If we specify additionalContext, this user's context will be
+           * modified.
+           */
+          additionalContext: { counter: currentContext.counter + 1 },
+          output: [{ content: { text: "Hello!", type: "text" } }],
+        });
+
+        /** Input was successfully handled, break the flow and return */
+        return NextResult.BREAK;
+      },
+    })),
+  };
+}
+```
+
+In the above example, you'll see that an `additionalContext` was specified in `observer.next`. This will trigger a modification of the user's context object in persistence, and fire a `context_change` request that you can catch and process:
+
+```javascript
+export default async function() {
+  return {
+    onCounterChangeTrigger: await createLeafWithObserver(async (observer) => ({
+      next: async (request) => {
+        const { currentContext, input, targetID, targetPlatform } = request;
+
+        /** The counter was changed by the previous leaf */
+        if (
+          input.type !== "context_change" ||
+          input.changedContext.counter == null
+        ) {
+          return NextResult.FALLTHROUGH;
+        }
+        await observer.next({
+          targetID,
+          targetPlatform,
+          output: [{ content: { text: "Counter was changed!", type: "text" } }],
+        });
+
+        return NextResult.BREAK;
+      },
+    })),
+  };
+}
+```
+
+This mechanism is especially useful when you want to trigger flows automatically after a new state. For example, you can implement a state machine for some input flow, which can be triggered from anywhere:
+
+```javascript
+export default async function({ appClient }: Config) {
+  return {
+    onStartEditingTrigger: await createLeafWithObserver(async (observer) => ({
+      next: async (request) => {
+        const { currentContext, input, targetID, targetPlatform } = request;
+
+        if (
+          input.type !== "context_change" ||
+          input.changedContext.edit_type !== "edit_profile"
+        ) {
+          return NextResult.FALLTHROUGH;
+        }
+
+        /**
+         * Send a message to the user first before hitting DB to get their
+         * information, in order to quickly give a feedback to their input.
+         */
+        await observer.next({
+          targetID,
+          targetPlatform,
+          output: [
+            { content: { text: "Starting profile edit", type: "text" } },
+          ],
+        });
+
+        const user = await appClient.getUser(currentContext.user.id);
+
+        /** No output, just context change. */
+        await observer.next({
+          targetID,
+          targetPlatform,
+          additionalContext: {
+            editProfileFlow: {
+              ...user,
+              state: EditProfileState.ENTER_NAME,
+            },
+          },
+          output: [],
+        });
+
+        return NextResult.BREAK;
+      },
+    })),
+    onEnterNameTrigger: await createLeafWithObserver(async (observer) => ({
+      next: async (request) => {
+        const { currentContext, input, targetID, targetPlatform } = request;
+
+        if (
+          input.type !== "context_change" ||
+          input.changedContext.edit_type !== "edit_profile" ||
+          input.changedContext.editProfileFlow?.state !==
+            EditProfileState.ENTER_NAME
+        ) {
+          return NextResult.FALLTHROUGH;
+        }
+
+        /**
+         * So instead of sending this message in onStartEditingTrigger, we send
+         * it here to nicely encapsulate the ENTER_NAME logic.
+         */
+        await observer.next({
+          targetID,
+          targetPlatform,
+          output: [{ content: { text: "What is your name", type: "text" } }],
+        });
+
+        /** Input was successfully handled, break the flow and return */
+        return NextResult.BREAK;
+      },
+    })),
+  };
+}
+```
+
+This is pretty similar to how [Redux](https://github.com/reduxjs/redux) manages its state.
+
+#### Set up the branches
+
+After you have the leaves ready, the branches are easy to set up:
+
+```javascript
+export default async function(args: Config) {
+  return {
+    editProfile: await createEditProfile(args),
+    sayHello: await createSayHello(),
+  };
+}
+```
+
+#### Set up the leaf selector
 
 The leaf selector receives requests and selects the most appropriate leaf that match the requirements of each request (such as those imposed by regex matches, state flags etc):
 
 ```javascript
-const branches = {
-  a: {
-    subBranches: {
-      aSubBranch: {}
-    }
-    leaves: aLeaves
-  }
-};
+const branches = await createBranches(args);
 
 const leafSelector = await createTransformChain()
   .pipe(catchError(await createDefaultErrorLeaf()))
