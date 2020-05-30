@@ -147,7 +147,6 @@ function createFacebookResponse<Context>({
     actions,
   }: FacebookResponseOutput.Content.Button): RawResponse.Message.Button {
     return {
-      messaging_type: "RESPONSE",
       message: {
         attachment: {
           type: "template",
@@ -169,7 +168,6 @@ function createFacebookResponse<Context>({
     }
 
     return {
-      messaging_type: "RESPONSE",
       message: {
         attachment: {
           type: "template",
@@ -223,7 +221,6 @@ function createFacebookResponse<Context>({
     }
 
     return {
-      messaging_type: "RESPONSE",
       message: {
         attachment: {
           type: "template",
@@ -253,7 +250,7 @@ function createFacebookResponse<Context>({
   function createResponseText({
     text,
   }: FacebookResponseOutput.Content.Text): RawResponse.Message.Text {
-    return { messaging_type: "RESPONSE", message: { text } };
+    return { message: { text } };
   }
 
   function createResponseVideo({
@@ -326,18 +323,30 @@ function createFacebookResponse<Context>({
         return null;
 
       default:
-        const { content, quickReplies = [] } = response;
+        const {
+          content: { tag, ...content },
+          quickReplies = [],
+        } = response;
+
         const fbQuickReplies = quickReplies.map((qr) => createQuickReply(qr));
         const { message, ...fbResponse } = createResponseMessage(content);
 
-        return {
+        let payload: RawResponse = {
           ...fbResponse,
           recipient,
+          messaging_type: "RESPONSE",
           message: {
             ...message,
             quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined,
           },
         };
+
+        /** https://developers.facebook.com/docs/messenger-platform/send-messages/message-tags#supported_tags */
+        if (tag != null) {
+          payload = { ...payload, tag, messaging_type: "MESSAGE_TAG" };
+        }
+
+        return payload;
     }
   }
 

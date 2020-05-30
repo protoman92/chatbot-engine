@@ -59,6 +59,17 @@ export function createFacebookClient(
         "messages"
       );
     },
+    uploadTemporaryAttachment: ({ type, url }) => {
+      return post(
+        {
+          message: {
+            attachment: { type, payload: { url, is_reusable: false } },
+          },
+        },
+        "me",
+        "message_attachments"
+      );
+    },
   };
 }
 

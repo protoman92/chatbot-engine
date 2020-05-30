@@ -119,13 +119,15 @@ declare namespace FacebookResponseOutput {
     }
   }
 
-  type Content =
+  type Content = (
     | Content.Button
     | Content.Carousel
     | Content.Image
     | Content.List
     | Content.Text
-    | Content.Video;
+    | Content.Video
+  ) &
+    Readonly<{ tag?: FacebookRawResponse.MessageTag }>;
 
   interface Menu {
     readonly actions: readonly [Action, ...Action[]];
@@ -139,7 +141,11 @@ export type FacebookResponseOutput = BaseResponseOutput &
         content: FacebookResponseOutput.Content;
         quickReplies?: readonly FacebookResponseOutput.QuickReply[];
       }>
-    | Readonly<{ content: FacebookResponseOutput.Menu; quickReplies?: never[] }>
+    | Readonly<{
+        content: FacebookResponseOutput.Menu;
+        quickReplies?: never[];
+        tag?: never;
+      }>
   );
 
 declare namespace FacebookRawRequest {
@@ -259,6 +265,12 @@ declare namespace FacebookRawResponse {
     readonly psid: FacebookUser["id"];
   }
 
+  type MessageTag =
+    | "ACCOUNT_UPDATE"
+    | "CONFIRMED_EVENT_UPDATE"
+    | "HUMAN_AGENT"
+    | "POST_PURCHASE_UPDATE";
+
   interface QuickReply {
     readonly title: string;
     readonly content_type: "location" | "text";
@@ -267,7 +279,6 @@ declare namespace FacebookRawResponse {
 
   namespace Message {
     interface Button {
-      readonly messaging_type: "RESPONSE";
       readonly message: Readonly<{
         attachment: {
           type: "template";
@@ -290,7 +301,6 @@ declare namespace FacebookRawResponse {
     }
 
     interface Carousel {
-      readonly messaging_type: "RESPONSE";
       readonly message: Readonly<{
         attachment: {
           type: "template";
@@ -311,7 +321,6 @@ declare namespace FacebookRawResponse {
     }
 
     interface List {
-      readonly messaging_type: "RESPONSE";
       readonly message: Readonly<{
         attachment: {
           payload: Readonly<{
@@ -335,7 +344,6 @@ declare namespace FacebookRawResponse {
     }
 
     interface Text {
-      readonly messaging_type: "RESPONSE";
       readonly message: Readonly<{ text: string }>;
     }
   }
@@ -351,6 +359,13 @@ declare namespace FacebookRawResponse {
 export type FacebookRawResponse = Readonly<{
   recipient: Readonly<{ id: string }>;
 }> &
+  (
+    | Readonly<{
+        messaging_type: "MESSAGE_TAG";
+        tag: FacebookRawResponse.MessageTag;
+      }>
+    | Readonly<{ messaging_type: "RESPONSE" }>
+  ) &
   (Omit<FacebookRawResponse.Message, "message"> &
     Readonly<{
       message: {
@@ -407,4 +422,9 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
 
   /** Send request to set up user's custom menu */
   sendMenuSettings(menu: FacebookRawResponse.Menu): Promise<unknown>;
+
+  /** Upload an attachment and get Facebook's attachment ID */
+  uploadTemporaryAttachment(
+    attachment: Readonly<{ type: "image"; url: string }>
+  ): Promise<Readonly<{ attachment_id: string }>>;
 }
