@@ -101,6 +101,7 @@ describe("Facebook client", () => {
     // When
     await fbClient.sendResponse({
       message: { text: "" },
+      messaging_type: "RESPONSE",
       recipient: { id: "" },
     });
 
@@ -108,7 +109,11 @@ describe("Facebook client", () => {
     verify(
       client.communicate(
         deepEqual({
-          body: { message: { text: "" }, recipient: { id: "" } },
+          body: {
+            message: { text: "" },
+            messaging_type: "RESPONSE",
+            recipient: { id: "" },
+          },
           headers: { "Content-Type": "application/json" },
           method: "POST",
           url: "https://graph.facebook.com/v/me/messages?access_token=",

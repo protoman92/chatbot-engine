@@ -67,3 +67,8 @@ export interface SaveUserForTargetIDContext<Context> {
   readonly additionalContext?: Partial<Context>;
   readonly targetUserID: string;
 }
+
+export interface SetTypingIndicatorConfig {
+  readonly client: PlatformClient<unknown>;
+  readonly onSetTypingError?: (e: Error) => void;
+}

@@ -6,6 +6,7 @@ import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
   MessageProcessorMiddleware,
+  SetTypingIndicatorConfig,
 } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
@@ -444,7 +445,7 @@ describe("Set typing indicator", () => {
 
     const transformed = await compose(
       instance(msgProcessor),
-      setTypingIndicator(instance(client))(middlewareInput)
+      setTypingIndicator({ client: instance(client) })(middlewareInput)
     );
 
     // When
@@ -465,5 +466,43 @@ describe("Set typing indicator", () => {
     verify(client.setTypingIndicator(targetID, true)).calledBefore(
       client.setTypingIndicator(targetID, false)
     );
+  });
+
+  it("Should ignore error if forced to", async () => {
+    // Setup
+    const config = spy<SetTypingIndicatorConfig>({
+      client: instance(client),
+      onSetTypingError: () => {},
+    });
+
+    const error = new Error("some-error");
+    when(msgProcessor.sendResponse(anything())).thenResolve();
+    when(client.setTypingIndicator(targetID, anything())).thenReject(error);
+
+    const transformed = await compose(
+      instance(msgProcessor),
+      setTypingIndicator(instance(config))(middlewareInput)
+    );
+
+    // When
+    await transformed.sendResponse({
+      targetID,
+      targetPlatform,
+      originalRequest: {
+        targetID,
+        currentContext: {},
+        input: { text: "", type: "text" },
+        targetPlatform: "facebook",
+        type: "message_trigger",
+      },
+      output: [],
+    });
+
+    // Then
+    verify(client.setTypingIndicator(targetID, true)).calledBefore(
+      client.setTypingIndicator(targetID, false)
+    );
+
+    verify(config.onSetTypingError!(error)).twice();
   });
 });

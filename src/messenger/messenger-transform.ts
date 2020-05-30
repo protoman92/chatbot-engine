@@ -1,8 +1,8 @@
-import { PlatformClient } from "../type/client";
 import { ContextDAO } from "../type/context-dao";
 import {
   MessageProcessorMiddleware,
   SaveUserForTargetIDContext,
+  SetTypingIndicatorConfig,
 } from "../type/messenger";
 
 /**
@@ -132,19 +132,35 @@ export function saveUserForTargetID<Context, RawUser>(
 
 /**
  * Set typing indicator on or off at the beginning and end of the messaging
- * process.
+ * process. We can choose to ignore set typing errors since they are not so
+ * important.
  */
-export function setTypingIndicator<Context>(
-  client: PlatformClient<unknown>
-): MessageProcessorMiddleware<Context> {
+export function setTypingIndicator<Context>({
+  client,
+  onSetTypingError = (error) => {
+    throw error;
+  },
+}: SetTypingIndicatorConfig): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,
       sendResponse: async (response) => {
         const { targetID } = response;
-        await client.setTypingIndicator(targetID, true);
+
+        try {
+          await client.setTypingIndicator(targetID, true);
+        } catch (error) {
+          onSetTypingError(error);
+        }
+
         const result = await processor.sendResponse(response);
-        await client.setTypingIndicator(targetID, false);
+
+        try {
+          await client.setTypingIndicator(targetID, false);
+        } catch (error) {
+          onSetTypingError(error);
+        }
+
         return result;
       },
     };
