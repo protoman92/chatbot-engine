@@ -59,11 +59,11 @@ export function createFacebookClient(
         "messages"
       );
     },
-    uploadTemporaryAttachment: ({ type, url }) => {
+    uploadAttachment: ({ reusable, type, url }) => {
       return post(
         {
           message: {
-            attachment: { type, payload: { url, is_reusable: false } },
+            attachment: { type, payload: { url, is_reusable: !!reusable } },
           },
         },
         "me",

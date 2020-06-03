@@ -424,7 +424,7 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
   sendMenuSettings(menu: FacebookRawResponse.Menu): Promise<unknown>;
 
   /** Upload an attachment and get Facebook's attachment ID */
-  uploadTemporaryAttachment(
-    attachment: Readonly<{ type: "image"; url: string }>
+  uploadAttachment(
+    attachment: Readonly<{ reusable: boolean; type: "image"; url: string }>
   ): Promise<Readonly<{ attachment_id: string }>>;
 }
