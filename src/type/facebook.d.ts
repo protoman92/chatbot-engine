@@ -92,11 +92,11 @@ declare namespace FacebookResponseOutput {
       readonly type: "carousel";
     }
 
-    interface Image {
-      readonly actions?: readonly Action[];
-      readonly image: string;
-      readonly type: "image";
-    }
+    type Image = Readonly<{
+      actions?: readonly Action[];
+      image: string;
+      type: "image";
+    }>;
 
     interface List {
       readonly actions?: readonly Action[];
@@ -114,10 +114,11 @@ declare namespace FacebookResponseOutput {
       readonly type: "text";
     }
 
-    interface Video {
-      readonly type: "video";
-      readonly video: string;
-    }
+    type Video = Readonly<{
+      actions?: readonly Action[];
+      type: "video";
+      video: string;
+    }>;
   }
 
   type Content = (
@@ -331,7 +332,12 @@ declare namespace FacebookRawResponse {
       readonly message: Readonly<{
         attachment: Readonly<{
           type: "image" | "video";
-          payload: Readonly<{ is_reusable: boolean; url: string }>;
+          payload: Readonly<
+            { is_reusable: boolean } & (
+              | { attachment_id: string }
+              | { url: string }
+            )
+          >;
         }>;
       }>;
     }
@@ -341,8 +347,14 @@ declare namespace FacebookRawResponse {
         attachment: Readonly<{
           type: "template";
           payload: Readonly<{
-            buttons?: readonly FacebookRawResponse.Button[];
-            elements: [{ media_type: "image" | "video"; url: string }];
+            elements: [
+              Readonly<
+                {
+                  buttons?: readonly FacebookRawResponse.Button[];
+                  media_type: "image" | "video";
+                } & ({ attachment_id: string } | { url: string })
+              >
+            ];
             template_type: "media";
           }>;
         }>;
@@ -432,6 +444,10 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
 
   /** Upload an attachment and get Facebook's attachment ID */
   uploadAttachment(
-    attachment: Readonly<{ reusable: boolean; type: "image"; url: string }>
-  ): Promise<Readonly<{ attachment_id: string }>>;
+    attachment: Readonly<{
+      reusable: boolean;
+      type: "file" | "image";
+      url: string;
+    }>
+  ): Promise<Readonly<{ attachmentID: string }>>;
 }

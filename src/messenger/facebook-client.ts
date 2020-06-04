@@ -59,8 +59,8 @@ export function createFacebookClient(
         "messages"
       );
     },
-    uploadAttachment: ({ reusable, type, url }) => {
-      return post(
+    uploadAttachment: async ({ reusable, type, url }) => {
+      const { attachment_id: attachmentID } = await post(
         {
           message: {
             attachment: { type, payload: { url, is_reusable: !!reusable } },
@@ -69,6 +69,8 @@ export function createFacebookClient(
         "me",
         "message_attachments"
       );
+
+      return { attachmentID };
     },
   };
 }

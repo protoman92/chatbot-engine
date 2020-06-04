@@ -1,4 +1,9 @@
-import { facebookError, isType, omitNull } from "../common/utils";
+import {
+  facebookError,
+  getFacebookImagePayload,
+  isType,
+  omitNull,
+} from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
@@ -192,16 +197,18 @@ function createFacebookResponse<Context>({
 
   function createResponseImage({
     actions,
-    image: url,
+    image,
   }: FacebookResponseOutput.Content.Image):
     | RawResponse.Message.PlainMedia
     | RawResponse.Message.RichMedia {
+    const imagePayload = getFacebookImagePayload(image);
+
     if (actions == null) {
       return {
         message: {
           attachment: {
             type: "image",
-            payload: { url, is_reusable: true },
+            payload: { ...imagePayload, is_reusable: true },
           },
         },
       };
@@ -212,8 +219,13 @@ function createFacebookResponse<Context>({
         attachment: {
           type: "template",
           payload: {
-            buttons: actions.map(createSingleAction),
-            elements: [{ url, media_type: "image" }],
+            elements: [
+              {
+                ...imagePayload,
+                buttons: actions.map(createSingleAction),
+                media_type: "image",
+              },
+            ],
             template_type: "media",
           },
         },
@@ -274,11 +286,13 @@ function createFacebookResponse<Context>({
   function createResponseVideo({
     video,
   }: FacebookResponseOutput.Content.Video): RawResponse.Message.PlainMedia {
+    const videoPayload = getFacebookImagePayload(video);
+
     return {
       message: {
         attachment: {
           type: "video",
-          payload: { is_reusable: true, url: video },
+          payload: { ...videoPayload, is_reusable: true },
         },
       },
     };

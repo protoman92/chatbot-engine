@@ -18,6 +18,15 @@ export function getCrossPlatformOutput(
   };
 }
 
+/**
+ * Pass either a URL, or an attachment ID, and this method will prepare the
+ * image payload.
+ */
+export function getFacebookImagePayload(urlOrAttachmentID: string) {
+  if (urlOrAttachmentID.startsWith("http")) return { url: urlOrAttachmentID };
+  return { attachment_id: urlOrAttachmentID };
+}
+
 /** Check if an object is of a certain type */
 export function isType<
   T,
