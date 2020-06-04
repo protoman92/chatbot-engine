@@ -206,10 +206,7 @@ function createFacebookResponse<Context>({
     if (actions == null) {
       return {
         message: {
-          attachment: {
-            type: "image",
-            payload: { ...imagePayload, is_reusable: true },
-          },
+          attachment: { type: "image", payload: imagePayload },
         },
       };
     }
@@ -289,12 +286,7 @@ function createFacebookResponse<Context>({
     const videoPayload = getFacebookImagePayload(video);
 
     return {
-      message: {
-        attachment: {
-          type: "video",
-          payload: { ...videoPayload, is_reusable: true },
-        },
-      },
+      message: { attachment: { type: "video", payload: videoPayload } },
     };
   }
 

@@ -333,10 +333,7 @@ declare namespace FacebookRawResponse {
         attachment: Readonly<{
           type: "image" | "video";
           payload: Readonly<
-            { is_reusable: boolean } & (
-              | { attachment_id: string }
-              | { url: string }
-            )
+            { attachment_id: string } | { is_reusable: boolean; url: string }
           >;
         }>;
       }>;

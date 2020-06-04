@@ -23,7 +23,10 @@ export function getCrossPlatformOutput(
  * image payload.
  */
 export function getFacebookImagePayload(urlOrAttachmentID: string) {
-  if (urlOrAttachmentID.startsWith("http")) return { url: urlOrAttachmentID };
+  if (urlOrAttachmentID.startsWith("http")) {
+    return { is_reusable: true, url: urlOrAttachmentID };
+  }
+
   return { attachment_id: urlOrAttachmentID };
 }
 
