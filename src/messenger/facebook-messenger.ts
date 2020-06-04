@@ -191,13 +191,31 @@ function createFacebookResponse<Context>({
   }
 
   function createResponseImage({
-    image,
-  }: FacebookResponseOutput.Content.Image): RawResponse.Message.Media {
+    actions,
+    image: url,
+  }: FacebookResponseOutput.Content.Image):
+    | RawResponse.Message.PlainMedia
+    | RawResponse.Message.RichMedia {
+    if (actions == null) {
+      return {
+        message: {
+          attachment: {
+            type: "image",
+            payload: { url, is_reusable: true },
+          },
+        },
+      };
+    }
+
     return {
       message: {
         attachment: {
-          type: "image",
-          payload: { is_reusable: true, url: image },
+          type: "template",
+          payload: {
+            buttons: actions.map(createSingleAction),
+            elements: [{ url, media_type: "image" }],
+            template_type: "media",
+          },
         },
       },
     };
@@ -255,7 +273,7 @@ function createFacebookResponse<Context>({
 
   function createResponseVideo({
     video,
-  }: FacebookResponseOutput.Content.Video): RawResponse.Message.Media {
+  }: FacebookResponseOutput.Content.Video): RawResponse.Message.PlainMedia {
     return {
       message: {
         attachment: {

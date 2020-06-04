@@ -93,6 +93,7 @@ declare namespace FacebookResponseOutput {
     }
 
     interface Image {
+      readonly actions?: readonly Action[];
       readonly image: string;
       readonly type: "image";
     }
@@ -291,41 +292,33 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    namespace Carousel {
-      interface Element {
-        readonly title: string;
-        readonly subtitle: string | undefined;
-        readonly image_url: string | undefined;
-        readonly buttons: readonly FacebookRawResponse.Button[] | undefined;
-      }
-    }
-
     interface Carousel {
       readonly message: Readonly<{
         attachment: {
           type: "template";
           payload: Readonly<{
-            elements: readonly Carousel.Element[];
+            elements: readonly Readonly<{
+              title: string;
+              subtitle?: string;
+              image_url?: string;
+              buttons?: readonly FacebookRawResponse.Button[];
+            }>[];
             template_type: "generic";
           }>;
         };
       }>;
     }
 
-    namespace List {
-      interface Element {
-        readonly title: string;
-        readonly subtitle: string | undefined;
-        readonly buttons: readonly FacebookRawResponse.Button[] | undefined;
-      }
-    }
-
     interface List {
       readonly message: Readonly<{
         attachment: {
           payload: Readonly<{
-            buttons: readonly FacebookRawResponse.Button[] | undefined;
-            elements: readonly List.Element[];
+            buttons?: readonly FacebookRawResponse.Button[];
+            elements: readonly Readonly<{
+              buttons?: readonly FacebookRawResponse.Button[];
+              title: string;
+              subtitle?: string | undefined;
+            }>[];
             template_type: "list";
             top_element_style: "compact";
           }>;
@@ -334,11 +327,24 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface Media {
+    interface PlainMedia {
       readonly message: Readonly<{
         attachment: Readonly<{
           type: "image" | "video";
           payload: Readonly<{ is_reusable: boolean; url: string }>;
+        }>;
+      }>;
+    }
+
+    interface RichMedia {
+      readonly message: Readonly<{
+        attachment: Readonly<{
+          type: "template";
+          payload: Readonly<{
+            buttons?: readonly FacebookRawResponse.Button[];
+            elements: [{ media_type: "image" | "video"; url: string }];
+            template_type: "media";
+          }>;
         }>;
       }>;
     }
@@ -352,7 +358,8 @@ declare namespace FacebookRawResponse {
     | Message.Button
     | Message.Carousel
     | Message.List
-    | Message.Media
+    | Message.PlainMedia
+    | Message.RichMedia
     | Message.Text;
 }
 
