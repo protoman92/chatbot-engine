@@ -191,6 +191,9 @@ function createRawTelegramResponse<Context>({
 
             case "text":
               return { text, callback_data: text };
+
+            case "url":
+              return { text, url: quickReply.url };
           }
         })
       ),

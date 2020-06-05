@@ -70,9 +70,15 @@ declare namespace TelegramResponseOutput {
       readonly text: string;
       readonly type: "text";
     }
+
+    interface URL {
+      readonly text: string;
+      readonly type: "url";
+      readonly url: string;
+    }
   }
 
-  type InlineMarkup = QuickReply.Postback | QuickReply.Text;
+  type InlineMarkup = QuickReply.Postback | QuickReply.Text | QuickReply.URL;
   type ReplyMarkup = QuickReply.Location | QuickReply.Text | QuickReply.Contact;
   type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
   type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
