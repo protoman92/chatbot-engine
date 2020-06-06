@@ -17,13 +17,7 @@ export function saveContextOnSend<Context>(
     return {
       ...processor,
       sendResponse: async (response) => {
-        const {
-          targetID,
-          targetPlatform,
-          additionalContext,
-          originalRequest,
-        } = response;
-
+        const { targetID, targetPlatform, additionalContext } = response;
         const result = await processor.sendResponse(response);
 
         if (additionalContext != null) {
@@ -33,22 +27,20 @@ export function saveContextOnSend<Context>(
             context: additionalContext,
           });
 
-          if (originalRequest != null) {
-            const finalProcessor = getFinalMessageProcessor();
+          const finalProcessor = getFinalMessageProcessor();
 
-            await finalProcessor.receiveRequest({
-              currentContext: originalRequest.currentContext,
-              input: {
-                newContext,
-                oldContext,
-                changedContext: additionalContext,
-                type: "context_change",
-              },
-              targetID: originalRequest.targetID,
-              targetPlatform: originalRequest.targetPlatform,
-              type: "manual_trigger",
-            });
-          }
+          await finalProcessor.receiveRequest({
+            currentContext: newContext,
+            input: {
+              newContext,
+              oldContext,
+              changedContext: additionalContext,
+              type: "context_change",
+            },
+            targetID: response.targetID,
+            targetPlatform: response.targetPlatform,
+            type: "manual_trigger",
+          });
         }
 
         return result;

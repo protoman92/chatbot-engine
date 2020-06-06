@@ -102,14 +102,15 @@ describe("Save context on send", () => {
     verify(
       msgProcessor.receiveRequest(
         deepEqual({
-          ...response.originalRequest!,
+          targetID,
+          currentContext: finalContext,
           input: {
             oldContext,
             changedContext: additionalContext,
             newContext: finalContext,
             type: "context_change",
           },
-          targetPlatform: "facebook",
+          targetPlatform: "telegram",
           type: "manual_trigger",
         })
       )
