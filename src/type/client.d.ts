@@ -1,10 +1,11 @@
 import { KV } from "./common";
+import { AxiosRequestConfig } from "axios";
 
 declare namespace HTTPRequest {
-  interface Base {
-    readonly url: string;
-    readonly headers?: Readonly<{ [K: string]: unknown }>;
+  interface Base
+    extends Pick<AxiosRequestConfig, "headers" | "maxContentLength"> {
     readonly query?: KV<unknown>;
+    readonly url: string;
   }
 
   interface GET extends Base {

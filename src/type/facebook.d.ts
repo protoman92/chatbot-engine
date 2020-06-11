@@ -1,3 +1,4 @@
+import { ReadStream } from "fs";
 import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
@@ -444,7 +445,7 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
     attachment: Readonly<{
       reusable: boolean;
       type: "file" | "image";
-      url: string;
-    }>
+    }> &
+      (Readonly<{ fileData: Buffer | ReadStream }> | Readonly<{ url: string }>)
   ): Promise<Readonly<{ attachmentID: string }>>;
 }

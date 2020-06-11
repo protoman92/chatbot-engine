@@ -1,5 +1,6 @@
+import FormData from "form-data";
 import { facebookError, requireAllTruthy } from "../common/utils";
-import { HTTPClient } from "../type/client";
+import { HTTPClient, HTTPRequest } from "../type/client";
 import { FacebookClient, FacebookConfig } from "../type/facebook";
 import defaultAxiosClient from "./axios-client";
 
@@ -21,12 +22,22 @@ export function createFacebookClient(
     });
   }
 
-  async function post<T>(body: unknown, ...additionalPaths: string[]) {
+  async function post<T>({
+    additionalPaths,
+    body,
+    headers: additionalHeaders,
+    ...config
+  }: Readonly<{
+    additionalPaths: string[];
+    body: unknown;
+  }> &
+    Pick<HTTPRequest.POST, "headers" | "maxContentLength">) {
     return client.communicate<T>({
       body,
       method: "POST",
       url: formatURL(...additionalPaths),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...additionalHeaders },
+      ...config,
     });
   }
 
@@ -47,30 +58,59 @@ export function createFacebookClient(
 
       throw facebookError("Invalid mode or verify token");
     },
-    sendMenuSettings: (data) => post(data, "me", "custom_user_settings"),
-    sendResponse: (data) => post(data, "me", "messages"),
+    sendMenuSettings: (data) =>
+      post({ body: data, additionalPaths: ["me", "custom_user_settings"] }),
+    sendResponse: (data) =>
+      post({ body: data, additionalPaths: ["me", "messages"] }),
     setTypingIndicator: (targetID, enabled) => {
-      return post(
-        {
+      return post({
+        body: {
           recipient: { id: targetID },
           sender_action: enabled ? "typing_on" : "typing_off",
         },
-        "me",
-        "messages"
-      );
+        additionalPaths: ["me", "messages"],
+      });
     },
-    uploadAttachment: async ({ reusable, type, url }) => {
-      const { attachment_id: attachmentID } = await post(
-        {
-          message: {
-            attachment: { type, payload: { url, is_reusable: !!reusable } },
+    uploadAttachment: async ({ reusable, type, ...attachment }) => {
+      /* istanbul ignore else  */
+      if ("url" in attachment) {
+        const { attachment_id: attachmentID } = await post({
+          additionalPaths: ["me", "message_attachments"],
+          body: {
+            message: {
+              attachment: {
+                type,
+                payload: { is_reusable: !!reusable, url: attachment.url },
+              },
+            },
           },
-        },
-        "me",
-        "message_attachments"
-      );
+        });
 
-      return { attachmentID };
+        return { attachmentID };
+      } else {
+        const formData = new FormData();
+
+        formData.append(
+          "message",
+          JSON.stringify({
+            attachment: {
+              type,
+              payload: { is_reusable: !!reusable },
+            },
+          })
+        );
+
+        formData.append("filedata", attachment.fileData);
+
+        const { attachment_id: attachmentID } = await post({
+          additionalPaths: ["me", "message_attachments"],
+          body: formData,
+          headers: formData.getHeaders(),
+          maxContentLength: Infinity,
+        });
+
+        return { attachmentID };
+      }
     },
   };
 }

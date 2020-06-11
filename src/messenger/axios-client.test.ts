@@ -33,12 +33,14 @@ describe("Axios client", () => {
     // When
     const body = { a: 1, b: 2 };
     const headers = { a: 1, b: 2 };
+    const maxContentLength = 0;
     const query = { a: 1, b: 2 };
 
     const getData = await client.communicate({
       url,
       headers,
       query,
+      maxContentLength,
       method: "GET",
     });
 
@@ -46,12 +48,18 @@ describe("Axios client", () => {
       url,
       body,
       headers,
+      maxContentLength,
       query,
       method: "POST",
     });
 
     // Then
-    const configAssert = deepEqual({ headers, params: query });
+    const configAssert = deepEqual({
+      headers,
+      maxContentLength,
+      params: query,
+    });
+
     verify(axios.get(url, configAssert)).once();
     verify(axios.post(url, deepEqual(body), configAssert)).once();
     expectJs(getData).to.eql(response.data);
