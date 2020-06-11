@@ -37,9 +37,7 @@ describe("Telegram client", () => {
     // When
     const apiResponse = await tlClient.sendResponse({
       action: "sendMessage",
-      chat_id: "",
-      text: "Hey",
-      reply_markup: undefined,
+      body: { chat_id: "", text: "" },
     });
 
     // Then
@@ -59,9 +57,7 @@ describe("Telegram client", () => {
       // When
       await tlClient.sendResponse({
         action: "sendMessage",
-        chat_id: "",
-        text: "Hey",
-        reply_markup: undefined,
+        body: { chat_id: "", text: "" },
       });
 
       throw new Error("Never should have come here");

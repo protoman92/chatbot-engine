@@ -72,7 +72,7 @@ export function createFacebookClient(
       });
     },
     uploadAttachment: async ({ reusable, type, ...attachment }) => {
-      /* istanbul ignore else  */
+      /* istanbul ignore else */
       if ("url" in attachment) {
         const { attachment_id: attachmentID } = await post({
           additionalPaths: ["me", "message_attachments"],

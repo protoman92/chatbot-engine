@@ -85,7 +85,7 @@ declare namespace FacebookResponseOutput {
 
     interface Carousel {
       readonly actions?: readonly Action[];
-      readonly items: Readonly<{
+      readonly items: readonly Readonly<{
         title: string;
         description?: string;
         image?: string;
