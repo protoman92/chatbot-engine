@@ -62,13 +62,15 @@ export function createTelegramClient(
       }).then(({ status }) => status === "member"),
     sendResponse: ({
       action,
+      body,
+      headers = {},
       parseMode: parse_mode = defaultParseMode,
-      ...payload
     }) => {
       return communicate({
+        body,
+        headers,
         url: formatURL(action, { parse_mode }),
         method: "POST",
-        body: payload,
       });
     },
     // tslint:disable-next-line:variable-name

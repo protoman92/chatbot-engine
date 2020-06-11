@@ -1,4 +1,4 @@
-import { Omit } from "ts-essentials";
+import FormData from "form-data";
 import { telegramError } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
@@ -157,23 +157,34 @@ function createRawTelegramResponse<Context>({
   targetID,
   output,
 }: TelegramResponse<Context>): readonly TelegramRawResponse[] {
-  function createImageResponse(
+  function createDocumentResponse(
     chat_id: string,
-    { image: photo, text: caption }: TelegramResponseOutput.Content.Image
-  ): Omit<TelegramRawResponse.SendPhoto, "reply_markup"> {
-    return {
-      caption,
-      chat_id,
-      photo,
-      action: "sendPhoto",
-    };
+    reply_markup: TelegramRawResponse.ReplyMarkup | undefined,
+    {
+      fileData: document,
+      fileName: filename,
+      text: caption,
+    }: TelegramResponseOutput.Content.Document
+  ): TelegramRawResponse.SendDocument {
+    const formData = new FormData();
+    if (!!caption) formData.append("caption", caption);
+    if (!!reply_markup) formData.append("reply_markup", reply_markup);
+    formData.append("chat_id", chat_id);
+    formData.append("document", document, { filename });
+    return formData;
   }
 
-  function createTextResponse(
-    chat_id: string,
-    { text }: TelegramResponseOutput.Content.Text
-  ): Omit<TelegramRawResponse.SendMessage, "reply_markup"> {
-    return { chat_id, text, action: "sendMessage" };
+  function createImageResponse({
+    image: photo,
+    text: caption,
+  }: TelegramResponseOutput.Content.Image): TelegramRawResponse.SendPhoto {
+    return { caption, photo };
+  }
+
+  function createTextResponse({
+    text,
+  }: TelegramResponseOutput.Content.Text): TelegramRawResponse.SendMessage {
+    return { text };
   }
 
   /** Only certain quick reply types supports inline markups. */
@@ -265,17 +276,38 @@ function createRawTelegramResponse<Context>({
   ): TelegramRawResponse {
     const reply_markup = quickReplies && createQuickReplies(quickReplies);
 
-    if (content.type === "image") {
-      return {
-        ...createImageResponse(targetID, content),
-        parseMode,
+    if (content.type === "document") {
+      const documentForm = createDocumentResponse(
+        targetID,
         reply_markup,
+        content
+      );
+
+      return {
+        parseMode,
+        action: "sendDocument",
+        body: documentForm,
+        headers: documentForm.getHeaders(),
+      };
+    } else if (content.type === "image") {
+      return {
+        parseMode,
+        action: "sendPhoto",
+        body: {
+          chat_id: targetID,
+          reply_markup,
+          ...createImageResponse(content),
+        },
       };
     } else {
       return {
-        ...createTextResponse(targetID, content),
         parseMode,
-        reply_markup,
+        action: "sendMessage",
+        body: {
+          chat_id: targetID,
+          reply_markup,
+          ...createTextResponse(content),
+        },
       };
     }
   }

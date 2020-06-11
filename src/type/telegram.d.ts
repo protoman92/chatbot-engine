@@ -1,4 +1,5 @@
-import {} from "ts-essentials";
+import FormData from "form-data";
+import { ReadStream } from "fs";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
@@ -91,9 +92,16 @@ declare namespace TelegramResponseOutput {
 
 declare namespace TelegramResponseOutput {
   namespace Content {
+    interface Document {
+      fileData: ReadStream;
+      fileName?: string;
+      text?: string;
+      type: "document";
+    }
+
     interface Image {
       readonly image: string;
-      readonly text: string;
+      readonly text?: string;
       readonly type: "image";
     }
 
@@ -103,7 +111,7 @@ declare namespace TelegramResponseOutput {
     }
   }
 
-  type Content = Content.Image | Content.Text;
+  type Content = Content.Document | Content.Image | Content.Text;
 }
 
 export interface TelegramResponseOutput extends BaseResponseOutput {
@@ -274,27 +282,45 @@ declare namespace TelegramRawResponse {
     | ReplyMarkup.InlineKeyboardMarkup
     | ReplyMarkup.ReplyKeyboardRemove;
 
+  type SendDocument = FormData;
+
   interface SendMessage {
-    readonly action: "sendMessage";
-    readonly chat_id: string;
-    readonly parseMode?: ParseMode;
-    readonly reply_markup: ReplyMarkup | undefined;
     readonly text: string;
   }
 
   interface SendPhoto {
-    readonly action: "sendPhoto";
-    readonly caption: string;
-    readonly chat_id: string;
-    readonly parseMode?: ParseMode;
+    readonly caption?: string;
     readonly photo: string;
-    readonly reply_markup: ReplyMarkup | undefined;
   }
 }
 
-export type TelegramRawResponse =
-  | TelegramRawResponse.SendMessage
-  | TelegramRawResponse.SendPhoto;
+export type TelegramRawResponse = Readonly<
+  {
+    headers?: Readonly<{ [x: string]: string }>;
+    parseMode?: TelegramRawResponse.ParseMode;
+  } & (
+    | {
+        action: "sendDocument";
+        body: TelegramRawResponse.SendDocument;
+      }
+    | {
+        action: "sendMessage";
+        body: TelegramRawResponse.SendMessage &
+          Readonly<{
+            chat_id: string;
+            reply_markup?: TelegramRawResponse.ReplyMarkup;
+          }>;
+      }
+    | {
+        action: "sendPhoto";
+        body: TelegramRawResponse.SendPhoto &
+          Readonly<{
+            chat_id: string;
+            reply_markup?: TelegramRawResponse.ReplyMarkup;
+          }>;
+      }
+  )
+>;
 
 interface TelegramMessageProcessorConfig<Context> {
   readonly leafSelector: LeafSelector<Context>;
