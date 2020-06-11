@@ -94,11 +94,31 @@ declare namespace FacebookResponseOutput {
       readonly type: "carousel";
     }
 
-    interface FileAttachment {
-      readonly attachmentID: string;
-      readonly attachmentType: FacebookRawResponse.FileAttachmentType;
-      readonly type: "attachment";
+    namespace FileAttachment {
+      interface Ambiguous {
+        readonly attachmentIDOrURL: string;
+        readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+        readonly type: "attachment";
+      }
+
+      interface ByID {
+        readonly attachmentID: string;
+        readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+        readonly type: "attachment";
+      }
+
+      interface ByURL {
+        readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+        readonly reusable?: boolean;
+        readonly type: "attachment";
+        readonly url: string;
+      }
     }
+
+    type FileAttachment =
+      | FileAttachment.Ambiguous
+      | FileAttachment.ByID
+      | FileAttachment.ByURL;
 
     namespace Media {
       interface Image {

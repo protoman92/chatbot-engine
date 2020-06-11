@@ -143,10 +143,45 @@ function createFacebookResponse<Context>({
   const MAX_LIST_ELEMENT_COUNT = 4;
 
   function createResponseFileAttachment({
-    attachmentID: attachment_id,
     attachmentType: type,
+    ...attachment
   }: FacebookResponseOutput.Content.FileAttachment): RawResponse.Message.Attachment {
-    return { message: { attachment: { type, payload: { attachment_id } } } };
+    if ("attachmentID" in attachment) {
+      return {
+        message: {
+          attachment: {
+            type,
+            payload: { attachment_id: attachment.attachmentID },
+          },
+        },
+      };
+    } else if ("url" in attachment) {
+      return {
+        message: {
+          attachment: {
+            type,
+            payload: {
+              is_reusable: !!attachment.reusable,
+              url: attachment.url,
+            },
+          },
+        },
+      };
+    } else {
+      if (attachment.attachmentIDOrURL.startsWith("http")) {     return createResponseFileAttachment({
+        ...attachment,
+        attachmentType: type,
+        url: attachment.attachmentIDOrURL,
+      });
+       
+      }
+
+     return createResponseFileAttachment({
+       ...attachment,
+       attachmentID: attachment.attachmentIDOrURL,
+       attachmentType: type,
+     });
+    }
   }
 
   function createResponseButton({
