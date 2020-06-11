@@ -1,9 +1,4 @@
-import {
-  facebookError,
-  getFacebookImagePayload,
-  isType,
-  omitNull,
-} from "../common/utils";
+import { facebookError, isType, omitNull } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
@@ -147,6 +142,13 @@ function createFacebookResponse<Context>({
   const MAX_GENERIC_ELEMENT_COUNT = 10;
   const MAX_LIST_ELEMENT_COUNT = 4;
 
+  function createResponseFileAttachment({
+    attachmentID: attachment_id,
+    attachmentType: type,
+  }: FacebookResponseOutput.Content.FileAttachment): RawResponse.Message.Attachment {
+    return { message: { attachment: { type, payload: { attachment_id } } } };
+  }
+
   function createResponseButton({
     text,
     actions,
@@ -195,20 +197,29 @@ function createFacebookResponse<Context>({
     };
   }
 
-  function createResponseImage({
+  function createResponseMedia({
     actions,
-    image,
-  }: FacebookResponseOutput.Content.Image):
-    | RawResponse.Message.PlainMedia
-    | RawResponse.Message.RichMedia {
-    const imagePayload = getFacebookImagePayload(image);
+    ...media
+  }: FacebookResponseOutput.Content.Media): RawResponse.Message.RichMedia {
+    // const imagePayload = getFacebookImagePayload(image);
 
-    if (actions == null) {
-      return {
-        message: {
-          attachment: { type: "image", payload: imagePayload },
-        },
-      };
+    // if (actions == null) {
+    //   return {
+    //     message: {
+    //       attachment: { type: "image", payload: imagePayload },
+    //     },
+    //   };
+    // }
+
+    let url: string;
+    let media_type: "image" | "video";
+
+    if ("image" in media) {
+      url = media.image;
+      media_type = "image";
+    } else {
+      url = media.video;
+      media_type = "video";
     }
 
     return {
@@ -217,11 +228,7 @@ function createFacebookResponse<Context>({
           type: "template",
           payload: {
             elements: [
-              {
-                ...imagePayload,
-                buttons: actions.map(createSingleAction),
-                media_type: "image",
-              },
+              { media_type, url, buttons: actions.map(createSingleAction) },
             ],
             template_type: "media",
           },
@@ -280,37 +287,27 @@ function createFacebookResponse<Context>({
     return { message: { text } };
   }
 
-  function createResponseVideo({
-    video,
-  }: FacebookResponseOutput.Content.Video): RawResponse.Message.PlainMedia {
-    const videoPayload = getFacebookImagePayload(video);
-
-    return {
-      message: { attachment: { type: "video", payload: videoPayload } },
-    };
-  }
-
   function createResponseMessage(
     content: FacebookResponseOutput.Content
   ): RawResponse.Message {
     switch (content.type) {
+      case "attachment":
+        return createResponseFileAttachment(content);
+
       case "button":
         return createResponseButton(content);
 
       case "carousel":
         return createResponseCarousel(content);
 
-      case "image":
-        return createResponseImage(content);
-
       case "list":
         return createResponseList(content);
 
+      case "media":
+        return createResponseMedia(content);
+
       case "text":
         return createResponseText(content);
-
-      case "video":
-        return createResponseVideo(content);
     }
   }
 

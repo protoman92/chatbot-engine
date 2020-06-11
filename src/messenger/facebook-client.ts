@@ -100,7 +100,7 @@ export function createFacebookClient(
           })
         );
 
-        formData.append("filedata", attachment.fileData);
+        formData.append("filedata", attachment.fileData, attachment);
 
         const { attachment_id: attachmentID } = await post({
           additionalPaths: ["me", "message_attachments"],

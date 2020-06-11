@@ -1,3 +1,4 @@
+import { AppendOptions } from "form-data";
 import { ReadStream } from "fs";
 import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
@@ -93,11 +94,27 @@ declare namespace FacebookResponseOutput {
       readonly type: "carousel";
     }
 
-    type Image = Readonly<{
-      actions?: readonly Action[];
-      image: string;
-      type: "image";
-    }>;
+    interface FileAttachment {
+      readonly attachmentID: string;
+      readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+      readonly type: "attachment";
+    }
+
+    namespace Media {
+      interface Image {
+        actions: readonly Action[];
+        image: string;
+        type: "media";
+      }
+
+      interface Video {
+        actions: readonly Action[];
+        type: "media";
+        video: string;
+      }
+    }
+
+    type Media = Media.Image | Media.Video;
 
     interface List {
       readonly actions?: readonly Action[];
@@ -114,21 +131,15 @@ declare namespace FacebookResponseOutput {
       readonly text: string;
       readonly type: "text";
     }
-
-    type Video = Readonly<{
-      actions?: readonly Action[];
-      type: "video";
-      video: string;
-    }>;
   }
 
   type Content = (
     | Content.Button
     | Content.Carousel
-    | Content.Image
+    | Content.FileAttachment
     | Content.List
+    | Content.Media
     | Content.Text
-    | Content.Video
   ) &
     Readonly<{ tag?: FacebookRawResponse.MessageTag }>;
 
@@ -258,6 +269,7 @@ declare namespace FacebookRawResponse {
   }
 
   type Button = Button.Postback | Button.URL;
+  type FileAttachmentType = "file" | "image" | "video";
 
   interface Menu {
     readonly persistent_menu: readonly Readonly<{
@@ -281,6 +293,17 @@ declare namespace FacebookRawResponse {
   }
 
   namespace Message {
+    interface Attachment {
+      readonly message: Readonly<{
+        attachment: Readonly<{
+          type: FacebookRawResponse.FileAttachmentType;
+          payload: Readonly<
+            { attachment_id: string } | { is_reusable: boolean; url: string }
+          >;
+        }>;
+      }>;
+    }
+
     interface Button {
       readonly message: Readonly<{
         attachment: {
@@ -329,17 +352,6 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface PlainMedia {
-      readonly message: Readonly<{
-        attachment: Readonly<{
-          type: "image" | "video";
-          payload: Readonly<
-            { attachment_id: string } | { is_reusable: boolean; url: string }
-          >;
-        }>;
-      }>;
-    }
-
     interface RichMedia {
       readonly message: Readonly<{
         attachment: Readonly<{
@@ -365,10 +377,10 @@ declare namespace FacebookRawResponse {
   }
 
   type Message =
+    | Message.Attachment
     | Message.Button
     | Message.Carousel
     | Message.List
-    | Message.PlainMedia
     | Message.RichMedia
     | Message.Text;
 }
@@ -444,8 +456,12 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
   uploadAttachment(
     attachment: Readonly<{
       reusable: boolean;
-      type: "file" | "image";
+      type: FacebookRawResponse.FileAttachmentType;
     }> &
-      (Readonly<{ fileData: Buffer | ReadStream }> | Readonly<{ url: string }>)
+      (
+        | Readonly<{ fileData: Buffer | ReadStream }>
+        | Readonly<{ url: string }>
+      ) &
+      AppendOptions
   ): Promise<Readonly<{ attachmentID: string }>>;
 }
