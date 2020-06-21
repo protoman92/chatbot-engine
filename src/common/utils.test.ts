@@ -23,7 +23,7 @@ describe("Common utilities", () => {
     expectJs(tlOutput).to.eql([{ content: { text: "", type: "text" } }]);
   });
 
-  it("Map series should maintain order", async function() {
+  it("Map series should maintain order", async function () {
     // Setup
     this.timeout(5000);
     const data = [...Array(5).keys()];

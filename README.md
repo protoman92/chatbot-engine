@@ -78,7 +78,7 @@ const tlClient = createTelegramClient(client, {
 A branch contains many leaves, and potentially other sub-branches. Let's see how we can implement a simple leaf:
 
 ```javascript
-export default async function() {
+export default async function () {
   return {
     sayHello: await createLeafWithObserver(async (observer) => ({
       /**
@@ -130,7 +130,7 @@ export default async function() {
 In the above example, you'll see that an `additionalContext` was specified in `observer.next`. This will trigger a modification of the user's context object in persistence, and fire a `context_change` request that you can catch and process:
 
 ```javascript
-export default async function() {
+export default async function () {
   return {
     onCounterChangeTrigger: await createLeafWithObserver(async (observer) => ({
       next: async (request) => {
@@ -159,7 +159,7 @@ export default async function() {
 This mechanism is especially useful when you want to trigger flows automatically after a new state. For example, you can implement a state machine for some input flow, which can be triggered from anywhere:
 
 ```javascript
-export default async function({ appClient }: Config) {
+export default async function ({ appClient }: Config) {
   return {
     onStartEditingTrigger: await createLeafWithObserver(async (observer) => ({
       next: async (request) => {
@@ -240,7 +240,7 @@ This is pretty similar to how [Redux](https://github.com/reduxjs/redux) manages 
 After you have the leaves ready, the branches are easy to set up:
 
 ```javascript
-export default async function(args: Config) {
+export default async function (args: Config) {
   return {
     editProfile: await createEditProfile(args),
     sayHello: await createSayHello(),

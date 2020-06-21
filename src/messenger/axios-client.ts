@@ -8,7 +8,7 @@ export function createAxiosClient(axiosInstance: AxiosInstance = axios) {
       const { url, headers, maxContentLength, query: params } = request;
       const config = { headers, maxContentLength };
 
-      const { data } = await (function() {
+      const { data } = await (function () {
         switch (request.method) {
           case "GET":
             return axiosInstance.get(url, { params, ...config });

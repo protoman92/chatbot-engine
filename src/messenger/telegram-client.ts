@@ -99,7 +99,7 @@ export function createTelegramClient(
   return telegramClient;
 }
 
-export default function(args?: Pick<TelegramConfig, "defaultParseMode">) {
+export default function (args?: Pick<TelegramConfig, "defaultParseMode">) {
   const { TELEGRAM_AUTH_TOKEN = "", TELEGRAM_WEBHOOK_URL = "" } = process.env;
 
   const {

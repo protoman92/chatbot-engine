@@ -19,7 +19,7 @@ export function createWitClient(
   };
 }
 
-export default function() {
+export default function () {
   const { WIT_AUTHORIZATION_TOKEN: authorizationToken } = process.env;
   const config = { authorizationToken };
   return createWitClient(defaultAxiosClient, requireAllTruthy(config));

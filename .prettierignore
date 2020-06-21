@@ -1,0 +1,6 @@
+**/.git*
+**/.nyc_output
+**/build
+**/coverage
+**/dist
+**/node_modules

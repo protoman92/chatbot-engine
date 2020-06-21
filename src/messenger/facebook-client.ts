@@ -115,7 +115,7 @@ export function createFacebookClient(
   };
 }
 
-export default function() {
+export default function () {
   const {
     FACEBOOK_API_VERSION = "",
     FACEBOOK_PAGE_TOKEN = "",

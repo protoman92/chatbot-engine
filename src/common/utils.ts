@@ -1,3 +1,4 @@
+import { AmbiguousResponse } from "../type";
 import { Transformer } from "../type/common";
 import { FacebookRawRequest, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousPlatform } from "../type/messenger";
@@ -15,6 +16,30 @@ export function getCrossPlatformOutput(
 ): <P extends AmbiguousPlatform>(platform: P) => NonNullable<typeof args[P]> {
   return <P extends AmbiguousPlatform>(platform: P) => {
     return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
+  };
+}
+
+/**
+ * Use this to get a cross-platform response, so as to reuse logic everywhere
+ * else.
+ */
+export function getCrossPlatformResponse<Context>(
+  args: Readonly<{
+    facebook?: readonly FacebookResponseOutput[];
+    telegram?: readonly TelegramResponseOutput[];
+  }>
+): (
+  args: Omit<AmbiguousResponse<Context>, "output">
+) => AmbiguousResponse<Context> {
+  return ({
+    targetPlatform,
+    ...args1
+  }: Omit<AmbiguousResponse<Context>, "output">) => {
+    return {
+      ...args1,
+      targetPlatform,
+      output: requireNotNull(args[targetPlatform]) as any,
+    };
   };
 }
 
@@ -78,7 +103,7 @@ export function omitNull<T>(
 export function promisify<T>(
   fn: (callback: (err: Error | undefined | null, value: T) => any) => void
 ): () => Promise<T> {
-  return function() {
+  return function () {
     return new Promise((resolve, reject) => {
       fn((err, val) => {
         if (err !== undefined && err !== null) {
@@ -100,7 +125,7 @@ export function promisify1<
 >(
   fn: FN
 ): (param1: Parameters<FN>[0]) => Promise<Parameters<Parameters<FN>[1]>[1]> {
-  return function(this: any, param1) {
+  return function (this: any, param1) {
     return promisify(fn.bind(this, param1))();
   };
 }
@@ -118,7 +143,7 @@ export function promisify2<
   p1: Parameters<FN>[0],
   p2: Parameters<FN>[1]
 ) => Promise<Parameters<Parameters<FN>[2]>[1]> {
-  return function(this: any, p1, p2) {
+  return function (this: any, p1, p2) {
     return promisify(fn.bind(this, p1, p2))();
   };
 }
