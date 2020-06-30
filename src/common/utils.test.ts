@@ -58,18 +58,20 @@ describe("Common utilities", () => {
   it("Chunk string should work", async () => {
     // Setup
     // When
-    const chunks = chunkString(
-      `
+    // Then
+    expectJs(
+      chunkString(
+        `
 1
 2
 3
 4
 5
 `.trim(),
-      2
-    );
+        2
+      )
+    ).to.eql(["1\n", "2\n", "3\n", "4\n", "5"]);
 
-    // Then
-    expectJs(chunks).to.eql(["1\n", "2\n", "3\n", "4\n", "5"]);
+    expectJs(chunkString("👶🏻👦🏻👧🏻", 1)).to.eql(["👶🏻", "👦🏻", "👧🏻"]);
   });
 });

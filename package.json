@@ -83,6 +83,7 @@
   "version": "1.0.0",
   "dependencies": {
     "form-data": "^3.0.0",
-    "formidable": "^1.2.2"
+    "formidable": "^1.2.2",
+    "grapheme-splitter": "^1.0.4"
   }
 }

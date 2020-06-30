@@ -1,3 +1,4 @@
+import GraphemeSplitter from "grapheme-splitter";
 import { AmbiguousResponse } from "../type";
 import { Transformer } from "../type/common";
 import { FacebookRawRequest, FacebookResponseOutput } from "../type/facebook";
@@ -25,17 +26,21 @@ export function chunkArray<TArr extends any[] | readonly any[]>(
   return result;
 }
 
-export function chunkString(str: string, length: number) {
-  const chunks: string[] = [];
-  let currentString = str;
+export const chunkString = (() => {
+  let splitter: GraphemeSplitter;
 
-  while (currentString.length > 0) {
-    chunks.push(currentString.substr(0, length));
-    currentString = currentString.substr(length);
-  }
+  return (str: string, length: number) => {
+    if (splitter == null) splitter = new GraphemeSplitter();
+    const chunks: string[] = [];
+    const currentStringChunks = splitter.splitGraphemes(str);
 
-  return chunks;
-}
+    while (currentStringChunks.length > 0) {
+      chunks.push(currentStringChunks.splice(0, length).join(""));
+    }
+
+    return chunks;
+  };
+})();
 
 /**
  * Use this to get a cross-platform output, so as to reuse logic everywhere
