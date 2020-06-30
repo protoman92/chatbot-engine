@@ -1,5 +1,5 @@
 import FormData from "form-data";
-import { telegramError } from "../common/utils";
+import { chunkString, telegramError } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   TelegramBot,
@@ -14,6 +14,9 @@ import {
   TelegramUser,
 } from "../type/telegram";
 import { createMessageProcessor } from "./generic-messenger";
+
+const CAPTION_TEXT_CHARACTER_LIMIT = 1024;
+const MESSAGE_TEXT_CHARACTER_LIMIT = 4096;
 
 /**
  * Extract an input command from an input text. For example:
@@ -174,17 +177,27 @@ function createRawTelegramResponse<Context>({
     return formData;
   }
 
-  function createImageResponse({
+  function createImageResponses({
     image: photo,
-    text: caption,
-  }: TelegramResponseOutput.Content.Image): TelegramRawResponse.SendPhoto {
-    return { caption, photo };
+    text: fullCaption = "",
+  }: TelegramResponseOutput.Content.Image): [
+    TelegramRawResponse.SendPhoto,
+    ...TelegramRawResponse.SendMessage[]
+  ] {
+    const [caption, ...texts] = chunkString(
+      fullCaption,
+      CAPTION_TEXT_CHARACTER_LIMIT
+    );
+
+    return [{ caption, photo }, ...texts.map((text) => ({ text }))];
   }
 
-  function createTextResponse({
-    text,
-  }: TelegramResponseOutput.Content.Text): TelegramRawResponse.SendMessage {
-    return { text };
+  function createTextResponses({
+    text: fullText,
+  }: TelegramResponseOutput.Content.Text): TelegramRawResponse.SendMessage[] {
+    return chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => ({
+      text,
+    }));
   }
 
   /** Only certain quick reply types supports inline markups. */
@@ -273,7 +286,7 @@ function createRawTelegramResponse<Context>({
       quickReplies,
       parseMode,
     }: TelegramResponse<Context>["output"][number]
-  ): TelegramRawResponse {
+  ): TelegramRawResponse[] {
     const reply_markup = quickReplies && createQuickReplies(quickReplies);
 
     if (content.type === "document") {
@@ -283,36 +296,56 @@ function createRawTelegramResponse<Context>({
         content
       );
 
-      return {
-        parseMode,
-        action: "sendDocument",
-        body: documentForm,
-        headers: documentForm.getHeaders(),
-      };
-    } else if (content.type === "image") {
-      return {
-        parseMode,
-        action: "sendPhoto",
-        body: {
-          chat_id: targetID,
-          reply_markup,
-          ...createImageResponse(content),
+      return [
+        {
+          parseMode,
+          action: "sendDocument",
+          body: documentForm,
+          headers: documentForm.getHeaders(),
         },
-      };
+      ];
+    } else if (content.type === "image") {
+      const [imageBody, ...textBodies] = createImageResponses(content);
+
+      const mergedResponses = [
+        {
+          parseMode,
+          action: "sendPhoto" as const,
+          body: {
+            ...imageBody,
+            chat_id: targetID,
+            reply_markup: textBodies.length > 0 ? undefined : reply_markup,
+          },
+        },
+        ...textBodies.map((textBody, idx, { length }) => ({
+          parseMode,
+          action: "sendMessage" as const,
+          body: {
+            ...textBody,
+            chat_id: targetID,
+            reply_markup: idx === length - 1 ? reply_markup : undefined,
+          },
+        })),
+      ];
+
+      return mergedResponses;
     } else {
-      return {
+      return createTextResponses(content).map((textBody, idx, { length }) => ({
         parseMode,
         action: "sendMessage",
         body: {
+          ...textBody,
           chat_id: targetID,
-          reply_markup,
-          ...createTextResponse(content),
+          reply_markup: idx === length - 1 ? reply_markup : undefined,
         },
-      };
+      }));
     }
   }
 
-  return output.map((o) => createRawResponse(targetID, o));
+  return output.reduce(
+    (acc, o) => [...acc, ...createRawResponse(targetID, o)],
+    [] as TelegramRawResponse[]
+  );
 }
 
 /** Create a Telegram message processor */

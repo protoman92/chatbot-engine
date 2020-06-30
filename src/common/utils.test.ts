@@ -5,6 +5,7 @@ import {
   mapSeries,
   omitNull,
   requireNotNull,
+  chunkString,
 } from "./utils";
 
 describe("Common utilities", () => {
@@ -52,5 +53,23 @@ describe("Common utilities", () => {
   it("Require not null should work", async () => {
     expectJs(requireNotNull(1)).to.eql(1);
     expectJs(() => requireNotNull(null)).to.throwError();
+  });
+
+  it("Chunk string should work", async () => {
+    // Setup
+    // When
+    const chunks = chunkString(
+      `
+1
+2
+3
+4
+5
+`.trim(),
+      2
+    );
+
+    // Then
+    expectJs(chunks).to.eql(["1\n", "2\n", "3\n", "4\n", "5"]);
   });
 });

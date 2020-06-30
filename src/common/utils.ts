@@ -4,6 +4,39 @@ import { FacebookRawRequest, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousPlatform } from "../type/messenger";
 import { TelegramRawRequest, TelegramResponseOutput } from "../type/telegram";
 
+export function chunkArray<TArr extends any[] | readonly any[]>(
+  arr: TArr,
+  chunkSize: number
+): TArr[0][][] {
+  if (chunkSize === 0) return [[]];
+  const result: TArr[0][][] = [];
+
+  for (let i = 0; i < arr.length; i += chunkSize) {
+    const chunk: TArr[0][] = [];
+
+    for (let j = 0; j < chunkSize; j++) {
+      if (arr.length <= i + j) break;
+      chunk.push(arr[i + j]);
+    }
+
+    result.push(chunk);
+  }
+
+  return result;
+}
+
+export function chunkString(str: string, length: number) {
+  const chunks: string[] = [];
+  let currentString = str;
+
+  while (currentString.length > 0) {
+    chunks.push(currentString.substr(0, length));
+    currentString = currentString.substr(length);
+  }
+
+  return chunks;
+}
+
 /**
  * Use this to get a cross-platform output, so as to reuse logic everywhere
  * else.
