@@ -42,6 +42,33 @@ export const chunkString = (() => {
   };
 })();
 
+export const firstSubString = (() => {
+  let splitter: GraphemeSplitter;
+
+  return (str: string, length: number) => {
+    if (splitter == null) splitter = new GraphemeSplitter();
+    const currentStringChunks = splitter.splitGraphemes(str);
+    const firstSubstring = currentStringChunks.splice(0, length).join("");
+    return { firstSubstring, restSubstring: currentStringChunks.join("") };
+  };
+})();
+
+export const lastSubstring = (() => {
+  let splitter: GraphemeSplitter;
+
+  return (str: string, length: number) => {
+    if (splitter == null) splitter = new GraphemeSplitter();
+    const currentStringChunks = splitter.splitGraphemes(str);
+    const totalLength = currentStringChunks.length;
+
+    const lastSubstring = currentStringChunks
+      .splice(totalLength - length)
+      .join("");
+
+    return { lastSubstring, restSubstring: currentStringChunks.join("") };
+  };
+})();
+
 /**
  * Use this to get a cross-platform output, so as to reuse logic everywhere
  * else.

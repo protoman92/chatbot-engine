@@ -1,4 +1,8 @@
-import { facebookError, omitNull } from "../common/utils";
+import {
+  chunkString,
+  facebookError,
+  omitNull
+} from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
@@ -8,9 +12,13 @@ import {
   FacebookRequest,
   FacebookRequestInput,
   FacebookResponse,
-  FacebookResponseOutput,
+  FacebookResponseOutput
 } from "../type/facebook";
 import { createMessageProcessor } from "./generic-messenger";
+
+const MAX_GENERIC_ELEMENT_COUNT = 10;
+const MAX_LIST_ELEMENT_COUNT = 4;
+const MESSAGE_TEXT_CHARACTER_LIMIT = 640;
 
 /** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>({
@@ -130,40 +138,41 @@ function createFacebookResponse<Context>({
   targetID,
   output,
 }: FacebookResponse<Context>): readonly RawResponse[] {
-  const MAX_GENERIC_ELEMENT_COUNT = 10;
-  const MAX_LIST_ELEMENT_COUNT = 4;
-
-  function createFileAttachmentMessage({
+  function createFileAttachmentMessages({
     attachmentType: type,
     ...attachment
-  }: FacebookResponseOutput.Content.FileAttachment): RawResponse.Message.Attachment["message"] {
+  }: FacebookResponseOutput.Content.FileAttachment): readonly RawResponse.Message.Attachment["message"][] {
     if ("attachmentID" in attachment) {
-      return {
-        attachment: {
-          type,
-          payload: { attachment_id: attachment.attachmentID },
-        },
-      };
-    } else if ("url" in attachment) {
-      return {
-        attachment: {
-          type,
-          payload: {
-            is_reusable: !!attachment.reusable,
-            url: attachment.url,
+      return [
+        {
+          attachment: {
+            type,
+            payload: { attachment_id: attachment.attachmentID },
           },
         },
-      };
+      ];
+    } else if ("url" in attachment) {
+      return [
+        {
+          attachment: {
+            type,
+            payload: {
+              is_reusable: !!attachment.reusable,
+              url: attachment.url,
+            },
+          },
+        },
+      ];
     } else {
       if (attachment.attachmentIDOrURL.startsWith("http")) {
-        return createFileAttachmentMessage({
+        return createFileAttachmentMessages({
           ...attachment,
           attachmentType: type,
           url: attachment.attachmentIDOrURL,
         });
       }
 
-      return createFileAttachmentMessage({
+      return createFileAttachmentMessages({
         ...attachment,
         attachmentID: attachment.attachmentIDOrURL,
         attachmentType: type,
@@ -171,50 +180,60 @@ function createFacebookResponse<Context>({
     }
   }
 
-  function createButtonMessage({
-    text,
+  function createButtonMessages({
+    text: fullText,
     actions,
-  }: FacebookResponseOutput.Content.Button): RawResponse.Message.Button["message"] {
-    return {
-      attachment: {
-        type: "template",
-        payload: {
-          text,
-          template_type: "button",
-          buttons: actions.map((a) => createSingleAction(a)),
+  }: FacebookResponseOutput.Content.Button): readonly (
+    | RawResponse.Message.Text["message"]
+    | RawResponse.Message.Button["message"]
+  )[] {
+    const chunkTexts = chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT);
+
+    return [
+      ...chunkTexts.slice(0, chunkTexts.length - 1).map((text) => ({ text })),
+      {
+        attachment: {
+          type: "template",
+          payload: {
+            text: chunkTexts[chunkTexts.length - 1],
+            template_type: "button",
+            buttons: actions.map((a) => createSingleAction(a)),
+          },
         },
       },
-    };
+    ];
   }
 
-  function createCarouselMessage({
+  function createCarouselMessages({
     items,
-  }: FacebookResponseOutput.Content.Carousel): RawResponse.Message.Carousel["message"] {
-    return {
-      attachment: {
-        type: "template",
-        payload: {
-          elements: items
-            .slice(0, MAX_GENERIC_ELEMENT_COUNT)
-            .map(({ title = "", description, image: mediaURL, actions }) => ({
-              title,
-              subtitle: description || undefined,
-              image_url: mediaURL || undefined,
-              buttons:
-                !!actions && actions.length
-                  ? actions.map(createSingleAction)
-                  : undefined,
-            })),
-          template_type: "generic",
+  }: FacebookResponseOutput.Content.Carousel): readonly RawResponse.Message.Carousel["message"][] {
+    return [
+      {
+        attachment: {
+          type: "template",
+          payload: {
+            elements: items
+              .slice(0, MAX_GENERIC_ELEMENT_COUNT)
+              .map(({ title = "", description, image: mediaURL, actions }) => ({
+                title,
+                subtitle: description || undefined,
+                image_url: mediaURL || undefined,
+                buttons:
+                  !!actions && actions.length
+                    ? actions.map(createSingleAction)
+                    : undefined,
+              })),
+            template_type: "generic",
+          },
         },
       },
-    };
+    ];
   }
 
-  function createMediaMessage({
+  function createMediaMessages({
     actions,
     ...media
-  }: FacebookResponseOutput.Content.Media): RawResponse.Message.RichMedia["message"] {
+  }: FacebookResponseOutput.Content.Media): readonly RawResponse.Message.RichMedia["message"][] {
     let url: string;
     let media_type: "image" | "video";
 
@@ -226,76 +245,84 @@ function createFacebookResponse<Context>({
       media_type = "video";
     }
 
-    return {
-      attachment: {
-        type: "template",
-        payload: {
-          elements: [
-            { media_type, url, buttons: actions.map(createSingleAction) },
-          ],
-          template_type: "media",
+    return [
+      {
+        attachment: {
+          type: "template",
+          payload: {
+            elements: [
+              { media_type, url, buttons: actions.map(createSingleAction) },
+            ],
+            template_type: "media",
+          },
         },
       },
-    };
+    ];
   }
 
-  function createListMessage(
+  function createListMessages(
     content: FacebookResponseOutput.Content.List
-  ): RawResponse.Message.List["message"] {
+  ): readonly RawResponse.Message.List["message"][] {
     const { items, actions: listActions } = content;
 
-    return {
-      attachment: {
-        type: "template",
-        payload: {
-          elements: items
-            .slice(0, MAX_LIST_ELEMENT_COUNT)
-            .map(({ title = "", description, actions = [] }) => ({
-              title,
-              subtitle: description || undefined,
-              buttons:
-                !!actions && actions.length
-                  ? actions.map(createSingleAction)
-                  : undefined,
-            })),
-          template_type: "list",
-          top_element_style: "compact",
-          buttons:
-            !!listActions && listActions.length
-              ? listActions.map(createSingleAction)
-              : undefined,
+    return [
+      {
+        attachment: {
+          type: "template",
+          payload: {
+            elements: items
+              .slice(0, MAX_LIST_ELEMENT_COUNT)
+              .map(({ title = "", description, actions = [] }) => ({
+                title,
+                subtitle: description || undefined,
+                buttons:
+                  !!actions && actions.length
+                    ? actions.map(createSingleAction)
+                    : undefined,
+              })),
+            template_type: "list",
+            top_element_style: "compact",
+            buttons:
+              !!listActions && listActions.length
+                ? listActions.map(createSingleAction)
+                : undefined,
+          },
         },
       },
-    };
+    ];
   }
 
-  function createTextMessage({
+  function createTextMessages({
     text,
-  }: FacebookResponseOutput.Content.Text): RawResponse.Message.Text["message"] {
-    return { text };
+  }: FacebookResponseOutput.Content.Text): readonly RawResponse.Message.Text["message"][] {
+    return [
+      ...chunkString(text, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => ({
+        text,
+      })),
+    ];
   }
 
-  function createResponseMessage(
+  function createResponseMessages(
     content: FacebookResponseOutput.Content
-  ): RawResponse.Message["message"] {
+  ): readonly RawResponse.Message["message"][] {
     switch (content.type) {
       case "attachment":
-        return createFileAttachmentMessage(content);
+        return createFileAttachmentMessages(content);
 
       case "button":
-        return createButtonMessage(content);
+        return createButtonMessages(content);
 
       case "carousel":
-        return createCarouselMessage(content);
+        return createCarouselMessages(content);
 
       case "list":
-        return createListMessage(content);
+        return createListMessages(content);
 
       case "media":
-        return createMediaMessage(content);
+        return createMediaMessages(content);
 
       case "text":
-        return createTextMessage(content);
+        return createTextMessages(content);
     }
   }
 
@@ -321,44 +348,44 @@ function createFacebookResponse<Context>({
     }
   }
 
-  function createRawResponse(
+  function createRawResponses(
     targetID: string,
     response: FacebookResponse<Context>["output"][number]
-  ): RawResponse | null {
-    const recipient = { id: targetID };
+  ): readonly (RawResponse | null)[] {
+    if (response.content.type === "menu") return [null];
 
-    switch (response.content.type) {
-      case "menu":
-        return null;
+    const {
+      content: { tag, ...content },
+      quickReplies: rawQuickReplies = [],
+    } = response;
 
-      default:
-        const {
-          content: { tag, ...content },
-          quickReplies = [],
-        } = response;
+    const quickReplies = rawQuickReplies.map(createRawQuickReply);
+    const responseMessages = createResponseMessages(content);
 
-        const fbQuickReplies = quickReplies.map(createRawQuickReply);
-        const message = createResponseMessage(content);
+    return responseMessages.map((message) => {
+      let payload: RawResponse = {
+        messaging_type: "RESPONSE",
+        message: {
+          ...message,
+          quick_replies: !!quickReplies.length ? quickReplies : undefined,
+        },
+        recipient: { id: targetID },
+      };
 
-        let payload: RawResponse = {
-          recipient,
-          messaging_type: "RESPONSE",
-          message: {
-            ...message,
-            quick_replies: !!fbQuickReplies.length ? fbQuickReplies : undefined,
-          },
-        };
+      if (tag != null) {
+        payload = { ...payload, tag, messaging_type: "MESSAGE_TAG" };
+      }
 
-        /** https://developers.facebook.com/docs/messenger-platform/send-messages/message-tags#supported_tags */
-        if (tag != null) {
-          payload = { ...payload, tag, messaging_type: "MESSAGE_TAG" };
-        }
-
-        return payload;
-    }
+      return payload;
+    });
   }
 
-  return omitNull(output.map((o) => createRawResponse(targetID, o)));
+  return omitNull(
+    output.reduce(
+      (acc, o) => [...acc, ...createRawResponses(targetID, o)],
+      [] as readonly (RawResponse | null)[]
+    )
+  );
 }
 
 /** Create a Facebook message processor */

@@ -1,11 +1,13 @@
 import expectJs from "expect.js";
 import { describe, it } from "mocha";
 import {
+  chunkString,
+  firstSubString,
   getCrossPlatformOutput,
+  lastSubstring,
   mapSeries,
   omitNull,
   requireNotNull,
-  chunkString,
 } from "./utils";
 
 describe("Common utilities", () => {
@@ -73,5 +75,25 @@ describe("Common utilities", () => {
     ).to.eql(["1\n", "2\n", "3\n", "4\n", "5"]);
 
     expectJs(chunkString("👶🏻👦🏻👧🏻", 1)).to.eql(["👶🏻", "👦🏻", "👧🏻"]);
+  });
+
+  it("First subString should work", async () => {
+    // Setup
+    // When
+    // Then
+    expectJs(firstSubString("👶🏻👦🏻👧🏻", 1)).to.eql({
+      firstSubstring: "👶🏻",
+      restSubstring: "👦🏻👧🏻",
+    });
+  });
+
+  it("Last subString should work", async () => {
+    // Setup
+    // When
+    // Then
+    expectJs(lastSubstring("👶🏻👦🏻👧🏻", 1)).to.eql({
+      lastSubstring: "👧🏻",
+      restSubstring: "👶🏻👦🏻",
+    });
   });
 });

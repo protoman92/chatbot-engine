@@ -1,5 +1,5 @@
 import FormData from "form-data";
-import { chunkString, telegramError } from "../common/utils";
+import { chunkString, firstSubString, telegramError } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   TelegramBot,
@@ -180,16 +180,22 @@ function createRawTelegramResponse<Context>({
   function createImageResponses({
     image: photo,
     text: fullCaption = "",
-  }: TelegramResponseOutput.Content.Image): [
+  }: TelegramResponseOutput.Content.Image):readonly [
     TelegramRawResponse.SendPhoto,
-    ...TelegramRawResponse.SendMessage[]
+    ...(readonly TelegramRawResponse.SendMessage[])
   ] {
-    const [caption, ...texts] = chunkString(
+    const { firstSubstring: caption, restSubstring } = firstSubString(
       fullCaption,
       CAPTION_TEXT_CHARACTER_LIMIT
     );
 
-    return [{ caption, photo }, ...texts.map((text) => ({ text }))];
+    return [
+      { caption, photo },
+      ...chunkString(
+        restSubstring,
+        MESSAGE_TEXT_CHARACTER_LIMIT
+      ).map((text) => ({ text })),
+    ];
   }
 
   function createTextResponses({
