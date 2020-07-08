@@ -30,11 +30,8 @@ export function createInMemoryContextDAO<Context>() {
 
   return {
     ...dao,
-    overrideStorage: async (customStorage: typeof storage) => {
-      storage = customStorage;
-    },
-    resetStorage: async () => {
-      storage = {};
-    },
+    getAllContext: async () => storage,
+    overrideStorage: async (custom: typeof storage) => (storage = custom),
+    resetStorage: async () => (storage = {}),
   };
 }
