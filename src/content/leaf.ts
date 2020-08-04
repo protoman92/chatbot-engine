@@ -67,12 +67,11 @@ export function createDefaultErrorLeaf<Context>({
       if (input.type !== "error") return NextResult.FALLTHROUGH;
       const { error, erroredLeaf } = input;
 
-      if (!!trackError) {
+      if (trackError != null) {
         trackError({ error, erroredLeaf, targetID, targetPlatform });
       }
 
       return observer.next({
-        ...request,
         targetID,
         targetPlatform,
         output: [
