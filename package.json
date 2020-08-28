@@ -86,6 +86,7 @@
     "build": "node build.js",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "gulp": "gulp",
+    "postinstall": "cd src/bootstrap && npm i",
     "test": "nyc mocha --require ts-node/register src/**/*.test.ts"
   },
   "version": "1.0.0"
