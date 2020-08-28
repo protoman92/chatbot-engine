@@ -48,6 +48,7 @@
   "name": "chatbot-engine",
   "nyc": {
     "exclude": [
+      "bootstrap",
       "**/*.test.*"
     ],
     "extension": [

@@ -1,0 +1,25 @@
+{
+  "author": "Hai Pham <swiften.svc@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/protoman92/chatbot-engine/issues"
+  },
+  "description": "Bootstrap for chatbot-engine",
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/protoman92/chatbot-engine#readme",
+  "keywords": [
+    "chatbot"
+  ],
+  "license": "MIT",
+  "name": "chatbot-engine-bootstrap",
+  "peerDependencies": {
+    "express": "4.17.1",
+    "express-rate-limit": "5.1.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/protoman92/chatbot-engine.git"
+  },
+  "version": "1.0.0"
+}
