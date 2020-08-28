@@ -3,6 +3,7 @@ import {
   ContextDAO,
   FacebookClient,
   Messenger,
+  TelegramClient,
 } from "../../type";
 
 export interface MessengerComponents<Context> {
@@ -10,6 +11,7 @@ export interface MessengerComponents<Context> {
   readonly facebookClient: FacebookClient;
   readonly messageProcessor: BaseMessageProcessor<Context>;
   readonly messenger: Messenger;
+  readonly telegramClient: TelegramClient;
 }
 
 export interface DefaultLeafResolverArgs<Context> {

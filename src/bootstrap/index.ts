@@ -17,9 +17,12 @@ import createTelegramClient from "../messenger/telegram-client";
 import {
   BaseMessageProcessor,
   ContextDAO,
+  FacebookClient,
   FacebookUser,
   LeafSelector,
+  MessageProcessorMiddleware,
   Messenger,
+  TelegramClient,
   TelegramUser,
 } from "../type";
 import { DefaultLeafResolverArgs, MessengerComponents } from "./interface";
@@ -32,6 +35,9 @@ interface ChatbotBootstrapArgs<
   TargetUser
 > {
   readonly app: express.Application;
+  readonly commonMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
+    Context
+  >[];
   readonly contextDAO: ContextDAO<Context>;
   createLeafSelector(
     args: LeafResolverArgs & DefaultLeafResolverArgs<Context>
@@ -40,12 +46,13 @@ interface ChatbotBootstrapArgs<
   saveUser(user: FacebookUser | TelegramUser): Promise<TargetUser>;
 }
 
-export default async function bootstrapChatbotServer<
+export default function bootstrapChatbotServer<
   Context extends Readonly<{ user?: TargetUser }>,
   LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
   TargetUser
 >({
   app,
+  commonMessageProcessorMiddlewares = [],
   contextDAO,
   createLeafSelector,
   saveUser,
@@ -53,9 +60,9 @@ export default async function bootstrapChatbotServer<
 }: ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>) {
   const { NODE_ENV = "" } = process.env;
   const env = NODE_ENV;
-  const facebookClient = await createFacebookClient();
-  const telegramClient = await createTelegramClient();
   let messageProcessor: BaseMessageProcessor<Context>;
+  let facebookClient: FacebookClient;
+  let telegramClient: TelegramClient;
   let messenger: Messenger;
 
   const resolverArgs = {
@@ -67,7 +74,10 @@ export default async function bootstrapChatbotServer<
   async function getMessengerComponents(): Promise<
     MessengerComponents<Context>
   > {
-    if (messenger == null) {
+    if (messenger == null || facebookClient == null || telegramClient == null) {
+      facebookClient = await createFacebookClient();
+      telegramClient = await createTelegramClient();
+
       const newLeafSelector = async () => {
         const leafSelector = await createLeafSelector(resolverArgs);
 
@@ -93,7 +103,8 @@ export default async function bootstrapChatbotServer<
             additionalContext: { user } as Partial<Context>,
             targetUserID: `${facebookUser.id}`,
           };
-        })
+        }),
+        ...commonMessageProcessorMiddlewares
       );
 
       const telegramProcessor = await createTelegramMessageProcessor(
@@ -108,7 +119,8 @@ export default async function bootstrapChatbotServer<
             additionalContext: { user } as Partial<Context>,
             telegramUserID: telegramUser.id,
           };
-        })
+        }),
+        ...commonMessageProcessorMiddlewares
       );
 
       messageProcessor = createCrossPlatformMessageProcessor({
@@ -127,6 +139,7 @@ export default async function bootstrapChatbotServer<
       facebookClient,
       messageProcessor,
       messenger,
+      telegramClient,
     };
   }
 
@@ -137,7 +150,6 @@ export default async function bootstrapChatbotServer<
     app.use(rateLimitter({ max: 15, windowMs: 1 * 60 * 1000 }));
   }
 
-  app.get("/", async (...[, res]) => res.json({ message: "Welcome!" }));
   app.use(ContextRoute(resolverArgs));
   app.use(WebhookRoute(resolverArgs));
 }
