@@ -4,6 +4,7 @@ import {
   FacebookClient,
   Messenger,
   TelegramClient,
+  AmbiguousPlatform,
 } from "../../type";
 
 export interface MessengerComponents<Context> {
@@ -17,5 +18,16 @@ export interface MessengerComponents<Context> {
 export interface DefaultLeafResolverArgs<Context> {
   readonly env: string;
   getMessengerComponents(): Promise<MessengerComponents<Context>>;
-  handleError(error: Error): Promise<void>;
+
+  onSetTypingError(
+    args: Readonly<{ error: Error; platform: AmbiguousPlatform }>
+  ): Promise<void>;
+
+  onWebhookError(
+    args: Readonly<{
+      error: Error;
+      payload: unknown;
+      platform: AmbiguousPlatform;
+    }>
+  ): Promise<void>;
 }

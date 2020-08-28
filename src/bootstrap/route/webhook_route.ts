@@ -1,9 +1,10 @@
 import express from "express";
+import { AmbiguousPlatform } from "../../type";
 import { DefaultLeafResolverArgs } from "../interface";
 
 export default function <Context>({
   getMessengerComponents,
-  handleError,
+  onWebhookError,
 }: DefaultLeafResolverArgs<Context>) {
   const router = express.Router();
 
@@ -13,17 +14,24 @@ export default function <Context>({
     res.status(200).send(challenge);
   });
 
-  router.post("/webhook/:platform", async ({ body, params: {} }, res) => {
-    const { messenger } = await getMessengerComponents();
+  router.post(
+    "/webhook/:platform",
+    async ({ body, params: { platform } }, res) => {
+      const { messenger } = await getMessengerComponents();
 
-    try {
-      await messenger.processRawRequest(body);
-    } catch (error) {
-      await handleError(error);
+      try {
+        await messenger.processRawRequest(body);
+      } catch (error) {
+        await onWebhookError({
+          error,
+          payload: body,
+          platform: platform as AmbiguousPlatform,
+        });
+      }
+
+      res.sendStatus(200);
     }
-
-    res.sendStatus(200);
-  });
+  );
 
   return router;
 }

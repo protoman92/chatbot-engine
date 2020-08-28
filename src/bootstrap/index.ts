@@ -1,22 +1,33 @@
 import express from "express";
 import rateLimitter from "express-rate-limit";
-import { createTransformChain } from "../content";
+import {
+  catchAll,
+  catchError,
+  createDefaultErrorLeaf,
+  createLeafSelector,
+  createTransformChain,
+  retryWithWit,
+} from "../content";
 import {
   createCrossPlatformMessageProcessor,
   createFacebookMessageProcessor,
   createMessenger,
   createTelegramMessageProcessor,
+  defaultFacebookClient as createFacebookClient,
+  defaultTelegramClient as createTelegramClient,
+  defaultWitClient as createWitClient,
   injectContextOnReceive,
   saveContextOnSend,
   saveFacebookUser,
   saveTelegramUser,
   setTypingIndicator,
 } from "../messenger";
-import createFacebookClient from "../messenger/facebook-client";
-import createTelegramClient from "../messenger/telegram-client";
 import {
+  AmbiguousRequest,
   BaseMessageProcessor,
+  Branch,
   ContextDAO,
+  ErrorLeafConfig,
   FacebookClient,
   FacebookUser,
   LeafSelector,
@@ -29,37 +40,48 @@ import { DefaultLeafResolverArgs, MessengerComponents } from "./interface";
 import ContextRoute from "./route/context_route";
 import WebhookRoute from "./route/webhook_route";
 
-interface ChatbotBootstrapArgs<
+type ChatbotBootstrapArgs<
   Context extends Readonly<{ user?: TargetUser }>,
   LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
   TargetUser
-> {
-  readonly app: express.Application;
-  readonly commonMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
-    Context
-  >[];
-  readonly contextDAO: ContextDAO<Context>;
-  createLeafSelector(
-    args: LeafResolverArgs & DefaultLeafResolverArgs<Context>
-  ): Promise<LeafSelector<Context>>;
-  handleError(error: Error): Promise<void>;
-  saveUser(user: FacebookUser | TelegramUser): Promise<TargetUser>;
-}
+> = LeafResolverArgs &
+  Readonly<{
+    app: express.Application;
+    commonMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
+      Context
+    >[];
+    contextDAO: ContextDAO<Context>;
+    saveUser: (user: FacebookUser | TelegramUser) => Promise<TargetUser>;
+  }> &
+  (
+    | {
+        createLeafSelector: (
+          args: LeafResolverArgs
+        ) => Promise<LeafSelector<Context>>;
+        leafSelectorType: "custom";
+      }
+    | {
+        createBranches: (args: LeafResolverArgs) => Promise<Branch<Context>>;
+        formatErrorMessage: ErrorLeafConfig["formatErrorMessage"];
+        leafSelectorType: "default";
+        onLeafCatchAll: (request: AmbiguousRequest<Context>) => Promise<void>;
+        onLeafError?: NonNullable<ErrorLeafConfig["trackError"]>;
+      }
+  );
 
 export default function bootstrapChatbotServer<
   Context extends Readonly<{ user?: TargetUser }>,
   LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
   TargetUser
->({
-  app,
-  commonMessageProcessorMiddlewares = [],
-  contextDAO,
-  createLeafSelector,
-  saveUser,
-  ...args
-}: ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>) {
-  const { NODE_ENV = "" } = process.env;
-  const env = NODE_ENV;
+>(args: ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>) {
+  const {
+    app,
+    commonMessageProcessorMiddlewares = [],
+    contextDAO,
+    saveUser,
+  } = args;
+
+  const { NODE_ENV: env = "" } = process.env;
   let messageProcessor: BaseMessageProcessor<Context>;
   let facebookClient: FacebookClient;
   let telegramClient: TelegramClient;
@@ -79,11 +101,32 @@ export default function bootstrapChatbotServer<
       telegramClient = await createTelegramClient();
 
       const newLeafSelector = async () => {
-        const leafSelector = await createLeafSelector(resolverArgs);
+        switch (args.leafSelectorType) {
+          case "custom":
+            const leafSelector = await args.createLeafSelector(resolverArgs);
 
-        return await createTransformChain()
-          .forContextOfType<Context>()
-          .transform(leafSelector);
+            return await createTransformChain()
+              .forContextOfType<Context>()
+              .transform(leafSelector);
+
+          case "default":
+            const witClient = await createWitClient();
+            const branches = await args.createBranches(resolverArgs);
+
+            return await createTransformChain()
+              .forContextOfType<Context>()
+              .pipe(retryWithWit(witClient))
+              .pipe(catchAll((request) => args.onLeafCatchAll(request)))
+              .pipe(
+                catchError(
+                  await createDefaultErrorLeaf({
+                    formatErrorMessage: args.formatErrorMessage,
+                    trackError: args.onLeafError,
+                  })
+                )
+              )
+              .transform(createLeafSelector(branches));
+        }
       };
 
       const leafSelector = await newLeafSelector();
@@ -94,7 +137,9 @@ export default function bootstrapChatbotServer<
         saveContextOnSend(contextDAO),
         setTypingIndicator({
           client: facebookClient,
-          onSetTypingError: (error) => args.handleError(error),
+          onSetTypingError: async (error) => {
+            await args.onSetTypingError({ error, platform: "facebook" });
+          },
         }),
         saveFacebookUser(contextDAO, facebookClient, async (facebookUser) => {
           const user = await saveUser(facebookUser);
@@ -145,7 +190,7 @@ export default function bootstrapChatbotServer<
 
   app.use(express.json());
 
-  if (NODE_ENV === "local") {
+  if (env === "local") {
     /** Use rate limitter for ngrok */
     app.use(rateLimitter({ max: 15, windowMs: 1 * 60 * 1000 }));
   }
