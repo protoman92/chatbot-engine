@@ -9,7 +9,6 @@
     "@types/aws-sdk": "^2.7.0",
     "@types/expect.js": "^0.3.29",
     "@types/formidable": "^1.0.31",
-    "@types/gulp": "^4.0.6",
     "@types/mocha": "^5.2.7",
     "@types/redis": "2.8.18",
     "aws-sdk": "2.673.0",
@@ -22,8 +21,6 @@
     "formidable": "1.2.2",
     "fs-extra": "^8.1.0",
     "grapheme-splitter": "1.0.4",
-    "gulp": "^4.0.2",
-    "gulp-run": "^1.7.1",
     "husky": "^3.1.0",
     "mocha": "^7.2.0",
     "nodemon": "^2.0.4",
@@ -85,7 +82,6 @@
   "scripts": {
     "build": "node build.js",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "gulp": "gulp",
     "postinstall": "cd src/bootstrap && npm i",
     "test": "nyc mocha --require ts-node/register src/**/*.test.ts"
   },
