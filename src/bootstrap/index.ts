@@ -23,17 +23,16 @@ import {
   setTypingIndicator,
 } from "../messenger";
 import {
+  AmbiguousPlatform,
   AmbiguousRequest,
   BaseMessageProcessor,
   Branch,
   ContextDAO,
   ErrorLeafConfig,
-  FacebookClient,
   FacebookUser,
   LeafSelector,
   MessageProcessorMiddleware,
   Messenger,
-  TelegramClient,
   TelegramUser,
 } from "../type";
 import { DefaultLeafResolverArgs, MessengerComponents } from "./interface";
@@ -44,14 +43,28 @@ export type ChatbotBootstrapArgs<
   Context extends Readonly<{ user?: TargetUser }>,
   LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
   TargetUser
-> = Omit<LeafResolverArgs, "env" | "getMessengerComponents"> &
+> = Omit<LeafResolverArgs, keyof DefaultLeafResolverArgs<Context>> &
   Readonly<{
-    app: express.Application;
     commonMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
       Context
     >[];
     contextDAO: ContextDAO<Context>;
-    saveUser: (user: FacebookUser | TelegramUser) => Promise<TargetUser>;
+    onSetTypingError: (
+      args: Readonly<{ error: Error; platform: AmbiguousPlatform }>
+    ) => Promise<void>;
+    onWebhookError: (
+      args: Readonly<{
+        error: Error;
+        payload: unknown;
+        platform: AmbiguousPlatform;
+      }>
+    ) => Promise<void>;
+    saveUser: (
+      args: Readonly<
+        | { targetPlatform: "facebook"; facebookUser: FacebookUser }
+        | { targetPlatform: "telegram"; telegramUser: TelegramUser }
+      >
+    ) => Promise<TargetUser>;
   }> &
   (
     | {
@@ -73,37 +86,26 @@ export default function bootstrapChatbotServer<
   Context extends Readonly<{ user?: TargetUser }>,
   LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
   TargetUser
->(args: ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>) {
-  const {
-    app,
-    commonMessageProcessorMiddlewares = [],
-    contextDAO,
-    saveUser,
-  } = args;
-
-  const { NODE_ENV: env = "" } = process.env;
-  let messageProcessor: BaseMessageProcessor<Context>;
-  let facebookClient: FacebookClient;
-  let telegramClient: TelegramClient;
-  let messenger: Messenger;
-
-  const resolverArgs = {
-    ...((args as unknown) as LeafResolverArgs),
-    env,
-    getMessengerComponents,
-  };
-
+>({
+  app,
+  getBootstrapArgs,
+}: Readonly<{
+  app: express.Application;
+  getBootstrapArgs: (
+    args: DefaultLeafResolverArgs<Context> &
+      Pick<MessengerComponents<Context>, "facebookClient" | "telegramClient">
+  ) => ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>;
+}>): (bootstrap?: (args: LeafResolverArgs) => void) => void {
   async function getMessengerComponents(): Promise<
     MessengerComponents<Context>
   > {
-    if (messenger == null || facebookClient == null || telegramClient == null) {
-      facebookClient = await createFacebookClient();
-      telegramClient = await createTelegramClient();
-
+    if (messenger == null) {
       const newLeafSelector = async () => {
-        switch (args.leafSelectorType) {
+        switch (bootstrapArgs.leafSelectorType) {
           case "custom":
-            const leafSelector = await args.createLeafSelector(resolverArgs);
+            const leafSelector = await bootstrapArgs.createLeafSelector(
+              resolverArgs
+            );
 
             return await createTransformChain()
               .forContextOfType<Context>()
@@ -111,17 +113,17 @@ export default function bootstrapChatbotServer<
 
           case "default":
             const witClient = await createWitClient();
-            const branches = await args.createBranches(resolverArgs);
+            const branches = await bootstrapArgs.createBranches(resolverArgs);
 
             return await createTransformChain()
               .forContextOfType<Context>()
               .pipe(retryWithWit(witClient))
-              .pipe(catchAll((request) => args.onLeafCatchAll(request)))
+              .pipe(catchAll(bootstrapArgs.onLeafCatchAll))
               .pipe(
                 catchError(
                   await createDefaultErrorLeaf({
-                    formatErrorMessage: args.formatErrorMessage,
-                    trackError: args.onLeafError,
+                    formatErrorMessage: bootstrapArgs.formatErrorMessage,
+                    trackError: bootstrapArgs.onLeafError,
                   })
                 )
               )
@@ -138,11 +140,17 @@ export default function bootstrapChatbotServer<
         setTypingIndicator({
           client: facebookClient,
           onSetTypingError: async (error) => {
-            await args.onSetTypingError({ error, platform: "facebook" });
+            await bootstrapArgs.onSetTypingError({
+              error,
+              platform: "facebook",
+            });
           },
         }),
         saveFacebookUser(contextDAO, facebookClient, async (facebookUser) => {
-          const user = await saveUser(facebookUser);
+          const user = await saveUser({
+            facebookUser,
+            targetPlatform: "facebook",
+          });
 
           return {
             additionalContext: { user } as Partial<Context>,
@@ -158,7 +166,10 @@ export default function bootstrapChatbotServer<
         saveContextOnSend(contextDAO),
         setTypingIndicator({ client: telegramClient }),
         saveTelegramUser(contextDAO, async (telegramUser) => {
-          const user = await saveUser(telegramUser);
+          const user = await saveUser({
+            telegramUser,
+            targetPlatform: "telegram",
+          });
 
           return {
             additionalContext: { user } as Partial<Context>,
@@ -188,13 +199,42 @@ export default function bootstrapChatbotServer<
     };
   }
 
-  app.use(express.json());
+  const { NODE_ENV: env = "" } = process.env;
+  const facebookClient = createFacebookClient();
+  const telegramClient = createTelegramClient({ defaultParseMode: "html" });
 
-  if (env === "local") {
-    /** Use rate limitter for ngrok */
-    app.use(rateLimitter({ max: 15, windowMs: 1 * 60 * 1000 }));
-  }
+  const bootstrapArgs = getBootstrapArgs({
+    env,
+    facebookClient,
+    getMessengerComponents,
+    telegramClient,
+  });
 
-  app.use(ContextRoute(resolverArgs));
-  app.use(WebhookRoute(resolverArgs));
+  const {
+    commonMessageProcessorMiddlewares = [],
+    contextDAO,
+    saveUser,
+  } = bootstrapArgs;
+
+  let messageProcessor: BaseMessageProcessor<Context>;
+  let messenger: Messenger;
+
+  const resolverArgs = {
+    ...bootstrapArgs,
+    env,
+    getMessengerComponents,
+  } as ReturnType<typeof getBootstrapArgs> & LeafResolverArgs;
+
+  return function (bootstrap) {
+    app.use(express.json());
+
+    if (env === "local") {
+      /** Use rate limitter for ngrok */
+      app.use(rateLimitter({ max: 15, windowMs: 1 * 60 * 1000 }));
+    }
+
+    app.use(ContextRoute(resolverArgs));
+    app.use(WebhookRoute(resolverArgs));
+    if (bootstrap != null) bootstrap(resolverArgs);
+  };
 }
