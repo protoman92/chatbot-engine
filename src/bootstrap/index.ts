@@ -40,11 +40,11 @@ import { DefaultLeafResolverArgs, MessengerComponents } from "./interface";
 import ContextRoute from "./route/context_route";
 import WebhookRoute from "./route/webhook_route";
 
-type ChatbotBootstrapArgs<
+export type ChatbotBootstrapArgs<
   Context extends Readonly<{ user?: TargetUser }>,
   LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
   TargetUser
-> = LeafResolverArgs &
+> = Omit<LeafResolverArgs, "env" | "getMessengerComponents"> &
   Readonly<{
     app: express.Application;
     commonMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
