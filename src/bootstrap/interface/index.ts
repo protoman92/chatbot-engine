@@ -14,7 +14,7 @@ export interface MessengerComponents<Context> {
   readonly telegramClient: TelegramClient;
 }
 
-export interface DefaultLeafResolverArgs<Context>
+export interface DefaultLeafDependencies<Context>
   extends Pick<
     MessengerComponents<Context>,
     "facebookClient" | "telegramClient"

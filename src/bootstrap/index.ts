@@ -28,14 +28,14 @@ import {
   MessageProcessorMiddleware,
   Messenger,
 } from "../type";
-import { DefaultLeafResolverArgs, MessengerComponents } from "./interface";
+import { DefaultLeafDependencies, MessengerComponents } from "./interface";
 import ContextRoute from "./route/context_route";
 import WebhookRoute from "./route/webhook_route";
 
 export type ChatbotBootstrapArgs<
   Context,
-  LeafResolverArgs extends DefaultLeafResolverArgs<Context>
-> = Omit<LeafResolverArgs, keyof DefaultLeafResolverArgs<Context>> &
+  LeafDependencies extends DefaultLeafDependencies<Context>
+> = Omit<LeafDependencies, keyof DefaultLeafDependencies<Context>> &
   Readonly<{
     contextDAO: ContextDAO<Context>;
     facebookMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
@@ -55,12 +55,12 @@ export type ChatbotBootstrapArgs<
   (
     | {
         createLeafSelector: (
-          args: LeafResolverArgs
+          args: LeafDependencies
         ) => Promise<LeafSelector<Context>>;
         leafSelectorType: "custom";
       }
     | {
-        createBranches: (args: LeafResolverArgs) => Promise<Branch<Context>>;
+        createBranches: (args: LeafDependencies) => Promise<Branch<Context>>;
         formatErrorMessage: ErrorLeafConfig["formatErrorMessage"];
         leafSelectorType: "default";
         onLeafCatchAll: (request: AmbiguousRequest<Context>) => Promise<void>;
@@ -70,19 +70,19 @@ export type ChatbotBootstrapArgs<
 
 export default function bootstrapChatbotServer<
   Context,
-  LeafResolverArgs extends DefaultLeafResolverArgs<Context>
+  LeafDependencies extends DefaultLeafDependencies<Context>
 >({
   app,
   bootstrapAfterRoutes,
   bootstrapBeforeRoutes,
-  getBootstrapArgs,
+  getChatbotBootstrapArgs,
 }: Readonly<{
   app: express.Application;
-  bootstrapBeforeRoutes?: (args: LeafResolverArgs) => void;
-  bootstrapAfterRoutes?: (args: LeafResolverArgs) => void;
-  getBootstrapArgs: (
-    args: DefaultLeafResolverArgs<Context>
-  ) => ChatbotBootstrapArgs<Context, LeafResolverArgs>;
+  bootstrapBeforeRoutes?: (args: LeafDependencies) => void;
+  bootstrapAfterRoutes?: (args: LeafDependencies) => void;
+  getChatbotBootstrapArgs: (
+    args: DefaultLeafDependencies<Context>
+  ) => ChatbotBootstrapArgs<Context, LeafDependencies>;
 }>): void {
   async function getMessengerComponents(): Promise<
     MessengerComponents<Context>
@@ -155,7 +155,7 @@ export default function bootstrapChatbotServer<
   const facebookClient = createFacebookClient();
   const telegramClient = createTelegramClient({ defaultParseMode: "html" });
 
-  const bootstrapArgs = getBootstrapArgs({
+  const bootstrapArgs = getChatbotBootstrapArgs({
     env,
     facebookClient,
     getMessengerComponents,
@@ -175,7 +175,7 @@ export default function bootstrapChatbotServer<
     ...bootstrapArgs,
     env,
     getMessengerComponents,
-  } as ReturnType<typeof getBootstrapArgs> & LeafResolverArgs;
+  } as ReturnType<typeof getChatbotBootstrapArgs> & LeafDependencies;
 
   if (bootstrapBeforeRoutes != null) bootstrapBeforeRoutes(resolverArgs);
   const router = express.Router();

@@ -1,10 +1,10 @@
 import express from "express";
 import { AmbiguousPlatform } from "../../type";
-import { DefaultLeafResolverArgs } from "../interface";
+import { DefaultLeafDependencies } from "../interface";
 
 export default function <Context>({
   getMessengerComponents,
-}: DefaultLeafResolverArgs<Context>) {
+}: DefaultLeafDependencies<Context>) {
   const router = express.Router();
 
   router.get(

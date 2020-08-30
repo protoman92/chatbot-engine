@@ -1,16 +1,16 @@
 import express from "express";
 import { ChatbotBootstrapArgs } from "..";
 import { AmbiguousPlatform } from "../../type";
-import { DefaultLeafResolverArgs } from "../interface";
+import { DefaultLeafDependencies } from "../interface";
 
 export default function <
   Context,
-  LeafResolverArgs extends DefaultLeafResolverArgs<Context>
+  LeafResolverArgs extends DefaultLeafDependencies<Context>
 >({
   getMessengerComponents,
   onWebhookError,
 }: ChatbotBootstrapArgs<Context, LeafResolverArgs> &
-  DefaultLeafResolverArgs<Context>) {
+  DefaultLeafDependencies<Context>) {
   const router = express.Router();
 
   router.get("/webhook/facebook", async ({ query }, res) => {
