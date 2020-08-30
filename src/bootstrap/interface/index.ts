@@ -14,7 +14,11 @@ export interface MessengerComponents<Context> {
   readonly telegramClient: TelegramClient;
 }
 
-export interface DefaultLeafResolverArgs<Context> {
+export interface DefaultLeafResolverArgs<Context>
+  extends Pick<
+    MessengerComponents<Context>,
+    "facebookClient" | "telegramClient"
+  > {
   readonly env: string;
   getMessengerComponents(): Promise<MessengerComponents<Context>>;
 }

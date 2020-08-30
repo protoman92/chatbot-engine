@@ -16,11 +16,6 @@ import {
   defaultFacebookClient as createFacebookClient,
   defaultTelegramClient as createTelegramClient,
   defaultWitClient as createWitClient,
-  injectContextOnReceive,
-  saveContextOnSend,
-  saveFacebookUser,
-  saveTelegramUser,
-  setTypingIndicator,
 } from "../messenger";
 import {
   AmbiguousPlatform,
@@ -29,11 +24,9 @@ import {
   Branch,
   ContextDAO,
   ErrorLeafConfig,
-  FacebookUser,
   LeafSelector,
   MessageProcessorMiddleware,
   Messenger,
-  TelegramUser,
 } from "../type";
 import { DefaultLeafResolverArgs, MessengerComponents } from "./interface";
 import ContextRoute from "./route/context_route";
@@ -45,13 +38,10 @@ export type ChatbotBootstrapArgs<
   TargetUser
 > = Omit<LeafResolverArgs, keyof DefaultLeafResolverArgs<Context>> &
   Readonly<{
-    commonMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
+    contextDAO: ContextDAO<Context>;
+    facebookMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
       Context
     >[];
-    contextDAO: ContextDAO<Context>;
-    onSetTypingError: (
-      args: Readonly<{ error: Error; platform: AmbiguousPlatform }>
-    ) => Promise<void>;
     onWebhookError: (
       args: Readonly<{
         error: Error;
@@ -59,12 +49,9 @@ export type ChatbotBootstrapArgs<
         platform: AmbiguousPlatform;
       }>
     ) => Promise<void>;
-    saveUser: (
-      args: Readonly<
-        | { targetPlatform: "facebook"; facebookUser: FacebookUser }
-        | { targetPlatform: "telegram"; telegramUser: TelegramUser }
-      >
-    ) => Promise<TargetUser>;
+    telegramMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
+      Context
+    >[];
   }> &
   (
     | {
@@ -88,18 +75,21 @@ export default function bootstrapChatbotServer<
   TargetUser
 >({
   app,
+  bootstrapAfterRoutes,
+  bootstrapBeforeRoutes,
   getBootstrapArgs,
 }: Readonly<{
   app: express.Application;
+  bootstrapBeforeRoutes?: (args: LeafResolverArgs) => void;
+  bootstrapAfterRoutes?: (args: LeafResolverArgs) => void;
   getBootstrapArgs: (
-    args: DefaultLeafResolverArgs<Context> &
-      Pick<MessengerComponents<Context>, "facebookClient" | "telegramClient">
+    args: DefaultLeafResolverArgs<Context>
   ) => ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>;
-}>): (bootstrap?: (args: LeafResolverArgs) => void) => void {
+}>): void {
   async function getMessengerComponents(): Promise<
     MessengerComponents<Context>
   > {
-    if (messenger == null) {
+    if (messageProcessor == null || messenger == null) {
       const newLeafSelector = async () => {
         switch (bootstrapArgs.leafSelectorType) {
           case "custom":
@@ -107,7 +97,7 @@ export default function bootstrapChatbotServer<
               resolverArgs
             );
 
-            return await createTransformChain()
+            return createTransformChain()
               .forContextOfType<Context>()
               .transform(leafSelector);
 
@@ -115,7 +105,7 @@ export default function bootstrapChatbotServer<
             const witClient = await createWitClient();
             const branches = await bootstrapArgs.createBranches(resolverArgs);
 
-            return await createTransformChain()
+            return createTransformChain()
               .forContextOfType<Context>()
               .pipe(retryWithWit(witClient))
               .pipe(catchAll(bootstrapArgs.onLeafCatchAll))
@@ -135,48 +125,12 @@ export default function bootstrapChatbotServer<
 
       const facebookProcessor = await createFacebookMessageProcessor(
         { leafSelector, client: facebookClient },
-        injectContextOnReceive(contextDAO),
-        saveContextOnSend(contextDAO),
-        setTypingIndicator({
-          client: facebookClient,
-          onSetTypingError: async (error) => {
-            await bootstrapArgs.onSetTypingError({
-              error,
-              platform: "facebook",
-            });
-          },
-        }),
-        saveFacebookUser(contextDAO, facebookClient, async (facebookUser) => {
-          const user = await saveUser({
-            facebookUser,
-            targetPlatform: "facebook",
-          });
-
-          return {
-            additionalContext: { user } as Partial<Context>,
-            targetUserID: `${facebookUser.id}`,
-          };
-        }),
-        ...commonMessageProcessorMiddlewares
+        ...facebookMessageProcessorMiddlewares
       );
 
       const telegramProcessor = await createTelegramMessageProcessor(
         { leafSelector, client: telegramClient },
-        injectContextOnReceive(contextDAO),
-        saveContextOnSend(contextDAO),
-        setTypingIndicator({ client: telegramClient }),
-        saveTelegramUser(contextDAO, async (telegramUser) => {
-          const user = await saveUser({
-            telegramUser,
-            targetPlatform: "telegram",
-          });
-
-          return {
-            additionalContext: { user } as Partial<Context>,
-            telegramUserID: telegramUser.id,
-          };
-        }),
-        ...commonMessageProcessorMiddlewares
+        ...telegramMessageProcessorMiddlewares
       );
 
       messageProcessor = createCrossPlatformMessageProcessor({
@@ -211,9 +165,9 @@ export default function bootstrapChatbotServer<
   });
 
   const {
-    commonMessageProcessorMiddlewares = [],
     contextDAO,
-    saveUser,
+    facebookMessageProcessorMiddlewares = [],
+    telegramMessageProcessorMiddlewares = [],
   } = bootstrapArgs;
 
   let messageProcessor: BaseMessageProcessor<Context>;
@@ -225,16 +179,17 @@ export default function bootstrapChatbotServer<
     getMessengerComponents,
   } as ReturnType<typeof getBootstrapArgs> & LeafResolverArgs;
 
-  return function (bootstrap) {
-    app.use(express.json());
+  if (bootstrapBeforeRoutes != null) bootstrapBeforeRoutes(resolverArgs);
+  const router = express.Router();
 
-    if (env === "local") {
-      /** Use rate limitter for ngrok */
-      app.use(rateLimitter({ max: 15, windowMs: 1 * 60 * 1000 }));
-    }
+  if (env === "local") {
+    /** Use rate limitter for ngrok */
+    router.use(rateLimitter({ max: 15, windowMs: 1 * 60 * 1000 }));
+  }
 
-    app.use(ContextRoute(resolverArgs));
-    app.use(WebhookRoute(resolverArgs));
-    if (bootstrap != null) bootstrap(resolverArgs);
-  };
+  router.use(express.json());
+  router.use(ContextRoute(resolverArgs));
+  router.use(WebhookRoute(resolverArgs));
+  app.use(router);
+  if (bootstrapAfterRoutes != null) bootstrapAfterRoutes(resolverArgs);
 }
