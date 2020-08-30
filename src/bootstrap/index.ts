@@ -33,9 +33,8 @@ import ContextRoute from "./route/context_route";
 import WebhookRoute from "./route/webhook_route";
 
 export type ChatbotBootstrapArgs<
-  Context extends Readonly<{ user?: TargetUser }>,
-  LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
-  TargetUser
+  Context,
+  LeafResolverArgs extends DefaultLeafResolverArgs<Context>
 > = Omit<LeafResolverArgs, keyof DefaultLeafResolverArgs<Context>> &
   Readonly<{
     contextDAO: ContextDAO<Context>;
@@ -70,9 +69,8 @@ export type ChatbotBootstrapArgs<
   );
 
 export default function bootstrapChatbotServer<
-  Context extends Readonly<{ user?: TargetUser }>,
-  LeafResolverArgs extends DefaultLeafResolverArgs<Context>,
-  TargetUser
+  Context,
+  LeafResolverArgs extends DefaultLeafResolverArgs<Context>
 >({
   app,
   bootstrapAfterRoutes,
@@ -84,7 +82,7 @@ export default function bootstrapChatbotServer<
   bootstrapAfterRoutes?: (args: LeafResolverArgs) => void;
   getBootstrapArgs: (
     args: DefaultLeafResolverArgs<Context>
-  ) => ChatbotBootstrapArgs<Context, LeafResolverArgs, TargetUser>;
+  ) => ChatbotBootstrapArgs<Context, LeafResolverArgs>;
 }>): void {
   async function getMessengerComponents(): Promise<
     MessengerComponents<Context>

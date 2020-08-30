@@ -9,7 +9,7 @@ export default function <
 >({
   getMessengerComponents,
   onWebhookError,
-}: ChatbotBootstrapArgs<Context, LeafResolverArgs, unknown> &
+}: ChatbotBootstrapArgs<Context, LeafResolverArgs> &
   DefaultLeafResolverArgs<Context>) {
   const router = express.Router();
 
