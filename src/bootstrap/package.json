@@ -4,6 +4,10 @@
     "url": "https://github.com/protoman92/chatbot-engine/issues"
   },
   "description": "Bootstrap for chatbot-engine",
+  "devDependencies": {
+    "@types/express-rate-limit": "5.1.0",
+    "webpack": "4.42.0"
+  },
   "files": [
     "dist"
   ],
@@ -21,8 +25,5 @@
     "type": "git",
     "url": "git+https://github.com/protoman92/chatbot-engine.git"
   },
-  "version": "1.0.0",
-  "devDependencies": {
-    "@types/express-rate-limit": "5.1.0"
-  }
+  "version": "1.0.0"
 }
