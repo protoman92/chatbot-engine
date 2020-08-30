@@ -1,5 +1,4 @@
 import expectJs from "expect.js";
-import { describe, it } from "mocha";
 import { capture, instance, spy } from "ts-mockito";
 import { createSubscription, NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type";

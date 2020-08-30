@@ -6,32 +6,33 @@
   "dependencies": {},
   "description": "Experimental chatbot engine",
   "devDependencies": {
-    "@types/aws-sdk": "^2.7.0",
-    "@types/expect.js": "^0.3.29",
-    "@types/formidable": "^1.0.31",
-    "@types/mocha": "^5.2.7",
+    "@types/aws-sdk": "2.7.0",
+    "@types/expect.js": "0.3.29",
+    "@types/formidable": "1.0.31",
+    "@types/jest": "26.0.10",
     "@types/redis": "2.8.18",
     "aws-sdk": "2.673.0",
     "axios": "0.19.2",
-    "bignumber.js": "^8.1.1",
-    "coveralls": "^3.1.0",
-    "del": "^5.1.0",
-    "expect.js": "^0.3.1",
+    "babel-jest": "26.3.0",
+    "bignumber.js": "8.1.1",
+    "coveralls": "3.1.0",
+    "del": "5.1.0",
+    "expect.js": "0.3.1",
     "form-data": "3.0.0",
     "formidable": "1.2.2",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "8.1.0",
     "grapheme-splitter": "1.0.4",
-    "husky": "^3.1.0",
-    "mocha": "^7.2.0",
-    "nodemon": "^2.0.4",
-    "nyc": "^14.1.1",
-    "prettier": "^2.0.5",
+    "husky": "3.1.0",
+    "jest": "26.4.2",
+    "nodemon": "2.0.4",
+    "prettier": "2.0.5",
     "redis": "3.0.2",
-    "snyk": "^1.370.1",
-    "source-map-support": "^0.5.19",
-    "ts-essentials": "^2.0.12",
-    "ts-mockito": "^2.6.1",
-    "ts-node": "^8.10.2",
+    "snyk": "1.370.1",
+    "source-map-support": "0.5.19",
+    "ts-essentials": "2.0.12",
+    "ts-jest": "26.3.0",
+    "ts-mockito": "2.6.1",
+    "ts-node": "8.10.2",
     "typescript": "^3.9.7"
   },
   "files": [
@@ -43,30 +44,6 @@
   ],
   "license": "MIT",
   "name": "chatbot-engine",
-  "nyc": {
-    "exclude": [
-      "bootstrap",
-      "**/*.test.*"
-    ],
-    "extension": [
-      ".js",
-      ".ts"
-    ],
-    "include": [
-      "src/**/*.js",
-      "src/**/*.ts"
-    ],
-    "instrument": true,
-    "reporter": [
-      "text",
-      "text-summary",
-      "html"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "sourceMap": true
-  },
   "peerDependencies": {
     "aws-sdk": "2.673.0",
     "axios": "0.19.2",
@@ -81,9 +58,9 @@
   },
   "scripts": {
     "build": "node build.js",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "coveralls": "coveralls < coverage/lcov.info",
     "postinstall": "cd src/bootstrap && npm i",
-    "test": "nyc mocha --require ts-node/register src/**/*.test.ts"
+    "test": "jest"
   },
   "version": "1.0.0"
 }

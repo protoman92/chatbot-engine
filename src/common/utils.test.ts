@@ -1,5 +1,4 @@
 import expectJs from "expect.js";
-import { describe, it } from "mocha";
 import {
   chunkString,
   firstSubString,
@@ -28,7 +27,6 @@ describe("Common utilities", () => {
 
   it("Map series should maintain order", async function () {
     // Setup
-    this.timeout(5000);
     const data = [...Array(5).keys()];
 
     function randomizeNumber(from: number, to: number) {

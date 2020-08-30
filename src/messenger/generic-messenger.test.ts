@@ -1,5 +1,4 @@
 import expectJs from "expect.js";
-import { beforeEach, describe } from "mocha";
 import {
   anything,
   capture,

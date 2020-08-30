@@ -1,5 +1,4 @@
 import expectJs from "expect.js";
-import { beforeEach, describe, it } from "mocha";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
 import { TelegramClient, TelegramConfig } from "../type/telegram";

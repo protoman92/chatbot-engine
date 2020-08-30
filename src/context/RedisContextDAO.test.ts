@@ -1,5 +1,4 @@
 import expectJs from "expect.js";
-import { beforeEach, describe } from "mocha";
 import { RedisClient } from "redis";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { joinObjects } from "../common/utils";

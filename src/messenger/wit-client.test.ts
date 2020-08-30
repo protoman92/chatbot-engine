@@ -1,4 +1,3 @@
-import { beforeEach, describe, it } from "mocha";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
 import { WitClient, WitConfig } from "../type/wit";

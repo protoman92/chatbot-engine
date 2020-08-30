@@ -1,12 +1,11 @@
 import expectJs from "expect.js";
-import { describe, it } from "mocha";
 import { TelegramBot, TelegramRawRequest, TelegramUser } from "../type";
 import {
   createGenericTelegramRequest,
   extractcommand,
 } from "./telegram-messenger";
 
-describe("Create generic Telegram requests", async () => {
+describe("Create generic Telegram requests", () => {
   const currentBot: TelegramBot = { first_name: "", id: 0, username: "" };
   const chat: TelegramRawRequest.Chat = { id: 0, type: "private" };
 
