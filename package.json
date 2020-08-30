@@ -58,7 +58,7 @@
   "scripts": {
     "build": "node build.js",
     "coveralls": "coveralls < coverage/lcov.info",
-    "postinstall": "cd src/bootstrap && npm i",
+    "postinstall": "cd src/bootstrap && yarn",
     "test": "jest"
   },
   "version": "1.0.0"
