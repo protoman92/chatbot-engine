@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { mapSeries } from "../common/utils";
 import { createContentSubject, mergeObservables, NextResult } from ".";
 
@@ -24,8 +23,8 @@ describe("Content stream and subject", () => {
     await subscription.unsubscribe();
 
     // Then
-    expectJs(nextCount).to.equal(3);
-    expectJs(completeCount).to.equal(1);
+    expect(nextCount).toEqual(3);
+    expect(completeCount).toEqual(1);
   });
 
   it("Should complete all internal observers on complete", async () => {
@@ -50,8 +49,8 @@ describe("Content stream and subject", () => {
     await subject.next(1);
 
     // Then
-    expectJs(completeCount).to.equal(1);
-    expectJs(nextCount).not.to.be.ok();
+    expect(completeCount).toEqual(1);
+    expect(nextCount).toBeFalsy();
   });
 
   it("Should merge all emissions when using merging observables", async () => {
@@ -79,7 +78,7 @@ describe("Content stream and subject", () => {
     await mapSeries(subjects, (subject, i) => subject.next(i));
 
     // Then
-    expectJs(receivedValues).to.eql([...Array(subjectCount).keys()]);
-    expectJs(completedCount).to.equal(subjectCount);
+    expect(receivedValues).toEqual([...Array(subjectCount).keys()]);
+    expect(completedCount).toEqual(subjectCount);
   });
 });

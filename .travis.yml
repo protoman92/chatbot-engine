@@ -1,10 +1,10 @@
-{
-  "os": "linux",
-  "dist": "trusty",
-  "group": "stable",
-  "script": ["yarn test"],
-  "node_js": "node",
-  "language": "node_js",
-  "after_success": ["yarn coveralls", "npm pack"],
-  "before_script": ["yarn", "yarn build"],
-}
+language: node_js
+node_js: node
+before_script:
+  - yarn
+  - yarn build
+script:
+  - yarn test
+after_success:
+  - yarn coveralls
+  - npm pack

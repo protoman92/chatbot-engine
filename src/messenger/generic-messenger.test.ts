@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import {
   anything,
   capture,
@@ -286,7 +285,7 @@ describe("Generic messenger", () => {
     await next(response);
 
     // Then
-    expectJs(complete).to.be.ok();
+    expect(complete).toBeTruthy();
     verify(processor.sendResponse(deepEqual(response))).once();
   });
 });

@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
@@ -33,12 +32,12 @@ describe("Leaf enumeration", () => {
       },
     });
 
-    expectJs(
+    expect(
       enumerated.map(({ currentLeafName, prefixLeafPaths }) => ({
         currentLeafName,
         prefixLeafPaths,
       }))
-    ).to.eql([
+    ).toEqual([
       {
         currentLeafName: "leaf12",
         prefixLeafPaths: ["branch1", "branch12", "leaf12"],
@@ -131,7 +130,7 @@ describe("Leaf selector", () => {
     await instance(selector).complete();
 
     // Then
-    expectJs(completedCount).to.equal(enumeratedLeaves.length);
+    expect(completedCount).toEqual(enumeratedLeaves.length);
   });
 
   it("Subscribing to response should merge leaf observables", async () => {
@@ -167,7 +166,7 @@ describe("Leaf selector", () => {
         next: async () => NextResult.BREAK,
       });
 
-      expectJs().fail("Should have failed");
+      fail("Should have failed");
     } catch {}
   });
 

@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription, NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
@@ -66,7 +65,7 @@ describe("Transform chain", () => {
     verify(fallbackLeaf.subscribe(anything())).once();
     verify(errorLeaf.complete!()).once();
     verify(errorLeaf.subscribe(anything())).once;
-    expectJs(nextResult).to.eql(NextResult.BREAK);
+    expect(nextResult).toEqual(NextResult.BREAK);
   });
 
   it("Leaf with pipe chain should trigger all wrapped leaves", async () => {
@@ -128,6 +127,6 @@ describe("Transform chain", () => {
     });
 
     // Then
-    expectJs(valueDeliveredCount).to.eql(2);
+    expect(valueDeliveredCount).toEqual(2);
   });
 });

@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { RedisClient } from "redis";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { joinObjects } from "../common/utils";
@@ -42,7 +41,7 @@ describe("Redis context DAO", () => {
 
     // Then
     verify(redis.get(getCacheKey(targetID), anything())).once();
-    expectJs(storedContext).to.eql(context);
+    expect(storedContext).toEqual(context);
   });
 
   it("Should append context on set call", async () => {
@@ -69,7 +68,7 @@ describe("Redis context DAO", () => {
     const newContext = joinObjects<{}>(oldContext, additionalContext);
     const cacheKey = getCacheKey(targetID);
     verify(redis.set(cacheKey, JSON.stringify(newContext), anything())).once();
-    expectJs(result).to.eql({ newContext, oldContext });
+    expect(result).toEqual({ newContext, oldContext });
   });
 
   it("Should clear context on reset call", async () => {
@@ -83,6 +82,6 @@ describe("Redis context DAO", () => {
 
     // Then
     verify(redis.del(getCacheKey(targetID), anything())).once();
-    expectJs(result).to.equal(true);
+    expect(result).toEqual(true);
   });
 });

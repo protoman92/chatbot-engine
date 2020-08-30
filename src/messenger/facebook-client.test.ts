@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
 import { FacebookClient, FacebookConfig } from "../type/facebook";
@@ -37,7 +36,7 @@ describe("Facebook client", () => {
     });
 
     // Then
-    expectJs(challenge).to.equal(hubChallenge);
+    expect(challenge).toEqual(hubChallenge);
   });
 
   it("Should fail hub challenge if hub mode is wrong", async () => {

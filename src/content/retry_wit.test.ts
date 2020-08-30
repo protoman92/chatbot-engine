@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
@@ -23,7 +22,7 @@ describe("Wit higher order function", () => {
   });
 
   it("Getting highest confidence should work", async () => {
-    expectJs(
+    expect(
       getHighestConfidence({
         intents: [{ confidence: 0.1, id: "0", name: "intent1" }],
         traits: {
@@ -31,7 +30,7 @@ describe("Wit higher order function", () => {
           trait2: [{ confidence: 0.3, value: "true", type: "value" }],
         },
       })
-    ).to.eql({
+    ).toEqual({
       confidence: 0.3,
       value: "true",
       trait: "trait2",
@@ -39,7 +38,7 @@ describe("Wit higher order function", () => {
       witType: "trait",
     });
 
-    expectJs(
+    expect(
       getHighestConfidence({
         intents: [{ confidence: 0.3, id: "0", name: "intent1" }],
         traits: {
@@ -47,7 +46,7 @@ describe("Wit higher order function", () => {
           trait2: [{ confidence: 0.1, value: "true", type: "value" }],
         },
       })
-    ).to.eql({ confidence: 0.3, id: "0", name: "intent1", witType: "intent" });
+    ).toEqual({ confidence: 0.3, id: "0", name: "intent1", witType: "intent" });
   });
 
   it("Should return original request result if invalid input type", async () => {
@@ -72,7 +71,7 @@ describe("Wit higher order function", () => {
     });
 
     // Then
-    expectJs(result).to.eql(NextResult.FALLTHROUGH);
+    expect(result).toEqual(NextResult.FALLTHROUGH);
   });
 
   it("Wit engine should not fire if no fallthrough from root leaf", async () => {

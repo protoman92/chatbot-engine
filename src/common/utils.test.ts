@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import {
   chunkString,
   firstSubString,
@@ -21,8 +20,8 @@ describe("Common utilities", () => {
     })("telegram");
 
     // Then
-    expectJs(fbOutput).to.eql([{ content: { text: "", type: "text" } }]);
-    expectJs(tlOutput).to.eql([{ content: { text: "", type: "text" } }]);
+    expect(fbOutput).toEqual([{ content: { text: "", type: "text" } }]);
+    expect(tlOutput).toEqual([{ content: { text: "", type: "text" } }]);
   });
 
   it("Map series should maintain order", async function () {
@@ -43,23 +42,23 @@ describe("Common utilities", () => {
     const mappedData = await mapSeries(data, resolveDatum);
 
     // Then
-    expectJs(mappedData).to.eql(data);
+    expect(mappedData).toEqual(data);
   });
 
   it("Omit null should work", async () => {
-    expectJs(omitNull([null, 1, 2, undefined, 3])).to.eql([1, 2, 3]);
+    expect(omitNull([null, 1, 2, undefined, 3])).toEqual([1, 2, 3]);
   });
 
   it("Require not null should work", async () => {
-    expectJs(requireNotNull(1)).to.eql(1);
-    expectJs(() => requireNotNull(null)).to.throwError();
+    expect(requireNotNull(1)).toEqual(1);
+    expect(() => requireNotNull(null)).toThrow();
   });
 
   it("Chunk string should work", async () => {
     // Setup
     // When
     // Then
-    expectJs(
+    expect(
       chunkString(
         `
 1
@@ -70,16 +69,16 @@ describe("Common utilities", () => {
 `.trim(),
         2
       )
-    ).to.eql(["1\n", "2\n", "3\n", "4\n", "5"]);
+    ).toEqual(["1\n", "2\n", "3\n", "4\n", "5"]);
 
-    expectJs(chunkString("👶🏻👦🏻👧🏻", 1)).to.eql(["👶🏻", "👦🏻", "👧🏻"]);
+    expect(chunkString("👶🏻👦🏻👧🏻", 1)).toEqual(["👶🏻", "👦🏻", "👧🏻"]);
   });
 
   it("First subString should work", async () => {
     // Setup
     // When
     // Then
-    expectJs(firstSubString("👶🏻👦🏻👧🏻", 1)).to.eql({
+    expect(firstSubString("👶🏻👦🏻👧🏻", 1)).toEqual({
       firstSubstring: "👶🏻",
       restSubstring: "👦🏻👧🏻",
     });
@@ -89,7 +88,7 @@ describe("Common utilities", () => {
     // Setup
     // When
     // Then
-    expectJs(lastSubstring("👶🏻👦🏻👧🏻", 1)).to.eql({
+    expect(lastSubstring("👶🏻👦🏻👧🏻", 1)).toEqual({
       lastSubstring: "👧🏻",
       restSubstring: "👶🏻👦🏻",
     });

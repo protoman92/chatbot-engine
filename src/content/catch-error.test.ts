@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { capture, instance, spy } from "ts-mockito";
 import { createSubscription, NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type";
@@ -44,10 +43,10 @@ describe("catchError higher-order function", () => {
 
     // Then
     const [{ input, ...request }] = capture(fallbackLeaf.next).first();
-    expectJs(result).to.eql(NextResult.BREAK);
-    expectJs(request).to.have.property("currentLeafName", currentLeafName);
-    expectJs(input).to.have.key("error");
-    expectJs(input).to.have.property("erroredLeaf", currentLeafName);
+    expect(result).toEqual(NextResult.BREAK);
+    expect(request).toHaveProperty("currentLeafName", currentLeafName);
+    expect(input).toHaveProperty("error");
+    expect(input).toHaveProperty("erroredLeaf", currentLeafName);
   });
 
   it("Should get currentLeafName from error object if applicable", async () => {
@@ -89,6 +88,6 @@ describe("catchError higher-order function", () => {
 
     // Then
     const [{ input }] = capture(fallbackLeaf.next).first();
-    expectJs(input).to.have.property("erroredLeaf", overrideLeafName);
+    expect(input).toHaveProperty("erroredLeaf", overrideLeafName);
   });
 });

@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
@@ -38,7 +37,7 @@ describe("catchAll higher order function", () => {
     });
 
     // Then
-    expectJs(result).to.eql(NextResult.BREAK);
+    expect(result).toEqual(NextResult.BREAK);
     verify(catchHandler.onCatchAll(anything())).never();
   });
 
@@ -64,7 +63,7 @@ describe("catchAll higher order function", () => {
     });
 
     // Then
-    expectJs(result).to.eql(NextResult.FALLTHROUGH);
+    expect(result).toEqual(NextResult.FALLTHROUGH);
     verify(catchHandler.onCatchAll(anything())).never();
   });
 
@@ -87,7 +86,7 @@ describe("catchAll higher order function", () => {
     const result = await transformed.next(request);
 
     // Then
-    expectJs(result).to.eql(NextResult.BREAK);
+    expect(result).toEqual(NextResult.BREAK);
     verify(catchHandler.onCatchAll(deepEqual(request))).once();
   });
 });

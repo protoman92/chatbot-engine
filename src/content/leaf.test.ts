@@ -1,5 +1,3 @@
-import expectJs from "expect.js";
-import { Omit } from "ts-essentials";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
@@ -43,7 +41,7 @@ describe("Create leaf with observer", () => {
     const { originalRequest } = await bridgeEmission(leaf)(request);
 
     // Then
-    expectJs(originalRequest).to.eql(request);
+    expect(originalRequest).toEqual(request);
   });
 
   it("Should add currentLeafName to error if error encountered", async () => {
@@ -69,7 +67,7 @@ describe("Create leaf with observer", () => {
       });
     } catch (e) {
       // Then
-      expectJs(e).to.have.property("currentLeafName", currentLeafName);
+      expect(e).toHaveProperty("currentLeafName", currentLeafName);
     }
   });
 });
@@ -110,11 +108,11 @@ describe("Default error leaf", () => {
       )
     ).once();
 
-    expectJs(output).to.have.length(1);
+    expect(output).toHaveLength(1);
     const [{ content: response }] = output;
 
     if (isType<FacebookResponseOutput.Content.Text>(response, "text")) {
-      expectJs(response.text).to.contain(error.message);
+      expect(response.text).toContain(error.message);
     } else {
       throw new Error("Never should have come here");
     }

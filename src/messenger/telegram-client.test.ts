@@ -1,4 +1,3 @@
-import expectJs from "expect.js";
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient } from "../type/client";
 import { TelegramClient, TelegramConfig } from "../type/telegram";
@@ -40,7 +39,7 @@ describe("Telegram client", () => {
     });
 
     // Then
-    expectJs(apiResponse).to.eql(result);
+    expect(apiResponse).toEqual(result);
   });
 
   it("Should throw error if ok is false", async () => {
@@ -61,7 +60,7 @@ describe("Telegram client", () => {
 
       throw new Error("Never should have come here");
     } catch ({ message }) {
-      expectJs(message).to.eql(description);
+      expect(message).toEqual(description);
     }
   });
 

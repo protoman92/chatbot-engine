@@ -1,6 +1,5 @@
 // tslint:disable-next-line:import-name
 import axiosStatic, { AxiosInstance, AxiosResponse } from "axios";
-import expectJs from "expect.js";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { createAxiosClient } from "./axios-client";
 import { HTTPClient } from "../type/client";
@@ -61,8 +60,8 @@ describe("Axios client", () => {
 
     verify(axios.get(url, configAssert)).once();
     verify(axios.post(url, deepEqual(body), configAssert)).once();
-    expectJs(getData).to.eql(response.data);
-    expectJs(postData).to.eql(response.data);
+    expect(getData).toEqual(response.data);
+    expect(postData).toEqual(response.data);
   });
 
   it("Should throw error if call fails", async () => {
@@ -83,7 +82,7 @@ describe("Axios client", () => {
       throw new Error("Never should have come here");
     } catch ({ message }) {
       // Then
-      expectJs(message).to.equal(error.message);
+      expect(message).toEqual(error.message);
     }
   });
 });

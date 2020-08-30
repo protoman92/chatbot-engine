@@ -1,6 +1,5 @@
 import { AppendOptions } from "form-data";
 import { ReadStream } from "fs";
-import { Omit } from "ts-essentials";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
