@@ -6,7 +6,7 @@ const path = require("path");
  * @param {Args} args
  * @returns {Pick<import('webpack').Configuration, 'resolve'>}
  */
-module.exports = function ({ aliases = {}, env }) {
+module.exports = function ({ env }) {
   return {
     resolve: {
       alias: {
