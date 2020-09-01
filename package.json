@@ -3,7 +3,14 @@
   "bugs": {
     "url": "https://github.com/protoman92/chatbot-engine/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "aws-sdk": "2.683.0",
+    "axios": "0.19.2",
+    "form-data": "3.0.0",
+    "formidable": "1.2.2",
+    "grapheme-splitter": "1.0.4",
+    "redis": "3.0.2"
+  },
   "description": "Experimental chatbot engine",
   "devDependencies": {
     "@types/aws-sdk": "2.7.0",
@@ -41,14 +48,7 @@
   ],
   "license": "MIT",
   "name": "chatbot-engine",
-  "peerDependencies": {
-    "aws-sdk": "2.673.0",
-    "axios": "0.19.2",
-    "form-data": "3.0.0",
-    "formidable": "1.2.2",
-    "grapheme-splitter": "1.0.4",
-    "redis": "3.0.2"
-  },
+  "peerDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/protoman92/chatbot-engine.git"
