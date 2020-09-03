@@ -8,6 +8,10 @@ export interface WitTraitValue {
   readonly type: "value";
 }
 
+export interface WitEntity extends WitTraitValue {
+  readonly body: string;
+}
+
 export interface WitIntent {
   readonly confidence: number;
   readonly id: string;
@@ -17,7 +21,7 @@ export interface WitIntent {
 export interface WitResponse {
   readonly _text: string;
   readonly msg_id: string;
-  readonly entities: { [x: string]: readonly WitTraitValue[] };
+  readonly entities: { [x: string]: readonly WitEntity[] };
   readonly intents: readonly WitIntent[];
   readonly traits: { [x: string]: readonly WitTraitValue[] };
 }

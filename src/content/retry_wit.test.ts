@@ -96,7 +96,14 @@ describe("Wit higher order function", () => {
   it("Wit engine should intercept fallthrough from text leaf", async () => {
     // Setup
     const entities: WitResponse["entities"] = {
-      a: [{ confidence: 1, value: "some-value", type: "value" }],
+      a: [
+        {
+          body: "some-body",
+          confidence: 1,
+          value: "some-value",
+          type: "value",
+        },
+      ],
     };
 
     const text = "some-text";
