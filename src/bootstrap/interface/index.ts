@@ -20,5 +20,6 @@ export interface DefaultLeafDependencies<Context>
     "facebookClient" | "telegramClient"
   > {
   readonly env: string;
+  readonly webhookTimeout: number;
   getMessengerComponents(): Promise<MessengerComponents<Context>>;
 }

@@ -2,6 +2,7 @@ import express from "express";
 import { ChatbotBootstrapArgs } from "..";
 import { AmbiguousPlatform } from "../../type";
 import { DefaultLeafDependencies } from "../interface";
+import { asyncTimeout } from "../javascript-helper/utils";
 
 export default function <
   Context,
@@ -9,6 +10,7 @@ export default function <
 >({
   getMessengerComponents,
   onWebhookError,
+  webhookTimeout,
 }: ChatbotBootstrapArgs<Context, LeafResolverArgs> &
   DefaultLeafDependencies<Context>) {
   const router = express.Router();
@@ -25,7 +27,13 @@ export default function <
       const { messenger } = await getMessengerComponents();
 
       try {
-        await messenger.processRawRequest(body);
+        await Promise.race([
+          messenger.processRawRequest(body),
+          (async function () {
+            await asyncTimeout(webhookTimeout);
+            throw new Error("Webhook timed out");
+          })(),
+        ]);
       } catch (error) {
         await onWebhookError({
           error,

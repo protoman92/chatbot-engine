@@ -76,6 +76,7 @@ export default function bootstrapChatbotServer<
   bootstrapAfterRoutes,
   bootstrapBeforeRoutes,
   getChatbotBootstrapArgs,
+  webhookTimeout,
 }: Readonly<{
   app: express.Application;
   bootstrapBeforeRoutes?: (args: LeafDependencies) => void;
@@ -83,6 +84,13 @@ export default function bootstrapChatbotServer<
   getChatbotBootstrapArgs: (
     args: DefaultLeafDependencies<Context>
   ) => ChatbotBootstrapArgs<Context, LeafDependencies>;
+  /**
+   *
+   * If we don't specify a timeout, the webhook will be repeatedly called
+   * again. Need to check for why that's the case, but do not hog the entire
+   * bot.
+   */
+  webhookTimeout: number;
 }>): void {
   async function getMessengerComponents(): Promise<
     MessengerComponents<Context>
@@ -160,6 +168,7 @@ export default function bootstrapChatbotServer<
     facebookClient,
     getMessengerComponents,
     telegramClient,
+    webhookTimeout,
   });
 
   const {
