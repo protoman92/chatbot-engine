@@ -1,8 +1,4 @@
-import {
-  chunkString,
-  facebookError,
-  omitNull
-} from "../common/utils";
+import { chunkString, facebookError, omitNull } from "../common/utils";
 import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
@@ -12,7 +8,7 @@ import {
   FacebookRequest,
   FacebookRequestInput,
   FacebookResponse,
-  FacebookResponseOutput
+  FacebookResponseOutput,
 } from "../type/facebook";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -76,9 +72,13 @@ function createFacebookRequest<Context>({
               }
 
             case "location":
-              const { lat, long } = attachment.payload.coordinates;
-              const coordinates = { lat, lng: long };
-              return { coordinate: coordinates, type: "location" };
+              const {
+                lat: latitude,
+                long: longitude,
+              } = attachment.payload.coordinates;
+
+              const coordinate = { latitude, longitude };
+              return { coordinate, type: "location" };
           }
         });
       }

@@ -221,6 +221,39 @@ describe("Create generic Telegram requests", () => {
       },
     ]);
   });
+
+  it("Should return location if location is returned", async () => {
+    // Setup
+    const location = { latitude: 0, longitude: 0 };
+
+    // When
+    const request = createGenericTelegramRequest(
+      {
+        message: {
+          chat,
+          from,
+          location,
+          date: 0,
+          message_id: 0,
+        },
+        update_id: 0,
+      },
+      currentBot
+    );
+
+    // Then
+    expect(request).toEqual([
+      {
+        currentBot,
+        currentContext: {},
+        input: { coordinate: location, type: "location" },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
 });
 
 describe("Utilities", () => {

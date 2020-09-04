@@ -181,6 +181,14 @@ declare namespace TelegramRawRequest {
       readonly left_chat_member: TelegramBot | TelegramUser;
     }
 
+    interface Location {
+      readonly chat: Chat;
+      readonly date: number;
+      readonly from: TelegramUser;
+      readonly location: Coordinates;
+      readonly message_id: number;
+    }
+
     interface NewChatMember {
       readonly chat: Chat;
       readonly from: TelegramUser;
@@ -209,6 +217,7 @@ declare namespace TelegramRawRequest {
     readonly message:
       | Message.Document
       | Message.LeftChatMember
+      | Message.Location
       | Message.NewChatMember
       | Message.Photo
       | Message.Text;

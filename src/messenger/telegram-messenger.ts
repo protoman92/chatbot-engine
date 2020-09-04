@@ -80,6 +80,11 @@ export function createGenericTelegramRequest<Context>(
       return [user, chat, [{ document: document, type: "document" }]];
     }
 
+    if ("location" in message) {
+      const { location: coordinate } = message;
+      return [user, chat, [{ coordinate, type: "location" }]];
+    }
+
     if ("new_chat_members" in message) {
       const { new_chat_members: newChatMembers } = message;
       return [user, chat, [{ newChatMembers, type: "joined_chat" }]];
@@ -137,7 +142,7 @@ export function createGenericTelegramRequest<Context>(
 
   const processed = processRequest(webhook);
 
-  if (!processed) {
+  if (processed == null) {
     console.error(telegramError(`Invalid request: ${JSON.stringify(webhook)}`));
     return [];
   }
@@ -180,7 +185,7 @@ function createRawTelegramResponse<Context>({
   function createImageResponses({
     image: photo,
     text: fullCaption = "",
-  }: TelegramResponseOutput.Content.Image):readonly [
+  }: TelegramResponseOutput.Content.Image): readonly [
     TelegramRawResponse.SendPhoto,
     ...(readonly TelegramRawResponse.SendMessage[])
   ] {
