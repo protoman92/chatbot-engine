@@ -24,6 +24,12 @@ module.exports = function ({ env }) {
                 "client",
                 "facebook_client"
               ),
+              "./middleware/capture_generic_response": path.join(
+                __dirname,
+                "test",
+                "middleware",
+                "capture_generic_response"
+              ),
             }
           : {}),
       },

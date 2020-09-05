@@ -29,6 +29,7 @@ import {
   Messenger,
 } from "../type";
 import { DefaultLeafDependencies, MessengerComponents } from "./interface";
+import createCaptureGenericResponseMiddleware from "./middleware/capture_generic_response";
 import ContextRoute from "./route/context_route";
 import WebhookRoute from "./route/webhook_route";
 
@@ -131,12 +132,14 @@ export default function bootstrapChatbotServer<
 
       const facebookProcessor = await createFacebookMessageProcessor(
         { leafSelector, client: facebookClient },
-        ...facebookMessageProcessorMiddlewares
+        ...facebookMessageProcessorMiddlewares,
+        createCaptureGenericResponseMiddleware()
       );
 
       const telegramProcessor = await createTelegramMessageProcessor(
         { leafSelector, client: telegramClient },
-        ...telegramMessageProcessorMiddlewares
+        ...telegramMessageProcessorMiddlewares,
+        createCaptureGenericResponseMiddleware()
       );
 
       messageProcessor = createCrossPlatformMessageProcessor({
