@@ -1,5 +1,9 @@
 import defaultDynamoDBContextDAO from "./DynamoDBContextDAO";
+import createInMemoryContextDAO from "./InMemoryContextDAO";
 import defaultRedisContextDAO from "./RedisContextDAO";
-export { createInMemoryContextDAO } from "./InMemoryContextDAO";
 export { createRedisContextDAO } from "./RedisContextDAO";
-export { defaultRedisContextDAO, defaultDynamoDBContextDAO };
+export {
+  createInMemoryContextDAO,
+  defaultRedisContextDAO,
+  defaultDynamoDBContextDAO,
+};

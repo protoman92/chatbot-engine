@@ -12,6 +12,18 @@ module.exports = function ({ env }) {
       alias: {
         ...(env === "test"
           ? {
+              "./DynamoDBContextDAO": path.join(
+                __dirname,
+                "..",
+                "context",
+                "InMemoryContextDAO"
+              ),
+              "./RedisContextDAO": path.join(
+                __dirname,
+                "..",
+                "context",
+                "InMemoryContextDAO"
+              ),
               "./facebook-client": path.join(
                 __dirname,
                 "test",
@@ -22,13 +34,19 @@ module.exports = function ({ env }) {
                 __dirname,
                 "test",
                 "client",
-                "facebook_client"
+                "telegram_client"
               ),
               "./middleware/capture_generic_response": path.join(
                 __dirname,
                 "test",
                 "middleware",
                 "capture_generic_response"
+              ),
+              "./route/webhook_route": path.join(
+                __dirname,
+                "test",
+                "route",
+                "webhook_route"
               ),
             }
           : {}),
