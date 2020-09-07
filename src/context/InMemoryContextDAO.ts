@@ -2,9 +2,13 @@
 import { joinObjects } from "../common/utils";
 import { ContextDAO } from "../type/context-dao";
 
+export type MockContextData<Context> = {
+  [K: string]: { [K: string]: Context };
+};
+
 /** Create an in-memory context DAO store. This is useful for debugging */
 function createInMemoryContextDAO<Context>() {
-  let storage: { [K: string]: { [K: string]: Context } } = {};
+  let storage: MockContextData<Context> = {};
 
   const baseDAO: ContextDAO<Context> = {
     getContext: async ({ targetPlatform: platform, targetID }) => {

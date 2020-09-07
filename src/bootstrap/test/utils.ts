@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { AmbiguousRequest } from "../../type";
+import { MockContextData } from "../../context/InMemoryContextDAO";
 
 export async function getSentResponses<Context>({
   baseURL,
@@ -31,4 +32,17 @@ export async function resetAllMocks({
   baseURL,
 }: Pick<AxiosRequestConfig, "baseURL">) {
   await axios.request({ baseURL, method: "POST", url: "/webhook/reset" });
+}
+
+export async function setMockContextData<Context>({
+  baseURL,
+  context: data,
+}: Pick<AxiosRequestConfig, "baseURL"> &
+  Readonly<{ context: MockContextData<Context> }>) {
+  await axios.request({
+    baseURL,
+    data,
+    method: "POST",
+    url: "/webhook/set-context",
+  });
 }
