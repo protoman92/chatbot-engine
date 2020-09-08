@@ -18,30 +18,34 @@ export function saveContextOnSend<Context>(
       ...processor,
       sendResponse: async (response) => {
         const { targetID, targetPlatform, additionalContext } = response;
-        const result = await processor.sendResponse(response);
 
-        if (additionalContext != null) {
-          const { newContext, oldContext } = await contextDAO.appendContext({
-            targetID,
-            targetPlatform,
-            context: additionalContext,
-          });
+        const [result] = await Promise.all([
+          processor.sendResponse(response),
+          (async function () {
+            if (additionalContext == null) return;
 
-          const finalProcessor = getFinalMessageProcessor();
+            const { newContext, oldContext } = await contextDAO.appendContext({
+              targetID,
+              targetPlatform,
+              context: additionalContext,
+            });
 
-          await finalProcessor.receiveRequest({
-            currentContext: newContext,
-            input: {
-              newContext,
-              oldContext,
-              changedContext: additionalContext,
-              type: "context_change",
-            },
-            targetID: response.targetID,
-            targetPlatform: response.targetPlatform,
-            type: "manual_trigger",
-          });
-        }
+            const finalProcessor = getFinalMessageProcessor();
+
+            await finalProcessor.receiveRequest({
+              currentContext: newContext,
+              input: {
+                newContext,
+                oldContext,
+                changedContext: additionalContext,
+                type: "context_change",
+              },
+              targetID: response.targetID,
+              targetPlatform: response.targetPlatform,
+              type: "manual_trigger",
+            });
+          })(),
+        ]);
 
         return result;
       },
@@ -139,13 +143,16 @@ export function setTypingIndicator<Context>({
       sendResponse: async (response) => {
         const { targetID } = response;
 
-        try {
-          await client.setTypingIndicator(targetID, true);
-        } catch (error) {
-          onSetTypingError(error);
-        }
-
-        const result = await processor.sendResponse(response);
+        const [result] = await Promise.all([
+          processor.sendResponse(response),
+          (async function () {
+            try {
+              await client.setTypingIndicator(targetID, true);
+            } catch (error) {
+              onSetTypingError(error);
+            }
+          })(),
+        ]);
 
         try {
           await client.setTypingIndicator(targetID, false);
