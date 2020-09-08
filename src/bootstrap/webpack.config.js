@@ -42,11 +42,11 @@ module.exports = function ({ env }) {
                 "middleware",
                 "capture_generic_response"
               ),
-              "./route/webhook_route": path.join(
+              "./route/bootstrap_webhook_route": path.join(
                 __dirname,
                 "test",
                 "route",
-                "webhook_route"
+                "bootstrap_webhook_route"
               ),
             }
           : {}),

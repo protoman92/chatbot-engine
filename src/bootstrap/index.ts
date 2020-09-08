@@ -30,8 +30,8 @@ import {
 } from "../type";
 import { DefaultLeafDependencies, MessengerComponents } from "./interface";
 import createCaptureGenericResponseMiddleware from "./middleware/capture_generic_response";
-import ContextRoute from "./route/context_route";
-import WebhookRoute from "./route/webhook_route";
+import ContextRoute from "./route/bootstrap_context_route";
+import WebhookRoute from "./route/bootstrap_webhook_route";
 
 export type ChatbotBootstrapArgs<
   Context,
