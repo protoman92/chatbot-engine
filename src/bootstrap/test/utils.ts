@@ -34,6 +34,18 @@ export async function resetAllMocks({
   await axios.request({ baseURL, method: "POST", url: "/webhook/reset" });
 }
 
+export async function getMockContextData<Context>({
+  baseURL,
+}: Pick<AxiosRequestConfig, "baseURL">) {
+  const { data } = await axios.request<Context>({
+    baseURL,
+    method: "GET",
+    url: "/webhook/get-context",
+  });
+
+  return data;
+}
+
 export async function setMockContextData<Context>({
   baseURL,
   context: data,
