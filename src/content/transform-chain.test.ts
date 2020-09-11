@@ -2,7 +2,7 @@ import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription, NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type/leaf";
 import { catchError } from "./catch-error";
-import { createDefaultErrorLeaf, createLeafWithObserver } from "./leaf";
+import { createDefaultErrorLeaf, createLeaf } from "./leaf";
 import { createTransformChain } from "./transform-chain";
 
 const targetID = "target-id";
@@ -93,7 +93,7 @@ describe("Transform chain", () => {
         )
       )
       .transform(
-        await createLeafWithObserver(async (observer) => ({
+        await createLeaf(async (observer) => ({
           next: async ({ targetID, targetPlatform, input }) => {
             const text = (input as { text: string }).text;
 

@@ -4,11 +4,7 @@ import { bridgeEmission, NextResult } from "../stream";
 import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
 import { AmbiguousLeaf, ErrorLeafConfig } from "../type/leaf";
 import { TelegramLeaf } from "../type/telegram";
-import {
-  createDefaultErrorLeaf,
-  createLeafObserverForPlatforms,
-  createLeafWithObserver,
-} from "./leaf";
+import { createDefaultErrorLeaf, createLeafObserver, createLeaf } from "./leaf";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
@@ -16,7 +12,7 @@ const targetPlatform = "facebook" as const;
 describe("Create leaf with observer", () => {
   it("Should add originalRequest to response", async () => {
     // Setup
-    const leaf = await createLeafWithObserver(async (observer) => ({
+    const leaf = await createLeaf(async (observer) => ({
       next: async ({ targetID }) => {
         await observer.next({
           targetID,
@@ -49,7 +45,7 @@ describe("Create leaf with observer", () => {
     const currentLeafName = "current_leaf_name";
     const error = new Error("some_error");
 
-    const leaf = await createLeafWithObserver(async () => ({
+    const leaf = await createLeaf(async () => ({
       next: async () => {
         throw error;
       },
@@ -135,8 +131,8 @@ describe("Leaf for platforms", () => {
       complete: () => Promise.reject(""),
     });
 
-    platformLeaf = await createLeafWithObserver<{}>(() => {
-      return createLeafObserverForPlatforms({
+    platformLeaf = await createLeaf<{}>(() => {
+      return createLeafObserver({
         facebook: instance(fbLeaf),
         telegram: instance(tlLeaf),
       });
@@ -194,7 +190,7 @@ describe("Leaf for platforms", () => {
 
   it("Should throw error if platform is not available", async () => {
     // Setup
-    const platformObserver = await createLeafObserverForPlatforms({});
+    const platformObserver = await createLeafObserver({});
 
     // When && Then: Facebook
     try {

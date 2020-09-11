@@ -2,7 +2,7 @@ import { capture, instance, spy } from "ts-mockito";
 import { createSubscription, NextResult } from "../stream";
 import { AmbiguousLeaf } from "../type";
 import { catchError } from "./catch-error";
-import { createLeafWithObserver } from "./leaf";
+import { createLeaf } from "./leaf";
 
 describe("catchError higher-order function", () => {
   const targetID = "target-id";
@@ -10,13 +10,13 @@ describe("catchError higher-order function", () => {
 
   it("Should add error to input if error is encountered", async () => {
     // Setup
-    let fallbackLeaf = await createLeafWithObserver<{}>(async () => ({
+    let fallbackLeaf = await createLeaf<{}>(async () => ({
       next: async () => NextResult.BREAK,
     }));
 
     fallbackLeaf = spy(fallbackLeaf);
 
-    const leafToBeTransformed = await createLeafWithObserver(async () => ({
+    const leafToBeTransformed = await createLeaf(async () => ({
       next: async () => {
         throw new Error("");
       },
@@ -53,7 +53,7 @@ describe("catchError higher-order function", () => {
     // Setup
     const overrideLeafName = "error_leaf_name";
 
-    let fallbackLeaf = await createLeafWithObserver<{}>(async () => ({
+    let fallbackLeaf = await createLeaf<{}>(async () => ({
       next: async () => NextResult.BREAK,
     }));
 

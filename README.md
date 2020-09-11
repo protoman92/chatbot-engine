@@ -80,7 +80,7 @@ A branch contains many leaves, and potentially other sub-branches. Let's see how
 ```javascript
 export default async function () {
   return {
-    sayHello: await createLeafWithObserver(async (observer) => ({
+    sayHello: await createLeaf(async (observer) => ({
       /**
        * This request contains the information sent by the user, via the input
        * field. It also tells you the user's platform and ID.
@@ -132,7 +132,7 @@ In the above example, you'll see that an `additionalContext` was specified in `o
 ```javascript
 export default async function () {
   return {
-    onCounterChangeTrigger: await createLeafWithObserver(async (observer) => ({
+    onCounterChangeTrigger: await createLeaf(async (observer) => ({
       next: async (request) => {
         const { currentContext, input, targetID, targetPlatform } = request;
 
@@ -161,7 +161,7 @@ This mechanism is especially useful when you want to trigger flows automatically
 ```javascript
 export default async function ({ appClient }: Config) {
   return {
-    onStartEditingTrigger: await createLeafWithObserver(async (observer) => ({
+    onStartEditingTrigger: await createLeaf(async (observer) => ({
       next: async (request) => {
         const { currentContext, input, targetID, targetPlatform } = request;
 
@@ -202,7 +202,7 @@ export default async function ({ appClient }: Config) {
         return NextResult.BREAK;
       },
     })),
-    onEnterNameTrigger: await createLeafWithObserver(async (observer) => ({
+    onEnterNameTrigger: await createLeaf(async (observer) => ({
       next: async (request) => {
         const { currentContext, input, targetID, targetPlatform } = request;
 

@@ -1,7 +1,7 @@
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
 import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
-import { createLeafWithObserver } from "./leaf";
+import { createLeaf } from "./leaf";
 import { createLeafSelector, enumerateLeaves } from "./leaf-selector";
 
 type TestLeafSelector = ReturnType<
@@ -14,7 +14,7 @@ describe("Leaf enumeration", () => {
     const enumerated = enumerateLeaves({
       branch1: {
         branch12: {
-          leaf12: await createLeafWithObserver(async () => ({
+          leaf12: await createLeaf(async () => ({
             next: async () => NextResult.BREAK,
           })),
           branch123: {},
@@ -24,7 +24,7 @@ describe("Leaf enumeration", () => {
         branch21: {
           branch213: {},
           branch223: {
-            leaf223: await createLeafWithObserver(async () => ({
+            leaf223: await createLeaf(async () => ({
               next: async () => NextResult.BREAK,
             })),
           },
@@ -59,7 +59,7 @@ describe("Leaf selector", () => {
 
   beforeEach(async () => {
     currentLeaf = spy<AmbiguousLeaf<Context>>(
-      await createLeafWithObserver(async () => ({
+      await createLeaf(async () => ({
         checkTextConditions: () => Promise.reject(""),
         checkContextConditions: () => Promise.reject(""),
         next: () => Promise.reject(""),
