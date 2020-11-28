@@ -26,5 +26,8 @@
     "type": "git",
     "url": "git+https://github.com/protoman92/chatbot-engine.git"
   },
+  "scripts": {
+    "postinstall": "cd javascript-helper && yarn"
+  },
   "version": "1.0.0"
 }
