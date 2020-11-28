@@ -84,10 +84,24 @@ declare namespace TelegramResponseOutput {
   type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
   type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
 
+  interface InlineMarkupQuickReply {
+    readonly content: InlineMarkupMatrix;
+    readonly type: "inline_markup";
+  }
+
+  interface ReplyMarkupQuickReply {
+    readonly content: ReplyMarkupMatrix;
+    readonly type: "reply_markup";
+  }
+
+  interface RemoveReplyKeyboardQuickReply {
+    readonly type: "remove_reply_keyboard";
+  }
+
   type QuickReply =
-    | { content: ReplyMarkupMatrix; type: "reply_markup" }
-    | { content: InlineMarkupMatrix; type: "inline_markup" }
-    | { type: "remove_reply_keyboard" };
+    | ReplyMarkupQuickReply
+    | InlineMarkupQuickReply
+    | RemoveReplyKeyboardQuickReply;
 }
 
 declare namespace TelegramResponseOutput {
