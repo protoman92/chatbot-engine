@@ -1,4 +1,3 @@
-export type Resolvable<T> = T | Promise<T>;
 export type KV<V> = Readonly<{ [K: string]: V }>;
 
 export interface Coordinates {
