@@ -2,7 +2,6 @@ import express from "express";
 import { ChatbotBootstrapArgs } from "..";
 import { AmbiguousPlatform } from "../../type";
 import { DefaultLeafDependencies } from "../interface";
-import { asyncTimeout } from "../javascript-helper/utils";
 
 export default function <
   Context,
@@ -30,7 +29,10 @@ export default function <
         await Promise.race([
           messenger.processRawRequest(body),
           (async function () {
-            await asyncTimeout(webhookTimeout);
+            await new Promise((resolve) => {
+              setTimeout(resolve, webhookTimeout);
+            });
+
             throw new Error("Webhook timed out");
           })(),
         ]);
