@@ -20,13 +20,11 @@ import {
 import {
   AmbiguousPlatform,
   AmbiguousRequest,
-  BaseMessageProcessor,
   Branch,
   ContextDAO,
   ErrorLeafConfig,
   LeafSelector,
   MessageProcessorMiddleware,
-  Messenger,
 } from "../type";
 import { DefaultLeafDependencies, MessengerComponents } from "./interface";
 import createCaptureGenericResponseMiddleware from "./middleware/capture_generic_response";
@@ -69,19 +67,15 @@ export type ChatbotBootstrapArgs<
       }
   );
 
-export default function bootstrapChatbotServer<
+export default function createChatbotRouter<
   Context,
-  LeafDependencies extends DefaultLeafDependencies<Context>
+  LeafDependencies extends DefaultLeafDependencies<
+    Context
+  > = DefaultLeafDependencies<Context>
 >({
-  app,
-  bootstrapAfterRoutes,
-  bootstrapBeforeRoutes,
   getChatbotBootstrapArgs,
   webhookTimeout,
 }: Readonly<{
-  app: express.Application;
-  bootstrapBeforeRoutes?: (args: LeafDependencies) => void;
-  bootstrapAfterRoutes?: (args: LeafDependencies) => void;
   getChatbotBootstrapArgs: (
     args: DefaultLeafDependencies<Context>
   ) => ChatbotBootstrapArgs<Context, LeafDependencies>;
@@ -92,76 +86,7 @@ export default function bootstrapChatbotServer<
    * bot.
    */
   webhookTimeout: number;
-}>): void {
-  async function getMessengerComponents(): Promise<
-    MessengerComponents<Context>
-  > {
-    if (messageProcessor == null || messenger == null) {
-      const newLeafSelector = async () => {
-        switch (bootstrapArgs.leafSelectorType) {
-          case "custom":
-            const leafSelector = await bootstrapArgs.createLeafSelector(
-              resolverArgs
-            );
-
-            return createTransformChain()
-              .forContextOfType<Context>()
-              .transform(leafSelector);
-
-          case "default":
-            const witClient = await createWitClient();
-            const branches = await bootstrapArgs.createBranches(resolverArgs);
-
-            return createTransformChain()
-              .forContextOfType<Context>()
-              .pipe(retryWithWit(witClient))
-              .pipe(catchAll(bootstrapArgs.onLeafCatchAll))
-              .pipe(
-                catchError(
-                  await createDefaultErrorLeaf({
-                    formatErrorMessage: bootstrapArgs.formatErrorMessage,
-                    trackError: bootstrapArgs.onLeafError,
-                  })
-                )
-              )
-              .transform(createLeafSelector(branches));
-        }
-      };
-
-      const leafSelector = await newLeafSelector();
-
-      const facebookProcessor = await createFacebookMessageProcessor(
-        { leafSelector, client: facebookClient },
-        ...facebookMessageProcessorMiddlewares,
-        createCaptureGenericResponseMiddleware()
-      );
-
-      const telegramProcessor = await createTelegramMessageProcessor(
-        { leafSelector, client: telegramClient },
-        ...telegramMessageProcessorMiddlewares,
-        createCaptureGenericResponseMiddleware()
-      );
-
-      messageProcessor = createCrossPlatformMessageProcessor({
-        facebook: facebookProcessor,
-        telegram: telegramProcessor,
-      });
-
-      messenger = await createMessenger({
-        leafSelector,
-        processor: messageProcessor,
-      });
-    }
-
-    return {
-      contextDAO,
-      facebookClient,
-      messageProcessor,
-      messenger,
-      telegramClient,
-    };
-  }
-
+}>): express.Router {
   const { NODE_ENV: env = "" } = process.env;
   const facebookClient = createFacebookClient();
   const telegramClient = createTelegramClient({ defaultParseMode: "html" });
@@ -174,14 +99,80 @@ export default function bootstrapChatbotServer<
     webhookTimeout,
   });
 
-  const {
-    contextDAO,
-    facebookMessageProcessorMiddlewares = [],
-    telegramMessageProcessorMiddlewares = [],
-  } = bootstrapArgs;
+  let messengerComponents: Promise<MessengerComponents<Context>> | undefined;
 
-  let messageProcessor: BaseMessageProcessor<Context>;
-  let messenger: Messenger;
+  function getMessengerComponents() {
+    if (messengerComponents == null) {
+      messengerComponents = new Promise(async (resolve) => {
+        let leafSelector: LeafSelector<Context>;
+
+        switch (bootstrapArgs.leafSelectorType) {
+          case "custom": {
+            const injectedleafSelector = await bootstrapArgs.createLeafSelector(
+              resolverArgs
+            );
+
+            leafSelector = await createTransformChain()
+              .forContextOfType<Context>()
+              .transform(injectedleafSelector);
+
+            break;
+          }
+
+          case "default": {
+            const witClient = await createWitClient();
+            const branches = await bootstrapArgs.createBranches(resolverArgs);
+
+            leafSelector = await createTransformChain()
+              .forContextOfType<Context>()
+              .pipe(retryWithWit(witClient))
+              .pipe(catchAll(bootstrapArgs.onLeafCatchAll))
+              .pipe(
+                catchError(
+                  await createDefaultErrorLeaf({
+                    formatErrorMessage: bootstrapArgs.formatErrorMessage,
+                    trackError: bootstrapArgs.onLeafError,
+                  })
+                )
+              )
+              .transform(createLeafSelector(branches));
+          }
+        }
+
+        const facebookProcessor = await createFacebookMessageProcessor(
+          { leafSelector, client: facebookClient },
+          ...(bootstrapArgs.facebookMessageProcessorMiddlewares ?? []),
+          createCaptureGenericResponseMiddleware()
+        );
+
+        const telegramProcessor = await createTelegramMessageProcessor(
+          { leafSelector, client: telegramClient },
+          ...(bootstrapArgs.telegramMessageProcessorMiddlewares ?? []),
+          createCaptureGenericResponseMiddleware()
+        );
+
+        const messageProcessor = createCrossPlatformMessageProcessor({
+          facebook: facebookProcessor,
+          telegram: telegramProcessor,
+        });
+
+        const messenger = await createMessenger({
+          leafSelector,
+          processor: messageProcessor,
+        });
+
+        resolve({
+          facebookClient,
+          messenger,
+          messageProcessor,
+          telegramClient,
+          contextDAO: bootstrapArgs.contextDAO,
+        });
+      });
+    }
+
+    return messengerComponents;
+  }
 
   const resolverArgs = {
     ...bootstrapArgs,
@@ -189,7 +180,6 @@ export default function bootstrapChatbotServer<
     getMessengerComponents,
   } as ReturnType<typeof getChatbotBootstrapArgs> & LeafDependencies;
 
-  if (bootstrapBeforeRoutes != null) bootstrapBeforeRoutes(resolverArgs);
   const router = express.Router();
 
   if (env === "local") {
@@ -200,6 +190,5 @@ export default function bootstrapChatbotServer<
   router.use(express.json());
   router.use(ContextRoute(resolverArgs));
   router.use(WebhookRoute(resolverArgs));
-  app.use(router);
-  if (bootstrapAfterRoutes != null) bootstrapAfterRoutes(resolverArgs);
+  return router;
 }
