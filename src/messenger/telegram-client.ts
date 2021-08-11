@@ -100,12 +100,13 @@ export function createTelegramClient(
 }
 
 export default function (args?: Pick<TelegramConfig, "defaultParseMode">) {
-  const { TELEGRAM_AUTH_TOKEN = "", TELEGRAM_WEBHOOK_URL = "" } = process.env;
-
   const {
     TELEGRAM_AUTH_TOKEN: authToken,
     TELEGRAM_WEBHOOK_URL: webhookURL,
-  } = requireAllTruthy({ TELEGRAM_AUTH_TOKEN, TELEGRAM_WEBHOOK_URL });
+  } = requireAllTruthy({
+    TELEGRAM_AUTH_TOKEN: process.env.TELEGRAM_AUTH_TOKEN,
+    TELEGRAM_WEBHOOK_URL: process.env.TELEGRAM_WEBHOOK_URL,
+  });
 
   return createTelegramClient(defaultAxiosClient, {
     ...args,

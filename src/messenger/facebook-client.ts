@@ -117,19 +117,13 @@ export function createFacebookClient(
 
 export default function () {
   const {
-    FACEBOOK_API_VERSION = "",
-    FACEBOOK_PAGE_TOKEN = "",
-    FACEBOOK_VERIFY_TOKEN = "",
-  } = process.env;
-
-  const {
     FACEBOOK_API_VERSION: apiVersion,
     FACEBOOK_PAGE_TOKEN: pageToken,
     FACEBOOK_VERIFY_TOKEN: verifyToken,
   } = requireAllTruthy({
-    FACEBOOK_API_VERSION,
-    FACEBOOK_PAGE_TOKEN,
-    FACEBOOK_VERIFY_TOKEN,
+    FACEBOOK_API_VERSION: process.env.FACEBOOK_API_VERSION,
+    FACEBOOK_PAGE_TOKEN: process.env.FACEBOOK_PAGE_TOKEN,
+    FACEBOOK_VERIFY_TOKEN: process.env.FACEBOOK_VERIFY_TOKEN,
   });
 
   return createFacebookClient(defaultAxiosClient, {

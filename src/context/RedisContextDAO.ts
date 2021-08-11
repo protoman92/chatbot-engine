@@ -44,8 +44,10 @@ export function createRedisContextDAO<Context>(
 }
 
 export default function <Context>() {
-  const { REDIS_HOST = "", REDIS_PORT = "" } = process.env;
-  requireAllTruthy({ REDIS_HOST, REDIS_PORT });
+  const { REDIS_HOST = "", REDIS_PORT = "" } = requireAllTruthy({
+    REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_PORT: process.env.REDIS_PORT,
+  });
 
   const redisClient = createClient({
     host: REDIS_HOST,

@@ -87,7 +87,7 @@ export default function createChatbotRouter<
    */
   webhookTimeout: number;
 }>): express.Router {
-  const { NODE_ENV: env = "" } = process.env;
+  const env = process.env.NODE_ENV || "";
   const facebookClient = createFacebookClient();
   const telegramClient = createTelegramClient({ defaultParseMode: "html" });
 
