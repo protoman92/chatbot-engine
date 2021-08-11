@@ -174,11 +174,15 @@ export default function createChatbotRouter<
     return messengerComponents;
   }
 
-  const resolverArgs = {
+  const resolverArgs: ReturnType<typeof getChatbotBootstrapArgs> &
+    LeafDependencies = {
     ...bootstrapArgs,
+    facebookClient,
     env,
     getMessengerComponents,
-  } as ReturnType<typeof getChatbotBootstrapArgs> & LeafDependencies;
+    telegramClient,
+    webhookTimeout,
+  };
 
   const router = express.Router();
 

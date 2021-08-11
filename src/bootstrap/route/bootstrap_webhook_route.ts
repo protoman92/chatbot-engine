@@ -30,7 +30,7 @@ export default function <
           messenger.processRawRequest(body),
           (async function () {
             await new Promise((resolve) => {
-              setTimeout(resolve, webhookTimeout);
+              setTimeout(() => resolve(undefined), webhookTimeout);
             });
 
             throw new Error("Webhook timed out");

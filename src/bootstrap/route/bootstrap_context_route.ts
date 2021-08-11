@@ -8,7 +8,7 @@ export default function <Context>({
   const router = express.Router();
 
   router.get(
-    "/:platform/:id/context",
+    "/context/:platform/:id",
     async (
       ...[
         {
@@ -29,7 +29,7 @@ export default function <Context>({
   );
 
   router.post(
-    "/:platform/:id/context",
+    "/context/:platform/:id",
     async (
       ...[
         {
@@ -52,7 +52,7 @@ export default function <Context>({
   );
 
   router.delete(
-    "/:platform/:id/context",
+    "/context/:platform/:id",
     async (
       ...[
         {
