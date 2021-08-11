@@ -65,16 +65,12 @@ export function createDynamoDBContextDAO<Context>({
 
 export default function <Context>() {
   const {
-    AWS_ACCESS_KEY_ID = "",
-    AWS_SECRET_ACCESS_KEY = "",
     DYNAMO_DB_ENDPOINT = "",
     DYNAMO_DB_REGION = "",
     DYNAMO_DB_TABLE_NAME = "",
   } = process.env;
 
   requireAllTruthy({
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
     DYNAMO_DB_ENDPOINT,
     DYNAMO_DB_REGION,
     DYNAMO_DB_TABLE_NAME,
@@ -82,10 +78,6 @@ export default function <Context>() {
 
   const ddb = new DynamoDB({
     apiVersion: "latest",
-    credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY,
-    },
     endpoint: DYNAMO_DB_ENDPOINT,
     region: DYNAMO_DB_REGION,
   });
