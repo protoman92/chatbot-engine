@@ -3,10 +3,13 @@ import { ContextDAO } from "../type/context-dao";
 import { SaveTelegramUserContext, TelegramUser } from "../type/telegram";
 
 /** Save a Telegram user in backend if targetID is not found in context */
-export function saveTelegramUser<Context>(
-  contextDAO: ContextDAO<Context>,
-  saveUser: (user: TelegramUser) => Promise<SaveTelegramUserContext<Context>>
-): MessageProcessorMiddleware<Context> {
+export function saveTelegramUser<Context>({
+  contextDAO,
+  saveUser,
+}: Readonly<{
+  contextDAO: ContextDAO<Context>;
+  saveUser: (user: TelegramUser) => Promise<SaveTelegramUserContext<Context>>;
+}>): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,

@@ -1,8 +1,8 @@
+import { PlatformClient } from "../type";
 import { ContextDAO } from "../type/context-dao";
 import {
   MessageProcessorMiddleware,
   SaveUserForTargetIDContext,
-  SetTypingIndicatorConfig,
 } from "../type/messenger";
 
 /**
@@ -10,9 +10,11 @@ import {
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  */
-export function saveContextOnSend<Context>(
-  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">
-): MessageProcessorMiddleware<Context> {
+export function saveContextOnSend<Context>({
+  contextDAO,
+}: Readonly<{
+  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">;
+}>): MessageProcessorMiddleware<Context> {
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
@@ -57,9 +59,11 @@ export function saveContextOnSend<Context>(
  * Inject the relevant context for a target every time a message group is
  * processed.
  */
-export function injectContextOnReceive<Context>(
-  contextDAO: Pick<ContextDAO<Context>, "getContext">
-): MessageProcessorMiddleware<Context> {
+export function injectContextOnReceive<Context>({
+  contextDAO,
+}: Readonly<{
+  contextDAO: Pick<ContextDAO<Context>, "getContext">;
+}>): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,
@@ -88,11 +92,15 @@ export function injectContextOnReceive<Context>(
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  */
-export function saveUserForTargetID<Context, RawUser>(
-  contextDAO: ContextDAO<Context>,
-  getUser: (targetID: string) => Promise<RawUser>,
-  saveUser: (rawUser: RawUser) => Promise<SaveUserForTargetIDContext<Context>>
-): MessageProcessorMiddleware<Context> {
+export function saveUserForTargetID<Context, RawUser>({
+  contextDAO,
+  getUser,
+  saveUser,
+}: Readonly<{
+  contextDAO: ContextDAO<Context>;
+  getUser: (targetID: string) => Promise<RawUser>;
+  saveUser: (rawUser: RawUser) => Promise<SaveUserForTargetIDContext<Context>>;
+}>): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,
@@ -136,7 +144,10 @@ export function setTypingIndicator<Context>({
   onSetTypingError = (error) => {
     throw error;
   },
-}: SetTypingIndicatorConfig): MessageProcessorMiddleware<Context> {
+}: Readonly<{
+  client: PlatformClient<unknown>;
+  onSetTypingError?: (e: Error) => void;
+}>): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,

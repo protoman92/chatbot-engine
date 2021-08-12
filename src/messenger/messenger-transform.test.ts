@@ -5,7 +5,6 @@ import { ContextDAO } from "../type/context-dao";
 import {
   BaseMessageProcessor,
   MessageProcessorMiddleware,
-  SetTypingIndicatorConfig,
 } from "../type/messenger";
 import { AmbiguousRequest } from "../type/request";
 import { AmbiguousResponse } from "../type/response";
@@ -65,7 +64,7 @@ describe("Save context on send", () => {
 
     const transformed = await compose(
       instance(msgProcessor),
-      saveContextOnSend(instance(contextDAO))(middlewareInput)
+      saveContextOnSend({ contextDAO: instance(contextDAO) })(middlewareInput)
     );
 
     const response: AmbiguousResponse<Context> = {
@@ -126,7 +125,9 @@ describe("Inject context on receive", () => {
 
     const transformed = await compose(
       instance(msgProcessor),
-      injectContextOnReceive(instance(contextDAO))(middlewareInput)
+      injectContextOnReceive({ contextDAO: instance(contextDAO) })(
+        middlewareInput
+      )
     );
 
     // When
@@ -159,7 +160,9 @@ describe("Inject context on receive", () => {
 
     const transformed = await compose(
       instance(msgProcessor),
-      injectContextOnReceive(instance(contextDAO))(middlewareInput)
+      injectContextOnReceive({ contextDAO: instance(contextDAO) })(
+        middlewareInput
+      )
     );
 
     const genericRequest: AmbiguousRequest<{}> = {
@@ -195,11 +198,11 @@ describe("Save user for target ID", () => {
 
     const transformed = await compose(
       instance(msgProcessor),
-      saveUserForTargetID(
-        instance(contextDAO),
-        async () => ({ id: targetID }),
-        async () => ({ targetUserID: targetID })
-      )(middlewareInput)
+      saveUserForTargetID({
+        contextDAO: instance(contextDAO),
+        getUser: async () => ({ id: targetID }),
+        saveUser: async () => ({ targetUserID: targetID }),
+      })(middlewareInput)
     );
 
     // When
@@ -237,11 +240,11 @@ describe("Save user for target ID", () => {
 
     const transformed = await compose(
       instance(msgProcessor),
-      saveUserForTargetID(
-        instance(contextDAO),
-        async () => ({ id: targetID }),
-        async () => ({ additionalContext, targetUserID: targetID })
-      )(middlewareInput)
+      saveUserForTargetID({
+        contextDAO: instance(contextDAO),
+        getUser: async () => ({ id: targetID }),
+        saveUser: async () => ({ additionalContext, targetUserID: targetID }),
+      })(middlewareInput)
     );
 
     const genericRequest: AmbiguousRequest<{}> = {
@@ -292,9 +295,10 @@ describe("Save Telegram user for target ID", () => {
 
     const transformed = await compose(
       instance(tlMessenger),
-      saveTelegramUser(instance(contextDAO), async () => ({
-        telegramUserID: targetID,
-      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+      saveTelegramUser({
+        contextDAO: instance(contextDAO),
+        saveUser: async () => ({ telegramUserID: targetID }),
+      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
@@ -316,9 +320,10 @@ describe("Save Telegram user for target ID", () => {
 
     const transformed = await compose(
       instance(tlMessenger),
-      saveTelegramUser(instance(contextDAO), async () => ({
-        telegramUserID: targetID,
-      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+      saveTelegramUser({
+        contextDAO: instance(contextDAO),
+        saveUser: async () => ({ telegramUserID: targetID }),
+      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
@@ -352,10 +357,10 @@ describe("Save Telegram user for target ID", () => {
 
     const transformed = await compose(
       instance(tlMessenger),
-      saveTelegramUser(instance(contextDAO), async () => ({
-        additionalContext,
-        telegramUserID: targetID,
-      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+      saveTelegramUser({
+        contextDAO: instance(contextDAO),
+        saveUser: async () => ({ additionalContext, telegramUserID: targetID }),
+      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
@@ -399,9 +404,10 @@ describe("Save Telegram user for target ID", () => {
 
     const transformed = await compose(
       instance(tlMessenger),
-      saveTelegramUser(instance(contextDAO), async () => ({
-        telegramUserID: undefined as any,
-      }))({ getFinalMessageProcessor: () => instance(tlMessenger) })
+      saveTelegramUser({
+        contextDAO: instance(contextDAO),
+        saveUser: async () => ({ telegramUserID: undefined as any }),
+      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
@@ -470,7 +476,7 @@ describe("Set typing indicator", () => {
 
   it("Should ignore error if forced to", async () => {
     // Setup
-    const config = spy<SetTypingIndicatorConfig>({
+    const config = spy<Parameters<typeof setTypingIndicator>[0]>({
       client: instance(client),
       onSetTypingError: () => {},
     });
