@@ -1,4 +1,5 @@
 import { FacebookResponse } from "./facebook";
+import { AmbiguousPlatform } from "./messenger";
 import { AmbiguousRequest } from "./request";
 import { TelegramResponse } from "./telegram";
 
@@ -19,5 +20,11 @@ export interface BaseResponse<Context> {
  * This is to prevent stale old context replacing latest one.
  */
 export type AmbiguousResponse<Context> =
-  | FacebookResponse<Context>
-  | TelegramResponse<Context>;
+  | (FacebookResponse<Context> | TelegramResponse<Context>)
+  | (BaseResponse<Context> & {
+      output: readonly (
+        | FacebookResponse<Context>["output"][number]
+        | TelegramResponse<Context>["output"][number]
+      )[];
+      targetPlatform: AmbiguousPlatform;
+    });
