@@ -6,20 +6,16 @@ import {
   TelegramClient,
 } from "../../type";
 
-export interface MessengerComponents<Context> {
-  readonly contextDAO: ContextDAO<Context>;
-  readonly facebookClient: FacebookClient;
+export interface DefaultAsynchronousDependencies<Context> {
   readonly messageProcessor: BaseMessageProcessor<Context>;
   readonly messenger: Messenger;
-  readonly telegramClient: TelegramClient;
 }
 
-export interface DefaultLeafDependencies<Context>
-  extends Pick<
-    MessengerComponents<Context>,
-    "facebookClient" | "telegramClient"
-  > {
+export interface DefaultLeafDependencies<Context> {
+  readonly contextDAO: ContextDAO<Context>;
   readonly env: string;
+  readonly facebookClient: FacebookClient;
+  readonly telegramClient: TelegramClient;
   readonly webhookTimeout: number;
-  getMessengerComponents(): Promise<MessengerComponents<Context>>;
+  getAsyncDependencies(): Promise<DefaultAsynchronousDependencies<Context>>;
 }

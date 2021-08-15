@@ -3,7 +3,7 @@ import { AmbiguousPlatform } from "../../type";
 import { DefaultLeafDependencies } from "../interface";
 
 export default function <Context>({
-  getMessengerComponents,
+  contextDAO,
 }: DefaultLeafDependencies<Context>) {
   const router = express.Router();
 
@@ -17,8 +17,6 @@ export default function <Context>({
         res,
       ]
     ) => {
-      const { contextDAO } = await getMessengerComponents();
-
       const context = await contextDAO.getContext({
         targetID,
         targetPlatform: platform as AmbiguousPlatform,
@@ -39,8 +37,6 @@ export default function <Context>({
         res,
       ]
     ) => {
-      const { contextDAO } = await getMessengerComponents();
-
       const result = await contextDAO.appendContext({
         targetID,
         context: body,
@@ -61,8 +57,6 @@ export default function <Context>({
         res,
       ]
     ) => {
-      const { contextDAO } = await getMessengerComponents();
-
       await contextDAO.resetContext({
         targetID,
         targetPlatform: platform as AmbiguousPlatform,

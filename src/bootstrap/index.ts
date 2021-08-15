@@ -1,5 +1,6 @@
 import express from "express";
 import rateLimitter from "express-rate-limit";
+import { StrictOmit } from "ts-essentials";
 import {
   catchAll,
   catchError,
@@ -26,7 +27,10 @@ import {
   LeafSelector,
   MessageProcessorMiddleware,
 } from "../type";
-import { DefaultLeafDependencies, MessengerComponents } from "./interface";
+import {
+  DefaultAsynchronousDependencies,
+  DefaultLeafDependencies,
+} from "./interface";
 import createCaptureGenericResponseMiddleware from "./middleware/capture_generic_response";
 import ContextRoute from "./route/bootstrap_context_route";
 import WebhookRoute from "./route/bootstrap_webhook_route";
@@ -37,9 +41,10 @@ export type ChatbotBootstrapArgs<
 > = Omit<LeafDependencies, keyof DefaultLeafDependencies<Context>> &
   Readonly<{
     contextDAO: ContextDAO<Context>;
-    facebookMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
-      Context
-    >[];
+    messageProcessorMiddlewares?: Readonly<{
+      facebook?: readonly MessageProcessorMiddleware<Context>[];
+      telegram?: readonly MessageProcessorMiddleware<Context>[];
+    }>;
     onWebhookError: (
       args: Readonly<{
         error: Error;
@@ -47,9 +52,6 @@ export type ChatbotBootstrapArgs<
         platform: AmbiguousPlatform;
       }>
     ) => Promise<void>;
-    telegramMessageProcessorMiddlewares?: readonly MessageProcessorMiddleware<
-      Context
-    >[];
   }> &
   (
     | {
@@ -77,7 +79,7 @@ export default function createChatbotRouter<
   webhookTimeout,
 }: Readonly<{
   getChatbotBootstrapArgs: (
-    args: DefaultLeafDependencies<Context>
+    args: StrictOmit<DefaultLeafDependencies<Context>, "contextDAO">
   ) => ChatbotBootstrapArgs<Context, LeafDependencies>;
   /**
    *
@@ -86,7 +88,7 @@ export default function createChatbotRouter<
    * bot.
    */
   webhookTimeout: number;
-}>): express.Router {
+}>) {
   const env = process.env.NODE_ENV || "";
   const facebookClient = createFacebookClient();
   const telegramClient = createTelegramClient({ defaultParseMode: "html" });
@@ -94,34 +96,32 @@ export default function createChatbotRouter<
   const bootstrapArgs = getChatbotBootstrapArgs({
     env,
     facebookClient,
-    getMessengerComponents,
+    getAsyncDependencies,
     telegramClient,
     webhookTimeout,
   });
 
-  let messengerComponents: Promise<MessengerComponents<Context>> | undefined;
+  let messengerComponents:
+    | Promise<DefaultAsynchronousDependencies<Context>>
+    | undefined;
 
-  function getMessengerComponents() {
+  function getAsyncDependencies() {
     if (messengerComponents == null) {
       messengerComponents = new Promise(async (resolve) => {
         let leafSelector: LeafSelector<Context>;
 
         switch (bootstrapArgs.leafSelectorType) {
           case "custom": {
-            const injectedleafSelector = await bootstrapArgs.createLeafSelector(
-              resolverArgs
-            );
-
             leafSelector = await createTransformChain()
               .forContextOfType<Context>()
-              .transform(injectedleafSelector);
+              .transform(await bootstrapArgs.createLeafSelector(dependencies));
 
             break;
           }
 
           case "default": {
             const witClient = await createWitClient();
-            const branches = await bootstrapArgs.createBranches(resolverArgs);
+            const branches = await bootstrapArgs.createBranches(dependencies);
 
             leafSelector = await createTransformChain()
               .forContextOfType<Context>()
@@ -141,13 +141,13 @@ export default function createChatbotRouter<
 
         const facebookProcessor = await createFacebookMessageProcessor(
           { leafSelector, client: facebookClient },
-          ...(bootstrapArgs.facebookMessageProcessorMiddlewares ?? []),
+          ...(bootstrapArgs.messageProcessorMiddlewares?.facebook ?? []),
           createCaptureGenericResponseMiddleware()
         );
 
         const telegramProcessor = await createTelegramMessageProcessor(
           { leafSelector, client: telegramClient },
-          ...(bootstrapArgs.telegramMessageProcessorMiddlewares ?? []),
+          ...(bootstrapArgs?.messageProcessorMiddlewares?.telegram ?? []),
           createCaptureGenericResponseMiddleware()
         );
 
@@ -161,25 +161,19 @@ export default function createChatbotRouter<
           processor: messageProcessor,
         });
 
-        resolve({
-          facebookClient,
-          messenger,
-          messageProcessor,
-          telegramClient,
-          contextDAO: bootstrapArgs.contextDAO,
-        });
+        resolve({ messenger, messageProcessor });
       });
     }
 
     return messengerComponents;
   }
 
-  const resolverArgs: ReturnType<typeof getChatbotBootstrapArgs> &
+  const dependencies: ReturnType<typeof getChatbotBootstrapArgs> &
     LeafDependencies = {
     ...bootstrapArgs,
     facebookClient,
     env,
-    getMessengerComponents,
+    getAsyncDependencies,
     telegramClient,
     webhookTimeout,
   };
@@ -192,7 +186,7 @@ export default function createChatbotRouter<
   }
 
   router.use(express.json());
-  router.use(ContextRoute(resolverArgs));
-  router.use(WebhookRoute(resolverArgs));
-  return router;
+  router.use(ContextRoute(dependencies));
+  router.use(WebhookRoute(dependencies));
+  return { chatbotDependencies: dependencies, chatbotRouter: router };
 }

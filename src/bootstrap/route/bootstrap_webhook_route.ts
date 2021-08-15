@@ -7,7 +7,8 @@ export default function <
   Context,
   LeafResolverArgs extends DefaultLeafDependencies<Context>
 >({
-  getMessengerComponents,
+  facebookClient,
+  getAsyncDependencies,
   onWebhookError,
   webhookTimeout,
 }: ChatbotBootstrapArgs<Context, LeafResolverArgs> &
@@ -15,7 +16,6 @@ export default function <
   const router = express.Router();
 
   router.get("/webhook/facebook", async ({ query }, res) => {
-    const { facebookClient } = await getMessengerComponents();
     const challenge = await facebookClient.resolveVerifyChallenge(query);
     res.status(200).send(challenge);
   });
@@ -23,7 +23,7 @@ export default function <
   router.post(
     "/webhook/:platform",
     async ({ body, params: { platform } }, res) => {
-      const { messenger } = await getMessengerComponents();
+      const { messenger } = await getAsyncDependencies();
 
       try {
         await Promise.race([
