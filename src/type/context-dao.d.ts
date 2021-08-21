@@ -14,7 +14,9 @@ export interface ContextDAO<Context> {
   /** Append to the current context in storage */
   appendContext(
     args: Readonly<{
-      context: Partial<Context>;
+      additionalContext: Partial<Context>;
+      /** If this is specified, we do not need to refetch it from database */
+      oldContext?: Context;
       targetID: string;
       targetPlatform: AmbiguousPlatform;
     }>

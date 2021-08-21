@@ -53,6 +53,10 @@ export const firstSubString = (() => {
   };
 })();
 
+export function isObject(args: unknown): args is Record<string, unknown> {
+  return Object.prototype.toString.apply(args) === "[object Object]";
+}
+
 export const lastSubstring = (() => {
   let splitter: GraphemeSplitter;
 

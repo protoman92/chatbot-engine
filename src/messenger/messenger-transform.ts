@@ -19,7 +19,12 @@ export function saveContextOnSend<Context>({
     return {
       ...processor,
       sendResponse: async (response) => {
-        const { targetID, targetPlatform, additionalContext } = response;
+        const {
+          originalRequest,
+          targetID,
+          targetPlatform,
+          additionalContext,
+        } = response;
 
         const [result] = await Promise.all([
           processor.sendResponse(response),
@@ -27,9 +32,10 @@ export function saveContextOnSend<Context>({
             if (additionalContext == null) return;
 
             const { newContext, oldContext } = await contextDAO.appendContext({
+              additionalContext,
               targetID,
               targetPlatform,
-              context: additionalContext,
+              oldContext: originalRequest?.currentContext,
             });
 
             const finalProcessor = getFinalMessageProcessor();
@@ -122,7 +128,10 @@ export function saveUserForTargetID<Context, RawUser>({
           const { newContext } = await contextDAO.appendContext({
             targetID,
             targetPlatform,
-            context: { ...additionalContext, targetID: `${targetUserID}` },
+            additionalContext: {
+              ...additionalContext,
+              targetID: `${targetUserID}`,
+            },
           });
 
           currentContext = newContext;

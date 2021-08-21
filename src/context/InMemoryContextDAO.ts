@@ -20,9 +20,17 @@ function createInMemoryContextDAO<Context>() {
 
       return storage[platform][targetID];
     },
-    appendContext: async ({ context, targetPlatform, targetID }) => {
-      const oldContext = await baseDAO.getContext({ targetPlatform, targetID });
-      const newContext = joinObjects(oldContext, context);
+    appendContext: async ({
+      additionalContext,
+      oldContext,
+      targetPlatform,
+      targetID,
+    }) => {
+      if (oldContext == null) {
+        oldContext = await baseDAO.getContext({ targetPlatform, targetID });
+      }
+
+      const newContext = joinObjects(oldContext, additionalContext);
       storage[targetPlatform][targetID] = newContext;
       return { oldContext, newContext };
     },

@@ -88,8 +88,9 @@ describe("Save context on send", () => {
     verify(
       contextDAO.appendContext(
         deepEqual({
+          additionalContext,
           targetID,
-          context: additionalContext,
+          oldContext: {},
           targetPlatform: "telegram",
         })
       )
@@ -263,7 +264,7 @@ describe("Save user for target ID", () => {
       contextDAO.appendContext(
         deepEqual({
           targetID,
-          context: { ...additionalContext, targetID },
+          additionalContext: { ...additionalContext, targetID },
           targetPlatform: targetPlatform,
         })
       )
@@ -385,7 +386,7 @@ describe("Save Telegram user for target ID", () => {
     verify(
       contextDAO.appendContext(
         deepEqual({
-          context: { ...additionalContext, targetID: `${targetID}` },
+          additionalContext: { ...additionalContext, targetID: `${targetID}` },
           targetID: `${targetID}`,
           targetPlatform: "telegram",
         })
@@ -432,7 +433,7 @@ describe("Save Telegram user for target ID", () => {
     verify(
       contextDAO.appendContext(
         deepEqual({
-          context: { targetID: undefined },
+          additionalContext: { targetID: undefined },
           targetID: `${targetID}`,
           targetPlatform: "telegram",
         })

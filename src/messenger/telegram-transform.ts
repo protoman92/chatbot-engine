@@ -37,7 +37,7 @@ export function saveTelegramUser<Context>({
           const { newContext } = await contextDAO.appendContext({
             targetID,
             targetPlatform,
-            context: {
+            additionalContext: {
               ...additionalContext,
               targetID:
                 telegramUserID == null ? undefined : `${telegramUserID}`,

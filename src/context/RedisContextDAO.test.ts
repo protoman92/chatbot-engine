@@ -59,9 +59,9 @@ describe("Redis context DAO", () => {
 
     // When
     const result = await contextDAO.appendContext({
+      additionalContext,
       targetID,
       targetPlatform,
-      context: additionalContext,
     });
 
     // Then

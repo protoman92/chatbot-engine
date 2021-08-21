@@ -4,7 +4,7 @@ before_script:
   - yarn
   - yarn build
 script:
-  - yarn test
+  - yarn test --coverage
 after_success:
   - yarn coveralls
   - npm pack

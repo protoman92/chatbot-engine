@@ -26,7 +26,7 @@ export default function <Context>({
     }
   );
 
-  router.post(
+  router.patch(
     "/context/:platform/:id",
     async (
       ...[
@@ -39,7 +39,7 @@ export default function <Context>({
     ) => {
       const result = await contextDAO.appendContext({
         targetID,
-        context: body,
+        additionalContext: body,
         targetPlatform: platform as AmbiguousPlatform,
       });
 

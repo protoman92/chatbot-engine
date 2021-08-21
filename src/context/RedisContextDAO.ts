@@ -24,9 +24,17 @@ export function createRedisContextDAO<Context>(
       const context = await get(getCacheKey(targetID, platform));
       return JSON.parse(context);
     },
-    appendContext: async ({ context, targetID, targetPlatform }) => {
-      const oldContext = await dao.getContext({ targetID, targetPlatform });
-      const newContext = joinObjects(oldContext, context);
+    appendContext: async ({
+      additionalContext,
+      oldContext,
+      targetID,
+      targetPlatform,
+    }) => {
+      if (oldContext == null) {
+        oldContext = await dao.getContext({ targetID, targetPlatform });
+      }
+
+      const newContext = joinObjects(oldContext, additionalContext);
 
       await set(
         getCacheKey(targetID, targetPlatform),
