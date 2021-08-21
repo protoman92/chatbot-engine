@@ -17,7 +17,7 @@ import {
 } from "./messenger-transform";
 import { saveTelegramUser } from "./telegram-transform";
 
-interface Context {}
+type Context = Record<string, unknown>;
 const targetPlatform = "facebook";
 let msgProcessor: BaseMessageProcessor<Context>;
 let client: PlatformClient<unknown>;
@@ -202,7 +202,10 @@ describe("Save user for target ID", () => {
       saveUserForTargetID({
         contextDAO: instance(contextDAO),
         getUser: async () => ({ id: targetID }),
-        saveUser: async () => ({ targetUserID: targetID }),
+        isEnabled: async ({ currentContext: { targetID } }) => {
+          return !!targetID;
+        },
+        saveUser: async () => ({ additionalContext: { targetID } }),
       })(middlewareInput)
     );
 
@@ -210,7 +213,7 @@ describe("Save user for target ID", () => {
     await transformed.receiveRequest({
       targetID,
       targetPlatform,
-      currentContext: {},
+      currentContext: { targetID },
       input: {
         changedContext: {},
         oldContext: {},
@@ -244,14 +247,17 @@ describe("Save user for target ID", () => {
       saveUserForTargetID({
         contextDAO: instance(contextDAO),
         getUser: async () => ({ id: targetID }),
-        saveUser: async () => ({ additionalContext, targetUserID: targetID }),
+        isEnabled: async ({ currentContext: { targetID } }) => {
+          return !!targetID;
+        },
+        saveUser: async () => ({ additionalContext }),
       })(middlewareInput)
     );
 
     const genericRequest: AmbiguousRequest<{}> = {
       targetID,
       targetPlatform,
-      currentContext: {},
+      currentContext: { targetID },
       input: { text: "", type: "text" },
       type: "message_trigger",
     };
@@ -262,11 +268,7 @@ describe("Save user for target ID", () => {
     // Then
     verify(
       contextDAO.appendContext(
-        deepEqual({
-          targetID,
-          additionalContext: { ...additionalContext, targetID },
-          targetPlatform: targetPlatform,
-        })
+        deepEqual({ additionalContext, targetID, targetPlatform })
       )
     ).once();
 
@@ -298,13 +300,16 @@ describe("Save Telegram user for target ID", () => {
       instance(tlMessenger),
       saveTelegramUser({
         contextDAO: instance(contextDAO),
-        saveUser: async () => ({ telegramUserID: targetID }),
+        isEnabled: async ({ currentContext: { targetID } }) => {
+          return !!targetID;
+        },
+        saveUser: async () => ({ additionalContext: { targetID } }),
       })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
     await transformed.receiveRequest({
-      currentContext: {},
+      currentContext: { targetID: targetID.toString() },
       input: { text: "", type: "text" },
       targetID: `${targetID}`,
       targetPlatform: "facebook",
@@ -323,13 +328,16 @@ describe("Save Telegram user for target ID", () => {
       instance(tlMessenger),
       saveTelegramUser({
         contextDAO: instance(contextDAO),
-        saveUser: async () => ({ telegramUserID: targetID }),
+        isEnabled: async ({ currentContext: { targetID } }) => {
+          return !!targetID;
+        },
+        saveUser: async () => ({ additionalContext: { targetID } }),
       })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
     await transformed.receiveRequest({
-      currentContext: {},
+      currentContext: { targetID: targetID.toString() },
       input: {
         changedContext: {},
         oldContext: {},
@@ -353,23 +361,25 @@ describe("Save Telegram user for target ID", () => {
     });
 
     when(tlMessenger.receiveRequest(anything())).thenResolve({});
-
     const additionalContext = { a: 1, b: 2 };
 
     const transformed = await compose(
       instance(tlMessenger),
       saveTelegramUser({
         contextDAO: instance(contextDAO),
-        saveUser: async () => ({ additionalContext, telegramUserID: targetID }),
+        isEnabled: async ({ currentContext: { targetID } }) => {
+          return !!targetID;
+        },
+        saveUser: async () => ({ additionalContext }),
       })({ getFinalMessageProcessor: () => instance(tlMessenger) })
     );
 
     // When
     await transformed.receiveRequest({
       currentBot: { id: 0, first_name: "", username: "" },
-      currentContext: {},
+      currentContext: { targetID: targetID.toString() },
       input: { text: "", type: "text" },
-      targetID: `${targetID}`,
+      targetID: targetID.toString(),
       targetPlatform: "telegram",
       telegramUser: {
         id: 0,
@@ -386,55 +396,8 @@ describe("Save Telegram user for target ID", () => {
     verify(
       contextDAO.appendContext(
         deepEqual({
-          additionalContext: { ...additionalContext, targetID: `${targetID}` },
-          targetID: `${targetID}`,
-          targetPlatform: "telegram",
-        })
-      )
-    ).once();
-  });
-
-  it("Should not save targetID if it's somehow null", async () => {
-    // Setup
-    when(contextDAO.appendContext(anything())).thenResolve({
-      newContext: {},
-      oldContext: {},
-    });
-
-    when(tlMessenger.receiveRequest(anything())).thenResolve({});
-
-    const transformed = await compose(
-      instance(tlMessenger),
-      saveTelegramUser({
-        contextDAO: instance(contextDAO),
-        saveUser: async () => ({ telegramUserID: undefined as any }),
-      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
-    );
-
-    // When
-    await transformed.receiveRequest({
-      currentBot: { id: 0, first_name: "", username: "" },
-      currentContext: {},
-      input: { text: "", type: "text" },
-      targetID: `${targetID}`,
-      targetPlatform: "telegram",
-      telegramUser: {
-        id: 0,
-        first_name: "",
-        last_name: "",
-        username: "",
-        language_code: "en" as const,
-        is_bot: false,
-      },
-      type: "message_trigger",
-    });
-
-    // Then
-    verify(
-      contextDAO.appendContext(
-        deepEqual({
-          additionalContext: { targetID: undefined },
-          targetID: `${targetID}`,
+          additionalContext,
+          targetID: targetID.toString(),
           targetPlatform: "telegram",
         })
       )

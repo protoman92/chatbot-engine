@@ -1,26 +1,23 @@
-import { ContextDAO } from "../type/context-dao";
 import { FacebookClient, FacebookUser } from "../type/facebook";
+import { MessageProcessorMiddleware } from "../type/messenger";
 import {
-  MessageProcessorMiddleware,
-  SaveUserForTargetIDContext,
-} from "../type/messenger";
-import { saveUserForTargetID } from "./messenger-transform";
+  saveUserForTargetID,
+  SaveUserForTargetIDArgs,
+} from "./messenger-transform";
 
 /** Save a Facebook user when there is no target ID in the context */
 export function saveFacebookUser<Context>({
-  contextDAO,
   client,
-  saveUser,
-}: Readonly<{
-  contextDAO: ContextDAO<Context>;
-  client: FacebookClient;
-  saveUser: (
-    facebookUser: FacebookUser
-  ) => Promise<SaveUserForTargetIDContext<Context>>;
-}>): MessageProcessorMiddleware<Context> {
+  ...args
+}: Pick<
+  SaveUserForTargetIDArgs<Context, FacebookUser>,
+  "contextDAO" | "isEnabled" | "saveUser"
+> &
+  Readonly<{ client: FacebookClient }>): MessageProcessorMiddleware<Context> {
   return saveUserForTargetID({
-    contextDAO,
-    saveUser,
-    getUser: (targetID) => client.getUser(targetID),
+    ...args,
+    getUser: (targetID) => {
+      return client.getUser(targetID);
+    },
   });
 }

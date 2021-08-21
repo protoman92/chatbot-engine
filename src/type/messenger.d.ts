@@ -62,8 +62,3 @@ declare namespace MessageProcessorMiddleware {
 export type MessageProcessorMiddleware<Context> = (
   input: MessageProcessorMiddleware.Input<Context>
 ) => Transformer<BaseMessageProcessor<Context>>;
-
-export interface SaveUserForTargetIDContext<Context> {
-  readonly additionalContext?: Partial<Context>;
-  readonly targetUserID: string;
-}

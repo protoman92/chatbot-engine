@@ -419,8 +419,3 @@ export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
   /** Set webhook to start receiving message updates */
   setWebhook(): Promise<unknown>;
 }
-
-export interface SaveTelegramUserContext<Context> {
-  readonly additionalContext?: Partial<Context>;
-  readonly telegramUserID: number;
-}

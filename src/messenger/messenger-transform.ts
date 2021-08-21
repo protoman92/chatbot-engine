@@ -1,9 +1,6 @@
-import { PlatformClient } from "../type";
+import { AmbiguousRequest, PlatformClient } from "../type";
 import { ContextDAO } from "../type/context-dao";
-import {
-  MessageProcessorMiddleware,
-  SaveUserForTargetIDContext,
-} from "../type/messenger";
+import { MessageProcessorMiddleware } from "../type/messenger";
 
 /**
  * Save the context every time a message group is sent to a target ID. If
@@ -93,6 +90,21 @@ export function injectContextOnReceive<Context>({
   };
 }
 
+export interface SaveUserForTargetIDArgs<Context, RawUser> {
+  readonly contextDAO: ContextDAO<Context>;
+  getUser(targetID: string): Promise<RawUser>;
+  /**
+   * If this returns false, do not get user to save. This helps prevent the
+   * logic from being called on every request.
+   */
+  isEnabled(
+    args: Pick<AmbiguousRequest<Context>, "currentContext">
+  ): Promise<boolean>;
+  saveUser(
+    rawUser: RawUser
+  ): Promise<Readonly<{ additionalContext?: Partial<Context> }>>;
+}
+
 /**
  * Save user in backend if there is no target ID in context. This usually
  * happen when the user is chatting for the first time, or the context was
@@ -101,12 +113,11 @@ export function injectContextOnReceive<Context>({
 export function saveUserForTargetID<Context, RawUser>({
   contextDAO,
   getUser,
+  isEnabled,
   saveUser,
-}: Readonly<{
-  contextDAO: ContextDAO<Context>;
-  getUser: (targetID: string) => Promise<RawUser>;
-  saveUser: (rawUser: RawUser) => Promise<SaveUserForTargetIDContext<Context>>;
-}>): MessageProcessorMiddleware<Context> {
+}: SaveUserForTargetIDArgs<Context, RawUser>): MessageProcessorMiddleware<
+  Context
+> {
   return () => async (processor) => {
     return {
       ...processor,
@@ -117,21 +128,14 @@ export function saveUserForTargetID<Context, RawUser>({
 
         let { currentContext, targetID, targetPlatform } = request;
 
-        if (!currentContext || !(currentContext as any)["targetID"]) {
+        if (await isEnabled({ currentContext })) {
           const rawUser = await getUser(targetID);
-
-          const {
-            additionalContext = {} as Partial<Context>,
-            targetUserID,
-          } = await saveUser(rawUser);
+          const { additionalContext = {} } = await saveUser(rawUser);
 
           const { newContext } = await contextDAO.appendContext({
+            additionalContext,
             targetID,
             targetPlatform,
-            additionalContext: {
-              ...additionalContext,
-              targetID: `${targetUserID}`,
-            },
           });
 
           currentContext = newContext;

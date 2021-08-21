@@ -1,14 +1,24 @@
-import { MessageProcessorMiddleware } from "../type";
+import { AmbiguousRequest, MessageProcessorMiddleware } from "../type";
 import { ContextDAO } from "../type/context-dao";
-import { SaveTelegramUserContext, TelegramUser } from "../type/telegram";
+import { TelegramUser } from "../type/telegram";
 
 /** Save a Telegram user in backend if targetID is not found in context */
 export function saveTelegramUser<Context>({
   contextDAO,
+  isEnabled,
   saveUser,
 }: Readonly<{
   contextDAO: ContextDAO<Context>;
-  saveUser: (user: TelegramUser) => Promise<SaveTelegramUserContext<Context>>;
+  /**
+   * If this returns false, do not get user to save. This helps prevent the
+   * logic from being called on every request.
+   */
+  isEnabled: (
+    args: Pick<AmbiguousRequest<Context>, "currentContext">
+  ) => Promise<boolean>;
+  saveUser: (
+    user: TelegramUser
+  ) => Promise<Readonly<{ readonly additionalContext?: Partial<Context> }>>;
 }>): MessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
@@ -28,20 +38,13 @@ export function saveTelegramUser<Context>({
           telegramUser,
         } = request;
 
-        if (!currentContext || !(currentContext as any)["targetID"]) {
-          const {
-            additionalContext = {} as Partial<Context>,
-            telegramUserID,
-          } = await saveUser(telegramUser);
+        if (await isEnabled({ currentContext })) {
+          const { additionalContext = {} } = await saveUser(telegramUser);
 
           const { newContext } = await contextDAO.appendContext({
+            additionalContext,
             targetID,
             targetPlatform,
-            additionalContext: {
-              ...additionalContext,
-              targetID:
-                telegramUserID == null ? undefined : `${telegramUserID}`,
-            },
           });
 
           currentContext = newContext;
