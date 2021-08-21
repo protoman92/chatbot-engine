@@ -17,7 +17,6 @@
     "@types/formidable": "1.0.31",
     "@types/jest": "26.0.10",
     "@types/redis": "2.8.18",
-    "axios": "0.21.1",
     "babel-jest": "26.3.0",
     "bignumber.js": "8.1.1",
     "coveralls": "3.1.0",
