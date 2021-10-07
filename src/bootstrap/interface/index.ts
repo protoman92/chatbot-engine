@@ -13,7 +13,6 @@ export interface DefaultAsynchronousDependencies<Context> {
 
 export interface DefaultLeafDependencies<Context> {
   readonly contextDAO: ContextDAO<Context>;
-  readonly env: string;
   readonly facebookClient: FacebookClient;
   readonly telegramClient: TelegramClient;
   readonly webhookTimeout: number;

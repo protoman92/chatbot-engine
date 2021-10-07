@@ -2,9 +2,10 @@ import express from "express";
 import { AmbiguousPlatform } from "../../type";
 import { DefaultLeafDependencies } from "../interface";
 
-export default function <Context>({
-  contextDAO,
-}: DefaultLeafDependencies<Context>) {
+export default function <
+  Context,
+  LeafDependencies extends DefaultLeafDependencies<Context>
+>({ contextDAO }: LeafDependencies) {
   const router = express.Router();
 
   router.get(

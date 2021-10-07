@@ -33,9 +33,8 @@ import {
 } from "./interface";
 import createCaptureGenericResponseMiddleware from "./middleware/capture_generic_response";
 import ContextRoute from "./route/bootstrap_context_route";
-import WebhookRoute from "./route/bootstrap_webhook_route";
 
-export type ChatbotBootstrapArgs<
+export type ChatbotProjectDependencies<
   Context,
   LeafDependencies extends DefaultLeafDependencies<Context>
 > = Omit<LeafDependencies, keyof DefaultLeafDependencies<Context>> &
@@ -69,18 +68,18 @@ export type ChatbotBootstrapArgs<
       }
   );
 
-export default function createChatbotRouter<
+export default async function createChatbotRouter<
   Context,
-  LeafDependencies extends DefaultLeafDependencies<
-    Context
-  > = DefaultLeafDependencies<Context>
+  LeafDependencies extends DefaultLeafDependencies<Context>
 >({
-  getChatbotBootstrapArgs,
+  env,
+  getChatbotProjectDependencies,
   webhookTimeout,
 }: Readonly<{
-  getChatbotBootstrapArgs: (
+  env: string;
+  getChatbotProjectDependencies: (
     args: StrictOmit<DefaultLeafDependencies<Context>, "contextDAO">
-  ) => ChatbotBootstrapArgs<Context, LeafDependencies>;
+  ) => Promise<ChatbotProjectDependencies<Context, LeafDependencies>>;
   /**
    *
    * If we don't specify a timeout, the webhook will be repeatedly called
@@ -89,12 +88,10 @@ export default function createChatbotRouter<
    */
   webhookTimeout: number;
 }>) {
-  const env = process.env.NODE_ENV || "";
   const facebookClient = createFacebookClient();
   const telegramClient = createTelegramClient({ defaultParseMode: "html" });
 
-  const bootstrapArgs = getChatbotBootstrapArgs({
-    env,
+  const projectDeps = await getChatbotProjectDependencies({
     facebookClient,
     getAsyncDependencies,
     telegramClient,
@@ -110,28 +107,28 @@ export default function createChatbotRouter<
       messengerComponents = new Promise(async (resolve) => {
         let leafSelector: LeafSelector<Context>;
 
-        switch (bootstrapArgs.leafSelectorType) {
+        switch (projectDeps.leafSelectorType) {
           case "custom": {
             leafSelector = await createTransformChain()
               .forContextOfType<Context>()
-              .transform(await bootstrapArgs.createLeafSelector(dependencies));
+              .transform(await projectDeps.createLeafSelector(dependencies));
 
             break;
           }
 
           case "default": {
             const witClient = await createWitClient();
-            const branches = await bootstrapArgs.createBranches(dependencies);
+            const branches = await projectDeps.createBranches(dependencies);
 
             leafSelector = await createTransformChain()
               .forContextOfType<Context>()
               .pipe(retryWithWit(witClient))
-              .pipe(catchAll(bootstrapArgs.onLeafCatchAll))
+              .pipe(catchAll(projectDeps.onLeafCatchAll))
               .pipe(
                 catchError(
                   await createDefaultErrorLeaf({
-                    formatErrorMessage: bootstrapArgs.formatErrorMessage,
-                    trackError: bootstrapArgs.onLeafError,
+                    formatErrorMessage: projectDeps.formatErrorMessage,
+                    trackError: projectDeps.onLeafError,
                   })
                 )
               )
@@ -141,13 +138,13 @@ export default function createChatbotRouter<
 
         const facebookProcessor = await createFacebookMessageProcessor(
           { leafSelector, client: facebookClient },
-          ...(bootstrapArgs.messageProcessorMiddlewares?.facebook ?? []),
+          ...(projectDeps.messageProcessorMiddlewares?.facebook ?? []),
           createCaptureGenericResponseMiddleware()
         );
 
         const telegramProcessor = await createTelegramMessageProcessor(
           { leafSelector, client: telegramClient },
-          ...(bootstrapArgs?.messageProcessorMiddlewares?.telegram ?? []),
+          ...(projectDeps?.messageProcessorMiddlewares?.telegram ?? []),
           createCaptureGenericResponseMiddleware()
         );
 
@@ -168,15 +165,14 @@ export default function createChatbotRouter<
     return messengerComponents;
   }
 
-  const dependencies: ReturnType<typeof getChatbotBootstrapArgs> &
-    LeafDependencies = {
-    ...bootstrapArgs,
+  const dependencies = {
+    ...projectDeps,
     facebookClient,
     env,
     getAsyncDependencies,
     telegramClient,
     webhookTimeout,
-  };
+  } as unknown as LeafDependencies;
 
   const router = express.Router();
 
@@ -187,6 +183,39 @@ export default function createChatbotRouter<
 
   router.use(express.json());
   router.use(ContextRoute(dependencies));
-  router.use(WebhookRoute(dependencies));
+
+  router.get("/webhook/facebook", async ({ query }, res) => {
+    const challenge = await facebookClient.resolveVerifyChallenge(query);
+    res.status(200).send(challenge);
+  });
+
+  router.post(
+    "/webhook/:platform",
+    async ({ body, params: { platform } }, res) => {
+      const { messenger } = await getAsyncDependencies();
+
+      try {
+        await Promise.race([
+          messenger.processRawRequest(body),
+          (async function () {
+            await new Promise((resolve) => {
+              setTimeout(() => resolve(undefined), webhookTimeout);
+            });
+
+            throw new Error("Webhook timed out");
+          })(),
+        ]);
+      } catch (error) {
+        await projectDeps.onWebhookError({
+          error: error as any,
+          payload: body,
+          platform: platform as AmbiguousPlatform,
+        });
+      }
+
+      res.sendStatus(200);
+    }
+  );
+
   return { chatbotDependencies: dependencies, chatbotRouter: router };
 }
