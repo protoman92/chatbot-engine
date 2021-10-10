@@ -1,9 +1,14 @@
 import { isType, mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
-import { Branch } from "../type/branch";
-import { AmbiguousLeaf, LeafEnumeration, LeafSelector } from "../type/leaf";
-import { AmbiguousResponse } from "../type/response";
-import { ContentObservable, ContentObserver } from "../type/stream";
+import {
+  AmbiguousLeaf,
+  AmbiguousResponse,
+  Branch,
+  ContentObservable,
+  ContentObserver,
+  LeafEnumeration,
+  LeafSelector,
+} from "../type";
 
 /**
  * Enumerate a key-value branch object to produce the entire list of enumerated

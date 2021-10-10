@@ -1,5 +1,8 @@
-import { FacebookClient, FacebookUser } from "../type/facebook";
-import { MessageProcessorMiddleware } from "../type/messenger";
+import {
+  FacebookClient,
+  FacebookUser,
+  MessageProcessorMiddleware,
+} from "../type";
 import {
   saveUserForTargetID,
   SaveUserForTargetIDArgs,

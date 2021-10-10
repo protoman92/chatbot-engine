@@ -1,9 +1,13 @@
 import GraphemeSplitter from "grapheme-splitter";
-import { AmbiguousResponse } from "../type";
-import { Transformer } from "../type/common";
-import { FacebookRawRequest, FacebookResponseOutput } from "../type/facebook";
-import { AmbiguousPlatform } from "../type/messenger";
-import { TelegramRawRequest, TelegramResponseOutput } from "../type/telegram";
+import {
+  AmbiguousPlatform,
+  AmbiguousResponse,
+  FacebookRawRequest,
+  FacebookResponseOutput,
+  TelegramRawRequest,
+  TelegramResponseOutput,
+  Transformer,
+} from "../type";
 
 export function chunkArray<TArr extends any[] | readonly any[]>(
   arr: TArr,

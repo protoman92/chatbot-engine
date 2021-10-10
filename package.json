@@ -52,7 +52,7 @@
     "url": "git+https://github.com/protoman92/chatbot-engine.git"
   },
   "scripts": {
-    "build": "node build.js",
+    "build": "tsc",
     "coveralls": "coveralls < coverage/lcov.info",
     "preinstall": "git submodule update --init",
     "test": "jest"

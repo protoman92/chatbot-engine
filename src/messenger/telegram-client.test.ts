@@ -1,6 +1,5 @@
 import { anything, instance, spy, verify, when } from "ts-mockito";
-import { HTTPClient } from "../type/client";
-import { TelegramClient, TelegramConfig } from "../type/telegram";
+import { HTTPClient, TelegramClient, TelegramConfig } from "../type";
 import { createTelegramClient } from "./telegram-client";
 
 describe("Telegram client", () => {
@@ -16,7 +15,6 @@ describe("Telegram client", () => {
     config = spy<TelegramConfig>({
       authToken: "",
       defaultParseMode: "markdown",
-      webhookURL: "",
     });
 
     tlClient = createTelegramClient(instance(client), instance(config));

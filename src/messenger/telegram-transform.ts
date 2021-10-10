@@ -1,6 +1,9 @@
-import { AmbiguousRequest, MessageProcessorMiddleware } from "../type";
-import { ContextDAO } from "../type/context-dao";
-import { TelegramUser } from "../type/telegram";
+import {
+  AmbiguousRequest,
+  ContextDAO,
+  MessageProcessorMiddleware,
+  TelegramUser,
+} from "../type";
 
 /** Save a Telegram user in backend if targetID is not found in context */
 export function saveTelegramUser<Context>({

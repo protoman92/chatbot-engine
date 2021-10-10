@@ -1,4 +1,4 @@
-import { TelegramBot, TelegramRawRequest, TelegramUser } from "../type";
+import { TelegramBot, TelegramUser, _TelegramRawRequest } from "../type";
 import {
   createGenericTelegramRequest,
   extractcommand,
@@ -6,7 +6,7 @@ import {
 
 describe("Create generic Telegram requests", () => {
   const currentBot: TelegramBot = { first_name: "", id: 0, username: "" };
-  const chat: TelegramRawRequest.Chat = { id: 0, type: "private" };
+  const chat: _TelegramRawRequest.Chat = { id: 0, type: "private" };
 
   const from: TelegramUser = {
     first_name: "",
@@ -91,7 +91,7 @@ describe("Create generic Telegram requests", () => {
 
   it("Should return document input type if document is attached", async () => {
     // Setup
-    const document: TelegramRawRequest.DocumentDetails = {
+    const document: _TelegramRawRequest.DocumentDetails = {
       file_id: "0",
       file_name: "",
       file_size: 0,
@@ -131,7 +131,7 @@ describe("Create generic Telegram requests", () => {
 
   it("Should return photo input type if photos are attached", async () => {
     // Setup
-    const photo: TelegramRawRequest.PhotoDetails = {
+    const photo: _TelegramRawRequest.PhotoDetails = {
       file_id: "0",
       file_size: 0,
       file_unique_id: "",

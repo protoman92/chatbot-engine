@@ -12,9 +12,12 @@ import { BaseResponseOutput } from "./visual-content";
 export type TelegramRequestInput<Context> =
   | Readonly<{ command: string; text?: string; type: "command" }>
   | Readonly<{ coordinate: Coordinates; type: "location" }>
-  | Readonly<{ document: TelegramRawRequest.DocumentDetails; type: "document" }>
   | Readonly<{
-      images: readonly TelegramRawRequest.PhotoDetails[];
+      document: _TelegramRawRequest.DocumentDetails;
+      type: "document";
+    }>
+  | Readonly<{
+      images: readonly _TelegramRawRequest.PhotoDetails[];
       type: "image";
     }>
   | Readonly<{
@@ -49,107 +52,113 @@ export interface TelegramResponse<Context> extends BaseResponse<Context> {
   readonly targetPlatform: "telegram";
 }
 
-declare namespace TelegramResponseOutput {
-  namespace QuickReply {
-    interface Contact {
+export namespace _TelegramResponseOutput {
+  export namespace QuickReply {
+    export interface Contact {
       readonly text: string;
       readonly type: "contact";
     }
 
-    interface Location {
+    export interface Location {
       readonly text: string;
       readonly type: "location";
     }
 
-    interface Postback {
+    export interface Postback {
       readonly payload: string;
       readonly text: string;
       readonly type: "postback";
     }
 
-    interface Text {
+    export interface Text {
       readonly text: string;
       readonly type: "text";
     }
 
-    interface URL {
+    export interface URL {
       readonly text: string;
       readonly type: "url";
       readonly url: string;
     }
   }
 
-  type InlineMarkup = QuickReply.Postback | QuickReply.Text | QuickReply.URL;
-  type ReplyMarkup = QuickReply.Location | QuickReply.Text | QuickReply.Contact;
-  type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
-  type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
+  export type InlineMarkup =
+    | QuickReply.Postback
+    | QuickReply.Text
+    | QuickReply.URL;
 
-  interface InlineMarkupQuickReply {
+  export type ReplyMarkup =
+    | QuickReply.Location
+    | QuickReply.Text
+    | QuickReply.Contact;
+
+  export type InlineMarkupMatrix = readonly (readonly InlineMarkup[])[];
+  export type ReplyMarkupMatrix = readonly (readonly ReplyMarkup[])[];
+
+  export interface InlineMarkupQuickReply {
     readonly content: InlineMarkupMatrix;
     readonly type: "inline_markup";
   }
 
-  interface ReplyMarkupQuickReply {
+  export interface ReplyMarkupQuickReply {
     readonly content: ReplyMarkupMatrix;
     readonly type: "reply_markup";
   }
 
-  interface RemoveReplyKeyboardQuickReply {
+  export interface RemoveReplyKeyboardQuickReply {
     readonly type: "remove_reply_keyboard";
   }
 
-  type QuickReply =
+  export type QuickReply =
     | ReplyMarkupQuickReply
     | InlineMarkupQuickReply
     | RemoveReplyKeyboardQuickReply;
-}
 
-declare namespace TelegramResponseOutput {
-  namespace Content {
-    interface Document {
-      fileData: ReadStream;
-      fileName?: string;
-      text?: string;
-      type: "document";
+  export namespace Content {
+    export interface Document {
+      readonly fileData: ReadStream;
+      readonly fileName?: string;
+      readonly text?: string;
+      readonly type: "document";
     }
 
-    interface Image {
+    export interface Image {
       readonly image: string;
       readonly text?: string;
       readonly type: "image";
     }
 
-    interface Text {
+    export interface Text {
       readonly text: string;
       readonly type: "text";
     }
   }
 
-  type Content = Content.Document | Content.Image | Content.Text;
+  export type Content = Content.Document | Content.Image | Content.Text;
 }
 
 export interface TelegramResponseOutput extends BaseResponseOutput {
-  readonly content: TelegramResponseOutput.Content;
-  readonly quickReplies?: TelegramResponseOutput.QuickReply;
+  readonly content: _TelegramResponseOutput.Content;
+  readonly quickReplies?: _TelegramResponseOutput.QuickReply;
   readonly parseMode?: "html" | "markdown";
 }
 
-declare namespace TelegramRawRequest {
+export namespace _TelegramRawRequest {
   namespace Chat {
-    interface Private {
+    export interface Private {
       readonly id: number;
       readonly type: "private";
     }
 
-    interface Group {
+    export interface Group {
       readonly id: number;
       readonly type: "group";
     }
   }
 
-  type Chat = Chat.Group | Chat.Private;
+  export type Chat = Chat.Group | Chat.Private;
 
-  interface DocumentDetails {
+  export interface DocumentDetails {
     readonly file_name: string;
     readonly mime_type: string;
     readonly thumb: Readonly<{
@@ -164,14 +173,14 @@ declare namespace TelegramRawRequest {
     readonly file_size: number;
   }
 
-  interface FileDetails {
+  export interface FileDetails {
     file_id: string;
     file_unique_id: string;
     file_size: number;
     file_path: string;
   }
 
-  interface PhotoDetails {
+  export interface PhotoDetails {
     readonly file_id: string;
     readonly file_unique_id: string;
     readonly file_size: number;
@@ -179,8 +188,8 @@ declare namespace TelegramRawRequest {
     readonly height: number;
   }
 
-  namespace Message {
-    interface Document {
+  export namespace Message {
+    export interface Document {
       readonly chat: Chat;
       readonly date: number;
       readonly from: TelegramUser;
@@ -188,14 +197,14 @@ declare namespace TelegramRawRequest {
       readonly document: DocumentDetails;
     }
 
-    interface LeftChatMember {
+    export interface LeftChatMember {
       readonly chat: Chat;
       readonly from: TelegramUser;
       readonly message_id: number;
       readonly left_chat_member: TelegramBot | TelegramUser;
     }
 
-    interface Location {
+    export interface Location {
       readonly chat: Chat;
       readonly date: number;
       readonly from: TelegramUser;
@@ -203,14 +212,14 @@ declare namespace TelegramRawRequest {
       readonly message_id: number;
     }
 
-    interface NewChatMember {
+    export interface NewChatMember {
       readonly chat: Chat;
       readonly from: TelegramUser;
       readonly message_id: number;
       readonly new_chat_members: readonly (TelegramBot | TelegramUser)[];
     }
 
-    interface Photo {
+    export interface Photo {
       readonly chat: Chat;
       readonly date: number;
       readonly from: TelegramUser;
@@ -218,7 +227,7 @@ declare namespace TelegramRawRequest {
       readonly photo: readonly PhotoDetails[];
     }
 
-    interface Text {
+    export interface Text {
       readonly chat: Chat;
       readonly from: TelegramUser;
       readonly message_id: number;
@@ -227,7 +236,7 @@ declare namespace TelegramRawRequest {
   }
 
   /** Payload that includes on message field */
-  interface Message {
+  export interface Message {
     readonly message:
       | Message.Document
       | Message.LeftChatMember
@@ -239,7 +248,7 @@ declare namespace TelegramRawRequest {
   }
 
   /** Payload that includes callback field, usually for quick replies */
-  interface Callback {
+  export interface Callback {
     readonly callback_query: Readonly<{
       id: string;
       from: TelegramUser;
@@ -253,65 +262,65 @@ declare namespace TelegramRawRequest {
 }
 
 export type TelegramRawRequest =
-  | TelegramRawRequest.Message
-  | TelegramRawRequest.Callback;
+  | _TelegramRawRequest.Message
+  | _TelegramRawRequest.Callback;
 
-declare namespace TelegramRawResponse {
-  type ParseMode = "html" | "markdown";
+export namespace _TelegramRawResponse {
+  export type ParseMode = "html" | "markdown";
 
-  namespace ReplyMarkup {
-    namespace ReplyKeyboardMarkup {
-      interface Button {
+  export namespace ReplyMarkup {
+    export namespace ReplyKeyboardMarkup {
+      export interface Button {
         readonly text: string;
         readonly request_contact: boolean | undefined;
         readonly request_location: boolean | undefined;
       }
     }
 
-    interface ReplyKeyboardMarkup {
+    export interface ReplyKeyboardMarkup {
       readonly keyboard: readonly (readonly ReplyKeyboardMarkup.Button[])[];
       readonly resize_keyboard: boolean | undefined;
       readonly one_time_keyboard: boolean | undefined;
       readonly selective: boolean | undefined;
     }
 
-    namespace InlineKeyboardMarkup {
-      namespace Button {
-        interface Postback {
+    export namespace InlineKeyboardMarkup {
+      export namespace Button {
+        export interface Postback {
           readonly callback_data: string;
           readonly text: string;
         }
 
-        interface URL {
+        export interface URL {
           readonly url: string;
           readonly text: string;
         }
       }
 
-      type Button = Button.Postback | Button.URL;
+      export type Button = Button.Postback | Button.URL;
     }
 
-    interface InlineKeyboardMarkup {
+    export interface InlineKeyboardMarkup {
       readonly inline_keyboard: readonly (readonly InlineKeyboardMarkup.Button[])[];
     }
 
-    interface ReplyKeyboardRemove {
+    export interface ReplyKeyboardRemove {
       readonly remove_keyboard: true;
     }
   }
 
-  type ReplyMarkup =
+  export type ReplyMarkup =
     | ReplyMarkup.ReplyKeyboardMarkup
     | ReplyMarkup.InlineKeyboardMarkup
     | ReplyMarkup.ReplyKeyboardRemove;
 
-  type SendDocument = FormData;
+  export type SendDocument = FormData;
 
-  interface SendMessage {
+  export interface SendMessage {
     readonly text: string;
   }
 
-  interface SendPhoto {
+  export interface SendPhoto {
     readonly caption?: string;
     readonly photo: string;
   }
@@ -320,32 +329,32 @@ declare namespace TelegramRawResponse {
 export type TelegramRawResponse = Readonly<
   {
     headers?: Readonly<{ [x: string]: string }>;
-    parseMode?: TelegramRawResponse.ParseMode;
+    parseMode?: _TelegramRawResponse.ParseMode;
   } & (
     | {
         action: "sendDocument";
-        body: TelegramRawResponse.SendDocument;
+        body: _TelegramRawResponse.SendDocument;
       }
     | {
         action: "sendMessage";
-        body: TelegramRawResponse.SendMessage &
+        body: _TelegramRawResponse.SendMessage &
           Readonly<{
             chat_id: string;
-            reply_markup?: TelegramRawResponse.ReplyMarkup;
+            reply_markup?: _TelegramRawResponse.ReplyMarkup;
           }>;
       }
     | {
         action: "sendPhoto";
-        body: TelegramRawResponse.SendPhoto &
+        body: _TelegramRawResponse.SendPhoto &
           Readonly<{
             chat_id: string;
-            reply_markup?: TelegramRawResponse.ReplyMarkup;
+            reply_markup?: _TelegramRawResponse.ReplyMarkup;
           }>;
       }
   )
 >;
 
-interface TelegramMessageProcessorConfig<Context> {
+export interface TelegramMessageProcessorConfig<Context> {
   readonly leafSelector: LeafSelector<Context>;
   readonly client: TelegramClient;
 }
@@ -378,24 +387,24 @@ export interface TelegramUser extends TelegramBot {
 /** Represents Telegram configurations */
 export interface TelegramConfig {
   readonly authToken: string;
-  readonly defaultParseMode?: TelegramRawResponse.ParseMode;
+  readonly defaultParseMode?: _TelegramRawResponse.ParseMode;
 }
 
-declare namespace TelegramClient {
-  namespace APIResponse {
-    interface Success {
+export namespace _TelegramClient {
+  export namespace APIResponse {
+    export interface Success {
       readonly description: string;
       readonly ok: true;
       readonly result: unknown;
     }
 
-    interface Failure {
+    export interface Failure {
       readonly description: string;
       readonly ok: false;
     }
   }
 
-  type APIResponse = APIResponse.Success | APIResponse.Failure;
+  export type APIResponse = APIResponse.Success | APIResponse.Failure;
 }
 
 /** A Telegram-specific client */
@@ -404,7 +413,7 @@ export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
   getCurrentBot(): Promise<TelegramBot>;
 
   /** Get a file using its ID */
-  getFile(fileID: string): Promise<TelegramRawRequest.FileDetails>;
+  getFile(fileID: string): Promise<_TelegramRawRequest.FileDetails>;
 
   /** Get the URL to a file in Telegram */
   getFileURL(filePath: string): Promise<string>;

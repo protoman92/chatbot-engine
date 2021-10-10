@@ -7,13 +7,16 @@ import {
   verify,
   when,
 } from "ts-mockito";
-import { PlatformClient } from "../type/client";
-import { FacebookMessageProcessor } from "../type/facebook";
-import { LeafSelector } from "../type/leaf";
-import { AmbiguousPlatform, BaseMessageProcessor } from "../type/messenger";
-import { AmbiguousRequest } from "../type/request";
-import { AmbiguousResponse } from "../type/response";
-import { TelegramMessageProcessor } from "../type/telegram";
+import {
+  AmbiguousPlatform,
+  AmbiguousRequest,
+  AmbiguousResponse,
+  BaseMessageProcessor,
+  FacebookMessageProcessor,
+  LeafSelector,
+  PlatformClient,
+  TelegramMessageProcessor,
+} from "../type";
 import {
   createCrossPlatformMessageProcessor,
   createMessageProcessor,

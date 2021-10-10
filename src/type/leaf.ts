@@ -67,7 +67,7 @@ export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
 export type LeafSelector<T> = ContentObserver<AmbiguousRequest<T>> &
   ContentObservable<AmbiguousResponse<T>>;
 
-interface ErrorLeafTrackErrorArgs
+export interface ErrorLeafTrackErrorArgs
   extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {
   readonly targetID: string;
   readonly targetPlatform: AmbiguousPlatform;

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { HTTPClient } from "../type/client";
+import { HTTPClient } from "../type";
 
 /** Create a default HTTP client using axios */
 export function createAxiosClient(axiosInstance: AxiosInstance = axios) {

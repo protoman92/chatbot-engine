@@ -1,6 +1,6 @@
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
-import { AmbiguousLeaf, LeafEnumeration } from "../type/leaf";
+import { AmbiguousLeaf, LeafEnumeration } from "../type";
 import { createLeaf } from "./leaf";
 import { createLeafSelector, enumerateLeaves } from "./leaf-selector";
 

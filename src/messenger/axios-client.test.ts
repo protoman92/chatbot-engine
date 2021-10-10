@@ -2,7 +2,7 @@
 import axiosStatic, { AxiosInstance, AxiosResponse } from "axios";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { createAxiosClient } from "./axios-client";
-import { HTTPClient } from "../type/client";
+import { HTTPClient } from "../type";
 
 describe("Axios client", () => {
   let axios: AxiosInstance;

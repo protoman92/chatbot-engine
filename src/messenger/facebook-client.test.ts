@@ -1,6 +1,5 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { HTTPClient } from "../type/client";
-import { FacebookClient, FacebookConfig } from "../type/facebook";
+import { FacebookClient, FacebookConfig, HTTPClient } from "../type";
 import { createFacebookClient } from "./facebook-client";
 
 describe("Facebook client", () => {

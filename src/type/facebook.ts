@@ -17,7 +17,9 @@ export type FacebookRequestInput<Context> =
   | Readonly<{ image: string; stickerID: string; type: "sticker" }>
   | CrossPlatformRequestInput<Context>;
 
-type CommonFacebookRequest<Context> = Readonly<{ targetPlatform: "facebook" }> &
+export type CommonFacebookRequest<Context> = Readonly<{
+  targetPlatform: "facebook";
+}> &
   BaseRequest<Context>;
 
 export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
@@ -35,37 +37,38 @@ export interface FacebookResponse<Context>
   readonly targetPlatform: "facebook";
 }
 
-declare namespace FacebookResponseOutput {
-  namespace QuickReply {
-    interface Location {
+export namespace _FacebookResponseOutput {
+  export namespace QuickReply {
+    export interface Location {
       readonly text: string;
       readonly type: "location";
     }
 
-    interface Postback {
+    export interface Postback {
       readonly payload: string;
       readonly text: string;
       readonly type: "postback";
     }
 
-    interface Text {
+    export interface Text {
       readonly text: string;
       readonly type: "text";
     }
   }
 
-  type QuickReply = QuickReply.Location | QuickReply.Postback | QuickReply.Text;
-}
+  export type QuickReply =
+    | QuickReply.Location
+    | QuickReply.Postback
+    | QuickReply.Text;
 
-declare namespace FacebookResponseOutput {
-  namespace Action {
-    interface Postback {
+  export namespace Action {
+    export interface Postback {
       readonly payload: string;
       readonly text: string;
       readonly type: "postback";
     }
 
-    interface URL {
+    export interface URL {
       readonly text: string;
       readonly type: "url";
       readonly url: string;
@@ -73,16 +76,16 @@ declare namespace FacebookResponseOutput {
   }
 
   /** Does something, like communicating with a remote service */
-  type Action = Action.Postback | Action.URL;
+  export type Action = Action.Postback | Action.URL;
 
-  namespace Content {
-    interface Button {
+  export namespace Content {
+    export interface Button {
       readonly actions: readonly Action[];
       readonly text: string;
       readonly type: "button";
     }
 
-    interface Carousel {
+    export interface Carousel {
       readonly actions?: readonly Action[];
       readonly items: readonly Readonly<{
         title: string;
@@ -93,49 +96,49 @@ declare namespace FacebookResponseOutput {
       readonly type: "carousel";
     }
 
-    namespace FileAttachment {
-      interface Ambiguous {
+    export namespace FileAttachment {
+      export interface Ambiguous {
         readonly attachmentIDOrURL: string;
-        readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+        readonly attachmentType: _FacebookRawResponse.FileAttachmentType;
         readonly type: "attachment";
       }
 
-      interface ByID {
+      export interface ByID {
         readonly attachmentID: string;
-        readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+        readonly attachmentType: _FacebookRawResponse.FileAttachmentType;
         readonly type: "attachment";
       }
 
-      interface ByURL {
-        readonly attachmentType: FacebookRawResponse.FileAttachmentType;
+      export interface ByURL {
+        readonly attachmentType: _FacebookRawResponse.FileAttachmentType;
         readonly reusable?: boolean;
         readonly type: "attachment";
         readonly url: string;
       }
     }
 
-    type FileAttachment =
+    export type FileAttachment =
       | FileAttachment.Ambiguous
       | FileAttachment.ByID
       | FileAttachment.ByURL;
 
-    namespace Media {
-      interface Image {
-        actions: readonly Action[];
-        image: string;
-        type: "media";
+    export namespace Media {
+      export interface Image {
+        readonly actions: readonly Action[];
+        readonly image: string;
+        readonly type: "media";
       }
 
-      interface Video {
-        actions: readonly Action[];
-        type: "media";
-        video: string;
+      export interface Video {
+        readonly actions: readonly Action[];
+        readonly type: "media";
+        readonly video: string;
       }
     }
 
-    type Media = Media.Image | Media.Video;
+    export type Media = Media.Image | Media.Video;
 
-    interface List {
+    export interface List {
       readonly actions?: readonly Action[];
       readonly items: Readonly<{
         title: string;
@@ -146,13 +149,13 @@ declare namespace FacebookResponseOutput {
       readonly type: "list";
     }
 
-    interface Text {
+    export interface Text {
       readonly text: string;
       readonly type: "text";
     }
   }
 
-  type Content = (
+  export type Content = (
     | Content.Button
     | Content.Carousel
     | Content.FileAttachment
@@ -160,9 +163,9 @@ declare namespace FacebookResponseOutput {
     | Content.Media
     | Content.Text
   ) &
-    Readonly<{ tag?: FacebookRawResponse.MessageTag }>;
+    Readonly<{ tag?: _FacebookRawResponse.MessageTag }>;
 
-  interface Menu {
+  export interface Menu {
     readonly actions: readonly [Action, ...Action[]];
     readonly type: "menu";
   }
@@ -171,25 +174,25 @@ declare namespace FacebookResponseOutput {
 export type FacebookResponseOutput = BaseResponseOutput &
   (
     | Readonly<{
-        content: FacebookResponseOutput.Content;
-        quickReplies?: readonly FacebookResponseOutput.QuickReply[];
+        content: _FacebookResponseOutput.Content;
+        quickReplies?: readonly _FacebookResponseOutput.QuickReply[];
       }>
     | Readonly<{
-        content: FacebookResponseOutput.Menu;
+        content: _FacebookResponseOutput.Menu;
         quickReplies?: never[];
         tag?: never;
       }>
   );
 
-declare namespace FacebookRawRequest {
-  namespace Attachment {
-    interface Image {
+export namespace _FacebookRawRequest {
+  export namespace Attachment {
+    export interface Image {
       readonly type: "image";
       readonly payload: Readonly<{ url: string }> &
         ({} | Readonly<{ sticker_id: number }>);
     }
 
-    interface Location {
+    export interface Location {
       readonly type: "location";
       readonly title: string;
       readonly url: string;
@@ -199,21 +202,21 @@ declare namespace FacebookRawRequest {
     }
   }
 
-  type Attachment = Attachment.Image | Attachment.Location;
+  export type Attachment = Attachment.Image | Attachment.Location;
 
-  namespace Entry {
-    namespace Messaging {
-      interface Postback {
+  export namespace Entry {
+    export namespace Messaging {
+      export interface Postback {
         readonly postback: Readonly<{ payload: string; title: string }>;
         readonly sender: Readonly<{ id: string }>;
         readonly recipient: Readonly<{ id: string }>;
         readonly timestamp: number;
       }
 
-      namespace Message {
-        interface Attachment {
+      export namespace Message {
+        export interface Attachment {
           readonly message: Readonly<{
-            attachments: readonly FacebookRawRequest.Attachment[];
+            attachments: readonly _FacebookRawRequest.Attachment[];
             message: Readonly<{ mid: string; seq: number }>;
           }>;
           readonly sender: Readonly<{ id: string }>;
@@ -221,7 +224,7 @@ declare namespace FacebookRawRequest {
           readonly timestamp: number;
         }
 
-        interface QuickReply {
+        export interface QuickReply {
           readonly message: Readonly<{
             mid: string;
             quick_reply: Readonly<{ payload: string }>;
@@ -232,7 +235,7 @@ declare namespace FacebookRawRequest {
           readonly timestamp: number;
         }
 
-        interface Text {
+        export interface Text {
           readonly message: Readonly<{
             text: string;
             message: Readonly<{ mid: string; seq: number }>;
@@ -243,9 +246,12 @@ declare namespace FacebookRawRequest {
         }
       }
 
-      type Message = Message.Attachment | Message.Text | Message.QuickReply;
+      export type Message =
+        | Message.Attachment
+        | Message.Text
+        | Message.QuickReply;
 
-      interface Referral {
+      export interface Referral {
         readonly recipient: Readonly<{ id: string }>;
         readonly referral: Readonly<{
           ref: string;
@@ -257,7 +263,7 @@ declare namespace FacebookRawRequest {
     }
 
     /** Represents possible combinations of Facebook requests */
-    type Messaging =
+    export type Messaging =
       | Messaging.Message
       | Messaging.Postback
       | Messaging.Referral;
@@ -268,54 +274,54 @@ declare namespace FacebookRawRequest {
 export interface FacebookRawRequest {
   readonly object: "page";
   readonly entry?: Readonly<{
-    messaging: readonly FacebookRawRequest.Entry.Messaging[];
+    messaging: readonly _FacebookRawRequest.Entry.Messaging[];
   }>[];
 }
 
-declare namespace FacebookRawResponse {
-  namespace Button {
-    interface Postback {
+export namespace _FacebookRawResponse {
+  export namespace Button {
+    export interface Postback {
       readonly payload: string;
       readonly title: string;
       readonly type: "postback";
     }
 
-    interface URL {
+    export interface URL {
       readonly title: string;
       readonly type: "web_url";
       readonly url: string;
     }
   }
 
-  type Button = Button.Postback | Button.URL;
-  type FileAttachmentType = "file" | "image" | "video";
+  export type Button = Button.Postback | Button.URL;
+  export type FileAttachmentType = "file" | "image" | "video";
 
-  interface Menu {
+  export interface Menu {
     readonly persistent_menu: readonly Readonly<{
-      call_to_actions: readonly FacebookRawResponse.Button[];
+      call_to_actions: readonly _FacebookRawResponse.Button[];
       composer_input_disabled: boolean;
       locale: string;
     }>[];
     readonly psid: FacebookUser["id"];
   }
 
-  type MessageTag =
+  export type MessageTag =
     | "ACCOUNT_UPDATE"
     | "CONFIRMED_EVENT_UPDATE"
     | "HUMAN_AGENT"
     | "POST_PURCHASE_UPDATE";
 
-  interface QuickReply {
+  export interface QuickReply {
     readonly title: string;
     readonly content_type: "location" | "text";
     readonly payload: string;
   }
 
-  namespace Message {
-    interface Attachment {
+  export namespace Message {
+    export interface Attachment {
       readonly message: Readonly<{
         attachment: Readonly<{
-          type: FacebookRawResponse.FileAttachmentType;
+          type: _FacebookRawResponse.FileAttachmentType;
           payload: Readonly<
             { attachment_id: string } | { is_reusable: boolean; url: string }
           >;
@@ -323,12 +329,12 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface Button {
+    export interface Button {
       readonly message: Readonly<{
         attachment: {
           type: "template";
           payload: Readonly<{
-            buttons: readonly FacebookRawResponse.Button[];
+            buttons: readonly _FacebookRawResponse.Button[];
             template_type: "button";
             text: string;
           }>;
@@ -336,7 +342,7 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface Carousel {
+    export interface Carousel {
       readonly message: Readonly<{
         attachment: {
           type: "template";
@@ -345,7 +351,7 @@ declare namespace FacebookRawResponse {
               title: string;
               subtitle?: string;
               image_url?: string;
-              buttons?: readonly FacebookRawResponse.Button[];
+              buttons?: readonly _FacebookRawResponse.Button[];
             }>[];
             template_type: "generic";
           }>;
@@ -353,13 +359,13 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface List {
+    export interface List {
       readonly message: Readonly<{
         attachment: {
           payload: Readonly<{
-            buttons?: readonly FacebookRawResponse.Button[];
+            buttons?: readonly _FacebookRawResponse.Button[];
             elements: readonly Readonly<{
-              buttons?: readonly FacebookRawResponse.Button[];
+              buttons?: readonly _FacebookRawResponse.Button[];
               title: string;
               subtitle?: string | undefined;
             }>[];
@@ -371,7 +377,7 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface RichMedia {
+    export interface RichMedia {
       readonly message: Readonly<{
         attachment: Readonly<{
           type: "template";
@@ -379,7 +385,7 @@ declare namespace FacebookRawResponse {
             elements: [
               Readonly<
                 {
-                  buttons?: readonly FacebookRawResponse.Button[];
+                  buttons?: readonly _FacebookRawResponse.Button[];
                   media_type: "image" | "video";
                 } & ({ attachment_id: string } | { url: string })
               >
@@ -390,12 +396,12 @@ declare namespace FacebookRawResponse {
       }>;
     }
 
-    interface Text {
+    export interface Text {
       readonly message: Readonly<{ text: string }>;
     }
   }
 
-  type Message =
+  export type Message =
     | Message.Attachment
     | Message.Button
     | Message.Carousel
@@ -410,15 +416,15 @@ export type FacebookRawResponse = Readonly<{
   (
     | Readonly<{
         messaging_type: "MESSAGE_TAG";
-        tag: FacebookRawResponse.MessageTag;
+        tag: _FacebookRawResponse.MessageTag;
       }>
     | Readonly<{ messaging_type: "RESPONSE" }>
   ) &
-  (Omit<FacebookRawResponse.Message, "message"> &
+  (Omit<_FacebookRawResponse.Message, "message"> &
     Readonly<{
       message: {
-        quick_replies?: readonly FacebookRawResponse.QuickReply[];
-      } & FacebookRawResponse.Message["message"];
+        quick_replies?: readonly _FacebookRawResponse.QuickReply[];
+      } & _FacebookRawResponse.Message["message"];
     }>);
 
 export interface FacebookMessageProcessorConfig<Context> {
@@ -469,13 +475,13 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
   ): Promise<number>;
 
   /** Send request to set up user's custom menu */
-  sendMenuSettings(menu: FacebookRawResponse.Menu): Promise<unknown>;
+  sendMenuSettings(menu: _FacebookRawResponse.Menu): Promise<unknown>;
 
   /** Upload an attachment and get Facebook's attachment ID */
   uploadAttachment(
     attachment: Readonly<{
       reusable: boolean;
-      type: FacebookRawResponse.FileAttachmentType;
+      type: _FacebookRawResponse.FileAttachmentType;
     }> &
       (
         | Readonly<{ fileData: Buffer | ReadStream }>

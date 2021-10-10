@@ -6,23 +6,20 @@ import {
 } from "../common/utils";
 import { NextResult } from "../stream";
 import {
-  FacebookMessageProcessor,
-  FacebookRawRequest,
-  FacebookRequest,
-} from "../type/facebook";
-import {
   AmbiguousPlatform,
   BaseMessageProcessor,
   BaseMessageProcessorConfig,
+  FacebookMessageProcessor,
+  FacebookRawRequest,
+  FacebookRequest,
   MessageProcessorMiddleware,
   Messenger,
   MessengerConfig,
-} from "../type/messenger";
-import {
   TelegramMessageProcessor,
   TelegramRawRequest,
   TelegramRequest,
-} from "../type/telegram";
+  _MessageProcessorMiddleware,
+} from "../type";
 
 /** Create a generic message processor */
 export async function createMessageProcessor<Context>(
@@ -37,7 +34,7 @@ export async function createMessageProcessor<Context>(
 ): Promise<BaseMessageProcessor<Context>> {
   let finalMessageProcessor: BaseMessageProcessor<Context>;
 
-  const middlewareInput: MessageProcessorMiddleware.Input<Context> = {
+  const middlewareInput: _MessageProcessorMiddleware.Input<Context> = {
     getFinalMessageProcessor: () => finalMessageProcessor,
   };
 

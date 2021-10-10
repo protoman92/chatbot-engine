@@ -1,6 +1,10 @@
 import { NextResult } from "../stream";
-import { LeafTransformer } from "../type/leaf";
-import { WitClient, WitHighestConfidence, WitResponse } from "../type/wit";
+import {
+  LeafTransformer,
+  WitClient,
+  WitHighestConfidence,
+  WitResponse,
+} from "../type";
 
 export function getHighestConfidence({
   intents,

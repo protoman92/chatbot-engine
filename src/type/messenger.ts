@@ -7,7 +7,7 @@ import { AmbiguousResponse } from "./response";
 /** Represents all supported platform identifiers */
 export type AmbiguousPlatform = "facebook" | "telegram";
 
-interface BaseMessageProcessorConfig<Context> {
+export interface BaseMessageProcessorConfig<Context> {
   readonly targetPlatform: AmbiguousPlatform;
   readonly leafSelector: LeafSelector<Context>;
   readonly client: PlatformClient<unknown>;
@@ -52,13 +52,13 @@ export interface Messenger<RawRequest = unknown> {
   processRawRequest(req: RawRequest): Promise<unknown>;
 }
 
-declare namespace MessageProcessorMiddleware {
-  interface Input<Context> {
+export namespace _MessageProcessorMiddleware {
+  export interface Input<Context> {
     getFinalMessageProcessor(): BaseMessageProcessor<Context>;
   }
 }
 
 /** Similar in concept to middlewares in systems such as Redux */
 export type MessageProcessorMiddleware<Context> = (
-  input: MessageProcessorMiddleware.Input<Context>
+  input: _MessageProcessorMiddleware.Input<Context>
 ) => Transformer<BaseMessageProcessor<Context>>;

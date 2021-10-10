@@ -1,10 +1,14 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { isType } from "../common/utils";
 import { bridgeEmission, NextResult } from "../stream";
-import { FacebookLeaf, FacebookResponseOutput } from "../type/facebook";
-import { AmbiguousLeaf, ErrorLeafConfig } from "../type/leaf";
-import { TelegramLeaf } from "../type/telegram";
-import { createDefaultErrorLeaf, createLeafObserver, createLeaf } from "./leaf";
+import {
+  AmbiguousLeaf,
+  ErrorLeafConfig,
+  FacebookLeaf,
+  TelegramLeaf,
+  _FacebookResponseOutput,
+} from "../type";
+import { createDefaultErrorLeaf, createLeaf, createLeafObserver } from "./leaf";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
@@ -107,7 +111,7 @@ describe("Default error leaf", () => {
     expect(output).toHaveLength(1);
     const [{ content: response }] = output;
 
-    if (isType<FacebookResponseOutput.Content.Text>(response, "text")) {
+    if (isType<_FacebookResponseOutput.Content.Text>(response, "text")) {
       expect(response.text).toContain(error.message);
     } else {
       throw new Error("Never should have come here");

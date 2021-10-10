@@ -1,15 +1,17 @@
 import { chunkString, facebookError, omitNull } from "../common/utils";
-import { MessageProcessorMiddleware } from "../type";
 import {
   FacebookMessageProcessor,
   FacebookMessageProcessorConfig,
-  FacebookRawRequest as RawRequest,
-  FacebookRawResponse as RawResponse,
+  FacebookRawRequest,
+  FacebookRawResponse,
   FacebookRequest,
   FacebookRequestInput,
   FacebookResponse,
-  FacebookResponseOutput,
-} from "../type/facebook";
+  MessageProcessorMiddleware,
+  _FacebookRawRequest,
+  _FacebookRawResponse,
+  _FacebookResponseOutput,
+} from "../type";
 import { createMessageProcessor } from "./generic-messenger";
 
 const MAX_GENERIC_ELEMENT_COUNT = 10;
@@ -19,11 +21,11 @@ const MESSAGE_TEXT_CHARACTER_LIMIT = 640;
 /** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>({
   entry = [],
-}: RawRequest): readonly FacebookRequest<Context>[] {
+}: FacebookRawRequest): readonly FacebookRequest<Context>[] {
   /** Group requests based on target ID */
-  function groupRequests(reqs: readonly RawRequest.Entry.Messaging[]) {
+  function groupRequests(reqs: readonly _FacebookRawRequest.Entry.Messaging[]) {
     const requestMap: {
-      [K: string]: readonly RawRequest.Entry.Messaging[];
+      [K: string]: readonly _FacebookRawRequest.Entry.Messaging[];
     } = {};
 
     reqs.forEach((req) => {
@@ -35,7 +37,7 @@ function createFacebookRequest<Context>({
   }
 
   function processRequest(
-    request: RawRequest.Entry.Messaging
+    request: _FacebookRawRequest.Entry.Messaging
   ): FacebookRequestInput<Context>[] {
     if ("postback" in request) {
       return [{ payload: request.postback.payload, type: "postback" }];
@@ -120,8 +122,8 @@ function createFacebookRequest<Context>({
 }
 
 function createSingleAction(
-  action: FacebookResponseOutput.Action
-): RawResponse.Button {
+  action: _FacebookResponseOutput.Action
+): _FacebookRawResponse.Button {
   const { text: title } = action;
 
   switch (action.type) {
@@ -137,11 +139,11 @@ function createSingleAction(
 function createFacebookResponse<Context>({
   targetID,
   output,
-}: FacebookResponse<Context>): readonly RawResponse[] {
+}: FacebookResponse<Context>): readonly FacebookRawResponse[] {
   function createFileAttachmentMessages({
     attachmentType: type,
     ...attachment
-  }: FacebookResponseOutput.Content.FileAttachment): readonly RawResponse.Message.Attachment["message"][] {
+  }: _FacebookResponseOutput.Content.FileAttachment): readonly _FacebookRawResponse.Message.Attachment["message"][] {
     if ("attachmentID" in attachment) {
       return [
         {
@@ -183,9 +185,9 @@ function createFacebookResponse<Context>({
   function createButtonMessages({
     text: fullText,
     actions,
-  }: FacebookResponseOutput.Content.Button): readonly (
-    | RawResponse.Message.Text["message"]
-    | RawResponse.Message.Button["message"]
+  }: _FacebookResponseOutput.Content.Button): readonly (
+    | _FacebookRawResponse.Message.Text["message"]
+    | _FacebookRawResponse.Message.Button["message"]
   )[] {
     const chunkTexts = chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT);
 
@@ -206,7 +208,7 @@ function createFacebookResponse<Context>({
 
   function createCarouselMessages({
     items,
-  }: FacebookResponseOutput.Content.Carousel): readonly RawResponse.Message.Carousel["message"][] {
+  }: _FacebookResponseOutput.Content.Carousel): readonly _FacebookRawResponse.Message.Carousel["message"][] {
     return [
       {
         attachment: {
@@ -233,7 +235,7 @@ function createFacebookResponse<Context>({
   function createMediaMessages({
     actions,
     ...media
-  }: FacebookResponseOutput.Content.Media): readonly RawResponse.Message.RichMedia["message"][] {
+  }: _FacebookResponseOutput.Content.Media): readonly _FacebookRawResponse.Message.RichMedia["message"][] {
     let url: string;
     let media_type: "image" | "video";
 
@@ -261,8 +263,8 @@ function createFacebookResponse<Context>({
   }
 
   function createListMessages(
-    content: FacebookResponseOutput.Content.List
-  ): readonly RawResponse.Message.List["message"][] {
+    content: _FacebookResponseOutput.Content.List
+  ): readonly _FacebookRawResponse.Message.List["message"][] {
     const { items, actions: listActions } = content;
 
     return [
@@ -294,7 +296,7 @@ function createFacebookResponse<Context>({
 
   function createTextMessages({
     text,
-  }: FacebookResponseOutput.Content.Text): readonly RawResponse.Message.Text["message"][] {
+  }: _FacebookResponseOutput.Content.Text): readonly _FacebookRawResponse.Message.Text["message"][] {
     return [
       ...chunkString(text, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => ({
         text,
@@ -303,8 +305,8 @@ function createFacebookResponse<Context>({
   }
 
   function createResponseMessages(
-    content: FacebookResponseOutput.Content
-  ): readonly RawResponse.Message["message"][] {
+    content: _FacebookResponseOutput.Content
+  ): readonly _FacebookRawResponse.Message["message"][] {
     switch (content.type) {
       case "attachment":
         return createFileAttachmentMessages(content);
@@ -328,8 +330,8 @@ function createFacebookResponse<Context>({
 
   /** Create a Facebook quick reply from a generic quick reply */
   function createRawQuickReply(
-    quickReply: FacebookResponseOutput.QuickReply
-  ): RawResponse.QuickReply {
+    quickReply: _FacebookResponseOutput.QuickReply
+  ): _FacebookRawResponse.QuickReply {
     const { text } = quickReply;
 
     switch (quickReply.type) {
@@ -351,7 +353,7 @@ function createFacebookResponse<Context>({
   function createRawResponses(
     targetID: string,
     response: FacebookResponse<Context>["output"][number]
-  ): readonly (RawResponse | null)[] {
+  ): readonly (FacebookRawResponse | null)[] {
     if (response.content.type === "menu") return [null];
 
     const {
@@ -363,7 +365,7 @@ function createFacebookResponse<Context>({
     const responseMessages = createResponseMessages(content);
 
     return responseMessages.map((message) => {
-      let payload: RawResponse = {
+      let payload: FacebookRawResponse = {
         messaging_type: "RESPONSE",
         message: {
           ...message,
@@ -381,10 +383,10 @@ function createFacebookResponse<Context>({
   }
 
   return omitNull(
-    output.reduce(
-      (acc, o) => [...acc, ...createRawResponses(targetID, o)],
-      [] as readonly (RawResponse | null)[]
-    )
+    output.reduce((acc, o) => {
+      acc.push(...createRawResponses(targetID, o));
+      return acc;
+    }, [] as (FacebookRawResponse | null)[])
   );
 }
 
@@ -398,7 +400,8 @@ export async function createFacebookMessageProcessor<Context>(
       leafSelector,
       client,
       targetPlatform: "facebook",
-      mapRequest: async (req) => createFacebookRequest(req as RawRequest),
+      mapRequest: async (req) =>
+        createFacebookRequest(req as FacebookRawRequest),
       mapResponse: async (res) => {
         return createFacebookResponse(res as FacebookResponse<Context>);
       },

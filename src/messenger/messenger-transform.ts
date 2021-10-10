@@ -1,6 +1,9 @@
-import { AmbiguousRequest, PlatformClient } from "../type";
-import { ContextDAO } from "../type/context-dao";
-import { MessageProcessorMiddleware } from "../type/messenger";
+import {
+  AmbiguousRequest,
+  ContextDAO,
+  MessageProcessorMiddleware,
+  PlatformClient,
+} from "../type";
 
 /**
  * Save the context every time a message group is sent to a target ID. If
@@ -173,7 +176,7 @@ export function setTypingIndicator<Context>({
             try {
               await client.setTypingIndicator(targetID, true);
             } catch (error) {
-              onSetTypingError(error);
+              onSetTypingError(error as Error);
             }
           })(),
         ]);
@@ -181,7 +184,7 @@ export function setTypingIndicator<Context>({
         try {
           await client.setTypingIndicator(targetID, false);
         } catch (error) {
-          onSetTypingError(error);
+          onSetTypingError(error as Error);
         }
 
         return result;

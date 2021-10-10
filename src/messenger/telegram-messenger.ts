@@ -1,18 +1,21 @@
 import FormData from "form-data";
 import { chunkString, firstSubString, telegramError } from "../common/utils";
-import { MessageProcessorMiddleware } from "../type";
 import {
+  MessageProcessorMiddleware,
   TelegramBot,
   TelegramMessageProcessor,
   TelegramMessageProcessorConfig,
-  TelegramRawRequest as RawRequest,
+  TelegramRawRequest,
   TelegramRawResponse,
   TelegramRequest,
   TelegramRequestInput,
   TelegramResponse,
-  TelegramResponseOutput,
   TelegramUser,
-} from "../type/telegram";
+  _TelegramRawRequest as RawRequest,
+  _TelegramRawRequest,
+  _TelegramRawResponse,
+  _TelegramResponseOutput,
+} from "../type";
 import { createMessageProcessor } from "./generic-messenger";
 
 const CAPTION_TEXT_CHARACTER_LIMIT = 1024;
@@ -50,14 +53,14 @@ export function extractcommand(
 
 /** Map platform request to generic request for generic processing */
 export function createGenericTelegramRequest<Context>(
-  webhook: RawRequest,
+  webhook: TelegramRawRequest,
   currentBot: TelegramBot
 ): readonly TelegramRequest<Context>[] {
   const { username } = currentBot;
 
   function processMessageRequest({
     message: { chat, from: user, ...message },
-  }: RawRequest.Message):
+  }: _TelegramRawRequest.Message):
     | [TelegramUser, RawRequest.Chat, TelegramRequestInput<Context>[]]
     | undefined {
     if ("text" in message) {
@@ -119,7 +122,7 @@ export function createGenericTelegramRequest<Context>(
   }
 
   function processRequest(
-    request: RawRequest
+    request: TelegramRawRequest
   ):
     | [
         TelegramUser,
@@ -167,13 +170,13 @@ function createRawTelegramResponse<Context>({
 }: TelegramResponse<Context>): readonly TelegramRawResponse[] {
   function createDocumentResponse(
     chat_id: string,
-    reply_markup: TelegramRawResponse.ReplyMarkup | undefined,
+    reply_markup: _TelegramRawResponse.ReplyMarkup | undefined,
     {
       fileData: document,
       fileName: filename,
       text: caption,
-    }: TelegramResponseOutput.Content.Document
-  ): TelegramRawResponse.SendDocument {
+    }: _TelegramResponseOutput.Content.Document
+  ): _TelegramRawResponse.SendDocument {
     const formData = new FormData();
     if (!!caption) formData.append("caption", caption);
     if (!!reply_markup) formData.append("reply_markup", reply_markup);
@@ -185,9 +188,9 @@ function createRawTelegramResponse<Context>({
   function createImageResponses({
     image: photo,
     text: fullCaption = "",
-  }: TelegramResponseOutput.Content.Image): readonly [
-    TelegramRawResponse.SendPhoto,
-    ...(readonly TelegramRawResponse.SendMessage[])
+  }: _TelegramResponseOutput.Content.Image): readonly [
+    _TelegramRawResponse.SendPhoto,
+    ...(readonly _TelegramRawResponse.SendMessage[])
   ] {
     const { firstSubstring: caption, restSubstring } = firstSubString(
       fullCaption,
@@ -205,7 +208,7 @@ function createRawTelegramResponse<Context>({
 
   function createTextResponses({
     text: fullText,
-  }: TelegramResponseOutput.Content.Text): TelegramRawResponse.SendMessage[] {
+  }: _TelegramResponseOutput.Content.Text): _TelegramRawResponse.SendMessage[] {
     return chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => ({
       text,
     }));
@@ -213,8 +216,8 @@ function createRawTelegramResponse<Context>({
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    matrix: TelegramResponseOutput.InlineMarkupMatrix
-  ): TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
+    matrix: _TelegramResponseOutput.InlineMarkupMatrix
+  ): _TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: matrix.map((quickReplies) =>
         quickReplies.map((quickReply) => {
@@ -237,8 +240,8 @@ function createRawTelegramResponse<Context>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    matric: TelegramResponseOutput.ReplyMarkupMatrix
-  ): TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
+    matric: _TelegramResponseOutput.ReplyMarkupMatrix
+  ): _TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: matric.map((quickReplies) =>
         quickReplies.map((quickReply) => {
@@ -276,8 +279,8 @@ function createRawTelegramResponse<Context>({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReply: TelegramResponseOutput.QuickReply
-  ): TelegramRawResponse.ReplyMarkup {
+    quickReply: _TelegramResponseOutput.QuickReply
+  ): _TelegramRawResponse.ReplyMarkup {
     switch (quickReply.type) {
       case "inline_markup":
         return createInlineMarkups(quickReply.content);
@@ -353,10 +356,10 @@ function createRawTelegramResponse<Context>({
     }
   }
 
-  return output.reduce(
-    (acc, o) => [...acc, ...createRawResponse(targetID, o)],
-    [] as TelegramRawResponse[]
-  );
+  return output.reduce((acc, o) => {
+    acc.push(...createRawResponse(targetID, o));
+    return acc;
+  }, [] as TelegramRawResponse[]);
 }
 
 /** Create a Telegram message processor */
@@ -372,7 +375,10 @@ export async function createTelegramMessageProcessor<Context>(
       client,
       targetPlatform: "telegram",
       mapRequest: async (req) => {
-        return createGenericTelegramRequest(req as RawRequest, currentBot);
+        return createGenericTelegramRequest(
+          req as TelegramRawRequest,
+          currentBot
+        );
       },
       mapResponse: async (res) => {
         return createRawTelegramResponse(res as TelegramResponse<Context>);

@@ -1,11 +1,14 @@
 import { requireNotNull } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
-import { ErrorLeafConfig } from "../type";
-import { FacebookLeafObserver } from "../type/facebook";
-import { AmbiguousLeaf, AmbiguousLeafObserver } from "../type/leaf";
-import { AmbiguousResponse } from "../type/response";
-import { NextContentObserver } from "../type/stream";
-import { TelegramLeafObserver } from "../type/telegram";
+import {
+  AmbiguousLeaf,
+  AmbiguousLeafObserver,
+  AmbiguousResponse,
+  ErrorLeafConfig,
+  FacebookLeafObserver,
+  NextContentObserver,
+  TelegramLeafObserver,
+} from "../type";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting

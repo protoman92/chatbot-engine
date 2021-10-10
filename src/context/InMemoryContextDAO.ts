@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { joinObjects } from "../common/utils";
-import { ContextDAO } from "../type/context-dao";
+import { ContextDAO } from "../type";
 
 export type MockContextData<Context> = {
   [K: string]: { [K: string]: Context };

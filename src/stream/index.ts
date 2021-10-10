@@ -4,7 +4,7 @@ import {
   ContentObserver,
   ContentSubject,
   ContentSubscription,
-} from "../type/stream";
+} from "../type";
 
 /**
  * Represents the result of calling next on an observer. This is usually not

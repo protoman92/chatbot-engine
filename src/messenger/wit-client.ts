@@ -1,6 +1,5 @@
 import { requireAllTruthy } from "../common/utils";
-import { HTTPClient } from "../type/client";
-import { WitClient, WitConfig, WitResponse } from "../type/wit";
+import { HTTPClient, WitClient, WitConfig, WitResponse } from "../type";
 import defaultAxiosClient from "./axios-client";
 
 /** Create a default wit client */

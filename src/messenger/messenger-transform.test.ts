@@ -1,14 +1,14 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose, joinObjects } from "../common/utils";
-import { PlatformClient } from "../type/client";
-import { ContextDAO } from "../type/context-dao";
 import {
+  AmbiguousRequest,
+  AmbiguousResponse,
   BaseMessageProcessor,
-  MessageProcessorMiddleware,
-} from "../type/messenger";
-import { AmbiguousRequest } from "../type/request";
-import { AmbiguousResponse } from "../type/response";
-import { TelegramMessageProcessor } from "../type/telegram";
+  ContextDAO,
+  PlatformClient,
+  TelegramMessageProcessor,
+  _MessageProcessorMiddleware,
+} from "../type";
 import {
   injectContextOnReceive,
   saveContextOnSend,
@@ -22,7 +22,7 @@ const targetPlatform = "facebook";
 let msgProcessor: BaseMessageProcessor<Context>;
 let client: PlatformClient<unknown>;
 let contextDAO: ContextDAO<Context>;
-let middlewareInput: MessageProcessorMiddleware.Input<Context>;
+let middlewareInput: _MessageProcessorMiddleware.Input<Context>;
 
 beforeEach(async () => {
   msgProcessor = spy<BaseMessageProcessor<Context>>({

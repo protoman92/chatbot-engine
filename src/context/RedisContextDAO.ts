@@ -5,8 +5,7 @@ import {
   promisify2,
   requireAllTruthy,
 } from "../common/utils";
-import { ContextDAO } from "../type/context-dao";
-import { AmbiguousPlatform } from "../type/messenger";
+import { AmbiguousPlatform, ContextDAO } from "../type";
 
 export function createRedisContextDAO<Context>(
   redis: Pick<RedisClient, "get" | "set" | "del">

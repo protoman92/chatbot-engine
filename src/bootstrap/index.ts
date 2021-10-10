@@ -165,14 +165,14 @@ export default async function createChatbotRouter<
     return messengerComponents;
   }
 
-  const dependencies = {
+  const dependencies = ({
     ...projectDeps,
     facebookClient,
     env,
     getAsyncDependencies,
     telegramClient,
     webhookTimeout,
-  } as unknown as LeafDependencies;
+  } as unknown) as LeafDependencies;
 
   const router = express.Router();
 

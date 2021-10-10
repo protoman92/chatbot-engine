@@ -5,7 +5,7 @@ import { mockFacebookClient } from "../client/facebook_client";
 import { mockResponseCapturer } from "../middleware/capture_generic_response";
 
 export default function <Context>({
-  getMessengerComponents,
+  getAsyncDependencies,
 }: DefaultLeafDependencies<Context>) {
   const router = express.Router();
 
@@ -32,7 +32,7 @@ export default function <Context>({
   });
 
   router.post("/webhook/:platform", async ({ body }, res) => {
-    const { messageProcessor } = await getMessengerComponents();
+    const { messageProcessor } = await getAsyncDependencies();
     await messageProcessor.receiveRequest(body);
     res.sendStatus(204);
   });

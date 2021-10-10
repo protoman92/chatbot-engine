@@ -1,6 +1,5 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { HTTPClient } from "../type/client";
-import { WitClient, WitConfig } from "../type/wit";
+import { HTTPClient, WitClient, WitConfig } from "../type";
 import { createWitClient } from "./wit-client";
 
 describe("Wit client", () => {

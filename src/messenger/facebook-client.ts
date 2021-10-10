@@ -1,7 +1,11 @@
 import FormData from "form-data";
 import { facebookError, requireAllTruthy } from "../common/utils";
-import { HTTPClient, HTTPRequest } from "../type/client";
-import { FacebookClient, FacebookConfig } from "../type/facebook";
+import {
+  FacebookClient,
+  FacebookConfig,
+  HTTPClient,
+  _HTTPRequest,
+} from "../type";
 import defaultAxiosClient from "./axios-client";
 
 /** Create a platform client for Facebook */
@@ -31,7 +35,7 @@ export function createFacebookClient(
     additionalPaths: string[];
     body: unknown;
   }> &
-    Pick<HTTPRequest.POST, "headers" | "maxContentLength">) {
+    Pick<_HTTPRequest.POST, "headers" | "maxContentLength">) {
     return client.communicate<T>({
       body,
       method: "POST",

@@ -1,12 +1,13 @@
 import { stringify } from "querystring";
 import { requireAllTruthy } from "../common/utils";
-import { HTTPClient } from "../type/client";
 import {
+  HTTPClient,
   TelegramBot,
   TelegramClient,
   TelegramConfig,
-  TelegramRawRequest,
-} from "../type/telegram";
+  _TelegramClient,
+  _TelegramRawRequest,
+} from "../type";
 import defaultAxiosClient from "./axios-client";
 
 export function createTelegramClient(
@@ -26,7 +27,7 @@ export function createTelegramClient(
   async function communicate<Result>(
     ...params: Parameters<HTTPClient["communicate"]>
   ): Promise<Result> {
-    const response = await client.communicate<TelegramClient.APIResponse>(
+    const response = await client.communicate<_TelegramClient.APIResponse>(
       ...params
     );
 
@@ -43,7 +44,7 @@ export function createTelegramClient(
     getCurrentBot: () =>
       communicate<TelegramBot>({ url: formatURL("getMe"), method: "GET" }),
     getFile: (file_id) =>
-      communicate<TelegramRawRequest.FileDetails>({
+      communicate<_TelegramRawRequest.FileDetails>({
         url: formatURL("getFile"),
         method: "GET",
         query: { file_id },

@@ -1,24 +1,24 @@
 import { KV } from "./common";
 import { AxiosRequestConfig } from "axios";
 
-declare namespace HTTPRequest {
-  interface Base
+export namespace _HTTPRequest {
+  export interface Base
     extends Pick<AxiosRequestConfig, "headers" | "maxContentLength"> {
     readonly query?: KV<unknown>;
     readonly url: string;
   }
 
-  interface GET extends Base {
+  export interface GET extends Base {
     readonly method: "GET";
   }
 
-  interface POST extends Base {
+  export interface POST extends Base {
     readonly method: "POST";
     readonly body: unknown;
   }
 }
 
-export type HTTPRequest = HTTPRequest.GET | HTTPRequest.POST;
+export type HTTPRequest = _HTTPRequest.GET | _HTTPRequest.POST;
 
 /** Handle HTTP communication */
 export interface HTTPClient {
