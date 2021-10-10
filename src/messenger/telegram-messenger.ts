@@ -364,7 +364,6 @@ export async function createTelegramMessageProcessor<Context>(
   { leafSelector, client }: TelegramMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<Context>[]
 ): Promise<TelegramMessageProcessor<Context>> {
-  await client.setWebhook();
   const currentBot = await client.getCurrentBot();
 
   const baseProcessor = await createMessageProcessor(

@@ -379,7 +379,6 @@ export interface TelegramUser extends TelegramBot {
 export interface TelegramConfig {
   readonly authToken: string;
   readonly defaultParseMode?: TelegramRawResponse.ParseMode;
-  readonly webhookURL: string;
 }
 
 declare namespace TelegramClient {
@@ -417,5 +416,5 @@ export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
   isMember(chatID: string, botID: string): Promise<boolean>;
 
   /** Set webhook to start receiving message updates */
-  setWebhook(): Promise<unknown>;
+  setWebhook(webhookURL: string): Promise<unknown>;
 }

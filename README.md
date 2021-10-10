@@ -67,7 +67,6 @@ const fbClient = createFacebookClient(client, {
 
 const tlClient = createTelegramClient(client, {
   authToken: process.env.TELEGRAM_AUTH_TOKEN,
-  webhookURL: `${process.env.TELEGRAM_WEBHOOK_URL}/api/telegram`,
 });
 ```
 
