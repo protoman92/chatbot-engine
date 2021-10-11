@@ -26,34 +26,37 @@ export function saveContextOnSend<Context>({
           additionalContext,
         } = response;
 
-        const [result] = await Promise.all([
-          processor.sendResponse(response),
-          (async function () {
-            if (additionalContext == null) return;
+        const result = await processor.sendResponse(response);
 
-            const { newContext, oldContext } = await contextDAO.appendContext({
-              additionalContext,
-              targetID,
-              targetPlatform,
-              oldContext: originalRequest?.currentContext,
-            });
+        /**
+         * We could send the response and emit the context_change request at
+         * the same time (which would improve performance), but it might cause
+         * issue with message ordering, especially if we have a handler that
+         * listens to context changes and sends related messages.
+         */
+        if (additionalContext != null) {
+          const { newContext, oldContext } = await contextDAO.appendContext({
+            additionalContext,
+            targetID,
+            targetPlatform,
+            oldContext: originalRequest?.currentContext,
+          });
 
-            const finalProcessor = getFinalMessageProcessor();
+          const finalProcessor = getFinalMessageProcessor();
 
-            await finalProcessor.receiveRequest({
-              currentContext: newContext,
-              input: {
-                newContext,
-                oldContext,
-                changedContext: additionalContext,
-                type: "context_change",
-              },
-              targetID: response.targetID,
-              targetPlatform: response.targetPlatform,
-              type: "manual_trigger",
-            });
-          })(),
-        ]);
+          await finalProcessor.receiveRequest({
+            currentContext: newContext,
+            input: {
+              newContext,
+              oldContext,
+              changedContext: additionalContext,
+              type: "context_change",
+            },
+            targetID: response.targetID,
+            targetPlatform: response.targetPlatform,
+            type: "manual_trigger",
+          });
+        }
 
         return result;
       },
