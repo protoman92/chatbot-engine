@@ -362,7 +362,7 @@ export interface TelegramMessageProcessorConfig<Context> {
 
 /** Represents a Telegram-specific message processor */
 export interface TelegramMessageProcessor<Context>
-  extends BaseMessageProcessor<Context> {}
+  extends BaseMessageProcessor<Context, TelegramRawRequest> {}
 
 export type TelegramMessageProcessorMiddleware<
   Context

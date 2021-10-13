@@ -24,7 +24,7 @@ export interface BaseMessageProcessorConfig<Context> {
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface BaseMessageProcessor<Context> {
+export interface BaseMessageProcessor<Context, SendResponseResult = unknown> {
   /** Generalize a raw request into a generic request */
   generalizeRequest(
     request: unknown
@@ -34,7 +34,9 @@ export interface BaseMessageProcessor<Context> {
   receiveRequest(request: AmbiguousRequest<Context>): Promise<void>;
 
   /** Send an outgoing platform response */
-  sendResponse(response: AmbiguousResponse<Context>): Promise<unknown>;
+  sendResponse(
+    response: AmbiguousResponse<Context>
+  ): Promise<SendResponseResult>;
 }
 
 export interface MessengerConfig<Context> {
@@ -61,9 +63,10 @@ export namespace _MessageProcessorMiddleware {
 /** Similar in concept to middlewares in systems such as Redux */
 export type MessageProcessorMiddleware<
   Context,
-  Processor extends BaseMessageProcessor<Context> = BaseMessageProcessor<
-    Context
-  >
+  Processor extends BaseMessageProcessor<
+    Context,
+    unknown
+  > = BaseMessageProcessor<Context, any>
 > = (
   input: _MessageProcessorMiddleware.Input<Context>
 ) => Transformer<Processor>;

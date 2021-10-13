@@ -380,7 +380,10 @@ export async function createTelegramMessageProcessor<Context>(
 ): Promise<TelegramMessageProcessor<Context>> {
   const currentBot = await client.getCurrentBot();
 
-  const baseProcessor = await createMessageProcessor(
+  const baseProcessor = await createMessageProcessor<
+    Context,
+    TelegramRawRequest
+  >(
     {
       leafSelector,
       client,

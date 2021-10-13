@@ -16,6 +16,7 @@ import {
   LeafSelector,
   PlatformClient,
   TelegramMessageProcessor,
+  TelegramRawRequest,
 } from "../type";
 import {
   createCrossPlatformMessageProcessor,
@@ -153,7 +154,7 @@ describe("Cross platform message processor", () => {
     tlProcessor = spy<TelegramMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve(undefined),
-      sendResponse: () => Promise.resolve({}),
+      sendResponse: () => Promise.resolve({} as TelegramRawRequest),
     });
 
     processors = { facebook: fbProcessor, telegram: tlProcessor };

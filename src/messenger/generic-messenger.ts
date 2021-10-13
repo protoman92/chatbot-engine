@@ -22,7 +22,10 @@ import {
 } from "../type";
 
 /** Create a generic message processor */
-export async function createMessageProcessor<Context>(
+export async function createMessageProcessor<
+  Context,
+  SendResponseResult = unknown
+>(
   {
     targetPlatform,
     leafSelector,
@@ -31,8 +34,8 @@ export async function createMessageProcessor<Context>(
     mapResponse,
   }: BaseMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<Context>[]
-): Promise<BaseMessageProcessor<Context>> {
-  let finalMessageProcessor: BaseMessageProcessor<Context>;
+): Promise<BaseMessageProcessor<Context, SendResponseResult>> {
+  let finalMessageProcessor: BaseMessageProcessor<Context, SendResponseResult>;
 
   const middlewareInput: _MessageProcessorMiddleware.Input<Context> = {
     getFinalMessageProcessor: () => {
