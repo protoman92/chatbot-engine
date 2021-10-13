@@ -1,7 +1,7 @@
 import {
   FacebookClient,
+  FacebookMessageProcessorMiddleware,
   FacebookUser,
-  MessageProcessorMiddleware,
 } from "../type";
 import {
   saveUserForTargetID,
@@ -16,7 +16,9 @@ export function saveFacebookUser<Context>({
   SaveUserForTargetIDArgs<Context, FacebookUser>,
   "contextDAO" | "isEnabled" | "saveUser"
 > &
-  Readonly<{ client: FacebookClient }>): MessageProcessorMiddleware<Context> {
+  Readonly<{ client: FacebookClient }>): FacebookMessageProcessorMiddleware<
+  Context
+> {
   return saveUserForTargetID({
     ...args,
     getUser: (targetID) => {

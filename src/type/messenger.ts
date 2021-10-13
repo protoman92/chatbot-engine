@@ -59,6 +59,11 @@ export namespace _MessageProcessorMiddleware {
 }
 
 /** Similar in concept to middlewares in systems such as Redux */
-export type MessageProcessorMiddleware<Context> = (
+export type MessageProcessorMiddleware<
+  Context,
+  Processor extends BaseMessageProcessor<Context> = BaseMessageProcessor<
+    Context
+  >
+> = (
   input: _MessageProcessorMiddleware.Input<Context>
-) => Transformer<BaseMessageProcessor<Context>>;
+) => Transformer<Processor>;

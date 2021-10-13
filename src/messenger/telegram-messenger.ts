@@ -5,6 +5,7 @@ import {
   TelegramBot,
   TelegramMessageProcessor,
   TelegramMessageProcessorConfig,
+  TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramRawResponse,
   TelegramRequest,
@@ -178,8 +179,14 @@ function createRawTelegramResponse<Context>({
     }: _TelegramResponseOutput.Content.Document
   ): _TelegramRawResponse.SendDocument {
     const formData = new FormData();
-    if (!!caption) formData.append("caption", caption);
-    if (!!reply_markup) formData.append("reply_markup", reply_markup);
+    if (!!caption) {
+      formData.append("caption", caption);
+    }
+
+    if (!!reply_markup) {
+      formData.append("reply_markup", reply_markup);
+    }
+
     formData.append("chat_id", chat_id);
     formData.append("document", document, { filename });
     return formData;
@@ -199,19 +206,20 @@ function createRawTelegramResponse<Context>({
 
     return [
       { caption, photo },
-      ...chunkString(
-        restSubstring,
-        MESSAGE_TEXT_CHARACTER_LIMIT
-      ).map((text) => ({ text })),
+      ...chunkString(restSubstring, MESSAGE_TEXT_CHARACTER_LIMIT).map(
+        (text) => {
+          return { text };
+        }
+      ),
     ];
   }
 
   function createTextResponses({
     text: fullText,
   }: _TelegramResponseOutput.Content.Text): _TelegramRawResponse.SendMessage[] {
-    return chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => ({
-      text,
-    }));
+    return chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => {
+      return { text };
+    });
   }
 
   /** Only certain quick reply types supports inline markups. */
@@ -365,7 +373,10 @@ function createRawTelegramResponse<Context>({
 /** Create a Telegram message processor */
 export async function createTelegramMessageProcessor<Context>(
   { leafSelector, client }: TelegramMessageProcessorConfig<Context>,
-  ...middlewares: readonly MessageProcessorMiddleware<Context>[]
+  ...middlewares: readonly (
+    | MessageProcessorMiddleware<Context>
+    | TelegramMessageProcessorMiddleware<Context>
+  )[]
 ): Promise<TelegramMessageProcessor<Context>> {
   const currentBot = await client.getCurrentBot();
 

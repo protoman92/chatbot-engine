@@ -3,7 +3,7 @@ import { ReadStream } from "fs";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
-import { BaseMessageProcessor } from "./messenger";
+import { BaseMessageProcessor, MessageProcessorMiddleware } from "./messenger";
 import { BaseRequest, CrossPlatformRequestInput } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
@@ -435,6 +435,10 @@ export interface FacebookMessageProcessorConfig<Context> {
 /** Represents a Facebook-specific messenger */
 export interface FacebookMessageProcessor<Context>
   extends BaseMessageProcessor<Context> {}
+
+export type FacebookMessageProcessorMiddleware<
+  Context
+> = MessageProcessorMiddleware<Context, FacebookMessageProcessor<Context>>;
 
 export type FacebookDefaultContext = {};
 

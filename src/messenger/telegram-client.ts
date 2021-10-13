@@ -5,6 +5,7 @@ import {
   TelegramBot,
   TelegramClient,
   TelegramConfig,
+  TelegramRawRequest,
   _TelegramClient,
   _TelegramRawRequest,
 } from "../type";

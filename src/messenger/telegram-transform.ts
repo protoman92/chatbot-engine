@@ -1,7 +1,7 @@
 import {
   AmbiguousRequest,
   ContextDAO,
-  MessageProcessorMiddleware,
+  TelegramMessageProcessorMiddleware,
   TelegramUser,
 } from "../type";
 
@@ -22,7 +22,7 @@ export function saveTelegramUser<Context>({
   saveUser: (
     user: TelegramUser
   ) => Promise<Readonly<{ readonly additionalContext?: Partial<Context> }>>;
-}>): MessageProcessorMiddleware<Context> {
+}>): TelegramMessageProcessorMiddleware<Context> {
   return () => async (processor) => {
     return {
       ...processor,

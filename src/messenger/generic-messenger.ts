@@ -35,15 +35,24 @@ export async function createMessageProcessor<Context>(
   let finalMessageProcessor: BaseMessageProcessor<Context>;
 
   const middlewareInput: _MessageProcessorMiddleware.Input<Context> = {
-    getFinalMessageProcessor: () => finalMessageProcessor,
+    getFinalMessageProcessor: () => {
+      return finalMessageProcessor;
+    },
   };
 
-  const reversedTransformers = [...middlewares.map((m) => m(middlewareInput))];
+  const reversedTransformers = [
+    ...middlewares.map((m) => {
+      return m(middlewareInput);
+    }),
+  ];
+
   reversedTransformers.reverse();
 
   finalMessageProcessor = await compose(
     {
-      generalizeRequest: (platformReq) => mapRequest(platformReq),
+      generalizeRequest: (platformReq) => {
+        return mapRequest(platformReq);
+      },
       receiveRequest: async (request) => {
         await leafSelector.next(request);
       },
@@ -81,7 +90,10 @@ export async function createMessenger<Context>({
   return {
     processRawRequest: async (platformReq) => {
       const genericReq = await processor.generalizeRequest(platformReq);
-      return mapSeries(genericReq, (req) => processor.receiveRequest(req));
+
+      return mapSeries(genericReq, (req) => {
+        return processor.receiveRequest(req);
+      });
     },
   };
 }
@@ -128,10 +140,12 @@ export function createCrossPlatformMessageProcessor<Context>(
       const targetPlatform = getPlatform(platformReq);
 
       return switchPlatform(targetPlatform, {
-        facebookCallback: (processor) =>
-          processor.generalizeRequest(platformReq as FacebookRawRequest),
-        telegramCallback: (processor) =>
-          processor.generalizeRequest(platformReq as TelegramRawRequest),
+        facebookCallback: (processor) => {
+          return processor.generalizeRequest(platformReq as FacebookRawRequest);
+        },
+        telegramCallback: (processor) => {
+          return processor.generalizeRequest(platformReq as TelegramRawRequest);
+        },
       });
     },
     receiveRequest: async (request) => {
@@ -146,8 +160,12 @@ export function createCrossPlatformMessageProcessor<Context>(
     },
     sendResponse: async (response) => {
       return switchPlatform(response.targetPlatform, {
-        facebookCallback: (processor) => processor.sendResponse(response),
-        telegramCallback: (processor) => processor.sendResponse(response),
+        facebookCallback: (processor) => {
+          return processor.sendResponse(response);
+        },
+        telegramCallback: (processor) => {
+          return processor.sendResponse(response);
+        },
       });
     },
   };

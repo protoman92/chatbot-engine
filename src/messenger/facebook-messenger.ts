@@ -2,6 +2,7 @@ import { chunkString, facebookError, omitNull } from "../common/utils";
 import {
   FacebookMessageProcessor,
   FacebookMessageProcessorConfig,
+  FacebookMessageProcessorMiddleware,
   FacebookRawRequest,
   FacebookRawResponse,
   FacebookRequest,
@@ -94,9 +95,15 @@ function createFacebookRequest<Context>({
   }
 
   const allRequests = entry
-    .map(({ messaging }) => messaging)
-    .filter((messaging) => !!messaging)
-    .reduce((acc, requests) => acc.concat(requests));
+    .map(({ messaging }) => {
+      return messaging;
+    })
+    .filter((messaging) => {
+      return !!messaging;
+    })
+    .reduce((acc, requests) => {
+      return acc.concat(requests);
+    });
 
   const groupedRequests = groupRequests(allRequests);
 
@@ -192,14 +199,18 @@ function createFacebookResponse<Context>({
     const chunkTexts = chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT);
 
     return [
-      ...chunkTexts.slice(0, chunkTexts.length - 1).map((text) => ({ text })),
+      ...chunkTexts.slice(0, chunkTexts.length - 1).map((text) => {
+        return { text };
+      }),
       {
         attachment: {
           type: "template",
           payload: {
             text: chunkTexts[chunkTexts.length - 1],
             template_type: "button",
-            buttons: actions.map((a) => createSingleAction(a)),
+            buttons: actions.map((a) => {
+              return createSingleAction(a);
+            }),
           },
         },
       },
@@ -216,15 +227,17 @@ function createFacebookResponse<Context>({
           payload: {
             elements: items
               .slice(0, MAX_GENERIC_ELEMENT_COUNT)
-              .map(({ title = "", description, image: mediaURL, actions }) => ({
-                title,
-                subtitle: description || undefined,
-                image_url: mediaURL || undefined,
-                buttons:
-                  !!actions && actions.length
-                    ? actions.map(createSingleAction)
-                    : undefined,
-              })),
+              .map(({ title = "", description, image: mediaURL, actions }) => {
+                return {
+                  title,
+                  subtitle: description || undefined,
+                  image_url: mediaURL || undefined,
+                  buttons:
+                    !!actions && actions.length
+                      ? actions.map(createSingleAction)
+                      : undefined,
+                };
+              }),
             template_type: "generic",
           },
         },
@@ -274,14 +287,16 @@ function createFacebookResponse<Context>({
           payload: {
             elements: items
               .slice(0, MAX_LIST_ELEMENT_COUNT)
-              .map(({ title = "", description, actions = [] }) => ({
-                title,
-                subtitle: description || undefined,
-                buttons:
-                  !!actions && actions.length
-                    ? actions.map(createSingleAction)
-                    : undefined,
-              })),
+              .map(({ title = "", description, actions = [] }) => {
+                return {
+                  title,
+                  subtitle: description || undefined,
+                  buttons:
+                    !!actions && actions.length
+                      ? actions.map(createSingleAction)
+                      : undefined,
+                };
+              }),
             template_type: "list",
             top_element_style: "compact",
             buttons:
@@ -298,9 +313,9 @@ function createFacebookResponse<Context>({
     text,
   }: _FacebookResponseOutput.Content.Text): readonly _FacebookRawResponse.Message.Text["message"][] {
     return [
-      ...chunkString(text, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => ({
-        text,
-      })),
+      ...chunkString(text, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => {
+        return { text };
+      }),
     ];
   }
 
@@ -354,7 +369,9 @@ function createFacebookResponse<Context>({
     targetID: string,
     response: FacebookResponse<Context>["output"][number]
   ): readonly (FacebookRawResponse | null)[] {
-    if (response.content.type === "menu") return [null];
+    if (response.content.type === "menu") {
+      return [null];
+    }
 
     const {
       content: { tag, ...content },
@@ -393,15 +410,19 @@ function createFacebookResponse<Context>({
 /** Create a Facebook message processor */
 export async function createFacebookMessageProcessor<Context>(
   { leafSelector, client }: FacebookMessageProcessorConfig<Context>,
-  ...middlewares: readonly MessageProcessorMiddleware<Context>[]
+  ...middlewares: readonly (
+    | MessageProcessorMiddleware<Context>
+    | FacebookMessageProcessorMiddleware<Context>
+  )[]
 ): Promise<FacebookMessageProcessor<Context>> {
   const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
       client,
       targetPlatform: "facebook",
-      mapRequest: async (req) =>
-        createFacebookRequest(req as FacebookRawRequest),
+      mapRequest: async (req) => {
+        return createFacebookRequest(req as FacebookRawRequest);
+      },
       mapResponse: async (res) => {
         return createFacebookResponse(res as FacebookResponse<Context>);
       },

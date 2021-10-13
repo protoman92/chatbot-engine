@@ -1,5 +1,6 @@
 import FormData from "form-data";
 import { ReadStream } from "fs";
+import { MessageProcessorMiddleware } from ".";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
@@ -362,6 +363,10 @@ export interface TelegramMessageProcessorConfig<Context> {
 /** Represents a Telegram-specific message processor */
 export interface TelegramMessageProcessor<Context>
   extends BaseMessageProcessor<Context> {}
+
+export type TelegramMessageProcessorMiddleware<
+  Context
+> = MessageProcessorMiddleware<Context, TelegramMessageProcessor<Context>>;
 
 export type TelegramDefaultContext = {};
 
