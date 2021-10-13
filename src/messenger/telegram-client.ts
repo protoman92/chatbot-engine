@@ -27,60 +27,67 @@ export function createTelegramClient(
   async function communicate<Result>(
     ...params: Parameters<HTTPClient["communicate"]>
   ): Promise<Result> {
-    const response = await client.communicate<_TelegramClient.APIResponse>(
-      ...params
-    );
+    const response = await client.communicate<
+      _TelegramClient.APIResponse<Result>
+    >(...params);
 
-    switch (response.ok) {
-      case true:
-        return response.result as Result;
-
-      case false:
-        throw new Error(response.description);
+    if (response.ok) {
+      return response.result;
     }
+
+    throw new Error(response.description);
   }
 
   const telegramClient: TelegramClient = {
-    getCurrentBot: () =>
-      communicate<TelegramBot>({ url: formatURL("getMe"), method: "GET" }),
-    getFile: (file_id) =>
-      communicate<_TelegramRawRequest.FileDetails>({
+    getCurrentBot: () => {
+      return communicate<TelegramBot>({
+        url: formatURL("getMe"),
+        method: "GET",
+      });
+    },
+    getFile: (file_id) => {
+      return communicate<_TelegramRawRequest.FileDetails>({
         url: formatURL("getFile"),
         method: "GET",
         query: { file_id },
-      }),
-    getFileURL: async (filePath) => formatFileURL(filePath),
+      });
+    },
+    getFileURL: async (filePath) => {
+      return formatFileURL(filePath);
+    },
     getFileURLFromID: async (fileID) => {
       const { file_path } = await telegramClient.getFile(fileID);
       const fileURL = await telegramClient.getFileURL(file_path);
       return fileURL;
     },
-    isMember: (chat_id, user_id) =>
-      communicate<{ status: string }>({
+    isMember: (chat_id, user_id) => {
+      return communicate<{ status: string }>({
         url: formatURL("getChatMember"),
         method: "GET",
         query: { chat_id, user_id },
-      }).then(({ status }) => status === "member"),
+      }).then(({ status }) => status === "member");
+    },
     sendResponse: ({
       action,
       body,
       headers = {},
       parseMode: parse_mode = defaultParseMode,
     }) => {
-      return communicate({
+      return communicate<TelegramRawRequest>({
         body,
         headers,
         url: formatURL(action, { parse_mode }),
         method: "POST",
       });
     },
-    // tslint:disable-next-line:variable-name
     setTypingIndicator: async (chat_id, enabled) => {
       /**
        * For Telegram, we don't need to call a separate action to switch off
        * typing. It will be done for us the next time a message arrives.
        */
-      if (!enabled) return {};
+      if (!enabled) {
+        return {};
+      }
 
       return communicate({
         url: formatURL("sendChatAction"),

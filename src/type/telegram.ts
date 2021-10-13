@@ -392,10 +392,10 @@ export interface TelegramConfig {
 
 export namespace _TelegramClient {
   export namespace APIResponse {
-    export interface Success {
+    export interface Success<Result> {
       readonly description: string;
       readonly ok: true;
-      readonly result: unknown;
+      readonly result: Result;
     }
 
     export interface Failure {
@@ -404,7 +404,9 @@ export namespace _TelegramClient {
     }
   }
 
-  export type APIResponse = APIResponse.Success | APIResponse.Failure;
+  export type APIResponse<Result> =
+    | APIResponse.Success<Result>
+    | APIResponse.Failure;
 }
 
 /** A Telegram-specific client */

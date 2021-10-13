@@ -44,11 +44,19 @@ export async function createMessageProcessor<Context>(
   finalMessageProcessor = await compose(
     {
       generalizeRequest: (platformReq) => mapRequest(platformReq),
-      receiveRequest: (request) => leafSelector.next(request),
+      receiveRequest: async (request) => {
+        await leafSelector.next(request);
+      },
       sendResponse: async (response) => {
-        if (response.targetPlatform !== targetPlatform) return;
+        if (response.targetPlatform !== targetPlatform) {
+          return;
+        }
+
         const data = await mapResponse(response);
-        return mapSeries(data, (datum) => client.sendResponse(datum));
+
+        return mapSeries(data, (datum) => {
+          return client.sendResponse(datum);
+        });
       },
     },
     ...reversedTransformers
@@ -128,10 +136,12 @@ export function createCrossPlatformMessageProcessor<Context>(
     },
     receiveRequest: async (request) => {
       return switchPlatform(request.targetPlatform, {
-        facebookCallback: (processor) =>
-          processor.receiveRequest(request as FacebookRequest<Context>),
-        telegramCallback: (processor) =>
-          processor.receiveRequest(request as TelegramRequest<Context>),
+        facebookCallback: (processor) => {
+          return processor.receiveRequest(request as FacebookRequest<Context>);
+        },
+        telegramCallback: (processor) => {
+          return processor.receiveRequest(request as TelegramRequest<Context>);
+        },
       });
     },
     sendResponse: async (response) => {
