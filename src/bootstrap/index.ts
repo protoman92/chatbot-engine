@@ -19,8 +19,8 @@ import {
   defaultWitClient as createWitClient,
 } from "../messenger";
 import {
+  AmbiguousGenericRequest,
   AmbiguousPlatform,
-  AmbiguousRequest,
   Branch,
   ContextDAO,
   ErrorLeafConfig,
@@ -63,7 +63,9 @@ export type ChatbotProjectDependencies<
         createBranches: (args: LeafDependencies) => Promise<Branch<Context>>;
         formatErrorMessage: ErrorLeafConfig["formatErrorMessage"];
         leafSelectorType: "default";
-        onLeafCatchAll: (request: AmbiguousRequest<Context>) => Promise<void>;
+        onLeafCatchAll: (
+          request: AmbiguousGenericRequest<Context>
+        ) => Promise<void>;
         onLeafError?: NonNullable<ErrorLeafConfig["trackError"]>;
       }
   );
@@ -165,14 +167,14 @@ export default async function createChatbotRouter<
     return messengerComponents;
   }
 
-  const dependencies = ({
+  const dependencies = {
     ...projectDeps,
     facebookClient,
     env,
     getAsyncDependencies,
     telegramClient,
     webhookTimeout,
-  } as unknown) as LeafDependencies;
+  } as unknown as LeafDependencies;
 
   const router = express.Router();
 

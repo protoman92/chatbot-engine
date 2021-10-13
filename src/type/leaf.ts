@@ -1,7 +1,7 @@
 import { AmbiguousPlatform } from ".";
 import { Branch } from "./branch";
 import { ErrorRequestInput } from "./error";
-import { AmbiguousRequest } from "./request";
+import { AmbiguousGenericRequest } from "./request";
 import { AmbiguousResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 
@@ -51,7 +51,7 @@ export interface LeafTransformChain<InContext, OutContext> {
 
 export interface AmbiguousLeafObserver<T>
   extends ContentObserver<
-    AmbiguousRequest<T> & Readonly<{ currentLeafName: string }>
+    AmbiguousGenericRequest<T> & Readonly<{ currentLeafName: string }>
   > {}
 
 /**
@@ -64,7 +64,7 @@ export interface AmbiguousLeafObserver<T>
 export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
   ContentObservable<AmbiguousResponse<T>>;
 
-export type LeafSelector<T> = ContentObserver<AmbiguousRequest<T>> &
+export type LeafSelector<T> = ContentObserver<AmbiguousGenericRequest<T>> &
   ContentObservable<AmbiguousResponse<T>>;
 
 export interface ErrorLeafTrackErrorArgs

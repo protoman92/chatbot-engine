@@ -17,12 +17,10 @@ export type FacebookRequestInput<Context> =
   | Readonly<{ image: string; stickerID: string; type: "sticker" }>
   | CrossPlatformRequestInput<Context>;
 
-export type CommonFacebookRequest<Context> = Readonly<{
+export type FacebookGenericRequest<Context> = Readonly<{
   targetPlatform: "facebook";
 }> &
-  BaseRequest<Context>;
-
-export type FacebookRequest<Context> = CommonFacebookRequest<Context> &
+  BaseRequest<Context> &
   (
     | Readonly<{
         input: FacebookRequestInput<Context>;
@@ -443,7 +441,7 @@ export type FacebookMessageProcessorMiddleware<
 export type FacebookDefaultContext = {};
 
 export type FacebookLeafObserver<T> = ContentObserver<
-  FacebookRequest<T & FacebookDefaultContext>
+  FacebookGenericRequest<T & FacebookDefaultContext>
 >;
 
 export type FacebookLeaf<T> = FacebookLeafObserver<T> &

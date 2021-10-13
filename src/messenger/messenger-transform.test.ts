@@ -1,7 +1,7 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose, joinObjects } from "../common/utils";
 import {
-  AmbiguousRequest,
+  AmbiguousGenericRequest,
   AmbiguousResponse,
   BaseMessageProcessor,
   ContextDAO,
@@ -166,7 +166,7 @@ describe("Inject context on receive", () => {
       )
     );
 
-    const genericRequest: AmbiguousRequest<{}> = {
+    const genericRequest: AmbiguousGenericRequest<{}> = {
       targetID,
       targetPlatform,
       currentContext: {},
@@ -251,7 +251,7 @@ describe("Save user for target ID", () => {
       })(middlewareInput)
     );
 
-    const genericRequest: AmbiguousRequest<{}> = {
+    const genericRequest: AmbiguousGenericRequest<{}> = {
       targetID,
       targetPlatform,
       currentContext: { targetID },

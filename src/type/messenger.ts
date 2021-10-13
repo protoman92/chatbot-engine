@@ -1,7 +1,7 @@
 import { PlatformClient } from "./client";
 import { Transformer } from "./common";
 import { LeafSelector } from "./leaf";
-import { AmbiguousRequest } from "./request";
+import { AmbiguousGenericRequest } from "./request";
 import { AmbiguousResponse } from "./response";
 
 /** Represents all supported platform identifiers */
@@ -32,10 +32,10 @@ export interface BaseMessageProcessor<
   /** Generalize a raw request into a generic request */
   generalizeRequest(
     request: RawRequest
-  ): Promise<readonly AmbiguousRequest<Context>[]>;
+  ): Promise<readonly AmbiguousGenericRequest<Context>[]>;
 
   /** Receive an incoming generic request */
-  receiveRequest(request: AmbiguousRequest<Context>): Promise<void>;
+  receiveRequest(request: AmbiguousGenericRequest<Context>): Promise<void>;
 
   /** Send an outgoing platform response */
   sendResponse(response: AmbiguousResponse<Context>): Promise<SendResult>;

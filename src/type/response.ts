@@ -1,6 +1,6 @@
 import { FacebookResponse } from "./facebook";
 import { AmbiguousPlatform } from "./messenger";
-import { AmbiguousRequest } from "./request";
+import { AmbiguousGenericRequest } from "./request";
 import { TelegramResponse } from "./telegram";
 
 export interface BaseResponse<Context> {
@@ -10,7 +10,7 @@ export interface BaseResponse<Context> {
    * a custom message not triggered by the user), the original request will be
    * available in order to trigger context change requests.
    */
-  readonly originalRequest?: AmbiguousRequest<Context>;
+  readonly originalRequest?: AmbiguousGenericRequest<Context>;
   readonly targetID: string;
 }
 

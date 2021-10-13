@@ -1,5 +1,5 @@
 import {
-  AmbiguousRequest,
+  AmbiguousGenericRequest,
   ContextDAO,
   TelegramMessageProcessorMiddleware,
   TelegramUser,
@@ -17,7 +17,7 @@ export function saveTelegramUser<Context>({
    * logic from being called on every request.
    */
   isEnabled: (
-    args: Pick<AmbiguousRequest<Context>, "currentContext">
+    args: Pick<AmbiguousGenericRequest<Context>, "currentContext">
   ) => Promise<boolean>;
   saveUser: (
     user: TelegramUser

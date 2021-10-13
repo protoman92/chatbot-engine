@@ -1,12 +1,12 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { AmbiguousRequest } from "../../type";
 import { MockContextData } from "../../context/InMemoryContextDAO";
+import { AmbiguousGenericRequest } from "../../type";
 
 export async function getSentResponses<Context>({
   baseURL,
   targetPlatform,
 }: Pick<AxiosRequestConfig, "baseURL"> &
-  Pick<AmbiguousRequest<Context>, "targetPlatform">) {
+  Pick<AmbiguousGenericRequest<Context>, "targetPlatform">) {
   const { data } = await axios.request<unknown>({
     baseURL,
     method: "GET",
@@ -19,7 +19,7 @@ export async function getSentResponses<Context>({
 export async function sendMessageRequest<Context>({
   baseURL,
   ...data
-}: Pick<AxiosRequestConfig, "baseURL"> & AmbiguousRequest<Context>) {
+}: Pick<AxiosRequestConfig, "baseURL"> & AmbiguousGenericRequest<Context>) {
   await axios.request({
     baseURL,
     data,

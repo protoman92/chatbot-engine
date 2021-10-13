@@ -1,5 +1,5 @@
 import {
-  AmbiguousRequest,
+  AmbiguousGenericRequest,
   ContextDAO,
   MessageProcessorMiddleware,
   PlatformClient,
@@ -104,7 +104,7 @@ export interface SaveUserForTargetIDArgs<Context, RawUser> {
    * logic from being called on every request.
    */
   isEnabled(
-    args: Pick<AmbiguousRequest<Context>, "currentContext">
+    args: Pick<AmbiguousGenericRequest<Context>, "currentContext">
   ): Promise<boolean>;
   saveUser(
     rawUser: RawUser

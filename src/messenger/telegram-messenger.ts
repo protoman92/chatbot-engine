@@ -8,7 +8,7 @@ import {
   TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramRawResponse,
-  TelegramRequest,
+  TelegramGenericRequest,
   TelegramRequestInput,
   TelegramResponse,
   TelegramUser,
@@ -56,7 +56,7 @@ export function extractcommand(
 export function createGenericTelegramRequest<Context>(
   webhook: TelegramRawRequest,
   currentBot: TelegramBot
-): readonly TelegramRequest<Context>[] {
+): readonly TelegramGenericRequest<Context>[] {
   const { username } = currentBot;
 
   function processMessageRequest({

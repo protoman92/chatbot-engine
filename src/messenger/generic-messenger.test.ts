@@ -8,8 +8,8 @@ import {
   when,
 } from "ts-mockito";
 import {
+  AmbiguousGenericRequest,
   AmbiguousPlatform,
-  AmbiguousRequest,
   AmbiguousResponse,
   BaseMessageProcessor,
   FacebookMessageProcessor,
@@ -105,7 +105,7 @@ describe("Generic message processor", () => {
       targetPlatform,
       leafSelector: instance(leafSelector),
       client: instance(client),
-      mapRequest: async () => [] as readonly AmbiguousRequest<{}>[],
+      mapRequest: async () => [] as readonly AmbiguousGenericRequest<{}>[],
       mapResponse: async () => [],
     });
 

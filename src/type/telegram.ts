@@ -32,12 +32,10 @@ export type TelegramRequestInput<Context> =
   | Readonly<{ payload: string; type: "postback" }>
   | CrossPlatformRequestInput<Context>;
 
-type CommonTelegramRequest<Context> = Readonly<{
+export type TelegramGenericRequest<Context> = Readonly<{
   targetPlatform: "telegram";
 }> &
-  BaseRequest<Context>;
-
-export type TelegramRequest<Context> = CommonTelegramRequest<Context> &
+  BaseRequest<Context> &
   (
     | Readonly<{
         currentBot: TelegramBot;
@@ -375,7 +373,7 @@ export type TelegramMessageProcessorMiddleware<
 export type TelegramDefaultContext = {};
 
 export type TelegramLeafObserver<T> = ContentObserver<
-  TelegramRequest<T & TelegramDefaultContext>
+  TelegramGenericRequest<T & TelegramDefaultContext>
 >;
 
 export type TelegramLeaf<T> = TelegramLeafObserver<T> &

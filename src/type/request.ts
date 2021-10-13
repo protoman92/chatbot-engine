@@ -1,7 +1,7 @@
 import { ContextChangeRequestInput } from "./context";
 import { ErrorRequestInput } from "./error";
-import { FacebookRequest } from "./facebook";
-import { TelegramRequest } from "./telegram";
+import { FacebookGenericRequest } from "./facebook";
+import { TelegramGenericRequest } from "./telegram";
 import { WitRequestInput } from "./wit";
 
 export type BaseRequest<Context> = Readonly<{
@@ -29,6 +29,6 @@ export type CrossPlatformRequest<Context> = BaseRequest<Context> &
       }>
   );
 
-export type AmbiguousRequest<Context> =
-  | FacebookRequest<Context>
-  | TelegramRequest<Context>;
+export type AmbiguousGenericRequest<Context> =
+  | FacebookGenericRequest<Context>
+  | TelegramGenericRequest<Context>;

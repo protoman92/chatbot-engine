@@ -5,7 +5,7 @@ import {
   FacebookMessageProcessorMiddleware,
   FacebookRawRequest,
   FacebookRawResponse,
-  FacebookRequest,
+  FacebookGenericRequest,
   FacebookRequestInput,
   FacebookResponse,
   MessageProcessorMiddleware,
@@ -22,7 +22,7 @@ const MESSAGE_TEXT_CHARACTER_LIMIT = 640;
 /** Map raw request to generic request for generic processing */
 function createFacebookRequest<Context>({
   entry = [],
-}: FacebookRawRequest): readonly FacebookRequest<Context>[] {
+}: FacebookRawRequest): readonly FacebookGenericRequest<Context>[] {
   /** Group requests based on target ID */
   function groupRequests(reqs: readonly _FacebookRawRequest.Entry.Messaging[]) {
     const requestMap: {
@@ -121,10 +121,10 @@ function createFacebookRequest<Context>({
             type: "message_trigger" as const,
           })),
         ],
-        [] as FacebookRequest<Context>[]
+        [] as FacebookGenericRequest<Context>[]
       ),
     ],
-    [] as FacebookRequest<Context>[]
+    [] as FacebookGenericRequest<Context>[]
   );
 }
 
