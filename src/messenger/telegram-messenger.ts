@@ -382,6 +382,7 @@ export async function createTelegramMessageProcessor<Context>(
 
   const baseProcessor = await createMessageProcessor<
     Context,
+    TelegramRawRequest,
     TelegramRawRequest
   >(
     {

@@ -434,7 +434,7 @@ export interface FacebookMessageProcessorConfig<Context> {
 
 /** Represents a Facebook-specific messenger */
 export interface FacebookMessageProcessor<Context>
-  extends BaseMessageProcessor<Context> {}
+  extends BaseMessageProcessor<Context, FacebookRawRequest> {}
 
 export type FacebookMessageProcessorMiddleware<
   Context

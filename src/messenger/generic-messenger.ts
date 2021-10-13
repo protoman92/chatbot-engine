@@ -24,7 +24,8 @@ import {
 /** Create a generic message processor */
 export async function createMessageProcessor<
   Context,
-  SendResponseResult = unknown
+  RawRequest = unknown,
+  SendResult = unknown
 >(
   {
     targetPlatform,
@@ -34,8 +35,12 @@ export async function createMessageProcessor<
     mapResponse,
   }: BaseMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<Context>[]
-): Promise<BaseMessageProcessor<Context, SendResponseResult>> {
-  let finalMessageProcessor: BaseMessageProcessor<Context, SendResponseResult>;
+): Promise<BaseMessageProcessor<Context, RawRequest, SendResult>> {
+  let finalMessageProcessor: BaseMessageProcessor<
+    Context,
+    RawRequest,
+    SendResult
+  >;
 
   const middlewareInput: _MessageProcessorMiddleware.Input<Context> = {
     getFinalMessageProcessor: () => {

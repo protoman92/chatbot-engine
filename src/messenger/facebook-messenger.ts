@@ -415,7 +415,10 @@ export async function createFacebookMessageProcessor<Context>(
     | FacebookMessageProcessorMiddleware<Context>
   )[]
 ): Promise<FacebookMessageProcessor<Context>> {
-  const baseProcessor = await createMessageProcessor(
+  const baseProcessor = await createMessageProcessor<
+    Context,
+    FacebookRawRequest
+  >(
     {
       leafSelector,
       client,
