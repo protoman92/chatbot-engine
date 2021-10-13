@@ -122,7 +122,7 @@ describe("Inject context on receive", () => {
 
   it("Should not inject context on receive if invalid request type", async () => {
     // Setup
-    when(msgProcessor.receiveRequest(anything())).thenResolve({});
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(msgProcessor),
@@ -153,7 +153,7 @@ describe("Inject context on receive", () => {
   it("Should inject context on receive", async () => {
     // Setup
     const expectedContext = { a: 1, b: 2 };
-    when(msgProcessor.receiveRequest(anything())).thenResolve({});
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     when(
       contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
@@ -195,7 +195,7 @@ describe("Save user for target ID", () => {
 
   it("Should not save user if invalid request type", async () => {
     // Setup
-    when(msgProcessor.receiveRequest(anything())).thenResolve({});
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(msgProcessor),
@@ -237,10 +237,7 @@ describe("Save user for target ID", () => {
       oldContext: {},
     });
 
-    when(msgProcessor.receiveRequest(anything())).thenResolve({
-      targetID,
-      visualContents: [],
-    });
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(msgProcessor),
@@ -294,7 +291,7 @@ describe("Save Telegram user for target ID", () => {
 
   it("Should not save user if invalid target platform", async () => {
     // Setup
-    when(tlMessenger.receiveRequest(anything())).thenResolve({});
+    when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(tlMessenger),
@@ -322,7 +319,7 @@ describe("Save Telegram user for target ID", () => {
 
   it("Should not save user if invalid request type", async () => {
     // Setup
-    when(tlMessenger.receiveRequest(anything())).thenResolve({});
+    when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(tlMessenger),
@@ -360,7 +357,7 @@ describe("Save Telegram user for target ID", () => {
       oldContext: {},
     });
 
-    when(tlMessenger.receiveRequest(anything())).thenResolve({});
+    when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
     const additionalContext = { a: 1, b: 2 };
 
     const transformed = await compose(

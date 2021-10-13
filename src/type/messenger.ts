@@ -31,7 +31,7 @@ export interface BaseMessageProcessor<Context> {
   ): Promise<readonly AmbiguousRequest<Context>[]>;
 
   /** Receive an incoming generic request */
-  receiveRequest(request: AmbiguousRequest<Context>): Promise<unknown>;
+  receiveRequest(request: AmbiguousRequest<Context>): Promise<void>;
 
   /** Send an outgoing platform response */
   sendResponse(response: AmbiguousResponse<Context>): Promise<unknown>;

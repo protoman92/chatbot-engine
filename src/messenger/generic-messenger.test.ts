@@ -146,13 +146,13 @@ describe("Cross platform message processor", () => {
 
     fbProcessor = spy<FacebookMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
-      receiveRequest: () => Promise.resolve({}),
+      receiveRequest: () => Promise.resolve(undefined),
       sendResponse: () => Promise.resolve({}),
     });
 
     tlProcessor = spy<TelegramMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
-      receiveRequest: () => Promise.resolve({}),
+      receiveRequest: () => Promise.resolve(undefined),
       sendResponse: () => Promise.resolve({}),
     });
 
@@ -254,7 +254,7 @@ describe("Generic messenger", () => {
 
     processor = spy<BaseMessageProcessor<Context>>({
       generalizeRequest: () => Promise.resolve([]),
-      receiveRequest: () => Promise.resolve({}),
+      receiveRequest: () => Promise.resolve(undefined),
       sendResponse: () => Promise.resolve({}),
     });
   });
