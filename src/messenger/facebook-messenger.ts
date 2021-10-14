@@ -107,25 +107,25 @@ function createFacebookRequest<Context>({
 
   const groupedRequests = groupRequests(allRequests);
 
-  return Object.entries(groupedRequests).reduce(
-    (acc, [targetID, requests]) => [
-      ...acc,
-      ...requests.map(processRequest).reduce(
-        (acc1, inputs) => [
-          ...acc1,
+  return Object.entries(groupedRequests).reduce((acc, [targetID, requests]) => {
+    acc.push(
+      ...requests.map(processRequest).reduce((acc1, inputs) => {
+        acc1.push(
           ...inputs.map((input) => ({
             input,
             targetID,
-            currentContext: {} as any,
+            currentContext: {} as Context,
             targetPlatform: "facebook" as const,
             type: "message_trigger" as const,
-          })),
-        ],
-        [] as FacebookGenericRequest<Context>[]
-      ),
-    ],
-    [] as FacebookGenericRequest<Context>[]
-  );
+          }))
+        );
+
+        return acc1;
+      }, [] as FacebookGenericRequest<Context>[])
+    );
+
+    return acc;
+  }, [] as FacebookGenericRequest<Context>[]);
 }
 
 function createSingleAction(

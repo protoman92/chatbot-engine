@@ -1,5 +1,4 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { _TelegramRawRequest } from "../../build/type";
 import { compose, joinObjects } from "../common/utils";
 import {
   AmbiguousGenericRequest,
@@ -10,6 +9,7 @@ import {
   TelegramGenericResponse,
   TelegramMessageProcessor,
   _MessageProcessorMiddleware,
+  _TelegramRawRequest,
 } from "../type";
 import {
   injectContextOnReceive,
@@ -60,7 +60,6 @@ describe("Save context on send", () => {
       oldContext,
       newContext: finalContext,
     });
-
     when(msgProcessor.sendResponse(anything())).thenResolve();
     when(msgProcessor.receiveRequest(anything())).thenResolve();
 
@@ -69,7 +68,7 @@ describe("Save context on send", () => {
       saveContextOnSend({ contextDAO: instance(contextDAO) })(middlewareInput)
     );
 
-    const response: AmbiguousGenericResponse<Context> = {
+    const genericResponse: AmbiguousGenericResponse<Context> = {
       targetID,
       additionalContext,
       originalRequest: {
@@ -84,7 +83,7 @@ describe("Save context on send", () => {
     };
 
     // When
-    await transformed.sendResponse(response);
+    await transformed.sendResponse(genericResponse);
 
     // Then
     verify(
@@ -97,22 +96,23 @@ describe("Save context on send", () => {
         })
       )
     ).once();
-
-    verify(msgProcessor.sendResponse(deepEqual(response))).once();
-
+    verify(msgProcessor.sendResponse(deepEqual(genericResponse))).once();
     verify(
       msgProcessor.receiveRequest(
         deepEqual({
-          targetID,
-          currentContext: finalContext,
-          input: {
-            oldContext,
-            changedContext: additionalContext,
-            newContext: finalContext,
-            type: "context_change",
+          genericRequest: {
+            targetID,
+            currentContext: finalContext,
+            input: {
+              oldContext,
+              changedContext: additionalContext,
+              newContext: finalContext,
+              type: "context_change",
+            },
+            targetPlatform: "telegram",
+            type: "manual_trigger",
           },
-          targetPlatform: "telegram",
-          type: "manual_trigger",
+          rawRequest: undefined,
         })
       )
     ).once();
@@ -135,16 +135,19 @@ describe("Inject context on receive", () => {
 
     // When
     await transformed.receiveRequest({
-      targetID,
-      targetPlatform,
-      currentContext: {},
-      input: {
-        changedContext: {},
-        oldContext: {},
-        newContext: {},
-        type: "context_change",
+      genericRequest: {
+        targetID,
+        targetPlatform,
+        currentContext: {},
+        input: {
+          changedContext: {},
+          oldContext: {},
+          newContext: {},
+          type: "context_change",
+        },
+        type: "manual_trigger",
       },
-      type: "manual_trigger",
+      rawRequest: undefined,
     });
 
     // Then
@@ -155,8 +158,8 @@ describe("Inject context on receive", () => {
   it("Should inject context on receive", async () => {
     // Setup
     const expectedContext = { a: 1, b: 2 };
-    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
     when(
       contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
     ).thenResolve(expectedContext);
@@ -177,16 +180,21 @@ describe("Inject context on receive", () => {
     };
 
     // When
-    await transformed.receiveRequest(genericRequest);
+    await transformed.receiveRequest({ genericRequest, rawRequest: undefined });
 
     // Then
     verify(
       contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
     ).once();
-
     verify(
       msgProcessor.receiveRequest(
-        deepEqual({ ...genericRequest, currentContext: expectedContext })
+        deepEqual({
+          genericRequest: {
+            ...genericRequest,
+            currentContext: expectedContext,
+          },
+          rawRequest: undefined,
+        })
       )
     ).once();
   });
@@ -203,26 +211,33 @@ describe("Save user for target ID", () => {
       instance(msgProcessor),
       saveUserForTargetID({
         contextDAO: instance(contextDAO),
-        getUser: async () => ({ id: targetID }),
+        getUser: async () => {
+          return { id: targetID };
+        },
         isEnabled: async ({ currentContext: { targetID } }) => {
           return !!targetID;
         },
-        saveUser: async () => ({ additionalContext: { targetID } }),
+        saveUser: async () => {
+          return { additionalContext: { targetID } };
+        },
       })(middlewareInput)
     );
 
     // When
     await transformed.receiveRequest({
-      targetID,
-      targetPlatform,
-      currentContext: { targetID },
-      input: {
-        changedContext: {},
-        oldContext: {},
-        newContext: {},
-        type: "context_change",
+      genericRequest: {
+        targetID,
+        targetPlatform,
+        currentContext: { targetID },
+        input: {
+          changedContext: {},
+          oldContext: {},
+          newContext: {},
+          type: "context_change",
+        },
+        type: "manual_trigger",
       },
-      type: "manual_trigger",
+      rawRequest: undefined,
     });
 
     // Then
@@ -238,18 +253,21 @@ describe("Save user for target ID", () => {
       newContext: additionalContext,
       oldContext: {},
     });
-
     when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(msgProcessor),
       saveUserForTargetID({
         contextDAO: instance(contextDAO),
-        getUser: async () => ({ id: targetID }),
+        getUser: async () => {
+          return { id: targetID };
+        },
         isEnabled: async ({ currentContext: { targetID } }) => {
           return !!targetID;
         },
-        saveUser: async () => ({ additionalContext }),
+        saveUser: async () => {
+          return { additionalContext };
+        },
       })(middlewareInput)
     );
 
@@ -262,7 +280,7 @@ describe("Save user for target ID", () => {
     };
 
     // When
-    await transformed.receiveRequest(genericRequest);
+    await transformed.receiveRequest({ genericRequest, rawRequest: undefined });
 
     // Then
     verify(
@@ -270,10 +288,15 @@ describe("Save user for target ID", () => {
         deepEqual({ additionalContext, targetID, targetPlatform })
       )
     ).once();
-
     verify(
       msgProcessor.receiveRequest(
-        deepEqual({ ...genericRequest, currentContext: additionalContext })
+        deepEqual({
+          genericRequest: {
+            ...genericRequest,
+            currentContext: additionalContext,
+          },
+          rawRequest: undefined,
+        })
       )
     ).once();
   });
@@ -308,16 +331,19 @@ describe("Save Telegram user for target ID", () => {
 
     // When
     await transformed.receiveRequest({
-      currentContext: { targetID: targetID.toString() },
-      input: {
-        changedContext: {},
-        oldContext: {},
-        newContext: {},
-        type: "context_change",
+      genericRequest: {
+        currentContext: { targetID: targetID.toString() },
+        input: {
+          changedContext: {},
+          oldContext: {},
+          newContext: {},
+          type: "context_change",
+        },
+        targetID: `${targetID}`,
+        targetPlatform: "telegram",
+        type: "manual_trigger",
       },
-      targetID: `${targetID}`,
-      targetPlatform: "telegram",
-      type: "manual_trigger",
+      rawRequest: undefined,
     });
 
     // Then
@@ -347,20 +373,23 @@ describe("Save Telegram user for target ID", () => {
 
     // When
     await transformed.receiveRequest({
-      currentBot: { id: 0, first_name: "", username: "" },
-      currentContext: { targetID: targetID.toString() },
-      input: { text: "", type: "text" },
-      targetID: targetID.toString(),
-      targetPlatform: "telegram",
-      telegramUser: {
-        id: 0,
-        first_name: "",
-        last_name: "",
-        username: "",
-        language_code: "en" as const,
-        is_bot: false,
+      genericRequest: {
+        currentBot: { id: 0, first_name: "", username: "" },
+        currentContext: { targetID: targetID.toString() },
+        input: { text: "", type: "text" },
+        targetID: targetID.toString(),
+        targetPlatform: "telegram",
+        telegramUser: {
+          id: 0,
+          first_name: "",
+          last_name: "",
+          username: "",
+          language_code: "en" as const,
+          is_bot: false,
+        },
+        type: "message_trigger",
       },
-      type: "message_trigger",
+      rawRequest: undefined,
     });
 
     // Then

@@ -75,9 +75,9 @@ export function saveTelegramUser<Context>({
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (genericRequest) => {
+      receiveRequest: async ({ genericRequest, ...args }) => {
         if (genericRequest.type !== "message_trigger") {
-          return processor.receiveRequest(genericRequest);
+          return processor.receiveRequest({ ...args, genericRequest });
         }
 
         let {
@@ -99,7 +99,10 @@ export function saveTelegramUser<Context>({
           currentContext = newContext;
         }
 
-        return processor.receiveRequest({ ...genericRequest, currentContext });
+        return processor.receiveRequest({
+          ...args,
+          genericRequest: { ...genericRequest, currentContext },
+        });
       },
     };
   };

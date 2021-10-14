@@ -16,18 +16,9 @@ export type CrossPlatformRequestInput<Context> =
   | ErrorRequestInput
   | WitRequestInput;
 
-export type CrossPlatformRequest<Context> = BaseRequest<Context> &
-  Readonly<{ targetPlatform: string }> &
-  (
-    | Readonly<{
-        input: CrossPlatformRequestInput<Context>;
-        type: "message_trigger";
-      }>
-    | Readonly<{
-        input: CrossPlatformRequestInput<Context>;
-        type: "manual_trigger";
-      }>
-  );
+export interface GenericMessageTriggerRequest {
+  readonly type: "message_trigger";
+}
 
 export type AmbiguousGenericRequest<Context> =
   | FacebookGenericRequest<Context>

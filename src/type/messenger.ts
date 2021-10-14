@@ -1,7 +1,10 @@
 import { PlatformClient } from "./client";
 import { Transformer } from "./common";
 import { LeafSelector } from "./leaf";
-import { AmbiguousGenericRequest } from "./request";
+import {
+  AmbiguousGenericRequest,
+  GenericMessageTriggerRequest,
+} from "./request";
 import { AmbiguousGenericResponse } from "./response";
 
 /** Represents all supported platform identifiers */
@@ -19,17 +22,24 @@ export interface BaseMessageProcessorConfig<Context> {
 
 export interface RawRequestGeneralizer<RawRequest, GenericRequest> {
   /** Generalize a raw request into a generic request */
-  generalizeRequest(request: RawRequest): Promise<readonly GenericRequest[]>;
+  generalizeRequest(rawRequest: RawRequest): Promise<readonly GenericRequest[]>;
 }
 
-export interface GenericRequestReceiver<GenericRequest> {
+export interface GenericRequestReceiver<RawRequest, GenericRequest> {
   /** Receive an incoming generic request */
-  receiveRequest(request: GenericRequest): Promise<void>;
+  receiveRequest(
+    args: Readonly<{
+      genericRequest: GenericRequest;
+      rawRequest: GenericRequest extends GenericMessageTriggerRequest
+        ? RawRequest
+        : undefined;
+    }>
+  ): Promise<void>;
 }
 
 export interface GenericResponseSender<GenericResponse, SendResult> {
   /** Send an outgoing platform response */
-  sendResponse(response: GenericResponse): Promise<SendResult>;
+  sendResponse(genericResponse: GenericResponse): Promise<SendResult>;
 }
 
 /**
@@ -43,7 +53,7 @@ export interface GenericResponseSender<GenericResponse, SendResult> {
  */
 export interface BaseMessageProcessor<Context>
   extends RawRequestGeneralizer<unknown, AmbiguousGenericRequest<Context>>,
-    GenericRequestReceiver<AmbiguousGenericRequest<Context>>,
+    GenericRequestReceiver<unknown, AmbiguousGenericRequest<Context>>,
     GenericResponseSender<AmbiguousGenericResponse<Context>, unknown> {}
 
 export interface MessengerConfig<Context> {

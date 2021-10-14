@@ -52,18 +52,18 @@ export async function createMessageProcessor<Context>(
 
   finalMessageProcessor = await compose(
     {
-      generalizeRequest: (platformReq) => {
-        return mapRequest(platformReq);
+      generalizeRequest: (rawRequest) => {
+        return mapRequest(rawRequest);
       },
-      receiveRequest: async (request) => {
-        await leafSelector.next(request);
+      receiveRequest: async ({ genericRequest }) => {
+        await leafSelector.next(genericRequest);
       },
-      sendResponse: async (response) => {
-        if (response.targetPlatform !== targetPlatform) {
+      sendResponse: async (genericResponse) => {
+        if (genericResponse.targetPlatform !== targetPlatform) {
           return;
         }
 
-        const data = await mapResponse(response);
+        const data = await mapResponse(genericResponse);
 
         return mapSeries(data, (datum) => {
           return client.sendResponse(datum);
@@ -90,11 +90,11 @@ export async function createMessenger<Context>({
   });
 
   return {
-    processRawRequest: async (platformReq) => {
-      const genericReq = await processor.generalizeRequest(platformReq);
+    processRawRequest: async (rawRequest) => {
+      const genericRequests = await processor.generalizeRequest(rawRequest);
 
-      return mapSeries(genericReq, (req) => {
-        return processor.receiveRequest(req);
+      return mapSeries(genericRequests, (genericRequest) => {
+        return processor.receiveRequest({ genericRequest, rawRequest });
       });
     },
   };
@@ -138,42 +138,44 @@ export function createCrossPlatformMessageProcessor<Context>(
   }
 
   return {
-    generalizeRequest: async (platformReq) => {
-      const targetPlatform = getPlatform(platformReq);
+    generalizeRequest: async (rawRequest) => {
+      const targetPlatform = getPlatform(rawRequest);
 
       return switchPlatform(targetPlatform, {
         facebookCallback: (processor) => {
-          return processor.generalizeRequest(platformReq as FacebookRawRequest);
+          return processor.generalizeRequest(rawRequest as FacebookRawRequest);
         },
         telegramCallback: (processor) => {
-          return processor.generalizeRequest(platformReq as TelegramRawRequest);
+          return processor.generalizeRequest(rawRequest as TelegramRawRequest);
         },
       });
     },
-    receiveRequest: async (request) => {
-      return switchPlatform(request.targetPlatform, {
+    receiveRequest: async ({ genericRequest, rawRequest }) => {
+      return switchPlatform(genericRequest.targetPlatform, {
         facebookCallback: (processor) => {
-          return processor.receiveRequest(
-            request as FacebookGenericRequest<Context>
-          );
+          return processor.receiveRequest({
+            genericRequest: genericRequest as FacebookGenericRequest<Context>,
+            rawRequest: rawRequest as FacebookRawRequest,
+          });
         },
         telegramCallback: (processor) => {
-          return processor.receiveRequest(
-            request as TelegramGenericRequest<Context>
-          );
+          return processor.receiveRequest({
+            genericRequest: genericRequest as TelegramGenericRequest<Context>,
+            rawRequest: rawRequest as TelegramRawRequest,
+          });
         },
       });
     },
-    sendResponse: async (response) => {
-      return switchPlatform(response.targetPlatform, {
+    sendResponse: async (genericResponse) => {
+      return switchPlatform(genericResponse.targetPlatform, {
         facebookCallback: (processor) => {
           return processor.sendResponse(
-            response as FacebookGenericResponse<Context>
+            genericResponse as FacebookGenericResponse<Context>
           );
         },
         telegramCallback: (processor) => {
           return processor.sendResponse(
-            response as TelegramGenericResponse<Context>
+            genericResponse as TelegramGenericResponse<Context>
           );
         },
       });

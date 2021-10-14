@@ -9,7 +9,11 @@ import {
   MessageProcessorMiddleware,
   RawRequestGeneralizer,
 } from "./messenger";
-import { BaseRequest, CrossPlatformRequestInput } from "./request";
+import {
+  BaseRequest,
+  CrossPlatformRequestInput,
+  GenericMessageTriggerRequest,
+} from "./request";
 import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
@@ -27,10 +31,8 @@ export type FacebookGenericRequest<Context> = Readonly<{
 }> &
   BaseRequest<Context> &
   (
-    | Readonly<{
-        input: FacebookRequestInput<Context>;
-        type: "message_trigger";
-      }>
+    | (GenericMessageTriggerRequest &
+        Readonly<{ input: FacebookRequestInput<Context> }>)
     | Readonly<{ input: FacebookRequestInput<Context>; type: "manual_trigger" }>
   );
 
@@ -441,7 +443,7 @@ export interface FacebookMessageProcessor<Context>
       FacebookRawRequest,
       FacebookGenericRequest<Context>
     >,
-    GenericRequestReceiver<FacebookGenericRequest<Context>>,
+    GenericRequestReceiver<FacebookRawRequest, FacebookGenericRequest<Context>>,
     GenericResponseSender<FacebookGenericResponse<Context>, unknown> {}
 
 export type FacebookMessageProcessorMiddleware<

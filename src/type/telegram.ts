@@ -9,7 +9,11 @@ import {
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
-import { BaseRequest, CrossPlatformRequestInput } from "./request";
+import {
+  BaseRequest,
+  CrossPlatformRequestInput,
+  GenericMessageTriggerRequest,
+} from "./request";
 import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
@@ -41,12 +45,12 @@ export type TelegramGenericRequest<Context> = Readonly<{
 }> &
   BaseRequest<Context> &
   (
-    | Readonly<{
-        currentBot: TelegramBot;
-        telegramUser: TelegramUser;
-        input: TelegramRequestInput<Context>;
-        type: "message_trigger";
-      }>
+    | (GenericMessageTriggerRequest &
+        Readonly<{
+          currentBot: TelegramBot;
+          telegramUser: TelegramUser;
+          input: TelegramRequestInput<Context>;
+        }>)
     | Readonly<{ input: TelegramRequestInput<Context>; type: "manual_trigger" }>
   );
 
@@ -368,7 +372,7 @@ export interface TelegramMessageProcessor<Context>
       TelegramRawRequest,
       TelegramGenericRequest<Context>
     >,
-    GenericRequestReceiver<TelegramGenericRequest<Context>>,
+    GenericRequestReceiver<TelegramRawRequest, TelegramGenericRequest<Context>>,
     GenericResponseSender<
       TelegramGenericResponse<Context>,
       readonly _TelegramRawRequest.Message["message"][]

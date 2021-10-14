@@ -18,15 +18,15 @@ export function saveContextOnSend<Context>({
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
-      sendResponse: async (response) => {
+      sendResponse: async (genericResponse) => {
         const {
           originalRequest,
           targetID,
           targetPlatform,
           additionalContext,
-        } = response;
+        } = genericResponse;
 
-        const result = await processor.sendResponse(response);
+        const result = await processor.sendResponse(genericResponse);
 
         /**
          * We could send the response and emit the context_change request at
@@ -45,16 +45,19 @@ export function saveContextOnSend<Context>({
           const finalProcessor = getFinalMessageProcessor();
 
           await finalProcessor.receiveRequest({
-            currentContext: newContext,
-            input: {
-              newContext,
-              oldContext,
-              changedContext: additionalContext,
-              type: "context_change",
+            genericRequest: {
+              currentContext: newContext,
+              input: {
+                newContext,
+                oldContext,
+                changedContext: additionalContext,
+                type: "context_change",
+              },
+              targetID: genericResponse.targetID,
+              targetPlatform: genericResponse.targetPlatform,
+              type: "manual_trigger",
             },
-            targetID: response.targetID,
-            targetPlatform: response.targetPlatform,
-            type: "manual_trigger",
+            rawRequest: undefined,
           });
         }
 
@@ -76,21 +79,26 @@ export function injectContextOnReceive<Context>({
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (request) => {
-        if (request.input.type === "context_change") {
-          return processor.receiveRequest(request);
+      receiveRequest: async ({ genericRequest, ...args }) => {
+        if (genericRequest.input.type === "context_change") {
+          return processor.receiveRequest({ ...args, genericRequest });
         }
 
-        const { targetID, targetPlatform } = request;
-
         let currentContext = await contextDAO.getContext({
-          targetID,
-          targetPlatform,
+          targetID: genericRequest.targetID,
+          targetPlatform: genericRequest.targetPlatform,
         });
 
         /** Allow the request's context to override stored context */
-        currentContext = { ...currentContext, ...request.currentContext };
-        return processor.receiveRequest({ ...request, currentContext });
+        currentContext = {
+          ...currentContext,
+          ...genericRequest.currentContext,
+        };
+
+        return processor.receiveRequest({
+          ...args,
+          genericRequest: { ...genericRequest, currentContext },
+        });
       },
     };
   };
@@ -127,12 +135,12 @@ export function saveUserForTargetID<Context, RawUser>({
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (request) => {
-        if (request.input.type === "context_change") {
-          return processor.receiveRequest(request);
+      receiveRequest: async ({ genericRequest, ...args }) => {
+        if (genericRequest.input.type === "context_change") {
+          return processor.receiveRequest({ ...args, genericRequest });
         }
 
-        let { currentContext, targetID, targetPlatform } = request;
+        let { currentContext, targetID, targetPlatform } = genericRequest;
 
         if (await isEnabled({ currentContext })) {
           const rawUser = await getUser(targetID);
@@ -147,7 +155,10 @@ export function saveUserForTargetID<Context, RawUser>({
           currentContext = newContext;
         }
 
-        return processor.receiveRequest({ ...request, currentContext });
+        return processor.receiveRequest({
+          ...args,
+          genericRequest: { ...genericRequest, currentContext },
+        });
       },
     };
   };
@@ -167,31 +178,31 @@ export function setTypingIndicator<Context>({
   client: PlatformClient<unknown>;
   onSetTypingError?: (e: Error) => void;
 }>): MessageProcessorMiddleware<Context> {
-  return () => async (processor) => {
-    return {
-      ...processor,
-      sendResponse: async (response) => {
-        const { targetID } = response;
+  return () => {
+    return async (processor) => {
+      return {
+        ...processor,
+        sendResponse: async (genericResponse) => {
+          const [result] = await Promise.all([
+            processor.sendResponse(genericResponse),
+            (async function () {
+              try {
+                await client.setTypingIndicator(genericResponse.targetID, true);
+              } catch (error) {
+                onSetTypingError(error as Error);
+              }
+            })(),
+          ]);
 
-        const [result] = await Promise.all([
-          processor.sendResponse(response),
-          (async function () {
-            try {
-              await client.setTypingIndicator(targetID, true);
-            } catch (error) {
-              onSetTypingError(error as Error);
-            }
-          })(),
-        ]);
+          try {
+            await client.setTypingIndicator(genericResponse.targetID, false);
+          } catch (error) {
+            onSetTypingError(error as Error);
+          }
 
-        try {
-          await client.setTypingIndicator(targetID, false);
-        } catch (error) {
-          onSetTypingError(error as Error);
-        }
-
-        return result;
-      },
+          return result;
+        },
+      };
     };
   };
 }

@@ -7,7 +7,6 @@ import {
   verify,
   when,
 } from "ts-mockito";
-import { _TelegramRawRequest } from "../../build/type";
 import {
   AmbiguousGenericRequest,
   AmbiguousGenericResponse,
@@ -110,11 +109,14 @@ describe("Generic message processor", () => {
     });
 
     await messageProcessor.receiveRequest({
-      currentContext,
-      targetID,
-      targetPlatform,
-      input: { type: "placebo" },
-      type: "message_trigger",
+      genericRequest: {
+        currentContext,
+        targetID,
+        targetPlatform,
+        input: { type: "placebo" },
+        type: "message_trigger",
+      },
+      rawRequest: {},
     });
 
     // Then
