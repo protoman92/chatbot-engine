@@ -1,7 +1,7 @@
 import { TelegramBot, TelegramUser, _TelegramRawRequest } from "../type";
 import {
   createGenericTelegramRequest,
-  extractcommand,
+  extractCommand,
 } from "./telegram-messenger";
 
 describe("Create generic Telegram requests", () => {
@@ -261,7 +261,7 @@ describe("Utilities", () => {
     const username = "haipham";
 
     // Setup && When && Then 1
-    const [command1, text1] = extractcommand(
+    const [command1, text1] = extractCommand(
       username,
       `/start    @haipham    run123  `
     );
@@ -270,24 +270,24 @@ describe("Utilities", () => {
     expect(text1).toEqual("run123");
 
     // Setup && When && Then 2
-    const [command2, text2] = extractcommand(username, "run123");
+    const [command2, text2] = extractCommand(username, "run123");
     expect(command2).toBeFalsy();
     expect(text2).toEqual("run123");
 
     // Setup && When && Then 3
-    const [command3, text3] = extractcommand(username, `/start @haiphamrun123`);
+    const [command3, text3] = extractCommand(username, `/start @haiphamrun123`);
 
     expect(command3).toEqual("start");
     expect(text3).toEqual("run123");
 
     // Setup && When && Then 4
-    const [command4, text4] = extractcommand(username, `/start@haiphamrun123`);
+    const [command4, text4] = extractCommand(username, `/start@haiphamrun123`);
 
     expect(command4).toEqual("start");
     expect(text4).toEqual("run123");
 
     // Setup && When && Then 5
-    const [command5, text5] = extractcommand(
+    const [command5, text5] = extractCommand(
       username,
       `/start@haipham run123
 456
@@ -302,7 +302,7 @@ describe("Utilities", () => {
 789`);
 
     // Setup && When && Then 6
-    const [command6, text6] = extractcommand(username, "/start run123");
+    const [command6, text6] = extractCommand(username, "/start run123");
     expect(command6).toEqual("start");
     expect(text6).toEqual("run123");
   });

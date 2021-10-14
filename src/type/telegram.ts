@@ -260,7 +260,6 @@ export namespace _TelegramRawRequest {
       data: string;
     }> &
       Pick<Message, "message">;
-
     readonly update_id: number;
   }
 }

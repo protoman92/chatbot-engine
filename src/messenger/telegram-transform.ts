@@ -4,6 +4,7 @@ import {
   TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramUser,
+  _TelegramRawRequest,
 } from "../type";
 
 /**
@@ -15,23 +16,44 @@ export function saveTelegramMessages<Context>({
   saveMessage,
 }: Readonly<{
   saveMessage: (
-    args: Readonly<{ rawRequest: TelegramRawRequest }>
+    args: Readonly<{
+      rawRequest: TelegramRawRequest;
+      rawRequestMessage: _TelegramRawRequest.Message["message"];
+    }>
   ) => Promise<void>;
 }>): TelegramMessageProcessorMiddleware<Context> {
+  function extractRawRequestMessage(
+    rawRequest: TelegramRawRequest
+  ): _TelegramRawRequest.Message["message"] {
+    if ("callback_query" in rawRequest) {
+      return rawRequest.callback_query.message;
+    } else {
+      return rawRequest.message;
+    }
+  }
+
   return () => async (processor) => {
     return {
       ...processor,
       generalizeRequest: async (rawRequest) => {
         const [genericRequest] = await Promise.all([
           processor.generalizeRequest(rawRequest),
-          saveMessage({ rawRequest }),
+          saveMessage({
+            rawRequest,
+            rawRequestMessage: extractRawRequestMessage(rawRequest),
+          }),
         ]);
 
         return genericRequest;
       },
       sendResponse: async (genericResponse) => {
         const sendResult = await processor.sendResponse(genericResponse);
-        await saveMessage({ rawRequest: sendResult });
+
+        await saveMessage({
+          rawRequest: sendResult,
+          rawRequestMessage: extractRawRequestMessage(sendResult),
+        });
+
         return sendResult;
       },
     };

@@ -28,7 +28,7 @@ const MESSAGE_TEXT_CHARACTER_LIMIT = 4096;
  * should give [start, 123], i.e. the command and the instruction. If the
  * command does not exist, fallback to the base input text for instruction.
  */
-export function extractcommand(
+export function extractCommand(
   username: string,
   textWithCommand: string
 ): [string, string] {
@@ -66,7 +66,7 @@ export function createGenericTelegramRequest<Context>(
     | undefined {
     if ("text" in message) {
       const { text: textWithCommand } = message;
-      const [command, text] = extractcommand(username, textWithCommand);
+      const [command, text] = extractCommand(username, textWithCommand);
 
       if (!!command) {
         return [
@@ -80,27 +80,26 @@ export function createGenericTelegramRequest<Context>(
     }
 
     if ("document" in message) {
-      const { document } = message;
-      return [user, chat, [{ document: document, type: "document" }]];
+      return [user, chat, [{ document: message.document, type: "document" }]];
     }
 
     if ("location" in message) {
-      const { location: coordinate } = message;
-      return [user, chat, [{ coordinate, type: "location" }]];
+      return [user, chat, [{ coordinate: message.location, type: "location" }]];
     }
 
     if ("new_chat_members" in message) {
-      const { new_chat_members: newChatMembers } = message;
-      return [user, chat, [{ newChatMembers, type: "joined_chat" }]];
-    }
-
-    if ("left_chat_member" in message) {
-      const { left_chat_member } = message;
-
       return [
         user,
         chat,
-        [{ leftChatMembers: [left_chat_member], type: "left_chat" }],
+        [{ newChatMembers: message.new_chat_members, type: "joined_chat" }],
+      ];
+    }
+
+    if ("left_chat_member" in message) {
+      return [
+        user,
+        chat,
+        [{ leftChatMembers: [message.left_chat_member], type: "left_chat" }],
       ];
     }
 

@@ -1,4 +1,5 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
+import { _TelegramRawRequest } from "../../build/type";
 import { compose, joinObjects } from "../common/utils";
 import {
   AmbiguousGenericRequest,
@@ -8,7 +9,6 @@ import {
   PlatformClient,
   TelegramGenericResponse,
   TelegramMessageProcessor,
-  TelegramRawRequest,
   _MessageProcessorMiddleware,
 } from "../type";
 import {
@@ -402,10 +402,14 @@ describe("Save Telegram messages", () => {
 
   it("Should allow saving Telegram messages when appropriate", async () => {
     // Setup
-    const rawRequest: TelegramRawRequest = {} as TelegramRawRequest;
+    const inRawRequest = {
+      callback_query: { message: {} },
+    } as _TelegramRawRequest.Callback;
+
+    const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
     when(middlewareArgs.saveMessage(anything())).thenResolve(undefined);
     when(tlMessenger.generalizeRequest(anything())).thenResolve({} as any);
-    when(tlMessenger.sendResponse(anything())).thenResolve(rawRequest);
+    when(tlMessenger.sendResponse(anything())).thenResolve(outRawRequest);
 
     const transformed = await compose(
       instance(tlMessenger),
@@ -417,11 +421,26 @@ describe("Save Telegram messages", () => {
     );
 
     // When
-    await transformed.generalizeRequest({} as TelegramRawRequest);
+    await transformed.generalizeRequest(inRawRequest);
     await transformed.sendResponse({} as TelegramGenericResponse<Context>);
 
     // Then
-    verify(middlewareArgs.saveMessage(deepEqual({ rawRequest }))).twice();
+    verify(
+      middlewareArgs.saveMessage(
+        deepEqual({
+          rawRequest: inRawRequest,
+          rawRequestMessage: inRawRequest.callback_query.message,
+        })
+      )
+    ).once();
+    verify(
+      middlewareArgs.saveMessage(
+        deepEqual({
+          rawRequest: outRawRequest,
+          rawRequestMessage: outRawRequest.message,
+        })
+      )
+    ).once();
   });
 });
 
