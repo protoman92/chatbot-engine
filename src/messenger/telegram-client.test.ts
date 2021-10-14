@@ -1,4 +1,4 @@
-import { anything, instance, spy, verify, when } from "ts-mockito";
+import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { HTTPClient, TelegramClient, TelegramConfig } from "../type";
 import { createTelegramClient } from "./telegram-client";
 
@@ -68,5 +68,26 @@ describe("Telegram client", () => {
 
     // Then
     verify(client.communicate(anything())).never();
+  });
+
+  it("Should delete message with the correct chat and message IDs", async () => {
+    // Setup
+    const chatID = "chat-id";
+    const messageID = "message-id";
+    when(client.communicate(anything())).thenResolve({ ok: true });
+
+    // When
+    await tlClient.deleteMessage({ chatID, messageID });
+
+    // Then
+    verify(
+      client.communicate(
+        deepEqual({
+          method: "GET",
+          query: { chat_id: chatID, message_id: messageID },
+          url: "https://api.telegram.org/bot/deleteMessage",
+        })
+      )
+    ).once();
   });
 });

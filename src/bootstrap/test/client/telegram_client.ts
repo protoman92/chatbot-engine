@@ -2,6 +2,7 @@ import { TelegramClient } from "../../../type";
 
 export const mockTelegramClient = (() => {
   const client: TelegramClient = {
+    deleteMessage: async function () {},
     getCurrentBot: async function () {
       return { id: 0, first_name: "", username: "" };
     },

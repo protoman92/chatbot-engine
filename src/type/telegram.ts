@@ -432,6 +432,10 @@ export namespace _TelegramClient {
 
 /** A Telegram-specific client */
 export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
+  deleteMessage(
+    args: Readonly<{ chatID: number | string; messageID: number | string }>
+  ): Promise<void>;
+
   /** Get the current chatbot */
   getCurrentBot(): Promise<TelegramBot>;
 
@@ -445,7 +449,7 @@ export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
   getFileURLFromID(fileID: string): Promise<string>;
 
   /** Check if a bot is a member of a group */
-  isMember(chatID: string, botID: string): Promise<boolean>;
+  isMember(args: Readonly<{ chatID: string; botID: string }>): Promise<boolean>;
 
   /** Set webhook to start receiving message updates */
   setWebhook(webhookURL: string): Promise<unknown>;

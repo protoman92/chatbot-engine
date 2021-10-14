@@ -40,6 +40,13 @@ export function createTelegramClient(
   }
 
   const telegramClient: TelegramClient = {
+    deleteMessage: ({ chatID: chat_id, messageID: message_id }) => {
+      return communicate({
+        method: "GET",
+        query: { chat_id, message_id },
+        url: formatURL("deleteMessage"),
+      });
+    },
     getCurrentBot: () => {
       return communicate<TelegramBot>({
         url: formatURL("getMe"),
@@ -61,12 +68,14 @@ export function createTelegramClient(
       const fileURL = await telegramClient.getFileURL(file_path);
       return fileURL;
     },
-    isMember: (chat_id, user_id) => {
+    isMember: ({ chatID: chat_id, botID: user_id }) => {
       return communicate<{ status: string }>({
         url: formatURL("getChatMember"),
         method: "GET",
         query: { chat_id, user_id },
-      }).then(({ status }) => status === "member");
+      }).then(({ status }) => {
+        return status === "member";
+      });
     },
     sendResponse: ({
       action,
