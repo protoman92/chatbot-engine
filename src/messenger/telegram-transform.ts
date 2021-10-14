@@ -2,8 +2,41 @@ import {
   AmbiguousGenericRequest,
   ContextDAO,
   TelegramMessageProcessorMiddleware,
+  TelegramRawRequest,
   TelegramUser,
 } from "../type";
+
+/**
+ * Allow saving Telegram messages when:
+ * - Generalizing raw request to generic request.
+ * - Sending generic response.
+ */
+export function saveTelegramMessages<Context>({
+  saveMessage,
+}: Readonly<{
+  saveMessage: (
+    args: Readonly<{ rawRequest: TelegramRawRequest }>
+  ) => Promise<void>;
+}>): TelegramMessageProcessorMiddleware<Context> {
+  return () => async (processor) => {
+    return {
+      ...processor,
+      generalizeRequest: async (rawRequest) => {
+        const [genericRequest] = await Promise.all([
+          processor.generalizeRequest(rawRequest),
+          saveMessage({ rawRequest }),
+        ]);
+
+        return genericRequest;
+      },
+      sendResponse: async (genericResponse) => {
+        const sendResult = await processor.sendResponse(genericResponse);
+        await saveMessage({ rawRequest: sendResult });
+        return sendResult;
+      },
+    };
+  };
+}
 
 /** Save a Telegram user in backend if targetID is not found in context */
 export function saveTelegramUser<Context>({
@@ -26,12 +59,9 @@ export function saveTelegramUser<Context>({
   return () => async (processor) => {
     return {
       ...processor,
-      receiveRequest: async (request) => {
-        if (
-          request.type !== "message_trigger" ||
-          request.targetPlatform !== "telegram"
-        ) {
-          return processor.receiveRequest(request);
+      receiveRequest: async (genericRequest) => {
+        if (genericRequest.type !== "message_trigger") {
+          return processor.receiveRequest(genericRequest);
         }
 
         let {
@@ -39,7 +69,7 @@ export function saveTelegramUser<Context>({
           targetID,
           targetPlatform,
           telegramUser,
-        } = request;
+        } = genericRequest;
 
         if (await isEnabled({ currentContext })) {
           const { additionalContext = {} } = await saveUser(telegramUser);
@@ -53,7 +83,7 @@ export function saveTelegramUser<Context>({
           currentContext = newContext;
         }
 
-        return processor.receiveRequest({ ...request, currentContext });
+        return processor.receiveRequest({ ...genericRequest, currentContext });
       },
     };
   };

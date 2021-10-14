@@ -6,7 +6,9 @@ import {
   BaseMessageProcessor,
   ContextDAO,
   PlatformClient,
+  TelegramGenericResponse,
   TelegramMessageProcessor,
+  TelegramRawRequest,
   _MessageProcessorMiddleware,
 } from "../type";
 import {
@@ -15,7 +17,7 @@ import {
   saveUserForTargetID,
   setTypingIndicator,
 } from "./messenger-transform";
-import { saveTelegramUser } from "./telegram-transform";
+import { saveTelegramMessages, saveTelegramUser } from "./telegram-transform";
 
 type Context = Record<string, unknown>;
 const targetPlatform = "facebook";
@@ -289,34 +291,6 @@ describe("Save Telegram user for target ID", () => {
     });
   });
 
-  it("Should not save user if invalid target platform", async () => {
-    // Setup
-    when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
-
-    const transformed = await compose(
-      instance(tlMessenger),
-      saveTelegramUser({
-        contextDAO: instance(contextDAO),
-        isEnabled: async ({ currentContext: { targetID } }) => {
-          return !!targetID;
-        },
-        saveUser: async () => ({ additionalContext: { targetID } }),
-      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
-    );
-
-    // When
-    await transformed.receiveRequest({
-      currentContext: { targetID: targetID.toString() },
-      input: { text: "", type: "text" },
-      targetID: `${targetID}`,
-      targetPlatform: "facebook",
-      type: "message_trigger",
-    } as any);
-
-    // Then
-    verify(contextDAO.appendContext(anything())).never();
-  });
-
   it("Should not save user if invalid request type", async () => {
     // Setup
     when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
@@ -399,6 +373,55 @@ describe("Save Telegram user for target ID", () => {
         })
       )
     ).once();
+  });
+});
+
+describe("Save Telegram messages", () => {
+  let middlewareArgs: Parameters<typeof saveTelegramMessages>[0];
+  let tlMessenger: TelegramMessageProcessor<{}>;
+
+  beforeEach(() => {
+    middlewareArgs = spy<typeof middlewareArgs>({
+      saveMessage: () => {
+        return Promise.reject("");
+      },
+    });
+
+    tlMessenger = spy<TelegramMessageProcessor<{}>>({
+      generalizeRequest: () => {
+        return Promise.reject("");
+      },
+      receiveRequest: () => {
+        return Promise.reject("");
+      },
+      sendResponse: () => {
+        return Promise.reject("");
+      },
+    });
+  });
+
+  it("Should allow saving Telegram messages when appropriate", async () => {
+    // Setup
+    const rawRequest: TelegramRawRequest = {} as TelegramRawRequest;
+    when(middlewareArgs.saveMessage(anything())).thenResolve(undefined);
+    when(tlMessenger.generalizeRequest(anything())).thenResolve({} as any);
+    when(tlMessenger.sendResponse(anything())).thenResolve(rawRequest);
+
+    const transformed = await compose(
+      instance(tlMessenger),
+      saveTelegramMessages(instance(middlewareArgs))({
+        getFinalMessageProcessor: () => {
+          return instance(tlMessenger);
+        },
+      })
+    );
+
+    // When
+    await transformed.generalizeRequest({} as TelegramRawRequest);
+    await transformed.sendResponse({} as TelegramGenericResponse<Context>);
+
+    // Then
+    verify(middlewareArgs.saveMessage(deepEqual({ rawRequest }))).twice();
   });
 });
 
