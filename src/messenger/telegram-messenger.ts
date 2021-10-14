@@ -388,15 +388,15 @@ export async function createTelegramMessageProcessor<Context>(
       leafSelector,
       client,
       targetPlatform: "telegram",
-      mapRequest: async (req) => {
+      mapRequest: async (rawRequest) => {
         return createGenericTelegramRequest(
-          req as TelegramRawRequest,
+          rawRequest as TelegramRawRequest,
           currentBot
         );
       },
-      mapResponse: async (res) => {
+      mapResponse: async (genericResponse) => {
         return createRawTelegramResponse(
-          res as TelegramGenericResponse<Context>
+          genericResponse as TelegramGenericResponse<Context>
         );
       },
     },

@@ -14,10 +14,13 @@ import {
  * - Sending generic response.
  */
 export function saveTelegramMessages<Context>({
+  contextDAO,
   saveMessages,
 }: Readonly<{
+  contextDAO: ContextDAO<Context>;
   saveMessages: (
     args: Readonly<{
+      currentContext: Context;
       rawRequestMessages: readonly _TelegramRawRequest.Message["message"][];
     }>
   ) => Promise<void>;
@@ -44,6 +47,7 @@ export function saveTelegramMessages<Context>({
           const [result] = await Promise.all([
             processor.receiveRequest({ ...args, genericRequest }),
             saveMessages({
+              currentContext: genericRequest.currentContext,
               rawRequestMessages: [
                 extractRawRequestMessage(genericRequest.rawRequest),
               ],
@@ -52,9 +56,19 @@ export function saveTelegramMessages<Context>({
 
           return result;
         },
-        sendResponse: async (genericResponse) => {
-          const sendResult = await processor.sendResponse(genericResponse);
-          await saveMessages({ rawRequestMessages: toArray(sendResult) });
+        sendResponse: async ({ genericResponse }) => {
+          const sendResult = await processor.sendResponse({ genericResponse });
+
+          const currentContext = await contextDAO.getContext({
+            targetID: genericResponse.targetID,
+            targetPlatform: genericResponse.targetPlatform,
+          });
+
+          await saveMessages({
+            currentContext,
+            rawRequestMessages: toArray(sendResult),
+          });
+
           return sendResult;
         },
       };

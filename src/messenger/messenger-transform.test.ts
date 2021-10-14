@@ -1,4 +1,5 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
+import { AmbiguousPlatform } from "../../build/type";
 import { compose, joinObjects } from "../common/utils";
 import {
   AmbiguousGenericRequest,
@@ -430,11 +431,27 @@ describe("Save Telegram user for target ID", () => {
 });
 
 describe("Save Telegram messages", () => {
+  const targetID = "target-id";
+  const targetPlatform: AmbiguousPlatform = "telegram";
+  let contextDAO: ContextDAO<Context>;
   let middlewareArgs: Parameters<typeof saveTelegramMessages>[0];
   let tlMessenger: TelegramMessageProcessor<{}>;
 
   beforeEach(() => {
+    contextDAO = spy<ContextDAO<Context>>({
+      getContext: () => {
+        return Promise.reject("");
+      },
+      appendContext: () => {
+        return Promise.reject("");
+      },
+      resetContext: () => {
+        return Promise.reject("");
+      },
+    });
+
     middlewareArgs = spy<typeof middlewareArgs>({
+      contextDAO: instance(contextDAO),
       saveMessages: () => {
         return Promise.reject("");
       },
@@ -460,6 +477,7 @@ describe("Save Telegram messages", () => {
     } as _TelegramRawRequest.Callback;
 
     const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
+    when(contextDAO.getContext(anything())).thenResolve({});
     when(middlewareArgs.saveMessages(anything())).thenResolve(undefined);
     when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
     when(tlMessenger.sendResponse(anything())).thenResolve([
@@ -478,27 +496,40 @@ describe("Save Telegram messages", () => {
     // When
     await transformed.receiveRequest({
       genericRequest: {
+        targetID,
+        targetPlatform,
+        currentContext: {},
         rawRequest: inRawRequest,
         type: "message_trigger",
       } as TelegramGenericRequest<Context>,
     });
 
     await transformed.receiveRequest({
-      genericRequest: { type: "manual_trigger" } as TelegramGenericRequest<
-        Context
-      >,
+      genericRequest: {
+        targetID,
+        targetPlatform,
+        type: "manual_trigger",
+      } as TelegramGenericRequest<Context>,
     });
 
     await transformed.sendResponse({
-      genericResponse: {} as TelegramGenericResponse<Context>,
+      genericResponse: { targetID, targetPlatform } as TelegramGenericResponse<
+        Context
+      >,
     });
 
     // Then
     verify(
       middlewareArgs.saveMessages(
-        deepEqual({ rawRequestMessages: [inRawRequest.callback_query.message] })
+        deepEqual({
+          currentContext: {},
+          rawRequestMessages: [inRawRequest.callback_query.message],
+        })
       )
     ).twice();
+    verify(
+      contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
+    ).once();
   });
 });
 
