@@ -7,6 +7,7 @@ import {
   verify,
   when,
 } from "ts-mockito";
+import { _TelegramRawRequest } from "../../build/type";
 import {
   AmbiguousGenericRequest,
   AmbiguousGenericResponse,
@@ -16,7 +17,6 @@ import {
   LeafSelector,
   PlatformClient,
   TelegramMessageProcessor,
-  TelegramRawRequest,
 } from "../type";
 import {
   createCrossPlatformMessageProcessor,
@@ -141,20 +141,36 @@ describe("Cross platform message processor", () => {
 
   beforeEach(() => {
     leafSelector = spy<LeafSelector<Context>>({
-      next: () => Promise.reject(""),
-      subscribe: () => Promise.reject(""),
+      next: () => {
+        return Promise.reject("");
+      },
+      subscribe: () => {
+        return Promise.reject("");
+      },
     });
 
     fbProcessor = spy<FacebookMessageProcessor<Context>>({
-      generalizeRequest: () => Promise.resolve([]),
-      receiveRequest: () => Promise.resolve(undefined),
-      sendResponse: () => Promise.resolve({}),
+      generalizeRequest: () => {
+        return Promise.resolve([]);
+      },
+      receiveRequest: () => {
+        return Promise.resolve(undefined);
+      },
+      sendResponse: () => {
+        return Promise.resolve({});
+      },
     });
 
     tlProcessor = spy<TelegramMessageProcessor<Context>>({
-      generalizeRequest: () => Promise.resolve([]),
-      receiveRequest: () => Promise.resolve(undefined),
-      sendResponse: () => Promise.resolve({} as TelegramRawRequest),
+      generalizeRequest: () => {
+        return Promise.resolve([]);
+      },
+      receiveRequest: () => {
+        return Promise.resolve(undefined);
+      },
+      sendResponse: () => {
+        return Promise.resolve([]);
+      },
     });
 
     processors = { facebook: fbProcessor, telegram: tlProcessor };

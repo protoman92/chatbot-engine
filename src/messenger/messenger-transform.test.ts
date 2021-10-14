@@ -382,7 +382,7 @@ describe("Save Telegram messages", () => {
 
   beforeEach(() => {
     middlewareArgs = spy<typeof middlewareArgs>({
-      saveMessage: () => {
+      saveMessages: () => {
         return Promise.reject("");
       },
     });
@@ -407,9 +407,11 @@ describe("Save Telegram messages", () => {
     } as _TelegramRawRequest.Callback;
 
     const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
-    when(middlewareArgs.saveMessage(anything())).thenResolve(undefined);
+    when(middlewareArgs.saveMessages(anything())).thenResolve(undefined);
     when(tlMessenger.generalizeRequest(anything())).thenResolve({} as any);
-    when(tlMessenger.sendResponse(anything())).thenResolve(outRawRequest);
+    when(tlMessenger.sendResponse(anything())).thenResolve([
+      outRawRequest.message,
+    ]);
 
     const transformed = await compose(
       instance(tlMessenger),
@@ -426,21 +428,10 @@ describe("Save Telegram messages", () => {
 
     // Then
     verify(
-      middlewareArgs.saveMessage(
-        deepEqual({
-          rawRequest: inRawRequest,
-          rawRequestMessage: inRawRequest.callback_query.message,
-        })
+      middlewareArgs.saveMessages(
+        deepEqual({ rawRequestMessages: [inRawRequest.callback_query.message] })
       )
-    ).once();
-    verify(
-      middlewareArgs.saveMessage(
-        deepEqual({
-          rawRequest: outRawRequest,
-          rawRequestMessage: outRawRequest.message,
-        })
-      )
-    ).once();
+    ).twice();
   });
 });
 

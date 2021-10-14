@@ -371,7 +371,7 @@ export interface TelegramMessageProcessor<Context>
     GenericRequestReceiver<TelegramGenericRequest<Context>>,
     GenericResponseSender<
       TelegramGenericResponse<Context>,
-      TelegramRawRequest
+      readonly _TelegramRawRequest.Message["message"][]
     > {}
 
 export type TelegramMessageProcessorMiddleware<

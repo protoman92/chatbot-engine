@@ -256,7 +256,7 @@ export function requireKeys<T, K extends keyof T>(
 
 /** Convert something that could either be a single value or an Array to Array */
 export function toArray<T>(value: T | readonly T[]): readonly T[] {
-  return value instanceof Array ? value : [value];
+  return Array.isArray(value) ? value : [value];
 }
 
 /** Transform a promise-convertible to a promise */

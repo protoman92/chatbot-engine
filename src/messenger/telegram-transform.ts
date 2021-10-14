@@ -1,3 +1,4 @@
+import { toArray } from "../common/utils";
 import {
   AmbiguousGenericRequest,
   ContextDAO,
@@ -13,12 +14,11 @@ import {
  * - Sending generic response.
  */
 export function saveTelegramMessages<Context>({
-  saveMessage,
+  saveMessages,
 }: Readonly<{
-  saveMessage: (
+  saveMessages: (
     args: Readonly<{
-      rawRequest: TelegramRawRequest;
-      rawRequestMessage: _TelegramRawRequest.Message["message"];
+      rawRequestMessages: readonly _TelegramRawRequest.Message["message"][];
     }>
   ) => Promise<void>;
 }>): TelegramMessageProcessorMiddleware<Context> {
@@ -38,9 +38,8 @@ export function saveTelegramMessages<Context>({
       generalizeRequest: async (rawRequest) => {
         const [genericRequest] = await Promise.all([
           processor.generalizeRequest(rawRequest),
-          saveMessage({
-            rawRequest,
-            rawRequestMessage: extractRawRequestMessage(rawRequest),
+          saveMessages({
+            rawRequestMessages: [extractRawRequestMessage(rawRequest)],
           }),
         ]);
 
@@ -48,12 +47,7 @@ export function saveTelegramMessages<Context>({
       },
       sendResponse: async (genericResponse) => {
         const sendResult = await processor.sendResponse(genericResponse);
-
-        await saveMessage({
-          rawRequest: sendResult,
-          rawRequestMessage: extractRawRequestMessage(sendResult),
-        });
-
+        await saveMessages({ rawRequestMessages: toArray(sendResult) });
         return sendResult;
       },
     };
