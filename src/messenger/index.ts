@@ -18,7 +18,7 @@ export {
 } from "./messenger-transform";
 export { createTelegramClient } from "./telegram-client";
 export { createTelegramMessageProcessor } from "./telegram-messenger";
-export { saveTelegramUser } from "./telegram-transform";
+export { saveTelegramMessages, saveTelegramUser } from "./telegram-transform";
 export { createWitClient } from "./wit-client";
 export {
   defaultWitClient,

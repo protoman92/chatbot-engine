@@ -24,8 +24,10 @@ import {
   Branch,
   ContextDAO,
   ErrorLeafConfig,
+  FacebookMessageProcessorMiddleware,
   LeafSelector,
   MessageProcessorMiddleware,
+  TelegramMessageProcessorMiddleware,
 } from "../type";
 import {
   DefaultAsynchronousDependencies,
@@ -41,8 +43,14 @@ export type ChatbotProjectDependencies<
   Readonly<{
     contextDAO: ContextDAO<Context>;
     messageProcessorMiddlewares?: Readonly<{
-      facebook?: readonly MessageProcessorMiddleware<Context>[];
-      telegram?: readonly MessageProcessorMiddleware<Context>[];
+      facebook?: readonly (
+        | MessageProcessorMiddleware<Context>
+        | FacebookMessageProcessorMiddleware<Context>
+      )[];
+      telegram?: readonly (
+        | MessageProcessorMiddleware<Context>
+        | TelegramMessageProcessorMiddleware<Context>
+      )[];
     }>;
     onWebhookError: (
       args: Readonly<{
