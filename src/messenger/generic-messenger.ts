@@ -58,7 +58,7 @@ export async function createMessageProcessor<Context>(
       receiveRequest: async ({ genericRequest }) => {
         await leafSelector.next(genericRequest);
       },
-      sendResponse: async (genericResponse) => {
+      sendResponse: async ({ genericResponse }) => {
         if (genericResponse.targetPlatform !== targetPlatform) {
           return;
         }
@@ -83,7 +83,7 @@ export async function createMessenger<Context>({
 }: MessengerConfig<Context>): Promise<Messenger<Context>> {
   await leafSelector.subscribe({
     next: async (response) => {
-      await processor.sendResponse(response);
+      await processor.sendResponse({ genericResponse: response });
       return NextResult.BREAK;
     },
     complete: async () => {},
@@ -164,17 +164,21 @@ export function createCrossPlatformMessageProcessor<Context>(
         },
       });
     },
-    sendResponse: async (genericResponse) => {
+    sendResponse: async ({ genericResponse }) => {
       return switchPlatform(genericResponse.targetPlatform, {
         facebookCallback: (processor) => {
-          return processor.sendResponse(
-            genericResponse as FacebookGenericResponse<Context>
-          );
+          return processor.sendResponse({
+            genericResponse: genericResponse as FacebookGenericResponse<
+              Context
+            >,
+          });
         },
         telegramCallback: (processor) => {
-          return processor.sendResponse(
-            genericResponse as TelegramGenericResponse<Context>
-          );
+          return processor.sendResponse({
+            genericResponse: genericResponse as TelegramGenericResponse<
+              Context
+            >,
+          });
         },
       });
     },

@@ -433,10 +433,12 @@ export async function createFacebookMessageProcessor<Context>(
 
   return {
     ...baseProcessor,
-    sendResponse: async (response: FacebookGenericResponse<Context>) => {
-      const { output: outputs, targetID } = response;
-
-      for (const output of outputs) {
+    sendResponse: async (
+      ...[{ genericResponse }]: Parameters<
+        FacebookMessageProcessor<Context>["sendResponse"]
+      >
+    ) => {
+      for (const output of genericResponse.output) {
         if (output.content.type === "menu") {
           await client.sendMenuSettings({
             persistent_menu: [
@@ -446,12 +448,12 @@ export async function createFacebookMessageProcessor<Context>(
                 locale: "default",
               },
             ],
-            psid: targetID,
+            psid: genericResponse.targetID,
           });
         }
       }
 
-      return baseProcessor.sendResponse(response);
+      return baseProcessor.sendResponse({ genericResponse });
     },
   } as FacebookMessageProcessor<Context>;
 }

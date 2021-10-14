@@ -107,7 +107,7 @@ describe("Save context on send", () => {
     };
 
     // When
-    await transformed.sendResponse(genericResponse);
+    await transformed.sendResponse({ genericResponse });
 
     // Then
     verify(
@@ -120,7 +120,7 @@ describe("Save context on send", () => {
         })
       )
     ).once();
-    verify(msgProcessor.sendResponse(deepEqual(genericResponse))).once();
+    verify(msgProcessor.sendResponse(deepEqual({ genericResponse }))).once();
     verify(
       msgProcessor.receiveRequest(
         deepEqual({
@@ -482,12 +482,16 @@ describe("Save Telegram messages", () => {
         type: "message_trigger",
       } as TelegramGenericRequest<Context>,
     });
+
     await transformed.receiveRequest({
       genericRequest: { type: "manual_trigger" } as TelegramGenericRequest<
         Context
       >,
     });
-    await transformed.sendResponse({} as TelegramGenericResponse<Context>);
+
+    await transformed.sendResponse({
+      genericResponse: {} as TelegramGenericResponse<Context>,
+    });
 
     // Then
     verify(
@@ -513,17 +517,19 @@ describe("Set typing indicator", () => {
 
     // When
     await transformed.sendResponse({
-      targetID,
-      targetPlatform,
-      originalRequest: {
+      genericResponse: {
         targetID,
-        currentContext: {},
-        input: { text: "", type: "text" },
-        rawRequest: {} as FacebookRawRequest,
-        targetPlatform: "facebook",
-        type: "message_trigger",
+        targetPlatform,
+        originalRequest: {
+          targetID,
+          currentContext: {},
+          input: { text: "", type: "text" },
+          rawRequest: {} as FacebookRawRequest,
+          targetPlatform: "facebook",
+          type: "message_trigger",
+        },
+        output: [],
       },
-      output: [],
     });
 
     // Then
@@ -550,17 +556,19 @@ describe("Set typing indicator", () => {
 
     // When
     await transformed.sendResponse({
-      targetID,
-      targetPlatform,
-      originalRequest: {
+      genericResponse: {
         targetID,
-        currentContext: {},
-        input: { text: "", type: "text" },
-        rawRequest: {} as FacebookRawRequest,
-        targetPlatform: "facebook",
-        type: "message_trigger",
+        targetPlatform,
+        originalRequest: {
+          targetID,
+          currentContext: {},
+          input: { text: "", type: "text" },
+          rawRequest: {} as FacebookRawRequest,
+          targetPlatform: "facebook",
+          type: "message_trigger",
+        },
+        output: [],
       },
-      output: [],
     });
 
     // Then

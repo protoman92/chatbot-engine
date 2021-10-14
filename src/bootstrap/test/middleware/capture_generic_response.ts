@@ -20,10 +20,15 @@ export default function <Context>(): MessageProcessorMiddleware<Context> {
   return function captureGenericResponseForTest() {
     return async (processor) => ({
       ...processor,
-      sendResponse: async (response) => {
-        const { originalRequest, additionalContext, ...captured } = response;
+      sendResponse: async ({ genericResponse }) => {
+        const {
+          originalRequest,
+          additionalContext,
+          ...captured
+        } = genericResponse;
+
         await mockResponseCapturer.captureResponse(captured);
-        return processor.sendResponse(response);
+        return processor.sendResponse({ genericResponse });
       },
     });
   };

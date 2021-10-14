@@ -18,15 +18,11 @@ export function saveContextOnSend<Context>({
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
-      sendResponse: async (genericResponse) => {
-        const {
-          originalRequest,
-          targetID,
-          targetPlatform,
-          additionalContext,
-        } = genericResponse;
-
-        const result = await processor.sendResponse(genericResponse);
+      sendResponse: async ({ genericResponse, ...args }) => {
+        const result = await processor.sendResponse({
+          ...args,
+          genericResponse,
+        });
 
         /**
          * We could send the response and emit the context_change request at
@@ -34,12 +30,12 @@ export function saveContextOnSend<Context>({
          * issue with message ordering, especially if we have a handler that
          * listens to context changes and sends related messages.
          */
-        if (additionalContext != null) {
+        if (genericResponse.additionalContext != null) {
           const { newContext, oldContext } = await contextDAO.appendContext({
-            additionalContext,
-            targetID,
-            targetPlatform,
-            oldContext: originalRequest?.currentContext,
+            additionalContext: genericResponse.additionalContext,
+            targetID: genericResponse.targetID,
+            targetPlatform: genericResponse.targetPlatform,
+            oldContext: genericResponse.originalRequest?.currentContext,
           });
 
           const finalProcessor = getFinalMessageProcessor();
@@ -50,7 +46,7 @@ export function saveContextOnSend<Context>({
               input: {
                 newContext,
                 oldContext,
-                changedContext: additionalContext,
+                changedContext: genericResponse.additionalContext,
                 type: "context_change",
               },
               targetID: genericResponse.targetID,
@@ -181,9 +177,9 @@ export function setTypingIndicator<Context>({
     return async (processor) => {
       return {
         ...processor,
-        sendResponse: async (genericResponse) => {
+        sendResponse: async ({ genericResponse, ...args }) => {
           const [result] = await Promise.all([
-            processor.sendResponse(genericResponse),
+            processor.sendResponse({ ...args, genericResponse }),
             (async function () {
               try {
                 await client.setTypingIndicator(genericResponse.targetID, true);

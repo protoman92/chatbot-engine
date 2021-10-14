@@ -62,9 +62,11 @@ describe("Generic message processor", () => {
     );
 
     await messageProcessor.sendResponse({
-      targetID,
-      targetPlatform,
-      output: [{ content: { text: "", type: "text" } }],
+      genericResponse: {
+        targetID,
+        targetPlatform,
+        output: [{ content: { text: "", type: "text" } }],
+      },
     });
 
     // Then
@@ -87,9 +89,11 @@ describe("Generic message processor", () => {
     );
 
     await messageProcessor.sendResponse({
-      targetID,
-      targetPlatform,
-      output: [{ content: { text: "", type: "text" } }],
+      genericResponse: {
+        targetID,
+        targetPlatform,
+        output: [{ content: { text: "", type: "text" } }],
+      },
     });
 
     // Then
@@ -296,7 +300,7 @@ describe("Generic messenger", () => {
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
-    const response: AmbiguousGenericResponse<Context> = {
+    const genericResponse: AmbiguousGenericResponse<Context> = {
       targetID,
       targetPlatform,
       originalRequest: {
@@ -310,10 +314,10 @@ describe("Generic messenger", () => {
       output: [],
     };
 
-    await next(response);
+    await next(genericResponse);
 
     // Then
     expect(complete).toBeTruthy();
-    verify(processor.sendResponse(deepEqual(response))).once();
+    verify(processor.sendResponse(deepEqual({ genericResponse }))).once();
   });
 });

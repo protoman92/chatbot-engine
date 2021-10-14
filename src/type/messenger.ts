@@ -31,7 +31,9 @@ export interface GenericRequestReceiver<GenericRequest> {
 
 export interface GenericResponseSender<GenericResponse, SendResult> {
   /** Send an outgoing platform response */
-  sendResponse(genericResponse: GenericResponse): Promise<SendResult>;
+  sendResponse(
+    args: Readonly<{ genericResponse: GenericResponse }>
+  ): Promise<SendResult>;
 }
 
 /**
