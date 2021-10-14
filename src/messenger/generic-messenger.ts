@@ -12,21 +12,19 @@ import {
   FacebookGenericRequest,
   FacebookMessageProcessor,
   FacebookRawRequest,
+  FacebookResponse,
   MessageProcessorMiddleware,
   Messenger,
   MessengerConfig,
+  TelegramGenericRequest,
   TelegramMessageProcessor,
   TelegramRawRequest,
-  TelegramGenericRequest,
+  TelegramResponse,
   _MessageProcessorMiddleware,
 } from "../type";
 
 /** Create a generic message processor */
-export async function createMessageProcessor<
-  Context,
-  RawRequest = unknown,
-  SendResult = unknown
->(
+export async function createMessageProcessor<Context>(
   {
     targetPlatform,
     leafSelector,
@@ -35,12 +33,8 @@ export async function createMessageProcessor<
     mapResponse,
   }: BaseMessageProcessorConfig<Context>,
   ...middlewares: readonly MessageProcessorMiddleware<Context>[]
-): Promise<BaseMessageProcessor<Context, RawRequest, SendResult>> {
-  let finalMessageProcessor: BaseMessageProcessor<
-    Context,
-    RawRequest,
-    SendResult
-  >;
+): Promise<BaseMessageProcessor<Context>> {
+  let finalMessageProcessor: BaseMessageProcessor<Context>;
 
   const middlewareInput: _MessageProcessorMiddleware.Input<Context> = {
     getFinalMessageProcessor: () => {
@@ -173,10 +167,10 @@ export function createCrossPlatformMessageProcessor<Context>(
     sendResponse: async (response) => {
       return switchPlatform(response.targetPlatform, {
         facebookCallback: (processor) => {
-          return processor.sendResponse(response);
+          return processor.sendResponse(response as FacebookResponse<Context>);
         },
         telegramCallback: (processor) => {
-          return processor.sendResponse(response);
+          return processor.sendResponse(response as TelegramResponse<Context>);
         },
       });
     },

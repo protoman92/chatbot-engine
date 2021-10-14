@@ -1,10 +1,14 @@
 import FormData from "form-data";
 import { ReadStream } from "fs";
-import { MessageProcessorMiddleware } from ".";
+import {
+  GenericRequestReceiver,
+  GenericResponseSender,
+  MessageProcessorMiddleware,
+  RawRequestGeneralizer,
+} from ".";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
-import { BaseMessageProcessor } from "./messenger";
 import { BaseRequest, CrossPlatformRequestInput } from "./request";
 import { BaseResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
@@ -360,11 +364,12 @@ export interface TelegramMessageProcessorConfig<Context> {
 
 /** Represents a Telegram-specific message processor */
 export interface TelegramMessageProcessor<Context>
-  extends BaseMessageProcessor<
-    Context,
-    TelegramRawRequest,
-    TelegramRawRequest
-  > {}
+  extends RawRequestGeneralizer<
+      TelegramRawRequest,
+      TelegramGenericRequest<Context>
+    >,
+    GenericRequestReceiver<TelegramGenericRequest<Context>>,
+    GenericResponseSender<TelegramResponse<Context>, TelegramRawRequest> {}
 
 export type TelegramMessageProcessorMiddleware<
   Context

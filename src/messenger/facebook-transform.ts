@@ -24,5 +24,5 @@ export function saveFacebookUser<Context>({
     getUser: (targetID) => {
       return client.getUser(targetID);
     },
-  });
+  }) as FacebookMessageProcessorMiddleware<Context>;
 }

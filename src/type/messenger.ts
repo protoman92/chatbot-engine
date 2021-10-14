@@ -15,6 +15,21 @@ export interface BaseMessageProcessorConfig<Context> {
   mapResponse: (res: AmbiguousResponse<Context>) => Promise<readonly unknown[]>;
 }
 
+export interface RawRequestGeneralizer<RawRequest, GenericRequest> {
+  /** Generalize a raw request into a generic request */
+  generalizeRequest(request: RawRequest): Promise<readonly GenericRequest[]>;
+}
+
+export interface GenericRequestReceiver<GenericRequest> {
+  /** Receive an incoming generic request */
+  receiveRequest(request: GenericRequest): Promise<void>;
+}
+
+export interface GenericResponseSender<GenericResponse, SendResult> {
+  /** Send an outgoing platform response */
+  sendResponse(response: GenericResponse): Promise<SendResult>;
+}
+
 /**
  * Represents a message processor that can process incoming request (including
  * parsing, validating and sending data). Note that this processor only handles
@@ -24,22 +39,10 @@ export interface BaseMessageProcessorConfig<Context> {
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface BaseMessageProcessor<
-  Context,
-  RawRequest = unknown,
-  SendResult = unknown
-> {
-  /** Generalize a raw request into a generic request */
-  generalizeRequest(
-    request: RawRequest
-  ): Promise<readonly AmbiguousGenericRequest<Context>[]>;
-
-  /** Receive an incoming generic request */
-  receiveRequest(request: AmbiguousGenericRequest<Context>): Promise<void>;
-
-  /** Send an outgoing platform response */
-  sendResponse(response: AmbiguousResponse<Context>): Promise<SendResult>;
-}
+export interface BaseMessageProcessor<Context>
+  extends RawRequestGeneralizer<unknown, AmbiguousGenericRequest<Context>>,
+    GenericRequestReceiver<AmbiguousGenericRequest<Context>>,
+    GenericResponseSender<AmbiguousResponse<Context>, unknown> {}
 
 export interface MessengerConfig<Context> {
   readonly leafSelector: LeafSelector<Context>;
@@ -65,11 +68,9 @@ export namespace _MessageProcessorMiddleware {
 /** Similar in concept to middlewares in systems such as Redux */
 export type MessageProcessorMiddleware<
   Context,
-  Processor extends BaseMessageProcessor<
-    Context,
-    unknown,
-    unknown
-  > = BaseMessageProcessor<Context, any, any>
+  Processor extends BaseMessageProcessor<Context> = BaseMessageProcessor<
+    Context
+  >
 > = (
   input: _MessageProcessorMiddleware.Input<Context>
 ) => Transformer<Processor>;

@@ -311,7 +311,7 @@ describe("Save Telegram user for target ID", () => {
       targetID: `${targetID}`,
       targetPlatform: "facebook",
       type: "message_trigger",
-    });
+    } as any);
 
     // Then
     verify(contextDAO.appendContext(anything())).never();
