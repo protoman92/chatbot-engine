@@ -1,6 +1,6 @@
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription, NextResult } from "../stream";
-import { AmbiguousLeaf } from "../type";
+import { AmbiguousLeaf, FacebookRawRequest } from "../type";
 import { catchError } from "./catch-error";
 import { createDefaultErrorLeaf, createLeaf } from "./leaf";
 import { createTransformChain } from "./transform-chain";
@@ -15,15 +15,27 @@ describe("Transform chain", () => {
     const erroredLeafName = "error_leaf";
 
     const errorLeaf = spy<AmbiguousLeaf<{}>>({
-      next: () => Promise.reject(error),
-      complete: () => Promise.resolve({}),
-      subscribe: () => Promise.resolve(createSubscription(async () => {})),
+      next: () => {
+        return Promise.reject(error);
+      },
+      complete: () => {
+        return Promise.resolve({});
+      },
+      subscribe: () => {
+        return Promise.resolve(createSubscription(async () => {}));
+      },
     });
 
     const fallbackLeaf = spy<AmbiguousLeaf<{}>>({
-      next: () => Promise.resolve(NextResult.BREAK),
-      complete: () => Promise.resolve({}),
-      subscribe: () => Promise.resolve(createSubscription(async () => {})),
+      next: () => {
+        return Promise.resolve(NextResult.BREAK);
+      },
+      complete: () => {
+        return Promise.resolve({});
+      },
+      subscribe: () => {
+        return Promise.resolve(createSubscription(async () => {}));
+      },
     });
 
     const transformed = await createTransformChain()
@@ -44,7 +56,12 @@ describe("Transform chain", () => {
       type: "manual_trigger",
     });
 
-    await transformed.subscribe({ next: async () => NextResult.BREAK });
+    await transformed.subscribe({
+      next: async () => {
+        return NextResult.BREAK;
+      },
+    });
+
     await transformed.complete!();
 
     // Then
@@ -60,7 +77,6 @@ describe("Transform chain", () => {
         })
       )
     ).once();
-
     verify(fallbackLeaf.complete!()).once();
     verify(fallbackLeaf.subscribe(anything())).once();
     verify(errorLeaf.complete!()).once();
@@ -88,7 +104,9 @@ describe("Transform chain", () => {
       .pipe(
         catchError(
           await createDefaultErrorLeaf({
-            formatErrorMessage: ({ message }) => message,
+            formatErrorMessage: ({ message }) => {
+              return message;
+            },
           })
         )
       )
@@ -123,6 +141,7 @@ describe("Transform chain", () => {
       currentContext: { error: new Error("") },
       currentLeafName: "",
       input: { text: "", type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger",
     });
 

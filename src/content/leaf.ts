@@ -6,13 +6,10 @@ import {
   AmbiguousLeafObserver,
   ErrorLeafConfig,
   FacebookLeafObserver,
+  LeafError,
   NextContentObserver,
   TelegramLeafObserver,
 } from "../type";
-
-interface AdditionalErrorInformation {
-  currentLeafName?: string;
-}
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -48,8 +45,7 @@ export async function createLeaf<Context>(
         const result = await baseLeaf.next(request);
         return result;
       } catch (error) {
-        (error as AdditionalErrorInformation).currentLeafName =
-          request.currentLeafName;
+        (error as LeafError).currentLeafName = request.currentLeafName;
         throw error;
       }
     },

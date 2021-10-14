@@ -12,6 +12,7 @@ import { LeafSelector } from "./leaf";
 import {
   BaseRequest,
   CrossPlatformRequestInput,
+  GenericManualTriggerRequest,
   GenericMessageTriggerRequest,
 } from "./request";
 import { BaseGenericResponse } from "./response";
@@ -45,13 +46,14 @@ export type TelegramGenericRequest<Context> = Readonly<{
 }> &
   BaseRequest<Context> &
   (
-    | (GenericMessageTriggerRequest &
+    | (GenericMessageTriggerRequest<TelegramRawRequest> &
         Readonly<{
           currentBot: TelegramBot;
           telegramUser: TelegramUser;
           input: TelegramRequestInput<Context>;
         }>)
-    | Readonly<{ input: TelegramRequestInput<Context>; type: "manual_trigger" }>
+    | (GenericManualTriggerRequest &
+        Readonly<{ input: TelegramRequestInput<Context> }>)
   );
 
 export interface TelegramGenericResponse<Context>
@@ -372,7 +374,7 @@ export interface TelegramMessageProcessor<Context>
       TelegramRawRequest,
       TelegramGenericRequest<Context>
     >,
-    GenericRequestReceiver<TelegramRawRequest, TelegramGenericRequest<Context>>,
+    GenericRequestReceiver<TelegramGenericRequest<Context>>,
     GenericResponseSender<
       TelegramGenericResponse<Context>,
       readonly _TelegramRawRequest.Message["message"][]

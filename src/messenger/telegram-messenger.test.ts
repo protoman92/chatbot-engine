@@ -1,4 +1,9 @@
-import { TelegramBot, TelegramUser, _TelegramRawRequest } from "../type";
+import {
+  TelegramBot,
+  TelegramRawRequest,
+  TelegramUser,
+  _TelegramRawRequest,
+} from "../type";
 import {
   createGenericTelegramRequest,
   extractCommand,
@@ -18,18 +23,19 @@ describe("Create generic Telegram requests", () => {
   };
 
   it("Should return command input type if command is valid", async () => {
-    // Setup && When
-    const request = createGenericTelegramRequest(
-      {
-        message: { chat, from, message_id: 0, text: "/test me" },
-        update_id: 0,
-      },
-      currentBot
-    );
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: { chat, from, message_id: 0, text: "/test me" },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
+        rawRequest,
         currentBot,
         currentContext: {},
         input: { command: "test", text: "me", type: "command" },
@@ -42,18 +48,19 @@ describe("Create generic Telegram requests", () => {
   });
 
   it("Should return command input type with no input text if input text is invalid", async () => {
-    // Setup && When
-    const request = createGenericTelegramRequest(
-      {
-        message: { chat, from, message_id: 0, text: "/test" },
-        update_id: 0,
-      },
-      currentBot
-    );
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: { chat, from, message_id: 0, text: "/test" },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
+        rawRequest,
         currentBot,
         currentContext: {},
         input: { command: "test", text: undefined, type: "command" },
@@ -66,18 +73,19 @@ describe("Create generic Telegram requests", () => {
   });
 
   it("Should return text input type if no command specified", async () => {
-    // Setup && When
-    const request = createGenericTelegramRequest(
-      {
-        message: { chat, from, message_id: 0, text: "test" },
-        update_id: 0,
-      },
-      currentBot
-    );
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: { chat, from, message_id: 0, text: "test" },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
+        rawRequest,
         currentBot,
         currentContext: {},
         input: { text: "test", type: "text" },
@@ -106,19 +114,19 @@ describe("Create generic Telegram requests", () => {
       },
     };
 
+    const rawRequest: TelegramRawRequest = {
+      message: { chat, from, date: 0, document, message_id: 0 },
+      update_id: 0,
+    };
+
     // When
-    const request = createGenericTelegramRequest(
-      {
-        message: { chat, from, date: 0, document, message_id: 0 },
-        update_id: 0,
-      },
-      currentBot
-    );
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
         currentBot,
+        rawRequest,
         currentContext: {},
         input: { document: document, type: "document" },
         targetID: "0",
@@ -139,19 +147,19 @@ describe("Create generic Telegram requests", () => {
       width: 0,
     };
 
+    const rawRequest: TelegramRawRequest = {
+      message: { chat, from, date: 0, message_id: 0, photo: [photo] },
+      update_id: 0,
+    };
+
     // When
-    const request = createGenericTelegramRequest(
-      {
-        message: { chat, from, date: 0, message_id: 0, photo: [photo] },
-        update_id: 0,
-      },
-      currentBot
-    );
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
         currentBot,
+        rawRequest,
         currentContext: {},
         input: { images: [photo], type: "image" },
         targetID: "0",
@@ -163,25 +171,26 @@ describe("Create generic Telegram requests", () => {
   });
 
   it("Should return new chat members if new members joined", async () => {
-    // Setup && When
-    const request = createGenericTelegramRequest(
-      {
-        message: {
-          chat,
-          from,
-          date: 0,
-          message_id: 0,
-          new_chat_members: [from],
-        },
-        update_id: 0,
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: {
+        chat,
+        from,
+        date: 0,
+        message_id: 0,
+        new_chat_members: [from],
       },
-      currentBot
-    );
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
         currentBot,
+        rawRequest,
         currentContext: {},
         input: { newChatMembers: [from], type: "joined_chat" },
         targetID: "0",
@@ -193,25 +202,26 @@ describe("Create generic Telegram requests", () => {
   });
 
   it("Should return left chat members if one member left", async () => {
-    // Setup && When
-    const request = createGenericTelegramRequest(
-      {
-        message: {
-          chat,
-          from,
-          date: 0,
-          left_chat_member: from,
-          message_id: 0,
-        },
-        update_id: 0,
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: {
+        chat,
+        from,
+        date: 0,
+        left_chat_member: from,
+        message_id: 0,
       },
-      currentBot
-    );
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
         currentBot,
+        rawRequest,
         currentContext: {},
         input: { leftChatMembers: [from], type: "left_chat" },
         targetID: "0",
@@ -226,25 +236,25 @@ describe("Create generic Telegram requests", () => {
     // Setup
     const location = { latitude: 0, longitude: 0 };
 
-    // When
-    const request = createGenericTelegramRequest(
-      {
-        message: {
-          chat,
-          from,
-          location,
-          date: 0,
-          message_id: 0,
-        },
-        update_id: 0,
+    const rawRequest: TelegramRawRequest = {
+      message: {
+        chat,
+        from,
+        location,
+        date: 0,
+        message_id: 0,
       },
-      currentBot
-    );
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
 
     // Then
-    expect(request).toEqual([
+    expect(genericRequest).toEqual([
       {
         currentBot,
+        rawRequest,
         currentContext: {},
         input: { coordinate: location, type: "location" },
         targetID: "0",
@@ -265,7 +275,6 @@ describe("Utilities", () => {
       username,
       `/start    @haipham    run123  `
     );
-
     expect(command1).toEqual("start");
     expect(text1).toEqual("run123");
 
@@ -276,13 +285,11 @@ describe("Utilities", () => {
 
     // Setup && When && Then 3
     const [command3, text3] = extractCommand(username, `/start @haiphamrun123`);
-
     expect(command3).toEqual("start");
     expect(text3).toEqual("run123");
 
     // Setup && When && Then 4
     const [command4, text4] = extractCommand(username, `/start@haiphamrun123`);
-
     expect(command4).toEqual("start");
     expect(text4).toEqual("run123");
 
@@ -294,9 +301,7 @@ describe("Utilities", () => {
 789
       `
     );
-
     expect(command5).toEqual("start");
-
     expect(text5).toEqual(`run123
 456
 789`);

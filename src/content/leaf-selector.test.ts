@@ -1,6 +1,6 @@
 import { anything, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
-import { AmbiguousLeaf, LeafEnumeration } from "../type";
+import { AmbiguousLeaf, FacebookRawRequest, LeafEnumeration } from "../type";
 import { createLeaf } from "./leaf";
 import { createLeafSelector, enumerateLeaves } from "./leaf-selector";
 
@@ -60,10 +60,18 @@ describe("Leaf selector", () => {
   beforeEach(async () => {
     currentLeaf = spy<AmbiguousLeaf<Context>>(
       await createLeaf(async () => ({
-        checkTextConditions: () => Promise.reject(""),
-        checkContextConditions: () => Promise.reject(""),
-        next: () => Promise.reject(""),
-        complete: () => Promise.reject(""),
+        checkTextConditions: () => {
+          return Promise.reject("");
+        },
+        checkContextConditions: () => {
+          return Promise.reject("");
+        },
+        next: () => {
+          return Promise.reject("");
+        },
+        complete: () => {
+          return Promise.reject("");
+        },
       }))
     );
 
@@ -85,7 +93,6 @@ describe("Leaf selector", () => {
     }));
 
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
-
     when(selector.triggerLeaf(anything(), anything())).thenCall(
       async ({ currentLeafName }: LeafEnumeration<{}>) => {
         if (currentLeafName === `${validLeafID}`) return NextResult.BREAK;
@@ -99,6 +106,7 @@ describe("Leaf selector", () => {
       targetPlatform,
       currentContext: {},
       input: { text: "", type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger",
     });
 
@@ -173,7 +181,6 @@ describe("Leaf selector", () => {
   it("Should throw error if no enumerated leaves found", async () => {
     // Setup
     when(selector.enumerateLeaves()).thenResolve([]);
-
     when(selector.triggerLeaf(anything(), anything())).thenResolve(
       NextResult.BREAK
     );
@@ -185,6 +192,7 @@ describe("Leaf selector", () => {
         targetPlatform,
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         type: "message_trigger",
       });
 

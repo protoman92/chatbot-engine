@@ -5,7 +5,9 @@ import {
   AmbiguousLeaf,
   ErrorLeafConfig,
   FacebookLeaf,
+  FacebookRawRequest,
   TelegramLeaf,
+  TelegramRawRequest,
   _FacebookResponseOutput,
 } from "../type";
 import { createDefaultErrorLeaf, createLeaf, createLeafObserver } from "./leaf";
@@ -28,20 +30,21 @@ describe("Create leaf with observer", () => {
       },
     }));
 
-    const request = {
+    const genericRequest = {
       targetID,
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
       input: { text: "", type: "text" as const },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger" as const,
     };
 
     // When
-    const { originalRequest } = await bridgeEmission(leaf)(request);
+    const { originalRequest } = await bridgeEmission(leaf)(genericRequest);
 
     // Then
-    expect(originalRequest).toEqual(request);
+    expect(originalRequest).toEqual(genericRequest);
   });
 
   it("Should add currentLeafName to error if error encountered", async () => {
@@ -63,6 +66,7 @@ describe("Create leaf with observer", () => {
         targetPlatform,
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         type: "message_trigger",
       });
     } catch (e) {
@@ -96,7 +100,6 @@ describe("Default error leaf", () => {
 
     // Then
     verify(errorConfig.formatErrorMessage(error)).once();
-
     verify(
       errorConfig.trackError!(
         deepEqual({
@@ -156,6 +159,7 @@ describe("Leaf for platforms", () => {
       currentContext: {},
       currentLeafName: "",
       input: { text: "", type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       targetPlatform: "facebook",
       type: "message_trigger",
     });
@@ -170,6 +174,7 @@ describe("Leaf for platforms", () => {
       currentContext: {},
       currentLeafName: "",
       input: { text: "", type: "text" },
+      rawRequest: {} as TelegramRawRequest,
       targetPlatform: "telegram",
       telegramUser: {
         id: 1,
@@ -203,6 +208,7 @@ describe("Leaf for platforms", () => {
         currentContext: {},
         currentLeafName: "",
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
         type: "message_trigger",
       });
@@ -222,6 +228,7 @@ describe("Leaf for platforms", () => {
         currentContext: {},
         currentLeafName: "",
         input: { text: "", type: "text" },
+        rawRequest: {} as TelegramRawRequest,
         targetPlatform: "telegram",
         telegramUser: {
           id: 1,

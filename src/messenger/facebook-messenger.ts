@@ -20,9 +20,9 @@ const MAX_LIST_ELEMENT_COUNT = 4;
 const MESSAGE_TEXT_CHARACTER_LIMIT = 640;
 
 /** Map raw request to generic request for generic processing */
-function createFacebookRequest<Context>({
-  entry = [],
-}: FacebookRawRequest): readonly FacebookGenericRequest<Context>[] {
+function createFacebookRequest<Context>(
+  rawRequest: FacebookRawRequest
+): readonly FacebookGenericRequest<Context>[] {
   /** Group requests based on target ID */
   function groupRequests(reqs: readonly _FacebookRawRequest.Entry.Messaging[]) {
     const requestMap: {
@@ -38,14 +38,14 @@ function createFacebookRequest<Context>({
   }
 
   function processRequest(
-    request: _FacebookRawRequest.Entry.Messaging
+    rawMessaging: _FacebookRawRequest.Entry.Messaging
   ): FacebookRequestInput<Context>[] {
-    if ("postback" in request) {
-      return [{ payload: request.postback.payload, type: "postback" }];
+    if ("postback" in rawMessaging) {
+      return [{ payload: rawMessaging.postback.payload, type: "postback" }];
     }
 
-    if ("message" in request) {
-      const { message } = request;
+    if ("message" in rawMessaging) {
+      const { message } = rawMessaging;
 
       if ("quick_reply" in message) {
         return [{ payload: message.quick_reply.payload, type: "postback" }];
@@ -87,14 +87,14 @@ function createFacebookRequest<Context>({
       }
     }
 
-    if ("referral" in request) {
-      return [{ param: request.referral.ref, type: "deeplink" }];
+    if ("referral" in rawMessaging) {
+      return [{ param: rawMessaging.referral.ref, type: "deeplink" }];
     }
 
-    throw facebookError(`Invalid request ${JSON.stringify(request)}`);
+    throw facebookError(`Invalid request ${JSON.stringify(rawMessaging)}`);
   }
 
-  const allRequests = entry
+  const allRequests = rawRequest.entry
     .map(({ messaging }) => {
       return messaging;
     })
@@ -115,6 +115,7 @@ function createFacebookRequest<Context>({
             input,
             targetID,
             currentContext: {} as Context,
+            rawRequest: rawRequest,
             targetPlatform: "facebook" as const,
             type: "message_trigger" as const,
           }))

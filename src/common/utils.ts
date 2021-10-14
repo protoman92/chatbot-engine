@@ -172,6 +172,19 @@ export function omitNull<T>(
   return arr.filter((object) => object != null) as readonly T[];
 }
 
+export function omitProperties<T extends object, K extends keyof T>(
+  args: T,
+  ...keys: readonly K[]
+): Omit<T, K> {
+  const result = { ...args };
+
+  for (const key of keys) {
+    delete result[key];
+  }
+
+  return result;
+}
+
 /** Promisify a callback-style function into one that supports promises */
 export function promisify<T>(
   fn: (callback: (err: Error | undefined | null, value: T) => any) => void

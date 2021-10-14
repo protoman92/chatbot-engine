@@ -3,3 +3,7 @@ export interface ErrorRequestInput {
   readonly erroredLeaf?: string;
   readonly type: "error";
 }
+
+export interface LeafError extends Error {
+  currentLeafName?: string;
+}

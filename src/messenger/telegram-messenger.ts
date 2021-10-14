@@ -54,11 +54,9 @@ export function extractCommand(
 
 /** Map platform request to generic request for generic processing */
 export function createGenericTelegramRequest<Context>(
-  webhook: TelegramRawRequest,
+  rawRequest: TelegramRawRequest,
   currentBot: TelegramBot
 ): readonly TelegramGenericRequest<Context>[] {
-  const { username } = currentBot;
-
   function processMessageRequest({
     message: { chat, from: user, ...message },
   }: _TelegramRawRequest.Message):
@@ -66,7 +64,11 @@ export function createGenericTelegramRequest<Context>(
     | undefined {
     if ("text" in message) {
       const { text: textWithCommand } = message;
-      const [command, text] = extractCommand(username, textWithCommand);
+
+      const [command, text] = extractCommand(
+        currentBot.username,
+        textWithCommand
+      );
 
       if (!!command) {
         return [
@@ -104,8 +106,7 @@ export function createGenericTelegramRequest<Context>(
     }
 
     if ("photo" in message) {
-      const { photo: images } = message;
-      return [user, chat, [{ images, type: "image" }]];
+      return [user, chat, [{ images: message.photo, type: "image" }]];
     }
 
     return undefined;
@@ -143,10 +144,12 @@ export function createGenericTelegramRequest<Context>(
     return result;
   }
 
-  const processed = processRequest(webhook);
+  const processed = processRequest(rawRequest);
 
   if (processed == null) {
-    console.error(telegramError(`Invalid request: ${JSON.stringify(webhook)}`));
+    console.error(
+      telegramError(`Invalid request: ${JSON.stringify(rawRequest)}`)
+    );
     return [];
   }
 
@@ -155,6 +158,7 @@ export function createGenericTelegramRequest<Context>(
   return inputs.map((input) => ({
     currentBot,
     input,
+    rawRequest,
     targetPlatform: "telegram",
     telegramUser,
     currentContext: {} as Context,

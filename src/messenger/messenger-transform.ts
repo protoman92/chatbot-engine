@@ -57,7 +57,6 @@ export function saveContextOnSend<Context>({
               targetPlatform: genericResponse.targetPlatform,
               type: "manual_trigger",
             },
-            rawRequest: undefined,
           });
         }
 

@@ -1,6 +1,6 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
-import { AmbiguousLeaf } from "../type";
+import { AmbiguousLeaf, FacebookRawRequest } from "../type";
 import { catchAll } from "./catch-all";
 
 const targetID = "target-id";
@@ -13,8 +13,12 @@ describe("catchAll higher order function", () => {
 
   beforeEach(() => {
     rootLeaf = spy<AmbiguousLeaf<Context>>({
-      next: () => Promise.reject(""),
-      subscribe: () => Promise.reject(""),
+      next: () => {
+        return Promise.reject("");
+      },
+      subscribe: () => {
+        return Promise.reject("");
+      },
     });
 
     catchHandler = spy<typeof catchHandler>({ onCatchAll: () => {} });
@@ -32,6 +36,7 @@ describe("catchAll higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
+      rawRequest: {} as FacebookRawRequest,
       input: { text: "", type: "text" },
       type: "message_trigger",
     });
@@ -74,19 +79,20 @@ describe("catchAll higher order function", () => {
     const transformed = await transformer(instance(rootLeaf));
 
     // When
-    const request = {
+    const genericRequest = {
       targetID,
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
       input: { text: "", type: "text" as const },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger" as const,
     };
 
-    const result = await transformed.next(request);
+    const result = await transformed.next(genericRequest);
 
     // Then
     expect(result).toEqual(NextResult.BREAK);
-    verify(catchHandler.onCatchAll(deepEqual(request))).once();
+    verify(catchHandler.onCatchAll(deepEqual(genericRequest))).once();
   });
 });

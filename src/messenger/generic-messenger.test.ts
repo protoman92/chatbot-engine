@@ -13,9 +13,11 @@ import {
   AmbiguousPlatform,
   BaseMessageProcessor,
   FacebookMessageProcessor,
+  FacebookRawRequest,
   LeafSelector,
   PlatformClient,
   TelegramMessageProcessor,
+  TelegramRawRequest,
 } from "../type";
 import {
   createCrossPlatformMessageProcessor,
@@ -113,10 +115,10 @@ describe("Generic message processor", () => {
         currentContext,
         targetID,
         targetPlatform,
+        rawRequest: {} as FacebookRawRequest,
         input: { type: "placebo" },
         type: "message_trigger",
       },
-      rawRequest: {},
     });
 
     // Then
@@ -126,6 +128,7 @@ describe("Generic message processor", () => {
           currentContext,
           targetID,
           targetPlatform,
+          rawRequest: {} as FacebookRawRequest,
           input: { type: "placebo" },
           type: "message_trigger",
         })
@@ -191,6 +194,7 @@ describe("Cross platform message processor", () => {
         targetID,
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -202,6 +206,7 @@ describe("Cross platform message processor", () => {
         currentBot: { id: 0, first_name: "", username: "" },
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as TelegramRawRequest,
         targetPlatform: "telegram" as const,
         telegramUser: {
           id: 0,
@@ -298,6 +303,7 @@ describe("Generic messenger", () => {
         targetID,
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
         type: "message_trigger",
       },

@@ -5,9 +5,12 @@ import {
   AmbiguousGenericResponse,
   BaseMessageProcessor,
   ContextDAO,
+  FacebookRawRequest,
   PlatformClient,
+  TelegramGenericRequest,
   TelegramGenericResponse,
   TelegramMessageProcessor,
+  TelegramRawRequest,
   _MessageProcessorMiddleware,
   _TelegramRawRequest,
 } from "../type";
@@ -28,23 +31,43 @@ let middlewareInput: _MessageProcessorMiddleware.Input<Context>;
 
 beforeEach(async () => {
   msgProcessor = spy<BaseMessageProcessor<Context>>({
-    generalizeRequest: () => Promise.reject(""),
-    receiveRequest: () => Promise.reject(""),
-    sendResponse: () => Promise.reject(""),
+    generalizeRequest: () => {
+      return Promise.reject("");
+    },
+    receiveRequest: () => {
+      return Promise.reject("");
+    },
+    sendResponse: () => {
+      return Promise.reject("");
+    },
   });
 
   client = spy<PlatformClient<unknown>>({
-    sendResponse: () => Promise.reject(""),
-    setTypingIndicator: () => Promise.reject(""),
+    sendResponse: () => {
+      return Promise.reject("");
+    },
+    setTypingIndicator: () => {
+      return Promise.reject("");
+    },
   });
 
   contextDAO = spy<ContextDAO<Context>>({
-    getContext: () => Promise.reject(""),
-    appendContext: () => Promise.reject(""),
-    resetContext: () => Promise.reject(""),
+    getContext: () => {
+      return Promise.reject("");
+    },
+    appendContext: () => {
+      return Promise.reject("");
+    },
+    resetContext: () => {
+      return Promise.reject("");
+    },
   });
 
-  middlewareInput = { getFinalMessageProcessor: () => instance(msgProcessor) };
+  middlewareInput = {
+    getFinalMessageProcessor: () => {
+      return instance(msgProcessor);
+    },
+  };
 });
 
 describe("Save context on send", () => {
@@ -60,8 +83,8 @@ describe("Save context on send", () => {
       oldContext,
       newContext: finalContext,
     });
-    when(msgProcessor.sendResponse(anything())).thenResolve();
-    when(msgProcessor.receiveRequest(anything())).thenResolve();
+    when(msgProcessor.sendResponse(anything())).thenResolve(undefined);
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await compose(
       instance(msgProcessor),
@@ -75,6 +98,7 @@ describe("Save context on send", () => {
         currentContext: {},
         input: { text: "", type: "text" },
         targetID: "some-other-id",
+        rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -112,7 +136,6 @@ describe("Save context on send", () => {
             targetPlatform: "telegram",
             type: "manual_trigger",
           },
-          rawRequest: undefined,
         })
       )
     ).once();
@@ -147,7 +170,6 @@ describe("Inject context on receive", () => {
         },
         type: "manual_trigger",
       },
-      rawRequest: undefined,
     });
 
     // Then
@@ -176,11 +198,12 @@ describe("Inject context on receive", () => {
       targetPlatform,
       currentContext: {},
       input: { text: "", type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger",
     };
 
     // When
-    await transformed.receiveRequest({ genericRequest, rawRequest: undefined });
+    await transformed.receiveRequest({ genericRequest });
 
     // Then
     verify(
@@ -193,7 +216,6 @@ describe("Inject context on receive", () => {
             ...genericRequest,
             currentContext: expectedContext,
           },
-          rawRequest: undefined,
         })
       )
     ).once();
@@ -237,7 +259,6 @@ describe("Save user for target ID", () => {
         },
         type: "manual_trigger",
       },
-      rawRequest: undefined,
     });
 
     // Then
@@ -276,11 +297,12 @@ describe("Save user for target ID", () => {
       targetPlatform,
       currentContext: { targetID },
       input: { text: "", type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger",
     };
 
     // When
-    await transformed.receiveRequest({ genericRequest, rawRequest: undefined });
+    await transformed.receiveRequest({ genericRequest });
 
     // Then
     verify(
@@ -295,7 +317,6 @@ describe("Save user for target ID", () => {
             ...genericRequest,
             currentContext: additionalContext,
           },
-          rawRequest: undefined,
         })
       )
     ).once();
@@ -343,7 +364,6 @@ describe("Save Telegram user for target ID", () => {
         targetPlatform: "telegram",
         type: "manual_trigger",
       },
-      rawRequest: undefined,
     });
 
     // Then
@@ -368,7 +388,11 @@ describe("Save Telegram user for target ID", () => {
           return !!targetID;
         },
         saveUser: async () => ({ additionalContext }),
-      })({ getFinalMessageProcessor: () => instance(tlMessenger) })
+      })({
+        getFinalMessageProcessor: () => {
+          return instance(tlMessenger);
+        },
+      })
     );
 
     // When
@@ -387,9 +411,9 @@ describe("Save Telegram user for target ID", () => {
           language_code: "en" as const,
           is_bot: false,
         },
+        rawRequest: {} as TelegramRawRequest,
         type: "message_trigger",
       },
-      rawRequest: undefined,
     });
 
     // Then
@@ -437,7 +461,7 @@ describe("Save Telegram messages", () => {
 
     const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
     when(middlewareArgs.saveMessages(anything())).thenResolve(undefined);
-    when(tlMessenger.generalizeRequest(anything())).thenResolve({} as any);
+    when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
     when(tlMessenger.sendResponse(anything())).thenResolve([
       outRawRequest.message,
     ]);
@@ -452,7 +476,17 @@ describe("Save Telegram messages", () => {
     );
 
     // When
-    await transformed.generalizeRequest(inRawRequest);
+    await transformed.receiveRequest({
+      genericRequest: {
+        rawRequest: inRawRequest,
+        type: "message_trigger",
+      } as TelegramGenericRequest<Context>,
+    });
+    await transformed.receiveRequest({
+      genericRequest: { type: "manual_trigger" } as TelegramGenericRequest<
+        Context
+      >,
+    });
     await transformed.sendResponse({} as TelegramGenericResponse<Context>);
 
     // Then
@@ -485,6 +519,7 @@ describe("Set typing indicator", () => {
         targetID,
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
         type: "message_trigger",
       },
@@ -521,6 +556,7 @@ describe("Set typing indicator", () => {
         targetID,
         currentContext: {},
         input: { text: "", type: "text" },
+        rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
         type: "message_trigger",
       },

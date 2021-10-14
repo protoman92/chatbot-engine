@@ -16,8 +16,14 @@ export type CrossPlatformRequestInput<Context> =
   | ErrorRequestInput
   | WitRequestInput;
 
-export interface GenericMessageTriggerRequest {
+export interface GenericMessageTriggerRequest<RawRequest> {
+  readonly rawRequest: RawRequest;
   readonly type: "message_trigger";
+}
+
+export interface GenericManualTriggerRequest {
+  readonly rawRequest?: undefined;
+  readonly type: "manual_trigger";
 }
 
 export type AmbiguousGenericRequest<Context> =

@@ -1,3 +1,4 @@
+import { omitProperties } from "../common/utils";
 import { NextResult } from "../stream";
 import {
   LeafTransformer,
@@ -43,7 +44,10 @@ export function retryWithWit<Context>(
     ...leaf,
     next: async (request) => {
       let result = await leaf.next(request);
-      if (result === NextResult.BREAK) return result;
+
+      if (result === NextResult.BREAK) {
+        return result;
+      }
 
       /** Wit allows only up to 280 chars */
       if (request.input.type === "text" && request.input.text.length <= 280) {
@@ -52,7 +56,7 @@ export function retryWithWit<Context>(
         const highestConfidence = getHighestConfidence(response);
 
         result = await leaf.next({
-          ...(request as Omit<typeof request, "input" | "type">),
+          ...omitProperties(request, "input", "rawRequest", "type"),
           input: { entities, highestConfidence, intents, traits, type: "wit" },
           targetPlatform: request.targetPlatform,
           type: "manual_trigger",

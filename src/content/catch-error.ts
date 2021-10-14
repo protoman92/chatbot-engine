@@ -1,5 +1,6 @@
+import { isType, omitProperties } from "../common/utils";
 import { createCompositeSubscription } from "../stream";
-import { AmbiguousLeaf, LeafTransformer } from "../type";
+import { AmbiguousLeaf, LeafError, LeafTransformer } from "../type";
 
 /** If a leaf throws error while producing content, switch to fallback leaf */
 export function catchError<Context>(
@@ -13,16 +14,16 @@ export function catchError<Context>(
         let erroredLeaf = currentLeafName;
 
         if (
-          "currentLeafName" in error &&
+          isType<LeafError>(error, "currentLeafName") &&
           typeof error.currentLeafName === "string"
         ) {
           erroredLeaf = error.currentLeafName;
         }
 
         return fallbackLeaf.next({
-          ...(request as Omit<typeof request, "input" | "type">),
+          ...omitProperties(request, "input", "rawRequest", "type"),
           currentLeafName,
-          input: { error, erroredLeaf, type: "error" },
+          input: { erroredLeaf, error: error as Error, type: "error" },
           type: "manual_trigger",
         });
       }

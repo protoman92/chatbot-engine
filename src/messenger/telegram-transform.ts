@@ -32,24 +32,32 @@ export function saveTelegramMessages<Context>({
     }
   }
 
-  return () => async (processor) => {
-    return {
-      ...processor,
-      generalizeRequest: async (rawRequest) => {
-        const [genericRequest] = await Promise.all([
-          processor.generalizeRequest(rawRequest),
-          saveMessages({
-            rawRequestMessages: [extractRawRequestMessage(rawRequest)],
-          }),
-        ]);
+  return () => {
+    return async (processor) => {
+      return {
+        ...processor,
+        receiveRequest: async ({ genericRequest, ...args }) => {
+          if (genericRequest.type !== "message_trigger") {
+            return processor.receiveRequest({ ...args, genericRequest });
+          }
 
-        return genericRequest;
-      },
-      sendResponse: async (genericResponse) => {
-        const sendResult = await processor.sendResponse(genericResponse);
-        await saveMessages({ rawRequestMessages: toArray(sendResult) });
-        return sendResult;
-      },
+          const [result] = await Promise.all([
+            processor.receiveRequest({ ...args, genericRequest }),
+            saveMessages({
+              rawRequestMessages: [
+                extractRawRequestMessage(genericRequest.rawRequest),
+              ],
+            }),
+          ]);
+
+          return result;
+        },
+        sendResponse: async (genericResponse) => {
+          const sendResult = await processor.sendResponse(genericResponse);
+          await saveMessages({ rawRequestMessages: toArray(sendResult) });
+          return sendResult;
+        },
+      };
     };
   };
 }

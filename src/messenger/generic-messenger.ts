@@ -94,7 +94,7 @@ export async function createMessenger<Context>({
       const genericRequests = await processor.generalizeRequest(rawRequest);
 
       return mapSeries(genericRequests, (genericRequest) => {
-        return processor.receiveRequest({ genericRequest, rawRequest });
+        return processor.receiveRequest({ genericRequest });
       });
     },
   };
@@ -150,18 +150,16 @@ export function createCrossPlatformMessageProcessor<Context>(
         },
       });
     },
-    receiveRequest: async ({ genericRequest, rawRequest }) => {
+    receiveRequest: async ({ genericRequest }) => {
       return switchPlatform(genericRequest.targetPlatform, {
         facebookCallback: (processor) => {
           return processor.receiveRequest({
             genericRequest: genericRequest as FacebookGenericRequest<Context>,
-            rawRequest: rawRequest as FacebookRawRequest,
           });
         },
         telegramCallback: (processor) => {
           return processor.receiveRequest({
             genericRequest: genericRequest as TelegramGenericRequest<Context>,
-            rawRequest: rawRequest as TelegramRawRequest,
           });
         },
       });

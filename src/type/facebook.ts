@@ -1,5 +1,6 @@
 import { AppendOptions } from "form-data";
 import { ReadStream } from "fs";
+import { GenericManualTriggerRequest } from ".";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
@@ -31,9 +32,10 @@ export type FacebookGenericRequest<Context> = Readonly<{
 }> &
   BaseRequest<Context> &
   (
-    | (GenericMessageTriggerRequest &
+    | (GenericMessageTriggerRequest<FacebookRawRequest> &
         Readonly<{ input: FacebookRequestInput<Context> }>)
-    | Readonly<{ input: FacebookRequestInput<Context>; type: "manual_trigger" }>
+    | (GenericManualTriggerRequest &
+        Readonly<{ input: FacebookRequestInput<Context> }>)
   );
 
 export interface FacebookGenericResponse<Context>
@@ -278,7 +280,7 @@ export namespace _FacebookRawRequest {
 /** Represents a webhook request */
 export interface FacebookRawRequest {
   readonly object: "page";
-  readonly entry?: Readonly<{
+  readonly entry: Readonly<{
     messaging: readonly _FacebookRawRequest.Entry.Messaging[];
   }>[];
 }
@@ -443,7 +445,7 @@ export interface FacebookMessageProcessor<Context>
       FacebookRawRequest,
       FacebookGenericRequest<Context>
     >,
-    GenericRequestReceiver<FacebookRawRequest, FacebookGenericRequest<Context>>,
+    GenericRequestReceiver<FacebookGenericRequest<Context>>,
     GenericResponseSender<FacebookGenericResponse<Context>, unknown> {}
 
 export type FacebookMessageProcessorMiddleware<

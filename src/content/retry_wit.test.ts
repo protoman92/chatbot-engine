@@ -1,6 +1,11 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { NextResult } from "../stream";
-import { AmbiguousLeaf, WitClient, WitResponse } from "../type";
+import {
+  AmbiguousLeaf,
+  FacebookRawRequest,
+  WitClient,
+  WitResponse,
+} from "../type";
 import { getHighestConfidence, retryWithWit } from "./retry_wit";
 
 const targetID = "target-id";
@@ -12,11 +17,19 @@ describe("Wit higher order function", () => {
   let rootLeaf: AmbiguousLeaf<Context>;
 
   beforeEach(() => {
-    comm = spy<WitClient>({ validate: () => Promise.reject("") });
+    comm = spy<WitClient>({
+      validate: () => {
+        return Promise.reject("");
+      },
+    });
 
     rootLeaf = spy<AmbiguousLeaf<Context>>({
-      next: () => Promise.reject(""),
-      subscribe: () => Promise.reject(""),
+      next: () => {
+        return Promise.reject("");
+      },
+      subscribe: () => {
+        return Promise.reject("");
+      },
     });
   });
 
@@ -85,6 +98,7 @@ describe("Wit higher order function", () => {
       currentContext: {},
       currentLeafName: "",
       input: { text: "some-text", type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger",
     });
 
@@ -114,7 +128,6 @@ describe("Wit higher order function", () => {
 
       return NextResult.BREAK;
     });
-
     when(comm.validate(anything())).thenResolve({
       entities,
       intents: [],
@@ -132,12 +145,12 @@ describe("Wit higher order function", () => {
       currentContext: {},
       currentLeafName: "",
       input: { text, type: "text" },
+      rawRequest: {} as FacebookRawRequest,
       type: "message_trigger",
     });
 
     // Then
     verify(comm.validate(text)).once();
-
     verify(
       rootLeaf.next(
         deepEqual({

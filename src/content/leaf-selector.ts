@@ -73,7 +73,10 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
 
       for (const enumLeaf of enumeratedLeaves) {
         const nextResult = await selector.triggerLeaf(enumLeaf, request);
-        if (nextResult === NextResult.BREAK) return NextResult.BREAK;
+
+        if (nextResult === NextResult.BREAK) {
+          return NextResult.BREAK;
+        }
       }
 
       return NextResult.FALLTHROUGH;
@@ -101,7 +104,9 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
         const enumeratedLeaves = await selector.enumerateLeaves();
 
         outputObservable = mergeObservables(
-          ...enumeratedLeaves.map(({ currentLeaf }) => currentLeaf)
+          ...enumeratedLeaves.map(({ currentLeaf }) => {
+            return currentLeaf;
+          })
         );
       }
 
