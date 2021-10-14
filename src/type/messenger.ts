@@ -2,7 +2,7 @@ import { PlatformClient } from "./client";
 import { Transformer } from "./common";
 import { LeafSelector } from "./leaf";
 import { AmbiguousGenericRequest } from "./request";
-import { AmbiguousResponse } from "./response";
+import { AmbiguousGenericResponse } from "./response";
 
 /** Represents all supported platform identifiers */
 export type AmbiguousPlatform = "facebook" | "telegram";
@@ -12,7 +12,9 @@ export interface BaseMessageProcessorConfig<Context> {
   readonly leafSelector: LeafSelector<Context>;
   readonly client: PlatformClient<unknown>;
   readonly mapRequest: BaseMessageProcessor<Context>["generalizeRequest"];
-  mapResponse: (res: AmbiguousResponse<Context>) => Promise<readonly unknown[]>;
+  mapResponse: (
+    res: AmbiguousGenericResponse<Context>
+  ) => Promise<readonly unknown[]>;
 }
 
 export interface RawRequestGeneralizer<RawRequest, GenericRequest> {
@@ -42,7 +44,7 @@ export interface GenericResponseSender<GenericResponse, SendResult> {
 export interface BaseMessageProcessor<Context>
   extends RawRequestGeneralizer<unknown, AmbiguousGenericRequest<Context>>,
     GenericRequestReceiver<AmbiguousGenericRequest<Context>>,
-    GenericResponseSender<AmbiguousResponse<Context>, unknown> {}
+    GenericResponseSender<AmbiguousGenericResponse<Context>, unknown> {}
 
 export interface MessengerConfig<Context> {
   readonly leafSelector: LeafSelector<Context>;

@@ -10,7 +10,7 @@ import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import { BaseRequest, CrossPlatformRequestInput } from "./request";
-import { BaseResponse } from "./response";
+import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
@@ -50,7 +50,8 @@ export type TelegramGenericRequest<Context> = Readonly<{
     | Readonly<{ input: TelegramRequestInput<Context>; type: "manual_trigger" }>
   );
 
-export interface TelegramResponse<Context> extends BaseResponse<Context> {
+export interface TelegramGenericResponse<Context>
+  extends BaseGenericResponse<Context> {
   readonly output: readonly TelegramResponseOutput[];
   readonly targetPlatform: "telegram";
 }
@@ -369,7 +370,10 @@ export interface TelegramMessageProcessor<Context>
       TelegramGenericRequest<Context>
     >,
     GenericRequestReceiver<TelegramGenericRequest<Context>>,
-    GenericResponseSender<TelegramResponse<Context>, TelegramRawRequest> {}
+    GenericResponseSender<
+      TelegramGenericResponse<Context>,
+      TelegramRawRequest
+    > {}
 
 export type TelegramMessageProcessorMiddleware<
   Context
@@ -382,7 +386,7 @@ export type TelegramLeafObserver<T> = ContentObserver<
 >;
 
 export type TelegramLeaf<T> = TelegramLeafObserver<T> &
-  ContentObservable<TelegramResponse<T>>;
+  ContentObservable<TelegramGenericResponse<T>>;
 
 export interface TelegramBot {
   readonly id: number;

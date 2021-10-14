@@ -1,13 +1,13 @@
 import { chunkString, facebookError, omitNull } from "../common/utils";
 import {
+  FacebookGenericRequest,
+  FacebookGenericResponse,
   FacebookMessageProcessor,
   FacebookMessageProcessorConfig,
   FacebookMessageProcessorMiddleware,
   FacebookRawRequest,
   FacebookRawResponse,
-  FacebookGenericRequest,
   FacebookRequestInput,
-  FacebookResponse,
   MessageProcessorMiddleware,
   _FacebookRawRequest,
   _FacebookRawResponse,
@@ -146,7 +146,7 @@ function createSingleAction(
 function createFacebookResponse<Context>({
   targetID,
   output,
-}: FacebookResponse<Context>): readonly FacebookRawResponse[] {
+}: FacebookGenericResponse<Context>): readonly FacebookRawResponse[] {
   function createFileAttachmentMessages({
     attachmentType: type,
     ...attachment
@@ -367,7 +367,7 @@ function createFacebookResponse<Context>({
 
   function createRawResponses(
     targetID: string,
-    response: FacebookResponse<Context>["output"][number]
+    response: FacebookGenericResponse<Context>["output"][number]
   ): readonly (FacebookRawResponse | null)[] {
     if (response.content.type === "menu") {
       return [null];
@@ -424,7 +424,7 @@ export async function createFacebookMessageProcessor<Context>(
         return createFacebookRequest(req as FacebookRawRequest);
       },
       mapResponse: async (res) => {
-        return createFacebookResponse(res as FacebookResponse<Context>);
+        return createFacebookResponse(res as FacebookGenericResponse<Context>);
       },
     },
     ...(middlewares as MessageProcessorMiddleware<Context>[])
@@ -432,7 +432,7 @@ export async function createFacebookMessageProcessor<Context>(
 
   return {
     ...baseProcessor,
-    sendResponse: async (response: FacebookResponse<Context>) => {
+    sendResponse: async (response: FacebookGenericResponse<Context>) => {
       const { output: outputs, targetID } = response;
 
       for (const output of outputs) {

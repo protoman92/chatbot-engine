@@ -10,16 +10,16 @@ import {
   BaseMessageProcessor,
   BaseMessageProcessorConfig,
   FacebookGenericRequest,
+  FacebookGenericResponse,
   FacebookMessageProcessor,
   FacebookRawRequest,
-  FacebookResponse,
   MessageProcessorMiddleware,
   Messenger,
   MessengerConfig,
   TelegramGenericRequest,
+  TelegramGenericResponse,
   TelegramMessageProcessor,
   TelegramRawRequest,
-  TelegramResponse,
   _MessageProcessorMiddleware,
 } from "../type";
 
@@ -167,10 +167,14 @@ export function createCrossPlatformMessageProcessor<Context>(
     sendResponse: async (response) => {
       return switchPlatform(response.targetPlatform, {
         facebookCallback: (processor) => {
-          return processor.sendResponse(response as FacebookResponse<Context>);
+          return processor.sendResponse(
+            response as FacebookGenericResponse<Context>
+          );
         },
         telegramCallback: (processor) => {
-          return processor.sendResponse(response as TelegramResponse<Context>);
+          return processor.sendResponse(
+            response as TelegramGenericResponse<Context>
+          );
         },
       });
     },

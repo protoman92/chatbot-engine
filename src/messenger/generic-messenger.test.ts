@@ -9,8 +9,8 @@ import {
 } from "ts-mockito";
 import {
   AmbiguousGenericRequest,
+  AmbiguousGenericResponse,
   AmbiguousPlatform,
-  AmbiguousResponse,
   BaseMessageProcessor,
   FacebookMessageProcessor,
   LeafSelector,
@@ -273,7 +273,7 @@ describe("Generic messenger", () => {
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
-    const response: AmbiguousResponse<Context> = {
+    const response: AmbiguousGenericResponse<Context> = {
       targetID,
       targetPlatform,
       originalRequest: {

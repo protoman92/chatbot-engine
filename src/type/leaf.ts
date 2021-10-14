@@ -2,7 +2,7 @@ import { AmbiguousPlatform } from ".";
 import { Branch } from "./branch";
 import { ErrorRequestInput } from "./error";
 import { AmbiguousGenericRequest } from "./request";
-import { AmbiguousResponse } from "./response";
+import { AmbiguousGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 
 /**
@@ -62,10 +62,10 @@ export interface AmbiguousLeafObserver<T>
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
 export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
-  ContentObservable<AmbiguousResponse<T>>;
+  ContentObservable<AmbiguousGenericResponse<T>>;
 
 export type LeafSelector<T> = ContentObserver<AmbiguousGenericRequest<T>> &
-  ContentObservable<AmbiguousResponse<T>>;
+  ContentObservable<AmbiguousGenericResponse<T>>;
 
 export interface ErrorLeafTrackErrorArgs
   extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {

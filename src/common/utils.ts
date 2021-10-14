@@ -1,7 +1,7 @@
 import GraphemeSplitter from "grapheme-splitter";
 import {
+  AmbiguousGenericResponse,
   AmbiguousPlatform,
-  AmbiguousResponse,
   FacebookRawRequest,
   FacebookResponseOutput,
   TelegramRawRequest,
@@ -102,12 +102,12 @@ export function getCrossPlatformResponse<Context>(
     telegram?: readonly TelegramResponseOutput[];
   }>
 ): (
-  args: Omit<AmbiguousResponse<Context>, "output">
-) => AmbiguousResponse<Context> {
+  args: Omit<AmbiguousGenericResponse<Context>, "output">
+) => AmbiguousGenericResponse<Context> {
   return ({
     targetPlatform,
     ...args1
-  }: Omit<AmbiguousResponse<Context>, "output">) => {
+  }: Omit<AmbiguousGenericResponse<Context>, "output">) => {
     return {
       ...args1,
       targetPlatform,

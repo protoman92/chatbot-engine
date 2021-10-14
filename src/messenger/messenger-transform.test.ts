@@ -2,7 +2,7 @@ import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { compose, joinObjects } from "../common/utils";
 import {
   AmbiguousGenericRequest,
-  AmbiguousResponse,
+  AmbiguousGenericResponse,
   BaseMessageProcessor,
   ContextDAO,
   PlatformClient,
@@ -67,7 +67,7 @@ describe("Save context on send", () => {
       saveContextOnSend({ contextDAO: instance(contextDAO) })(middlewareInput)
     );
 
-    const response: AmbiguousResponse<Context> = {
+    const response: AmbiguousGenericResponse<Context> = {
       targetID,
       additionalContext,
       originalRequest: {

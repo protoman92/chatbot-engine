@@ -10,7 +10,7 @@ import {
   RawRequestGeneralizer,
 } from "./messenger";
 import { BaseRequest, CrossPlatformRequestInput } from "./request";
-import { BaseResponse } from "./response";
+import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseResponseOutput } from "./visual-content";
 
@@ -34,8 +34,8 @@ export type FacebookGenericRequest<Context> = Readonly<{
     | Readonly<{ input: FacebookRequestInput<Context>; type: "manual_trigger" }>
   );
 
-export interface FacebookResponse<Context>
-  extends BaseResponse<Context & FacebookDefaultContext> {
+export interface FacebookGenericResponse<Context>
+  extends BaseGenericResponse<Context & FacebookDefaultContext> {
   readonly output: readonly FacebookResponseOutput[];
   readonly targetPlatform: "facebook";
 }
@@ -442,7 +442,7 @@ export interface FacebookMessageProcessor<Context>
       FacebookGenericRequest<Context>
     >,
     GenericRequestReceiver<FacebookGenericRequest<Context>>,
-    GenericResponseSender<FacebookResponse<Context>, unknown> {}
+    GenericResponseSender<FacebookGenericResponse<Context>, unknown> {}
 
 export type FacebookMessageProcessorMiddleware<
   Context
@@ -455,7 +455,7 @@ export type FacebookLeafObserver<T> = ContentObserver<
 >;
 
 export type FacebookLeaf<T> = FacebookLeafObserver<T> &
-  ContentObservable<FacebookResponse<T>>;
+  ContentObservable<FacebookGenericResponse<T>>;
 
 /** Represents a Facebook user */
 export interface FacebookUser {

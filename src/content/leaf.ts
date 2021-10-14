@@ -1,14 +1,18 @@
 import { requireNotNull } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
 import {
+  AmbiguousGenericResponse,
   AmbiguousLeaf,
   AmbiguousLeafObserver,
-  AmbiguousResponse,
   ErrorLeafConfig,
   FacebookLeafObserver,
   NextContentObserver,
   TelegramLeafObserver,
 } from "../type";
+
+interface AdditionalErrorInformation {
+  currentLeafName?: string;
+}
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -17,12 +21,12 @@ import {
 export async function createLeaf<Context>(
   fn: (
     observer: NextContentObserver<
-      Omit<AmbiguousResponse<Context>, "originalRequest">
+      Omit<AmbiguousGenericResponse<Context>, "originalRequest">
     >
   ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
 ): Promise<AmbiguousLeaf<Context>> {
-  let originalRequest: AmbiguousResponse<Context>["originalRequest"];
-  const baseSubject = createContentSubject<AmbiguousResponse<Context>>();
+  let originalRequest: AmbiguousGenericResponse<Context>["originalRequest"];
+  const baseSubject = createContentSubject<AmbiguousGenericResponse<Context>>();
 
   const subject: typeof baseSubject = {
     ...baseSubject,
@@ -30,7 +34,7 @@ export async function createLeaf<Context>(
       return baseSubject.next({
         ...response,
         originalRequest,
-      } as AmbiguousResponse<Context>);
+      } as AmbiguousGenericResponse<Context>);
     },
   };
 
@@ -44,7 +48,8 @@ export async function createLeaf<Context>(
         const result = await baseLeaf.next(request);
         return result;
       } catch (error) {
-        error.currentLeafName = request.currentLeafName;
+        (error as AdditionalErrorInformation).currentLeafName =
+          request.currentLeafName;
         throw error;
       }
     },

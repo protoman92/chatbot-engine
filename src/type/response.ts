@@ -1,9 +1,9 @@
-import { FacebookResponse } from "./facebook";
+import { FacebookGenericResponse } from "./facebook";
 import { AmbiguousPlatform } from "./messenger";
 import { AmbiguousGenericRequest } from "./request";
-import { TelegramResponse } from "./telegram";
+import { TelegramGenericResponse } from "./telegram";
 
-export interface BaseResponse<Context> {
+export interface BaseGenericResponse<Context> {
   readonly additionalContext?: Partial<Context>;
   /**
    * If this response is sent organically (i.e. not manually invoked to send
@@ -19,12 +19,12 @@ export interface BaseResponse<Context> {
  * the existing context in persistence (emphasis on addition, not replacement).
  * This is to prevent stale old context replacing latest one.
  */
-export type AmbiguousResponse<Context> =
-  | (FacebookResponse<Context> | TelegramResponse<Context>)
-  | (BaseResponse<Context> & {
+export type AmbiguousGenericResponse<Context> =
+  | (FacebookGenericResponse<Context> | TelegramGenericResponse<Context>)
+  | (BaseGenericResponse<Context> & {
       output: readonly (
-        | FacebookResponse<Context>["output"][number]
-        | TelegramResponse<Context>["output"][number]
+        | FacebookGenericResponse<Context>["output"][number]
+        | TelegramGenericResponse<Context>["output"][number]
       )[];
       targetPlatform: AmbiguousPlatform;
     });

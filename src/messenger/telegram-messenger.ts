@@ -3,14 +3,14 @@ import { chunkString, firstSubString, telegramError } from "../common/utils";
 import {
   MessageProcessorMiddleware,
   TelegramBot,
+  TelegramGenericRequest,
+  TelegramGenericResponse,
   TelegramMessageProcessor,
   TelegramMessageProcessorConfig,
   TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramRawResponse,
-  TelegramGenericRequest,
   TelegramRequestInput,
-  TelegramResponse,
   TelegramUser,
   _TelegramRawRequest as RawRequest,
   _TelegramRawRequest,
@@ -168,7 +168,7 @@ export function createGenericTelegramRequest<Context>(
 function createRawTelegramResponse<Context>({
   targetID,
   output,
-}: TelegramResponse<Context>): readonly TelegramRawResponse[] {
+}: TelegramGenericResponse<Context>): readonly TelegramRawResponse[] {
   function createDocumentResponse(
     chat_id: string,
     reply_markup: _TelegramRawResponse.ReplyMarkup | undefined,
@@ -307,7 +307,7 @@ function createRawTelegramResponse<Context>({
       content,
       quickReplies,
       parseMode,
-    }: TelegramResponse<Context>["output"][number]
+    }: TelegramGenericResponse<Context>["output"][number]
   ): TelegramRawResponse[] {
     const reply_markup = quickReplies && createQuickReplies(quickReplies);
 
@@ -392,7 +392,9 @@ export async function createTelegramMessageProcessor<Context>(
         );
       },
       mapResponse: async (res) => {
-        return createRawTelegramResponse(res as TelegramResponse<Context>);
+        return createRawTelegramResponse(
+          res as TelegramGenericResponse<Context>
+        );
       },
     },
     ...(middlewares as MessageProcessorMiddleware<Context>[])

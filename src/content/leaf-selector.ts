@@ -1,8 +1,8 @@
 import { isType, mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import {
+  AmbiguousGenericResponse,
   AmbiguousLeaf,
-  AmbiguousResponse,
   Branch,
   ContentObservable,
   ContentObserver,
@@ -52,7 +52,7 @@ export function enumerateLeaves<Context>(
  */
 export function createLeafSelector<Context>(branch: Branch<Context>) {
   const _enumeratedLeaves = enumerateLeaves(branch);
-  let outputObservable: ContentObservable<AmbiguousResponse<Context>>;
+  let outputObservable: ContentObservable<AmbiguousGenericResponse<Context>>;
   let _subscribeCount = 0;
 
   const selector = {
@@ -86,7 +86,7 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
       });
     },
     subscribe: async (
-      observer: ContentObserver<AmbiguousResponse<Context>>
+      observer: ContentObserver<AmbiguousGenericResponse<Context>>
     ) => {
       _subscribeCount += 1;
 
