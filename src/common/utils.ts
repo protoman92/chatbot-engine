@@ -172,10 +172,10 @@ export function omitNull<T>(
   return arr.filter((object) => object != null) as readonly T[];
 }
 
-export function omitProperties<T extends object, K extends keyof T>(
+export function omitProperties<T extends object, KS extends (keyof T)[]>(
   args: T,
-  ...keys: readonly K[]
-): Omit<T, K> {
+  ...keys: KS
+): KS extends [any, ...any[]] ? Omit<T, KS[number]> : T {
   const result = { ...args };
 
   for (const key of keys) {

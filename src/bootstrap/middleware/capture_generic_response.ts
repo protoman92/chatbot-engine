@@ -1,5 +1,9 @@
 import { MessageProcessorMiddleware } from "../../type";
 
 export default function <Context>(): MessageProcessorMiddleware<Context> {
-  return () => async (processor) => processor;
+  return () => {
+    return async (processor) => {
+      return processor;
+    };
+  };
 }
