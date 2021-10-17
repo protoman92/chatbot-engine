@@ -20,7 +20,6 @@ import {
 } from "../messenger";
 import {
   AmbiguousGenericRequest,
-  AmbiguousPlatform,
   Branch,
   ContextDAO,
   ErrorLeafConfig,
@@ -32,9 +31,11 @@ import {
 import {
   DefaultAsynchronousDependencies,
   DefaultLeafDependencies,
+  OnWebhookErrorHandler,
 } from "./interface";
 import createCaptureGenericResponseMiddleware from "./middleware/capture_generic_response";
 import ContextRoute from "./route/bootstrap_context_route";
+import WebhookRoute from "./route/bootstrap_webhook_route";
 
 export type ChatbotProjectDependencies<
   Context,
@@ -52,13 +53,7 @@ export type ChatbotProjectDependencies<
         | TelegramMessageProcessorMiddleware<Context>
       )[];
     }>;
-    onWebhookError: (
-      args: Readonly<{
-        error: Error;
-        payload: unknown;
-        platform: AmbiguousPlatform;
-      }>
-    ) => Promise<void>;
+    onWebhookError: OnWebhookErrorHandler;
   }> &
   (
     | {
@@ -91,7 +86,6 @@ export default async function createChatbotRouter<
     args: StrictOmit<DefaultLeafDependencies<Context>, "contextDAO">
   ) => Promise<ChatbotProjectDependencies<Context, LeafDependencies>>;
   /**
-   *
    * If we don't specify a timeout, the webhook will be repeatedly called
    * again. Need to check for why that's the case, but do not hog the entire
    * bot.
@@ -194,37 +188,11 @@ export default async function createChatbotRouter<
   router.use(express.json());
   router.use(ContextRoute(dependencies));
 
-  router.get("/webhook/facebook", async ({ query }, res) => {
-    const challenge = await facebookClient.resolveVerifyChallenge(query);
-    res.status(200).send(challenge);
-  });
-
-  router.post(
-    "/webhook/:platform",
-    async ({ body, params: { platform } }, res) => {
-      const { messenger } = await getAsyncDependencies();
-
-      try {
-        await Promise.race([
-          messenger.processRawRequest(body),
-          (async function () {
-            await new Promise((resolve) => {
-              setTimeout(() => resolve(undefined), webhookTimeout);
-            });
-
-            throw new Error("Webhook timed out");
-          })(),
-        ]);
-      } catch (error) {
-        await projectDeps.onWebhookError({
-          error: error as any,
-          payload: body,
-          platform: platform as AmbiguousPlatform,
-        });
-      }
-
-      res.sendStatus(200);
-    }
+  router.use(
+    WebhookRoute({
+      ...dependencies,
+      onWebhookError: projectDeps.onWebhookError,
+    })
   );
 
   return { chatbotDependencies: dependencies, chatbotRouter: router };

@@ -15,9 +15,11 @@ import {
  */
 export function saveTelegramMessages<Context>({
   contextDAO,
+  isEnabled,
   saveMessages,
 }: Readonly<{
   contextDAO: ContextDAO<Context>;
+  isEnabled: () => Promise<boolean>;
   saveMessages: (
     args: Readonly<{
       currentContext: Context;
@@ -40,7 +42,10 @@ export function saveTelegramMessages<Context>({
       return {
         ...processor,
         receiveRequest: async ({ genericRequest, ...args }) => {
-          if (genericRequest.type !== "message_trigger") {
+          if (
+            !(await isEnabled()) ||
+            genericRequest.type !== "message_trigger"
+          ) {
             return processor.receiveRequest({ ...args, genericRequest });
           }
 
@@ -59,15 +64,17 @@ export function saveTelegramMessages<Context>({
         sendResponse: async ({ genericResponse }) => {
           const sendResult = await processor.sendResponse({ genericResponse });
 
-          const currentContext = await contextDAO.getContext({
-            targetID: genericResponse.targetID,
-            targetPlatform: genericResponse.targetPlatform,
-          });
+          if (await isEnabled()) {
+            const currentContext = await contextDAO.getContext({
+              targetID: genericResponse.targetID,
+              targetPlatform: genericResponse.targetPlatform,
+            });
 
-          await saveMessages({
-            currentContext,
-            rawRequestMessages: toArray(sendResult),
-          });
+            await saveMessages({
+              currentContext,
+              rawRequestMessages: toArray(sendResult),
+            });
+          }
 
           return sendResult;
         },

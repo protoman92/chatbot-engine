@@ -452,6 +452,9 @@ describe("Save Telegram messages", () => {
 
     middlewareArgs = spy<typeof middlewareArgs>({
       contextDAO: instance(contextDAO),
+      isEnabled: () => {
+        return Promise.reject("");
+      },
       saveMessages: () => {
         return Promise.reject("");
       },
@@ -478,6 +481,7 @@ describe("Save Telegram messages", () => {
 
     const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
     when(contextDAO.getContext(anything())).thenResolve({});
+    when(middlewareArgs.isEnabled()).thenResolve(true);
     when(middlewareArgs.saveMessages(anything())).thenResolve(undefined);
     when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
     when(tlMessenger.sendResponse(anything())).thenResolve([
@@ -530,6 +534,39 @@ describe("Save Telegram messages", () => {
     verify(
       contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
     ).once();
+  });
+
+  it("Should not trigger if not enabled", async () => {
+    // Setup
+    when(middlewareArgs.isEnabled()).thenResolve(false);
+    when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
+    when(tlMessenger.sendResponse(anything())).thenResolve([
+      {} as _TelegramRawRequest.Message["message"],
+    ]);
+
+    const transformed = await compose(
+      instance(tlMessenger),
+      saveTelegramMessages(instance(middlewareArgs))({
+        getFinalMessageProcessor: () => {
+          return instance(tlMessenger);
+        },
+      })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      genericRequest: { type: "message_trigger" } as TelegramGenericRequest<
+        Context
+      >,
+    });
+
+    await transformed.sendResponse({
+      genericResponse: {} as TelegramGenericResponse<Context>,
+    });
+
+    // Then
+    verify(middlewareArgs.saveMessages(anything())).never();
+    verify(contextDAO.getContext(anything())).never;
   });
 });
 

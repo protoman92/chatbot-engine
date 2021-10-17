@@ -1,14 +1,17 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { MockContextData } from "../../context/InMemoryContextDAO";
+import axios from "axios";
+import { DeepPartial } from "ts-essentials";
+import { InMemoryContextData } from "../../context/InMemoryContextDAO";
 import { AmbiguousGenericRequest } from "../../type";
 
+export const chatbotTestConfiguration = {
+  baseURL: "",
+};
+
 export async function getSentResponses<Context>({
-  baseURL,
   targetPlatform,
-}: Pick<AxiosRequestConfig, "baseURL"> &
-  Pick<AmbiguousGenericRequest<Context>, "targetPlatform">) {
+}: Pick<AmbiguousGenericRequest<Context>, "targetPlatform">) {
   const { data } = await axios.request<unknown>({
-    baseURL,
+    baseURL: chatbotTestConfiguration.baseURL,
     method: "GET",
     url: `/webhook/${targetPlatform}/sent-response`,
   });
@@ -16,29 +19,28 @@ export async function getSentResponses<Context>({
   return data;
 }
 
-export async function sendMessageRequest<Context>({
-  baseURL,
-  ...data
-}: Pick<AxiosRequestConfig, "baseURL"> & AmbiguousGenericRequest<Context>) {
+export async function sendMessageRequest<Context>(
+  data: DeepPartial<AmbiguousGenericRequest<Context>>
+) {
   await axios.request({
-    baseURL,
     data,
+    baseURL: chatbotTestConfiguration.baseURL,
     method: "POST",
     url: `/webhook/${data.targetPlatform}`,
   });
 }
 
-export async function resetAllMocks({
-  baseURL,
-}: Pick<AxiosRequestConfig, "baseURL">) {
-  await axios.request({ baseURL, method: "POST", url: "/webhook/reset" });
+export async function resetAllMocks() {
+  await axios.request({
+    baseURL: chatbotTestConfiguration.baseURL,
+    method: "POST",
+    url: "/webhook/reset",
+  });
 }
 
-export async function getMockContextData<Context>({
-  baseURL,
-}: Pick<AxiosRequestConfig, "baseURL">) {
+export async function getMockContextData<Context>() {
   const { data } = await axios.request<Context>({
-    baseURL,
+    baseURL: chatbotTestConfiguration.baseURL,
     method: "GET",
     url: "/webhook/get-context",
   });
@@ -47,13 +49,11 @@ export async function getMockContextData<Context>({
 }
 
 export async function setMockContextData<Context>({
-  baseURL,
   context: data,
-}: Pick<AxiosRequestConfig, "baseURL"> &
-  Readonly<{ context: MockContextData<Context> }>) {
+}: Readonly<{ context: DeepPartial<InMemoryContextData<Context>> }>) {
   await axios.request({
-    baseURL,
     data,
+    baseURL: chatbotTestConfiguration.baseURL,
     method: "POST",
     url: "/webhook/set-context",
   });

@@ -16,7 +16,9 @@ export const mockResponseCapturer = (() => {
   };
 })();
 
-export default function <Context>(): MessageProcessorMiddleware<Context> {
+export default function captureGenericResponse<
+  Context
+>(): MessageProcessorMiddleware<Context> {
   return function captureGenericResponseForTest() {
     return async (processor) => ({
       ...processor,

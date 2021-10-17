@@ -168,7 +168,7 @@ export function createDynamoDBContextDAO<Context>({
   return dao;
 }
 
-export default function <Context>() {
+export default function createDefaultDynamoDBContextDAO<Context>() {
   const {
     DYNAMO_DB_ENDPOINT = "",
     DYNAMO_DB_REGION = "",

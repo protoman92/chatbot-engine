@@ -33,7 +33,7 @@ export default function <Context>({
 
   router.post("/webhook/:platform", async ({ body }, res) => {
     const { messageProcessor } = await getAsyncDependencies();
-    await messageProcessor.receiveRequest(body);
+    await messageProcessor.receiveRequest({ genericRequest: body });
     res.sendStatus(204);
   });
 

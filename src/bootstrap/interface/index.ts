@@ -1,4 +1,5 @@
 import {
+  AmbiguousPlatform,
   BaseMessageProcessor,
   ContextDAO,
   FacebookClient,
@@ -18,3 +19,11 @@ export interface DefaultLeafDependencies<Context> {
   readonly webhookTimeout: number;
   getAsyncDependencies(): Promise<DefaultAsynchronousDependencies<Context>>;
 }
+
+export type OnWebhookErrorHandler = (
+  args: Readonly<{
+    error: Error;
+    payload: unknown;
+    platform: AmbiguousPlatform;
+  }>
+) => Promise<void>;
