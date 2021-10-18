@@ -1,7 +1,7 @@
 import axios from "axios";
 import { DeepPartial } from "ts-essentials";
 import { InMemoryContextData } from "../../context/InMemoryContextDAO";
-import { AmbiguousGenericRequest } from "../../type";
+import { AmbiguousGenericRequest, AmbiguousGenericResponse } from "../../type";
 
 export const chatbotTestConfiguration = {
   baseURL: "",
@@ -10,7 +10,9 @@ export const chatbotTestConfiguration = {
 export async function getSentResponses<Context>({
   targetPlatform,
 }: Pick<AmbiguousGenericRequest<Context>, "targetPlatform">) {
-  const { data } = await axios.request<unknown>({
+  const { data } = await axios.request<
+    readonly AmbiguousGenericResponse<Context>[]
+  >({
     baseURL: chatbotTestConfiguration.baseURL,
     method: "GET",
     url: `/webhook/${targetPlatform}/sent-response`,
