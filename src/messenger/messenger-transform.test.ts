@@ -1,9 +1,9 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { AmbiguousPlatform } from "../../build/type";
 import { compose, joinObjects } from "../common/utils";
 import {
   AmbiguousGenericRequest,
   AmbiguousGenericResponse,
+  AmbiguousPlatform,
   BaseMessageProcessor,
   ContextDAO,
   FacebookRawRequest,

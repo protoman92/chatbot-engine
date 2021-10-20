@@ -77,6 +77,13 @@ export const lastSubstring = (() => {
   };
 })();
 
+export function generateUniqueTargetKey({
+  targetID,
+  targetPlatform,
+}: Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>) {
+  return `${targetPlatform}_${targetID}`;
+}
+
 /**
  * Use this to get a cross-platform output, so as to reuse logic everywhere
  * else.

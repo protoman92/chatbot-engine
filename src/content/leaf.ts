@@ -1,4 +1,4 @@
-import { requireNotNull } from "../common/utils";
+import { generateUniqueTargetKey, requireNotNull } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
 import {
   AmbiguousGenericResponse,
@@ -22,15 +22,19 @@ export async function createLeaf<Context>(
     >
   ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
 ): Promise<AmbiguousLeaf<Context>> {
-  let originalRequest: AmbiguousGenericResponse<Context>["originalRequest"];
+  let originalRequests: Record<
+    ReturnType<typeof generateUniqueTargetKey>,
+    AmbiguousGenericResponse<Context>["originalRequest"]
+  > = {};
+
   const baseSubject = createContentSubject<AmbiguousGenericResponse<Context>>();
 
   const subject: typeof baseSubject = {
     ...baseSubject,
-    next: async (response) => {
+    next: (response) => {
       return baseSubject.next({
         ...response,
-        originalRequest,
+        originalRequest: originalRequests[generateUniqueTargetKey(response)],
       } as AmbiguousGenericResponse<Context>);
     },
   };
@@ -38,16 +42,13 @@ export async function createLeaf<Context>(
   const baseLeaf = await fn(subject);
 
   return {
-    next: async (request) => {
-      originalRequest = request;
+    next: (request) => {
+      originalRequests[generateUniqueTargetKey(request)] = request;
 
-      try {
-        const result = await baseLeaf.next(request);
-        return result;
-      } catch (error) {
+      return baseLeaf.next(request).catch((error) => {
         (error as LeafError).currentLeafName = request.currentLeafName;
         throw error;
-      }
+      });
     },
     complete: async () => {
       !!baseLeaf.complete && (await baseLeaf.complete());
