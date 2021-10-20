@@ -23,13 +23,7 @@ export default function captureGenericResponse<
     return async (processor) => ({
       ...processor,
       sendResponse: async ({ genericResponse }) => {
-        const {
-          originalRequest,
-          additionalContext,
-          ...captured
-        } = genericResponse;
-
-        await mockResponseCapturer.captureResponse(captured);
+        await mockResponseCapturer.captureResponse(genericResponse);
         return processor.sendResponse({ genericResponse });
       },
     });

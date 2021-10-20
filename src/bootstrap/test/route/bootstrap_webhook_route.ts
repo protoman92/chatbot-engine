@@ -43,7 +43,22 @@ export default function <Context>({
   });
 
   router.get("/webhook/:platform/sent-response", async (...[, res]) => {
-    const sentResponses = await mockResponseCapturer.getSentResponses();
+    let sentResponses = await mockResponseCapturer.getSentResponses();
+
+    sentResponses = JSON.parse(
+      JSON.stringify(sentResponses, (...[, value]) => {
+        if (typeof value === "bigint") {
+          return value.toString();
+        }
+
+        if (value === undefined) {
+          return null;
+        }
+
+        return value;
+      })
+    );
+
     res.json(sentResponses);
   });
 
