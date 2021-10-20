@@ -21,6 +21,17 @@ export async function getSentResponses<Context>({
   return data;
 }
 
+export async function mergeMockContextData<Context>({
+  context: data,
+}: Readonly<{ context: DeepPartial<InMemoryContextData<Context>> }>) {
+  await axios.request({
+    data,
+    baseURL: chatbotTestConfiguration.baseURL,
+    method: "POST",
+    url: "/webhook/merge-context",
+  });
+}
+
 export async function sendMessageRequest<Context>(
   data: DeepPartial<AmbiguousGenericRequest<Context>>
 ) {

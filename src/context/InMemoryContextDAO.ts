@@ -1,6 +1,8 @@
 /* istanbul ignore file */
+import { merge } from "lodash";
 import { joinObjects } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
+import { inspect } from "util";
 
 export type InMemoryContextData<Context> = {
   [K in AmbiguousPlatform]: { [K: string]: Context };
@@ -11,12 +13,12 @@ function createInMemoryContextDAO<Context>() {
   let storage: InMemoryContextData<Context> = { facebook: {}, telegram: {} };
 
   const baseDAO: ContextDAO<Context> = {
-    getContext: async ({ targetPlatform: platform, targetID }) => {
-      if (storage[platform][targetID] == null) {
-        storage[platform][targetID] = {} as Context;
+    getContext: async ({ targetID, targetPlatform }) => {
+      if (storage[targetPlatform][targetID] == null) {
+        storage[targetPlatform][targetID] = {} as Context;
       }
 
-      return storage[platform][targetID];
+      return storage[targetPlatform][targetID];
     },
     appendContext: async ({
       additionalContext,
@@ -45,6 +47,9 @@ function createInMemoryContextDAO<Context>() {
     overrideStorage: async (custom: typeof storage) => {
       storage = custom;
     },
+    mergeStorage: async (additionalStorage: typeof storage) => {
+      storage = merge(storage, additionalStorage);
+    },
     resetStorage: async () => {
       for (const key in storage) {
         storage[key as keyof typeof storage] = {};
@@ -52,7 +57,15 @@ function createInMemoryContextDAO<Context>() {
     },
   };
 
-  return { ...dao, contextDAO: dao };
+  const finalDAO = {
+    ...dao,
+    contextDAO: dao,
+    [inspect.custom]() {
+      return JSON.stringify(storage, null, 4);
+    },
+  };
+
+  return finalDAO;
 }
 
 export const inMemoryContextDAO = createInMemoryContextDAO();

@@ -21,6 +21,11 @@ export default function <Context>({
     res.json(context);
   });
 
+  router.post("/webhook/merge-context", async ({ body }, res) => {
+    await inMemoryContextDAO.mergeStorage(body);
+    res.sendStatus(204);
+  });
+
   router.post("/webhook/set-context", async ({ body }, res) => {
     await inMemoryContextDAO.overrideStorage(body);
     res.sendStatus(204);
