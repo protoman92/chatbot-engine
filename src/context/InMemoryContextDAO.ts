@@ -3,6 +3,7 @@ import { merge } from "lodash";
 import { joinObjects } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
 import { inspect } from "util";
+import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
 
 export type InMemoryContextData<Context> = {
   [K in AmbiguousPlatform]: { [K: string]: Context };
@@ -10,33 +11,38 @@ export type InMemoryContextData<Context> = {
 
 /** Create an in-memory context DAO store. This is useful for debugging */
 function createInMemoryContextDAO<Context>() {
+  const synchronizer = createAsyncSynchronizer();
   let storage: InMemoryContextData<Context> = { facebook: {}, telegram: {} };
 
+  const getContext: ContextDAO<Context>["getContext"] = async ({
+    targetID,
+    targetPlatform,
+  }) => {
+    if (storage[targetPlatform][targetID] == null) {
+      storage[targetPlatform][targetID] = {} as Context;
+    }
+
+    return storage[targetPlatform][targetID];
+  };
+
   const baseDAO: ContextDAO<Context> = {
-    getContext: async ({ targetID, targetPlatform }) => {
-      if (storage[targetPlatform][targetID] == null) {
-        storage[targetPlatform][targetID] = {} as Context;
-      }
+    getContext: synchronizer.synchronize(getContext),
+    appendContext: synchronizer.synchronize(
+      async ({ additionalContext, oldContext, targetPlatform, targetID }) => {
+        if (oldContext == null) {
+          oldContext = await getContext({ targetPlatform, targetID });
+        }
 
-      return storage[targetPlatform][targetID];
-    },
-    appendContext: async ({
-      additionalContext,
-      oldContext,
-      targetPlatform,
-      targetID,
-    }) => {
-      if (oldContext == null) {
-        oldContext = await baseDAO.getContext({ targetPlatform, targetID });
+        const newContext = joinObjects(oldContext, additionalContext);
+        storage[targetPlatform][targetID] = newContext;
+        return { oldContext, newContext };
       }
-
-      const newContext = joinObjects(oldContext, additionalContext);
-      storage[targetPlatform][targetID] = newContext;
-      return { oldContext, newContext };
-    },
-    resetContext: async ({ targetID, targetPlatform }) => {
-      delete storage[targetPlatform][targetID];
-    },
+    ),
+    resetContext: synchronizer.synchronize(
+      async ({ targetID, targetPlatform }) => {
+        delete storage[targetPlatform][targetID];
+      }
+    ),
   };
 
   const dao = {
