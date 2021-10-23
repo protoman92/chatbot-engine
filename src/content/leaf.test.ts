@@ -8,7 +8,7 @@ import {
   FacebookRawRequest,
   TelegramLeaf,
   TelegramRawRequest,
-  _FacebookResponseOutput,
+  _FacebookGenericResponseOutput,
 } from "../type";
 import { createDefaultErrorLeaf, createLeaf, createLeafObserver } from "./leaf";
 
@@ -114,7 +114,7 @@ describe("Default error leaf", () => {
     expect(output).toHaveLength(1);
     const [{ content: response }] = output;
 
-    if (isType<_FacebookResponseOutput.Content.Text>(response, "text")) {
+    if (isType<_FacebookGenericResponseOutput.Content.Text>(response, "text")) {
       expect(response.text).toContain(error.message);
     } else {
       throw new Error("Never should have come here");

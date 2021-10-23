@@ -17,52 +17,52 @@ import {
 } from "./request";
 import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
-import { BaseResponseOutput } from "./visual-content";
+import { BaseGenericResponseOutput } from "./visual-content";
 
-export type TelegramRequestInput<Context> =
-  | Readonly<{ command: string; text?: string; type: "command" }>
-  | Readonly<{ coordinate: Coordinates; type: "location" }>
-  | Readonly<{
+export type TelegramRequestInput<Context> = Readonly<
+  | { command: string; text?: string; type: "command" }
+  | { coordinate: Coordinates; type: "location" }
+  | {
       document: _TelegramRawRequest.DocumentDetails;
       type: "document";
-    }>
-  | Readonly<{
+    }
+  | {
       images: readonly _TelegramRawRequest.PhotoDetails[];
       type: "image";
-    }>
-  | Readonly<{
+    }
+  | {
       leftChatMembers: readonly (TelegramBot | TelegramUser)[];
       type: "left_chat";
-    }>
-  | Readonly<{
+    }
+  | {
       newChatMembers: readonly (TelegramBot | TelegramUser)[];
       type: "joined_chat";
-    }>
-  | Readonly<{ payload: string; type: "postback" }>
-  | CrossPlatformRequestInput<Context>;
+    }
+  | { payload: string; type: "postback" }
+  | CrossPlatformRequestInput<Context>
+>;
 
-export type TelegramGenericRequest<Context> = Readonly<{
-  targetPlatform: "telegram";
-}> &
-  BaseRequest<Context> &
-  (
-    | (GenericMessageTriggerRequest<TelegramRawRequest> &
-        Readonly<{
+export type TelegramGenericRequest<Context> = Readonly<
+  {
+    targetPlatform: "telegram";
+  } & BaseRequest<Context> &
+    (
+      | (GenericMessageTriggerRequest<TelegramRawRequest> & {
           currentBot: TelegramBot;
           telegramUser: TelegramUser;
           input: TelegramRequestInput<Context>;
-        }>)
-    | (GenericManualTriggerRequest &
-        Readonly<{ input: TelegramRequestInput<Context> }>)
-  );
+        })
+      | (GenericManualTriggerRequest & { input: TelegramRequestInput<Context> })
+    )
+>;
 
 export interface TelegramGenericResponse<Context>
   extends BaseGenericResponse<Context> {
-  readonly output: readonly TelegramResponseOutput[];
+  readonly output: readonly TelegramGenericResponseOutput[];
   readonly targetPlatform: "telegram";
 }
 
-export namespace _TelegramResponseOutput {
+export namespace _TelegramGenericResponseOutput {
   export namespace QuickReply {
     export interface Contact {
       readonly text: string;
@@ -147,9 +147,10 @@ export namespace _TelegramResponseOutput {
   export type Content = Content.Document | Content.Image | Content.Text;
 }
 
-export interface TelegramResponseOutput extends BaseResponseOutput {
-  readonly content: _TelegramResponseOutput.Content;
-  readonly quickReplies?: _TelegramResponseOutput.QuickReply;
+export interface TelegramGenericResponseOutput
+  extends BaseGenericResponseOutput {
+  readonly content: _TelegramGenericResponseOutput.Content;
+  readonly quickReplies?: _TelegramGenericResponseOutput.QuickReply;
   readonly parseMode?: "html" | "markdown";
 }
 

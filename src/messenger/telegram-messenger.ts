@@ -12,10 +12,10 @@ import {
   TelegramRawResponse,
   TelegramRequestInput,
   TelegramUser,
+  _TelegramGenericResponseOutput,
   _TelegramRawRequest as RawRequest,
   _TelegramRawRequest,
   _TelegramRawResponse,
-  _TelegramResponseOutput,
 } from "../type";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -179,7 +179,7 @@ function createRawTelegramResponse<Context>({
       fileData: document,
       fileName: filename,
       text: caption,
-    }: _TelegramResponseOutput.Content.Document
+    }: _TelegramGenericResponseOutput.Content.Document
   ): _TelegramRawResponse.SendDocument {
     const formData = new FormData();
     if (!!caption) {
@@ -198,7 +198,7 @@ function createRawTelegramResponse<Context>({
   function createImageResponses({
     image: photo,
     text: fullCaption = "",
-  }: _TelegramResponseOutput.Content.Image): readonly [
+  }: _TelegramGenericResponseOutput.Content.Image): readonly [
     _TelegramRawResponse.SendPhoto,
     ...(readonly _TelegramRawResponse.SendMessage[])
   ] {
@@ -219,7 +219,7 @@ function createRawTelegramResponse<Context>({
 
   function createTextResponses({
     text: fullText,
-  }: _TelegramResponseOutput.Content.Text): _TelegramRawResponse.SendMessage[] {
+  }: _TelegramGenericResponseOutput.Content.Text): _TelegramRawResponse.SendMessage[] {
     return chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => {
       return { text };
     });
@@ -227,7 +227,7 @@ function createRawTelegramResponse<Context>({
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    matrix: _TelegramResponseOutput.InlineMarkupMatrix
+    matrix: _TelegramGenericResponseOutput.InlineMarkupMatrix
   ): _TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: matrix.map((quickReplies) =>
@@ -251,7 +251,7 @@ function createRawTelegramResponse<Context>({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    matric: _TelegramResponseOutput.ReplyMarkupMatrix
+    matric: _TelegramGenericResponseOutput.ReplyMarkupMatrix
   ): _TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: matric.map((quickReplies) =>
@@ -290,7 +290,7 @@ function createRawTelegramResponse<Context>({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReply: _TelegramResponseOutput.QuickReply
+    quickReply: _TelegramGenericResponseOutput.QuickReply
   ): _TelegramRawResponse.ReplyMarkup {
     switch (quickReply.type) {
       case "inline_markup":

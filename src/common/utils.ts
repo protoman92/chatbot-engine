@@ -2,10 +2,10 @@ import GraphemeSplitter from "grapheme-splitter";
 import {
   AmbiguousGenericResponse,
   AmbiguousPlatform,
+  FacebookGenericResponseOutput,
   FacebookRawRequest,
-  FacebookResponseOutput,
+  TelegramGenericResponseOutput,
   TelegramRawRequest,
-  TelegramResponseOutput,
   Transformer,
 } from "../type";
 
@@ -90,8 +90,8 @@ export function generateUniqueTargetKey({
  */
 export function getCrossPlatformOutput(
   args: Readonly<{
-    facebook?: readonly FacebookResponseOutput[];
-    telegram?: readonly TelegramResponseOutput[];
+    facebook?: readonly FacebookGenericResponseOutput[];
+    telegram?: readonly TelegramGenericResponseOutput[];
   }>
 ): <P extends AmbiguousPlatform>(platform: P) => NonNullable<typeof args[P]> {
   return <P extends AmbiguousPlatform>(platform: P) => {
@@ -105,8 +105,8 @@ export function getCrossPlatformOutput(
  */
 export function getCrossPlatformResponse<Context>(
   args: Readonly<{
-    facebook?: readonly FacebookResponseOutput[];
-    telegram?: readonly TelegramResponseOutput[];
+    facebook?: readonly FacebookGenericResponseOutput[];
+    telegram?: readonly TelegramGenericResponseOutput[];
   }>
 ): (
   args: Omit<AmbiguousGenericResponse<Context>, "output">

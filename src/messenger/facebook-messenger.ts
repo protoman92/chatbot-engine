@@ -9,9 +9,9 @@ import {
   FacebookRawResponse,
   FacebookRequestInput,
   MessageProcessorMiddleware,
+  _FacebookGenericResponseOutput,
   _FacebookRawRequest,
   _FacebookRawResponse,
-  _FacebookResponseOutput,
 } from "../type";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -130,7 +130,7 @@ function createFacebookRequest<Context>(
 }
 
 function createSingleAction(
-  action: _FacebookResponseOutput.Action
+  action: _FacebookGenericResponseOutput.Action
 ): _FacebookRawResponse.Button {
   const { text: title } = action;
 
@@ -151,7 +151,7 @@ function createFacebookResponse<Context>({
   function createFileAttachmentMessages({
     attachmentType: type,
     ...attachment
-  }: _FacebookResponseOutput.Content.FileAttachment): readonly _FacebookRawResponse.Message.Attachment["message"][] {
+  }: _FacebookGenericResponseOutput.Content.FileAttachment): readonly _FacebookRawResponse.Message.Attachment["message"][] {
     if ("attachmentID" in attachment) {
       return [
         {
@@ -193,7 +193,7 @@ function createFacebookResponse<Context>({
   function createButtonMessages({
     text: fullText,
     actions,
-  }: _FacebookResponseOutput.Content.Button): readonly (
+  }: _FacebookGenericResponseOutput.Content.Button): readonly (
     | _FacebookRawResponse.Message.Text["message"]
     | _FacebookRawResponse.Message.Button["message"]
   )[] {
@@ -220,7 +220,7 @@ function createFacebookResponse<Context>({
 
   function createCarouselMessages({
     items,
-  }: _FacebookResponseOutput.Content.Carousel): readonly _FacebookRawResponse.Message.Carousel["message"][] {
+  }: _FacebookGenericResponseOutput.Content.Carousel): readonly _FacebookRawResponse.Message.Carousel["message"][] {
     return [
       {
         attachment: {
@@ -249,7 +249,7 @@ function createFacebookResponse<Context>({
   function createMediaMessages({
     actions,
     ...media
-  }: _FacebookResponseOutput.Content.Media): readonly _FacebookRawResponse.Message.RichMedia["message"][] {
+  }: _FacebookGenericResponseOutput.Content.Media): readonly _FacebookRawResponse.Message.RichMedia["message"][] {
     let url: string;
     let media_type: "image" | "video";
 
@@ -277,7 +277,7 @@ function createFacebookResponse<Context>({
   }
 
   function createListMessages(
-    content: _FacebookResponseOutput.Content.List
+    content: _FacebookGenericResponseOutput.Content.List
   ): readonly _FacebookRawResponse.Message.List["message"][] {
     const { items, actions: listActions } = content;
 
@@ -312,7 +312,7 @@ function createFacebookResponse<Context>({
 
   function createTextMessages({
     text,
-  }: _FacebookResponseOutput.Content.Text): readonly _FacebookRawResponse.Message.Text["message"][] {
+  }: _FacebookGenericResponseOutput.Content.Text): readonly _FacebookRawResponse.Message.Text["message"][] {
     return [
       ...chunkString(text, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => {
         return { text };
@@ -321,7 +321,7 @@ function createFacebookResponse<Context>({
   }
 
   function createResponseMessages(
-    content: _FacebookResponseOutput.Content
+    content: _FacebookGenericResponseOutput.Content
   ): readonly _FacebookRawResponse.Message["message"][] {
     switch (content.type) {
       case "attachment":
@@ -346,7 +346,7 @@ function createFacebookResponse<Context>({
 
   /** Create a Facebook quick reply from a generic quick reply */
   function createRawQuickReply(
-    quickReply: _FacebookResponseOutput.QuickReply
+    quickReply: _FacebookGenericResponseOutput.QuickReply
   ): _FacebookRawResponse.QuickReply {
     const { text } = quickReply;
 

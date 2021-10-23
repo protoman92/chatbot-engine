@@ -1,9 +1,9 @@
-import { FacebookResponseOutput } from "./facebook";
-import { TelegramResponseOutput } from "./telegram";
+import { FacebookGenericResponseOutput } from "./facebook";
+import { TelegramGenericResponseOutput } from "./telegram";
 
-export interface BaseResponseOutput {}
+export interface BaseGenericResponseOutput {}
 
 /** Represents content that will go out to the user */
-export type AmbiguousResponseOutput =
-  | FacebookResponseOutput
-  | TelegramResponseOutput;
+export type AmbiguousGenericResponseOutput =
+  | FacebookGenericResponseOutput
+  | TelegramGenericResponseOutput;

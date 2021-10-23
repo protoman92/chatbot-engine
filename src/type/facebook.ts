@@ -17,7 +17,7 @@ import {
 } from "./request";
 import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
-import { BaseResponseOutput } from "./visual-content";
+import { BaseGenericResponseOutput } from "./visual-content";
 
 export type FacebookRequestInput<Context> =
   | Readonly<{ param: string; type: "deeplink" }>
@@ -40,11 +40,11 @@ export type FacebookGenericRequest<Context> = Readonly<{
 
 export interface FacebookGenericResponse<Context>
   extends BaseGenericResponse<Context & FacebookDefaultContext> {
-  readonly output: readonly FacebookResponseOutput[];
+  readonly output: readonly FacebookGenericResponseOutput[];
   readonly targetPlatform: "facebook";
 }
 
-export namespace _FacebookResponseOutput {
+export namespace _FacebookGenericResponseOutput {
   export namespace QuickReply {
     export interface Location {
       readonly text: string;
@@ -178,18 +178,18 @@ export namespace _FacebookResponseOutput {
   }
 }
 
-export type FacebookResponseOutput = BaseResponseOutput &
-  (
-    | Readonly<{
-        content: _FacebookResponseOutput.Content;
-        quickReplies?: readonly _FacebookResponseOutput.QuickReply[];
-      }>
-    | Readonly<{
-        content: _FacebookResponseOutput.Menu;
+export type FacebookGenericResponseOutput = BaseGenericResponseOutput &
+  Readonly<
+    | {
+        content: _FacebookGenericResponseOutput.Content;
+        quickReplies?: readonly _FacebookGenericResponseOutput.QuickReply[];
+      }
+    | {
+        content: _FacebookGenericResponseOutput.Menu;
         quickReplies?: never[];
         tag?: never;
-      }>
-  );
+      }
+  >;
 
 export namespace _FacebookRawRequest {
   export namespace Attachment {
@@ -338,20 +338,20 @@ export namespace _FacebookRawResponse {
 
     export interface Button {
       readonly message: Readonly<{
-        attachment: {
+        attachment: Readonly<{
           type: "template";
           payload: Readonly<{
             buttons: readonly _FacebookRawResponse.Button[];
             template_type: "button";
             text: string;
           }>;
-        };
+        }>;
       }>;
     }
 
     export interface Carousel {
       readonly message: Readonly<{
-        attachment: {
+        attachment: Readonly<{
           type: "template";
           payload: Readonly<{
             elements: readonly Readonly<{
@@ -362,13 +362,13 @@ export namespace _FacebookRawResponse {
             }>[];
             template_type: "generic";
           }>;
-        };
+        }>;
       }>;
     }
 
     export interface List {
       readonly message: Readonly<{
-        attachment: {
+        attachment: Readonly<{
           payload: Readonly<{
             buttons?: readonly _FacebookRawResponse.Button[];
             elements: readonly Readonly<{
@@ -380,7 +380,7 @@ export namespace _FacebookRawResponse {
             top_element_style: "compact";
           }>;
           type: "template";
-        };
+        }>;
       }>;
     }
 
@@ -417,22 +417,20 @@ export namespace _FacebookRawResponse {
     | Message.Text;
 }
 
-export type FacebookRawResponse = Readonly<{
-  recipient: Readonly<{ id: string }>;
-}> &
-  (
-    | Readonly<{
+export type FacebookRawResponse = Readonly<
+  { recipient: Readonly<{ id: string }> } & (
+    | {
         messaging_type: "MESSAGE_TAG";
         tag: _FacebookRawResponse.MessageTag;
-      }>
-    | Readonly<{ messaging_type: "RESPONSE" }>
+      }
+    | { messaging_type: "RESPONSE" }
   ) &
-  (Omit<_FacebookRawResponse.Message, "message"> &
-    Readonly<{
+    (Omit<_FacebookRawResponse.Message, "message"> & {
       message: {
         quick_replies?: readonly _FacebookRawResponse.QuickReply[];
       } & _FacebookRawResponse.Message["message"];
-    }>);
+    })
+>;
 
 export interface FacebookMessageProcessorConfig<Context> {
   readonly leafSelector: LeafSelector<Context>;
