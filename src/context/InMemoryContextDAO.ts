@@ -1,9 +1,10 @@
 /* istanbul ignore file */
+import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
+import { decorateClientMethods } from "@haipham/javascript-helper-decorator";
 import { merge } from "lodash";
+import { inspect } from "util";
 import { joinObjects } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
-import { inspect } from "util";
-import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
 
 export type InMemoryContextData<Context> = {
   [K in AmbiguousPlatform]: { [K: string]: Context };
@@ -26,23 +27,24 @@ function createInMemoryContextDAO<Context>() {
   };
 
   const baseDAO: ContextDAO<Context> = {
-    getContext: synchronizer.synchronize(getContext),
-    appendContext: synchronizer.synchronize(
-      async ({ additionalContext, oldContext, targetPlatform, targetID }) => {
-        if (oldContext == null) {
-          oldContext = await getContext({ targetPlatform, targetID });
-        }
+    getContext,
+    appendContext: async ({
+      additionalContext,
+      oldContext,
+      targetPlatform,
+      targetID,
+    }) => {
+      if (oldContext == null) {
+        oldContext = await getContext({ targetPlatform, targetID });
+      }
 
-        const newContext = joinObjects(oldContext, additionalContext);
-        storage[targetPlatform][targetID] = newContext;
-        return { oldContext, newContext };
-      }
-    ),
-    resetContext: synchronizer.synchronize(
-      async ({ targetID, targetPlatform }) => {
-        delete storage[targetPlatform][targetID];
-      }
-    ),
+      const newContext = joinObjects(oldContext, additionalContext);
+      storage[targetPlatform][targetID] = newContext;
+      return { oldContext, newContext };
+    },
+    resetContext: async ({ targetID, targetPlatform }) => {
+      delete storage[targetPlatform][targetID];
+    },
   };
 
   const dao = {
@@ -71,7 +73,9 @@ function createInMemoryContextDAO<Context>() {
     },
   };
 
-  return finalDAO;
+  return decorateClientMethods<typeof finalDAO>({
+    decorator: synchronizer.synchronize,
+  })(finalDAO);
 }
 
 export const inMemoryContextDAO = createInMemoryContextDAO();
