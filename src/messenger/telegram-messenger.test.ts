@@ -232,7 +232,7 @@ describe("Create generic Telegram requests", () => {
     ]);
   });
 
-  it("Should return location if location is returned", async () => {
+  it("Should return location if location is provided", async () => {
     // Setup
     const location = { latitude: 0, longitude: 0 };
 
@@ -257,6 +257,87 @@ describe("Create generic Telegram requests", () => {
         rawRequest,
         currentContext: {},
         input: { coordinate: location, type: "location" },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return pre-checkout details if pre_checkout_query is returned", async () => {
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      pre_checkout_query: {
+        from,
+        currency: "SGD",
+        id: "id",
+        invoice_payload: "invoice-payload",
+        total_amount: 100,
+      },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
+
+    // Then
+    expect(genericRequest).toEqual([
+      {
+        currentBot,
+        rawRequest,
+        currentContext: {},
+        input: {
+          amount: 100,
+          checkoutID: "id",
+          currency: "SGD",
+          payload: "invoice-payload",
+          type: "pre_checkout",
+        },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
+  it("Should return successful payment details if successful_payment is returned", async () => {
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: {
+        chat,
+        from,
+        date: 0,
+        message_id: 0,
+        successful_payment: {
+          currency: "SGD",
+          invoice_payload: "payload",
+          provider_payment_charge_id: "ppci",
+          telegram_payment_charge_id: "tpci",
+          total_amount: 100,
+        },
+      },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
+
+    // Then
+    expect(genericRequest).toEqual([
+      {
+        currentBot,
+        rawRequest,
+        currentContext: {},
+        input: {
+          amount: 100,
+          currency: "SGD",
+          payload: "payload",
+          providerPaymentChargeID: "ppci",
+          telegramPaymentChargeID: "tpci",
+          type: "successful_payment",
+        },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,

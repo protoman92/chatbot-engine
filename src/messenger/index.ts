@@ -1,6 +1,6 @@
 import defaultAxiosClient from "./axios-client";
-import defaultFacebookClient from "./facebook-client";
-import defaultTelegramClient from "./telegram-client";
+import createDefaultFacebookClient from "./facebook-client";
+import createDefaultTelegramClient from "./telegram-client";
 import defaultWitClient from "./wit-client";
 export { createAxiosClient } from "./axios-client";
 export { createFacebookClient } from "./facebook-client";
@@ -23,6 +23,6 @@ export { createWitClient } from "./wit-client";
 export {
   defaultWitClient,
   defaultAxiosClient,
-  defaultFacebookClient,
-  defaultTelegramClient,
+  createDefaultFacebookClient,
+  createDefaultTelegramClient,
 };

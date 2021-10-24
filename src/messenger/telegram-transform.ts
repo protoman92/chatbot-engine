@@ -1,4 +1,4 @@
-import { toArray } from "../common/utils";
+import { isType, toArray } from "../common/utils";
 import {
   AmbiguousGenericRequest,
   ContextDAO,
@@ -23,15 +23,25 @@ export function saveTelegramMessages<Context>({
   saveMessages: (
     args: Readonly<{
       currentContext: Context;
-      rawRequestMessages: readonly _TelegramRawRequest.Message["message"][];
+      rawRequestMessages: readonly (
+        | _TelegramRawRequest.Message["message"]
+        | _TelegramRawRequest.SuccessfulPayment["message"]
+      )[];
     }>
   ) => Promise<void>;
 }>): TelegramMessageProcessorMiddleware<Context> {
   function extractRawRequestMessage(
     rawRequest: TelegramRawRequest
-  ): _TelegramRawRequest.Message["message"] {
-    if ("callback_query" in rawRequest) {
+  ):
+    | _TelegramRawRequest.Message["message"]
+    | _TelegramRawRequest.SuccessfulPayment["message"]
+    | undefined {
+    if (isType<_TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
       return rawRequest.callback_query.message;
+    } else if (
+      isType<_TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
+    ) {
+      return undefined;
     } else {
       return rawRequest.message;
     }
@@ -49,20 +59,26 @@ export function saveTelegramMessages<Context>({
             return processor.receiveRequest({ ...args, genericRequest });
           }
 
+          const rawRequestMessages = extractRawRequestMessage(
+            genericRequest.rawRequest
+          );
+
           const [result] = await Promise.all([
             processor.receiveRequest({ ...args, genericRequest }),
-            saveMessages({
-              currentContext: genericRequest.currentContext,
-              rawRequestMessages: [
-                extractRawRequestMessage(genericRequest.rawRequest),
-              ],
-            }),
+            ...(rawRequestMessages == null
+              ? []
+              : [
+                  saveMessages({
+                    rawRequestMessages: toArray(rawRequestMessages),
+                    currentContext: genericRequest.currentContext,
+                  }),
+                ]),
           ]);
 
           return result;
         },
         sendResponse: async ({ genericResponse }) => {
-          const sendResult = await processor.sendResponse({ genericResponse });
+          const sendResults = await processor.sendResponse({ genericResponse });
 
           if (await isEnabled()) {
             const currentContext = await contextDAO.getContext({
@@ -70,13 +86,23 @@ export function saveTelegramMessages<Context>({
               targetPlatform: genericResponse.targetPlatform,
             });
 
-            await saveMessages({
-              currentContext,
-              rawRequestMessages: toArray(sendResult),
-            });
+            const rawRequestMessages: Exclude<
+              typeof sendResults[number],
+              boolean
+            >[] = [];
+
+            for (const sendResult of sendResults) {
+              if (typeof sendResult === "boolean") {
+                continue;
+              }
+
+              rawRequestMessages.push(sendResult);
+            }
+
+            await saveMessages({ currentContext, rawRequestMessages });
           }
 
-          return sendResult;
+          return sendResults;
         },
       };
     };

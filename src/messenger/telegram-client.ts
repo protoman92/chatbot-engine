@@ -1,5 +1,9 @@
 import { stringify } from "querystring";
-import { requireAllTruthy } from "../common/utils";
+import {
+  requireAllTruthy,
+  requireTruthy,
+  telegramError,
+} from "../common/utils";
 import {
   HTTPClient,
   TelegramBot,
@@ -13,7 +17,11 @@ import defaultAxiosClient from "./axios-client";
 
 export function createTelegramClient(
   client: HTTPClient,
-  { authToken, defaultParseMode }: TelegramConfig
+  {
+    authToken,
+    defaultParseMode,
+    defaultPaymentProviderToken: paymentProviderToken,
+  }: TelegramConfig
 ): TelegramClient {
   function formatURL(action: string, query?: {}) {
     let qs = stringify(query);
@@ -84,8 +92,19 @@ export function createTelegramClient(
       parseMode: parse_mode = defaultParseMode,
     }) => {
       return communicate<TelegramRawRequest>({
-        body,
         headers,
+        body: {
+          ...body,
+          ...(action === "sendInvoice"
+            ? {
+                provider_token: requireTruthy(
+                  paymentProviderToken,
+                  telegramError("Payment provider token must be provided.")
+                    .message
+                ),
+              }
+            : {}),
+        },
         url: formatURL(action, { parse_mode }),
         method: "POST",
       });
@@ -117,7 +136,12 @@ export function createTelegramClient(
   return telegramClient;
 }
 
-export default function (args?: Pick<TelegramConfig, "defaultParseMode">) {
+export default function createDefaultTelegramClient(
+  args?: Pick<
+    TelegramConfig,
+    "defaultParseMode" | "defaultPaymentProviderToken"
+  >
+) {
   const { TELEGRAM_AUTH_TOKEN: authToken } = requireAllTruthy({
     TELEGRAM_AUTH_TOKEN: process.env.TELEGRAM_AUTH_TOKEN,
   });

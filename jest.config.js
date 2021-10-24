@@ -1,14 +1,15 @@
 const path = require("path");
 
 module.exports = {
-  verbose: true,
+  collectCoverage: false,
   roots: ["<rootDir>"],
   moduleNameMapper: { "^lodash-es$": "lodash" },
+  testMatch: [path.join("<rootDir>", "src", "**", "*.(test|spec).ts")],
+  testEnvironment: "node",
   transform: {
     "^.+\\.jsx?$": "babel-jest",
     "^.+\\.tsx?$": "ts-jest",
   },
-  testMatch: [path.join("<rootDir>", "src", "**", "*.(test|spec).ts")],
-  testEnvironment: "node",
-  collectCoverage: false,
+  transformIgnorePatterns: ["/node_modules/(?!(@haipham/javascript-helper.*))"],
+  verbose: true,
 };

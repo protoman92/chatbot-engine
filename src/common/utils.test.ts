@@ -5,7 +5,6 @@ import {
   lastSubstring,
   mapSeries,
   omitNull,
-  requireNotNull,
 } from "./utils";
 
 describe("Common utilities", () => {
@@ -47,11 +46,6 @@ describe("Common utilities", () => {
 
   it("Omit null should work", async () => {
     expect(omitNull([null, 1, 2, undefined, 3])).toEqual([1, 2, 3]);
-  });
-
-  it("Require not null should work", async () => {
-    expect(requireNotNull(1)).toEqual(1);
-    expect(() => requireNotNull(null)).toThrow();
   });
 
   it("Chunk string should work", async () => {

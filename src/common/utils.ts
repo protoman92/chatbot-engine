@@ -1,3 +1,4 @@
+import { isType, requireNotNull } from "@haipham/javascript-helper-utils";
 import GraphemeSplitter from "grapheme-splitter";
 import {
   AmbiguousGenericResponse,
@@ -8,6 +9,13 @@ import {
   TelegramRawRequest,
   Transformer,
 } from "../type";
+export {
+  isType,
+  requireAllTruthy,
+  requireNotNull,
+  requireTruthy,
+  toArray,
+} from "@haipham/javascript-helper-utils";
 
 export function chunkArray<TArr extends any[] | readonly any[]>(
   arr: TArr,
@@ -45,6 +53,14 @@ export const chunkString = (() => {
     return chunks;
   };
 })();
+
+export function getErrorMessage(errorOrString: Error | string): string {
+  if (typeof errorOrString === "string") {
+    return errorOrString;
+  }
+
+  return errorOrString.message;
+}
 
 export const firstSubString = (() => {
   let splitter: GraphemeSplitter;
@@ -121,16 +137,6 @@ export function getCrossPlatformResponse<Context>(
       output: requireNotNull(args[targetPlatform]) as any,
     };
   };
-}
-
-/** Check if an object is of a certain type */
-export function isType<
-  T,
-  K extends Extract<keyof T, string> = Extract<keyof T, string>
->(object: any, ...keys: readonly K[]): object is T {
-  if (!object) return false;
-  const objectKeySet = new Set(Object.keys(object));
-  return keys.every((key) => objectKeySet.has(key));
 }
 
 /** Deep clone an object */
@@ -241,22 +247,6 @@ export function promisify2<
   };
 }
 
-export function requireNotNull<T>(obj: T | null | undefined): T {
-  if (obj == null) throw new Error("");
-  return obj;
-}
-
-/** Request all values of an object to be truthy, and throw an error otherwise */
-export function requireAllTruthy<T>(
-  args: T
-): Readonly<{ [x in keyof T]: NonNullable<T[x]> }> {
-  Object.entries(args).forEach(([key, value]) => {
-    if (!value) throw new Error(`Falsy value ${key}`);
-  });
-
-  return args as any;
-}
-
 /**
  * Require some keys for an object. This makes sure the specified keys do not
  * point to undefined or null values.
@@ -272,11 +262,6 @@ export function requireKeys<T, K extends keyof T>(
   });
 
   return object as any;
-}
-
-/** Convert something that could either be a single value or an Array to Array */
-export function toArray<T>(value: T | readonly T[]): readonly T[] {
-  return Array.isArray(value) ? value : [value];
 }
 
 /** Transform a promise-convertible to a promise */

@@ -15,6 +15,7 @@ describe("Telegram client", () => {
     config = spy<TelegramConfig>({
       authToken: "",
       defaultParseMode: "markdown",
+      defaultPaymentProviderToken: "payment-provider-token",
     });
 
     tlClient = createTelegramClient(instance(client), instance(config));
@@ -86,6 +87,45 @@ describe("Telegram client", () => {
           method: "GET",
           query: { chat_id: chatID, message_id: messageID },
           url: "https://api.telegram.org/bot/deleteMessage",
+        })
+      )
+    ).once();
+  });
+
+  it("Should include payment provider token if sending invoice", async () => {
+    // Setup
+    const chatID = "chat-id";
+    when(client.communicate(anything())).thenResolve({ ok: true });
+
+    // When
+    await tlClient.sendResponse({
+      action: "sendInvoice",
+      body: {
+        chat_id: chatID,
+        currency: "SGD",
+        description: "description",
+        payload: "payload",
+        prices: [{ amount: 100, label: "label" }],
+        title: "title",
+      },
+    });
+
+    // Then
+    verify(
+      client.communicate(
+        deepEqual({
+          method: "POST",
+          headers: {},
+          body: {
+            chat_id: chatID,
+            currency: "SGD",
+            description: "description",
+            payload: "payload",
+            provider_token: "payment-provider-token",
+            prices: [{ amount: 100, label: "label" }],
+            title: "title",
+          },
+          url: "https://api.telegram.org/bot/sendInvoice?parse_mode=markdown",
         })
       )
     ).once();

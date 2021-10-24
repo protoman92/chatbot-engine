@@ -11,11 +11,11 @@ import {
 } from "../content";
 import {
   createCrossPlatformMessageProcessor,
+  createDefaultFacebookClient,
+  createDefaultTelegramClient,
   createFacebookMessageProcessor,
   createMessenger,
   createTelegramMessageProcessor,
-  defaultFacebookClient as createFacebookClient,
-  defaultTelegramClient as createTelegramClient,
   defaultWitClient as createWitClient,
 } from "../messenger";
 import {
@@ -23,9 +23,11 @@ import {
   Branch,
   ContextDAO,
   ErrorLeafConfig,
+  FacebookClient,
   FacebookMessageProcessorMiddleware,
   LeafSelector,
   MessageProcessorMiddleware,
+  TelegramClient,
   TelegramMessageProcessorMiddleware,
 } from "../type";
 import {
@@ -78,10 +80,13 @@ export default async function createChatbotRouter<
   LeafDependencies extends DefaultLeafDependencies<Context>
 >({
   env,
+  facebookClient = createDefaultFacebookClient(),
   getChatbotProjectDependencies,
+  telegramClient = createDefaultTelegramClient({ defaultParseMode: "html" }),
   webhookTimeout,
 }: Readonly<{
   env: string;
+  facebookClient?: FacebookClient;
   getChatbotProjectDependencies: (
     args: StrictOmit<DefaultLeafDependencies<Context>, "contextDAO">
   ) => Promise<ChatbotProjectDependencies<Context, LeafDependencies>>;
@@ -90,11 +95,9 @@ export default async function createChatbotRouter<
    * again. Need to check for why that's the case, but do not hog the entire
    * bot.
    */
+  telegramClient?: TelegramClient;
   webhookTimeout: number;
 }>) {
-  const facebookClient = createFacebookClient();
-  const telegramClient = createTelegramClient({ defaultParseMode: "html" });
-
   const projectDeps = await getChatbotProjectDependencies({
     facebookClient,
     getAsyncDependencies,

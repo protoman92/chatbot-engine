@@ -493,14 +493,12 @@ export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
 
   /** Upload an attachment and get Facebook's attachment ID */
   uploadAttachment(
-    attachment: Readonly<{
-      reusable: boolean;
-      type: _FacebookRawResponse.FileAttachmentType;
-    }> &
-      (
-        | Readonly<{ fileData: Buffer | ReadStream }>
-        | Readonly<{ url: string }>
-      ) &
+    attachment: Readonly<
+      {
+        reusable: boolean;
+        type: _FacebookRawResponse.FileAttachmentType;
+      } & ({ fileData: Buffer | ReadStream } | { url: string })
+    > &
       AppendOptions
   ): Promise<Readonly<{ attachmentID: string }>>;
 }

@@ -1,19 +1,24 @@
 import FormData from "form-data";
-import { chunkString, firstSubString, telegramError } from "../common/utils";
+import {
+  chunkString,
+  firstSubString,
+  getErrorMessage,
+  telegramError,
+  isType,
+} from "../common/utils";
 import {
   MessageProcessorMiddleware,
   TelegramBot,
   TelegramGenericRequest,
+  TelegramGenericRequestInput,
   TelegramGenericResponse,
   TelegramMessageProcessor,
   TelegramMessageProcessorConfig,
   TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramRawResponse,
-  TelegramRequestInput,
   TelegramUser,
   _TelegramGenericResponseOutput,
-  _TelegramRawRequest as RawRequest,
   _TelegramRawRequest,
   _TelegramRawResponse,
 } from "../type";
@@ -60,7 +65,11 @@ export function createGenericTelegramRequest<Context>(
   function processMessageRequest({
     message: { chat, from: user, ...message },
   }: _TelegramRawRequest.Message):
-    | [TelegramUser, RawRequest.Chat, TelegramRequestInput<Context>[]]
+    | [
+        TelegramUser,
+        _TelegramRawRequest.Chat,
+        TelegramGenericRequestInput<Context>[]
+      ]
     | undefined {
     if ("text" in message) {
       const { text: textWithCommand } = message;
@@ -114,12 +123,65 @@ export function createGenericTelegramRequest<Context>(
 
   function processCallbackRequest({
     callback_query: { data, from: user },
-  }: RawRequest.Callback): [
+  }: _TelegramRawRequest.Callback): [
     TelegramUser,
-    RawRequest.Chat | undefined,
-    TelegramRequestInput<Context>[]
+    _TelegramRawRequest.Chat | undefined,
+    TelegramGenericRequestInput<Context>[]
   ] {
     return [user, undefined, [{ payload: data, type: "postback" }]];
+  }
+
+  function processPreCheckoutRequest({
+    pre_checkout_query: {
+      currency,
+      from: user,
+      id: checkoutID,
+      invoice_payload: payload,
+      total_amount: amount,
+    },
+  }: _TelegramRawRequest.PreCheckout): [
+    TelegramUser,
+    _TelegramRawRequest.Chat | undefined,
+    TelegramGenericRequestInput<Context>[]
+  ] {
+    return [
+      user,
+      undefined,
+      [{ amount, checkoutID, currency, payload, type: "pre_checkout" }],
+    ];
+  }
+
+  function processSuccessfulPaymentRequest({
+    message: {
+      chat,
+      from: user,
+      successful_payment: {
+        currency,
+        invoice_payload: payload,
+        provider_payment_charge_id: providerPaymentChargeID,
+        telegram_payment_charge_id: telegramPaymentChargeID,
+        total_amount: amount,
+      },
+    },
+  }: _TelegramRawRequest.SuccessfulPayment): [
+    TelegramUser,
+    _TelegramRawRequest.Chat | undefined,
+    TelegramGenericRequestInput<Context>[]
+  ] {
+    return [
+      user,
+      chat,
+      [
+        {
+          amount,
+          currency,
+          payload,
+          providerPaymentChargeID,
+          telegramPaymentChargeID,
+          type: "successful_payment",
+        },
+      ],
+    ];
   }
 
   function processRequest(
@@ -127,18 +189,31 @@ export function createGenericTelegramRequest<Context>(
   ):
     | [
         TelegramUser,
-        RawRequest.Chat | undefined,
-        TelegramRequestInput<Context>[]
+        _TelegramRawRequest.Chat | undefined,
+        TelegramGenericRequestInput<Context>[]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
 
-    if ("callback_query" in request) {
+    if (isType<_TelegramRawRequest.Callback>(request, "callback_query")) {
       result = processCallbackRequest(request);
-    }
+    } else if (
+      isType<_TelegramRawRequest.PreCheckout>(request, "pre_checkout_query")
+    ) {
+      result = processPreCheckoutRequest(request);
+    } else if ("message" in request) {
+      const { message, ...restRequest } = request;
 
-    if ("message" in request) {
-      result = processMessageRequest(request);
+      if (
+        isType<_TelegramRawRequest.SuccessfulPayment["message"]>(
+          message,
+          "successful_payment"
+        )
+      ) {
+        result = processSuccessfulPaymentRequest({ message, ...restRequest });
+      } else {
+        result = processMessageRequest({ message, ...restRequest });
+      }
     }
 
     return result;
@@ -217,6 +292,25 @@ function createRawTelegramResponse<Context>({
     ];
   }
 
+  function createInvoiceResponse({
+    type,
+    ...args
+  }: _TelegramGenericResponseOutput.Content.Invoice): _TelegramRawResponse.SendInvoice {
+    return { ...args };
+  }
+
+  function createPreCheckoutConfirmationResponse({
+    checkoutID: pre_checkout_query_id,
+    error,
+    isOK,
+  }: _TelegramGenericResponseOutput.Content.PreCheckoutConfirmation): _TelegramRawResponse.AnswerPreCheckoutQuery {
+    return {
+      ok: isOK || false,
+      pre_checkout_query_id,
+      error_message: error == null ? undefined : getErrorMessage(error),
+    };
+  }
+
   function createTextResponses({
     text: fullText,
   }: _TelegramGenericResponseOutput.Content.Text): _TelegramRawResponse.SendMessage[] {
@@ -230,8 +324,8 @@ function createRawTelegramResponse<Context>({
     matrix: _TelegramGenericResponseOutput.InlineMarkupMatrix
   ): _TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
     return {
-      inline_keyboard: matrix.map((quickReplies) =>
-        quickReplies.map((quickReply) => {
+      inline_keyboard: matrix.map((quickReplies) => {
+        return quickReplies.map((quickReply) => {
           const { text } = quickReply;
 
           switch (quickReply.type) {
@@ -244,8 +338,8 @@ function createRawTelegramResponse<Context>({
             case "url":
               return { text, url: quickReply.url };
           }
-        })
-      ),
+        });
+      }),
     };
   }
 
@@ -254,8 +348,8 @@ function createRawTelegramResponse<Context>({
     matric: _TelegramGenericResponseOutput.ReplyMarkupMatrix
   ): _TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
     return {
-      keyboard: matric.map((quickReplies) =>
-        quickReplies.map((quickReply) => {
+      keyboard: matric.map((quickReplies) => {
+        return quickReplies.map((quickReply) => {
           const { text } = quickReply;
 
           switch (quickReply.type) {
@@ -280,8 +374,8 @@ function createRawTelegramResponse<Context>({
                 request_location: undefined,
               };
           }
-        })
-      ),
+        });
+      }),
       resize_keyboard: true,
       one_time_keyboard: true,
       selective: false,
@@ -354,6 +448,26 @@ function createRawTelegramResponse<Context>({
       ];
 
       return mergedResponses;
+    } else if (content.type === "invoice") {
+      const invoiceResponse = createInvoiceResponse(content);
+
+      return [
+        {
+          parseMode,
+          action: "sendInvoice",
+          body: { ...invoiceResponse, chat_id: targetID },
+        },
+      ];
+    } else if (content.type === "pre_checkout_confirmation") {
+      const answerResponse = createPreCheckoutConfirmationResponse(content);
+
+      return [
+        {
+          parseMode,
+          action: "answerPreCheckoutQuery",
+          body: { ...answerResponse, chat_id: targetID },
+        },
+      ];
     } else {
       return createTextResponses(content).map((textBody, idx, { length }) => ({
         parseMode,

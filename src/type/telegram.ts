@@ -1,5 +1,6 @@
 import FormData from "form-data";
 import { ReadStream } from "fs";
+import { StrictOmit } from "ts-essentials";
 import {
   GenericRequestReceiver,
   GenericResponseSender,
@@ -19,7 +20,7 @@ import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
-export type TelegramRequestInput<Context> = Readonly<
+export type TelegramGenericRequestInput<Context> = Readonly<
   | { command: string; text?: string; type: "command" }
   | { coordinate: Coordinates; type: "location" }
   | {
@@ -39,6 +40,25 @@ export type TelegramRequestInput<Context> = Readonly<
       type: "joined_chat";
     }
   | { payload: string; type: "postback" }
+  /**
+   * Need to answer this with a pre-checkout confirmation response for the
+   * payment to go through.
+   */
+  | {
+      amount: number;
+      checkoutID: string;
+      currency: string;
+      payload: string;
+      type: "pre_checkout";
+    }
+  | {
+      amount: number;
+      currency: string;
+      payload: string;
+      providerPaymentChargeID: string;
+      telegramPaymentChargeID: string;
+      type: "successful_payment";
+    }
   | CrossPlatformRequestInput<Context>
 >;
 
@@ -50,9 +70,11 @@ export type TelegramGenericRequest<Context> = Readonly<
       | (GenericMessageTriggerRequest<TelegramRawRequest> & {
           currentBot: TelegramBot;
           telegramUser: TelegramUser;
-          input: TelegramRequestInput<Context>;
+          input: TelegramGenericRequestInput<Context>;
         })
-      | (GenericManualTriggerRequest & { input: TelegramRequestInput<Context> })
+      | (GenericManualTriggerRequest & {
+          input: TelegramGenericRequestInput<Context>;
+        })
     )
 >;
 
@@ -138,13 +160,44 @@ export namespace _TelegramGenericResponseOutput {
       readonly type: "image";
     }
 
+    export namespace Invoice {
+      export interface Price {
+        readonly amount: number;
+        readonly label: string;
+      }
+    }
+
+    export interface Invoice {
+      readonly currency: string;
+      readonly description: string;
+      readonly payload: string;
+      readonly prices: readonly Invoice.Price[];
+      readonly title: string;
+      readonly type: "invoice";
+    }
+
+    export type PreCheckoutConfirmation = Readonly<
+      {
+        checkoutID: string;
+        type: "pre_checkout_confirmation";
+      } & (
+        | { error: Error | string; isOK?: undefined }
+        | { error?: undefined; isOK: true }
+      )
+    >;
+
     export interface Text {
       readonly text: string;
       readonly type: "text";
     }
   }
 
-  export type Content = Content.Document | Content.Image | Content.Text;
+  export type Content =
+    | Content.Document
+    | Content.Image
+    | Content.Invoice
+    | Content.PreCheckoutConfirmation
+    | Content.Text;
 }
 
 export interface TelegramGenericResponseOutput
@@ -246,7 +299,6 @@ export namespace _TelegramRawRequest {
     }
   }
 
-  /** Payload that includes on message field */
   export interface Message {
     readonly message:
       | Message.Document
@@ -269,11 +321,41 @@ export namespace _TelegramRawRequest {
       Pick<Message, "message">;
     readonly update_id: number;
   }
+
+  export interface PreCheckout {
+    readonly pre_checkout_query: Readonly<{
+      currency: string;
+      from: TelegramUser;
+      id: string;
+      invoice_payload: string;
+      total_amount: number;
+    }>;
+    readonly update_id: number;
+  }
+
+  export interface SuccessfulPayment {
+    readonly message: Readonly<{
+      chat: Chat;
+      date: number;
+      from: TelegramUser;
+      message_id: number;
+      successful_payment: Readonly<{
+        currency: string;
+        invoice_payload: string;
+        provider_payment_charge_id: string;
+        telegram_payment_charge_id: string;
+        total_amount: number;
+      }>;
+    }>;
+    readonly update_id: number;
+  }
 }
 
 export type TelegramRawRequest =
   | _TelegramRawRequest.Message
-  | _TelegramRawRequest.Callback;
+  | _TelegramRawRequest.Callback
+  | _TelegramRawRequest.PreCheckout
+  | _TelegramRawRequest.SuccessfulPayment;
 
 export namespace _TelegramRawResponse {
   export type ParseMode = "html" | "markdown";
@@ -324,7 +406,19 @@ export namespace _TelegramRawResponse {
     | ReplyMarkup.InlineKeyboardMarkup
     | ReplyMarkup.ReplyKeyboardRemove;
 
+  export interface AnswerPreCheckoutQuery {
+    readonly error_message: string | undefined;
+    readonly ok: boolean;
+    readonly pre_checkout_query_id: string;
+  }
+
   export type SendDocument = FormData;
+
+  export interface SendInvoice
+    extends StrictOmit<
+      _TelegramGenericResponseOutput.Content.Invoice,
+      "type"
+    > {}
 
   export interface SendMessage {
     readonly text: string;
@@ -342,8 +436,17 @@ export type TelegramRawResponse = Readonly<
     parseMode?: _TelegramRawResponse.ParseMode;
   } & (
     | {
+        action: "answerPreCheckoutQuery";
+        body: _TelegramRawResponse.AnswerPreCheckoutQuery &
+          Readonly<{ chat_id: string }>;
+      }
+    | {
         action: "sendDocument";
         body: _TelegramRawResponse.SendDocument;
+      }
+    | {
+        action: "sendInvoice";
+        body: _TelegramRawResponse.SendInvoice & Readonly<{ chat_id: string }>;
       }
     | {
         action: "sendMessage";
@@ -378,7 +481,11 @@ export interface TelegramMessageProcessor<Context>
     GenericRequestReceiver<TelegramGenericRequest<Context>>,
     GenericResponseSender<
       TelegramGenericResponse<Context>,
-      readonly _TelegramRawRequest.Message["message"][]
+      readonly (
+        | _TelegramRawRequest.Message["message"]
+        /** If response is pre_checkout_confirmation */
+        | true
+      )[]
     > {}
 
 export type TelegramMessageProcessorMiddleware<
@@ -410,6 +517,7 @@ export interface TelegramUser extends TelegramBot {
 export interface TelegramConfig {
   readonly authToken: string;
   readonly defaultParseMode?: _TelegramRawResponse.ParseMode;
+  readonly defaultPaymentProviderToken?: string;
 }
 
 export namespace _TelegramClient {
