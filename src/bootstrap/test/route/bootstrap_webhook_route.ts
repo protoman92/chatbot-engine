@@ -36,10 +36,14 @@ export default function <Context>({
     res.sendStatus(204);
   });
 
-  router.post("/webhook/:platform", async ({ body }, res) => {
-    const { messageProcessor } = await getAsyncDependencies();
-    await messageProcessor.receiveRequest({ genericRequest: body });
-    res.sendStatus(204);
+  router.post("/webhook/:platform", async ({ body }, res, next) => {
+    try {
+      const { messageProcessor } = await getAsyncDependencies();
+      await messageProcessor.receiveRequest({ genericRequest: body });
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.get("/webhook/:platform/sent-response", async (...[, res]) => {
