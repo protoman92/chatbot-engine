@@ -76,30 +76,6 @@ export async function createMessageProcessor<Context>(
   return finalMessageProcessor;
 }
 
-/** Create a messenger */
-export async function createMessenger<Context>({
-  leafSelector,
-  processor,
-}: MessengerConfig<Context>): Promise<Messenger<Context>> {
-  await leafSelector.subscribe({
-    next: async (response) => {
-      await processor.sendResponse({ genericResponse: response });
-      return NextResult.BREAK;
-    },
-    complete: async () => {},
-  });
-
-  return {
-    processRawRequest: async (rawRequest) => {
-      const genericRequests = await processor.generalizeRequest(rawRequest);
-
-      return mapSeries(genericRequests, (genericRequest) => {
-        return processor.receiveRequest({ genericRequest });
-      });
-    },
-  };
-}
-
 /**
  * Create a cross-platform message processor that delegates to the appropriate
  * platform-specific message processor when a request arrives.
@@ -180,6 +156,30 @@ export function createCrossPlatformMessageProcessor<Context>(
             >,
           });
         },
+      });
+    },
+  };
+}
+
+/** Create a messenger */
+export async function createMessenger<Context>({
+  leafSelector,
+  processor,
+}: MessengerConfig<Context>): Promise<Messenger> {
+  await leafSelector.subscribe({
+    next: async (response) => {
+      await processor.sendResponse({ genericResponse: response });
+      return NextResult.BREAK;
+    },
+    complete: async () => {},
+  });
+
+  return {
+    processRawRequest: async (rawRequest) => {
+      const genericRequests = await processor.generalizeRequest(rawRequest);
+
+      return mapSeries(genericRequests, (genericRequest) => {
+        return processor.receiveRequest({ genericRequest });
       });
     },
   };

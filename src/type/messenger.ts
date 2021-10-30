@@ -60,9 +60,9 @@ export interface MessengerConfig<Context> {
  * handling data to sending response. Note that each generic messenger should
  * have a generic messenger that handles requests one-by-one.
  */
-export interface Messenger<RawRequest = unknown> {
+export interface Messenger {
   /** Process a platform request from end-to-end */
-  processRawRequest(req: RawRequest): Promise<unknown>;
+  processRawRequest(req: unknown): Promise<unknown>;
 }
 
 export namespace _MessageProcessorMiddleware {
