@@ -4,7 +4,7 @@ module.exports = {
   collectCoverage: false,
   roots: ["<rootDir>"],
   moduleNameMapper: { "^lodash-es$": "lodash" },
-  testMatch: [path.join("<rootDir>", "src", "**", "*.(test|spec).ts")],
+  testMatch: [path.join("<rootDir>", "**", "*.(test|spec).ts")],
   testEnvironment: "node",
   transform: {
     "^.+\\.jsx?$": "babel-jest",
