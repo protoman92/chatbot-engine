@@ -502,7 +502,7 @@ export async function createTelegramMessageProcessor<Context>(
       leafSelector,
       client,
       targetPlatform: "telegram",
-      mapRequest: async (rawRequest) => {
+      mapRequest: async ({ rawRequest }) => {
         return createGenericTelegramRequest(
           rawRequest as TelegramRawRequest,
           currentBot

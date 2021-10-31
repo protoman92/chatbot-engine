@@ -22,9 +22,9 @@ export default function captureGenericResponse<
   return function captureGenericResponseForTest() {
     return async (processor) => ({
       ...processor,
-      sendResponse: async ({ genericResponse }) => {
+      sendResponse: async ({ genericResponse, ...args }) => {
         await mockResponseCapturer.captureResponse(genericResponse);
-        return processor.sendResponse({ genericResponse });
+        return processor.sendResponse({ ...args, genericResponse });
       },
     });
   };

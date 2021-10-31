@@ -422,8 +422,8 @@ export async function createFacebookMessageProcessor<Context>(
       leafSelector,
       client,
       targetPlatform: "facebook",
-      mapRequest: async (req) => {
-        return createFacebookRequest(req as FacebookRawRequest);
+      mapRequest: async ({ rawRequest }) => {
+        return createFacebookRequest(rawRequest as FacebookRawRequest);
       },
       mapResponse: async (res) => {
         return createFacebookResponse(res as FacebookGenericResponse<Context>);
@@ -435,7 +435,7 @@ export async function createFacebookMessageProcessor<Context>(
   return {
     ...baseProcessor,
     sendResponse: async (
-      ...[{ genericResponse }]: Parameters<
+      ...[{ genericResponse, ...args }]: Parameters<
         FacebookMessageProcessor<Context>["sendResponse"]
       >
     ) => {
@@ -454,7 +454,7 @@ export async function createFacebookMessageProcessor<Context>(
         }
       }
 
-      return baseProcessor.sendResponse({ genericResponse });
+      return baseProcessor.sendResponse({ ...args, genericResponse });
     },
   } as FacebookMessageProcessor<Context>;
 }

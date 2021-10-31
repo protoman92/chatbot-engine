@@ -41,6 +41,7 @@ export function saveContextOnSend<Context>({
           const finalProcessor = getFinalMessageProcessor();
 
           await finalProcessor.receiveRequest({
+            ...args,
             genericRequest: {
               currentContext: newContext,
               input: {

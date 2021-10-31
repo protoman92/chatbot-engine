@@ -110,36 +110,45 @@ export function createCrossPlatformMessageProcessor<Context>(
   }
 
   return {
-    generalizeRequest: async (rawRequest) => {
+    generalizeRequest: async ({ rawRequest, ...args }) => {
       const targetPlatform = getPlatform(rawRequest);
 
       return switchPlatform(targetPlatform, {
         facebookCallback: (processor) => {
-          return processor.generalizeRequest(rawRequest as FacebookRawRequest);
+          return processor.generalizeRequest({
+            ...args,
+            rawRequest: rawRequest as FacebookRawRequest,
+          });
         },
         telegramCallback: (processor) => {
-          return processor.generalizeRequest(rawRequest as TelegramRawRequest);
+          return processor.generalizeRequest({
+            ...args,
+            rawRequest: rawRequest as TelegramRawRequest,
+          });
         },
       });
     },
-    receiveRequest: async ({ genericRequest }) => {
+    receiveRequest: async ({ genericRequest, ...args }) => {
       return switchPlatform(genericRequest.targetPlatform, {
         facebookCallback: (processor) => {
           return processor.receiveRequest({
+            ...args,
             genericRequest: genericRequest as FacebookGenericRequest<Context>,
           });
         },
         telegramCallback: (processor) => {
           return processor.receiveRequest({
+            ...args,
             genericRequest: genericRequest as TelegramGenericRequest<Context>,
           });
         },
       });
     },
-    sendResponse: async ({ genericResponse }) => {
+    sendResponse: async ({ genericResponse, ...args }) => {
       return switchPlatform(genericResponse.targetPlatform, {
         facebookCallback: (processor) => {
           return processor.sendResponse({
+            ...args,
             genericResponse: genericResponse as FacebookGenericResponse<
               Context
             >,
@@ -147,6 +156,7 @@ export function createCrossPlatformMessageProcessor<Context>(
         },
         telegramCallback: (processor) => {
           return processor.sendResponse({
+            ...args,
             genericResponse: genericResponse as TelegramGenericResponse<
               Context
             >,
@@ -157,7 +167,10 @@ export function createCrossPlatformMessageProcessor<Context>(
   };
 }
 
-/** Create a messenger */
+/**
+ * Create a messenger. Make sure the leaf selector passed here is the same one
+ * passed to the message processor.
+ */
 export async function createMessenger<Context>({
   leafSelector,
   processor,
@@ -171,11 +184,14 @@ export async function createMessenger<Context>({
   });
 
   return {
-    processRawRequest: async (rawRequest) => {
-      const genericRequests = await processor.generalizeRequest(rawRequest);
+    processRawRequest: async ({ rawRequest, ...args }) => {
+      const genericRequests = await processor.generalizeRequest({
+        ...args,
+        rawRequest,
+      });
 
       return mapSeries(genericRequests, (genericRequest) => {
-        return processor.receiveRequest({ genericRequest });
+        return processor.receiveRequest({ ...args, genericRequest });
       });
     },
   };

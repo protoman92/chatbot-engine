@@ -77,8 +77,11 @@ export function saveTelegramMessages<Context>({
 
           return result;
         },
-        sendResponse: async ({ genericResponse }) => {
-          const sendResults = await processor.sendResponse({ genericResponse });
+        sendResponse: async ({ genericResponse, ...args }) => {
+          const sendResults = await processor.sendResponse({
+            genericResponse,
+            ...args,
+          });
 
           if (await isEnabled()) {
             const currentContext = await contextDAO.getContext({

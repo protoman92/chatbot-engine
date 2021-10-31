@@ -1,3 +1,8 @@
+import {
+  GenericRequestToReceive,
+  GenericResponseToSend,
+  RawRequestToGeneralize,
+} from "..";
 import { PlatformClient } from "./client";
 import { Transformer } from "./common";
 import { LeafSelector } from "./leaf";
@@ -19,20 +24,20 @@ export interface BaseMessageProcessorConfig<Context> {
 
 export interface RawRequestGeneralizer<RawRequest, GenericRequest> {
   /** Generalize a raw request into a generic request */
-  generalizeRequest(rawRequest: RawRequest): Promise<readonly GenericRequest[]>;
+  generalizeRequest(
+    args: RawRequestToGeneralize<RawRequest>
+  ): Promise<readonly GenericRequest[]>;
 }
 
 export interface GenericRequestReceiver<GenericRequest> {
   /** Receive an incoming generic request */
-  receiveRequest(
-    args: Readonly<{ genericRequest: GenericRequest }>
-  ): Promise<void>;
+  receiveRequest(args: GenericRequestToReceive<GenericRequest>): Promise<void>;
 }
 
 export interface GenericResponseSender<GenericResponse, SendResult> {
-  /** Send an outgoing platform response */
+  /** Convert a generic response into a raw response and send it out */
   sendResponse(
-    args: Readonly<{ genericResponse: GenericResponse }>
+    args: GenericResponseToSend<GenericResponse>
   ): Promise<SendResult>;
 }
 
@@ -61,8 +66,8 @@ export interface MessengerConfig<Context> {
  * have a generic messenger that handles requests one-by-one.
  */
 export interface Messenger {
-  /** Process a platform request from end-to-end */
-  processRawRequest(req: unknown): Promise<unknown>;
+  /** Process a raw request from end-to-end */
+  processRawRequest(args: RawRequestToGeneralize<unknown>): Promise<unknown>;
 }
 
 export namespace _MessageProcessorMiddleware {
