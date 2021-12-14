@@ -7,7 +7,7 @@
     "@haipham/javascript-helper-async-synchronizer": "^1.0.0",
     "@haipham/javascript-helper-decorator": "^1.0.0",
     "aws-sdk": "2.973.0",
-    "axios": "0.21.1",
+    "axios": "0.21.2",
     "form-data": "3.0.0",
     "formidable": "1.2.2",
     "grapheme-splitter": "1.0.4",
