@@ -55,11 +55,14 @@
   "scripts": {
     "build": "rm -rf build && tsc",
     "coveralls": "coveralls < coverage/lcov.info",
+    "lerna:bootstrap": "lerna bootstrap --force-local",
     "preinstall": "git submodule update --init",
     "test": "jest"
   },
   "version": "1.0.0",
   "workspaces": [
-    "package/*"
+    "package/*",
+    "package/javascript-helper/package/*",
+    "package/microbackend/package/*"
   ]
 }
