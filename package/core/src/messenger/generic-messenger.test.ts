@@ -25,16 +25,15 @@ import {
   createMessenger,
 } from "./generic-messenger";
 
-interface Context {}
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("Generic message processor", () => {
-  let leafSelector: LeafSelector<Context>;
+  let leafSelector: LeafSelector;
   let client: PlatformClient<unknown>;
 
   beforeEach(async () => {
-    leafSelector = spy<LeafSelector<Context>>({
+    leafSelector = spy<LeafSelector>({
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });
@@ -110,7 +109,7 @@ describe("Generic message processor", () => {
       targetPlatform,
       leafSelector: instance(leafSelector),
       client: instance(client),
-      mapRequest: async () => [] as readonly AmbiguousGenericRequest<{}>[],
+      mapRequest: async () => [] as readonly AmbiguousGenericRequest[],
       mapResponse: async () => [],
     });
 
@@ -142,14 +141,14 @@ describe("Generic message processor", () => {
 });
 
 describe("Cross platform message processor", () => {
-  let leafSelector: LeafSelector<Context>;
-  let fbProcessor: FacebookMessageProcessor<Context>;
-  let tlProcessor: TelegramMessageProcessor<Context>;
+  let leafSelector: LeafSelector;
+  let fbProcessor: FacebookMessageProcessor;
+  let tlProcessor: TelegramMessageProcessor;
   let processors: Parameters<typeof createCrossPlatformMessageProcessor>[0];
   let processorInstances: typeof processors;
 
   beforeEach(() => {
-    leafSelector = spy<LeafSelector<Context>>({
+    leafSelector = spy<LeafSelector>({
       next: () => {
         return Promise.reject("");
       },
@@ -158,7 +157,7 @@ describe("Cross platform message processor", () => {
       },
     });
 
-    fbProcessor = spy<FacebookMessageProcessor<Context>>({
+    fbProcessor = spy<FacebookMessageProcessor>({
       generalizeRequest: () => {
         return Promise.resolve([]);
       },
@@ -170,7 +169,7 @@ describe("Cross platform message processor", () => {
       },
     });
 
-    tlProcessor = spy<TelegramMessageProcessor<Context>>({
+    tlProcessor = spy<TelegramMessageProcessor>({
       generalizeRequest: () => {
         return Promise.resolve([]);
       },
@@ -271,16 +270,16 @@ describe("Cross platform message processor", () => {
 });
 
 describe("Generic messenger", () => {
-  let leafSelector: LeafSelector<Context>;
-  let processor: BaseMessageProcessor<Context>;
+  let leafSelector: LeafSelector;
+  let processor: BaseMessageProcessor;
 
   beforeEach(() => {
-    leafSelector = spy<LeafSelector<Context>>({
+    leafSelector = spy<LeafSelector>({
       next: () => Promise.reject(""),
       subscribe: () => Promise.reject(""),
     });
 
-    processor = spy<BaseMessageProcessor<Context>>({
+    processor = spy<BaseMessageProcessor>({
       generalizeRequest: () => Promise.resolve([]),
       receiveRequest: () => Promise.resolve(undefined),
       sendResponse: () => Promise.resolve({}),
@@ -300,7 +299,7 @@ describe("Generic messenger", () => {
 
     const { next, complete } = capture(leafSelector.subscribe).first()[0];
 
-    const genericResponse: AmbiguousGenericResponse<Context> = {
+    const genericResponse: AmbiguousGenericResponse = {
       targetID,
       targetPlatform,
       originalRequest: {

@@ -16,19 +16,19 @@ import {
  * Create a leaf from a base leaf with a default subject for broadcasting
  * contents.
  */
-export async function createLeaf<Context>(
+export async function createLeaf(
   fn: (
     observer: NextContentObserver<
-      Omit<AmbiguousGenericResponse<Context>, "originalRequest">
+      Omit<AmbiguousGenericResponse, "originalRequest">
     >
-  ) => Promise<Omit<AmbiguousLeaf<Context>, "subscribe">>
-): Promise<AmbiguousLeaf<Context>> {
+  ) => Promise<Omit<AmbiguousLeaf, "subscribe">>
+): Promise<AmbiguousLeaf> {
   let originalRequests: Record<
     ReturnType<typeof generateUniqueTargetKey>,
-    AmbiguousGenericResponse<Context>["originalRequest"]
+    AmbiguousGenericResponse["originalRequest"]
   > = {};
 
-  const baseSubject = createContentSubject<AmbiguousGenericResponse<Context>>();
+  const baseSubject = createContentSubject<AmbiguousGenericResponse>();
 
   const subject: typeof baseSubject = {
     ...baseSubject,
@@ -36,7 +36,7 @@ export async function createLeaf<Context>(
       return baseSubject.next({
         ...response,
         originalRequest: originalRequests[generateUniqueTargetKey(response)],
-      } as AmbiguousGenericResponse<Context>);
+      } as AmbiguousGenericResponse);
     },
   };
 
@@ -63,10 +63,10 @@ export async function createLeaf<Context>(
  * Create an error leaf that will be used to deliver error messages if no
  * other leaf can handle the error.
  */
-export function createDefaultErrorLeaf<Context>({
+export function createDefaultErrorLeaf({
   formatErrorMessage,
   trackError,
-}: ErrorLeafConfig): Promise<AmbiguousLeaf<Context>> {
+}: ErrorLeafConfig): Promise<AmbiguousLeaf> {
   return createLeaf(async (observer) => ({
     next: async ({ input, targetID, targetPlatform, ...request }) => {
       if (input.type !== "error") return NextResult.FALLTHROUGH;
@@ -96,13 +96,13 @@ export function createDefaultErrorLeaf<Context>({
  * Create a leaf observer that handles content for different platforms, based
  * on the leaf input.
  */
-export async function createLeafObserver<Context>({
+export async function createLeafObserver({
   facebook,
   telegram,
 }: Readonly<{
-  facebook?: FacebookLeafObserver<Context>;
-  telegram?: TelegramLeafObserver<Context>;
-}>): Promise<AmbiguousLeafObserver<Context>> {
+  facebook?: FacebookLeafObserver;
+  telegram?: TelegramLeafObserver;
+}>): Promise<AmbiguousLeafObserver> {
   return {
     next: async (request) => {
       switch (request.targetPlatform) {

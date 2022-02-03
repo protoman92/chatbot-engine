@@ -9,7 +9,7 @@ const targetPlatform = "facebook" as const;
 
 describe("Redis context DAO", () => {
   let redis: Pick<RedisClient, "get" | "set" | "del">;
-  let contextDAO: ContextDAO<{}>;
+  let contextDAO: ContextDAO;
 
   function getCacheKey(targetID: string) {
     return `facebook-${targetID}`;

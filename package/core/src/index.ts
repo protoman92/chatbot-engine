@@ -1,3 +1,6 @@
+/** Augment this type to add more properties to the chatbot context */
+export interface ChatbotContext {}
+
 /** Augment this type to add more arguments to the request to generalize */
 export interface RawRequestToGeneralize<RawRequest> {
   readonly rawRequest: RawRequest;

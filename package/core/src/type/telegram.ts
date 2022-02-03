@@ -20,7 +20,7 @@ import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
-export type TelegramGenericRequestInput<Context> = Readonly<
+export type TelegramGenericRequestInput = Readonly<
   | { command: string; text?: string; type: "command" }
   | { coordinate: Coordinates; type: "location" }
   | {
@@ -59,27 +59,26 @@ export type TelegramGenericRequestInput<Context> = Readonly<
       telegramPaymentChargeID: string;
       type: "successful_payment";
     }
-  | CrossPlatformRequestInput<Context>
+  | CrossPlatformRequestInput
 >;
 
-export type TelegramGenericRequest<Context> = Readonly<
+export type TelegramGenericRequest = Readonly<
   {
     targetPlatform: "telegram";
-  } & BaseRequest<Context> &
+  } & BaseRequest &
     (
       | (GenericMessageTriggerRequest<TelegramRawRequest> & {
           currentBot: TelegramBot;
           telegramUser: TelegramUser;
-          input: TelegramGenericRequestInput<Context>;
+          input: TelegramGenericRequestInput;
         })
       | (GenericManualTriggerRequest & {
-          input: TelegramGenericRequestInput<Context>;
+          input: TelegramGenericRequestInput;
         })
     )
 >;
 
-export interface TelegramGenericResponse<Context>
-  extends BaseGenericResponse<Context> {
+export interface TelegramGenericResponse extends BaseGenericResponse {
   readonly output: readonly TelegramGenericResponseOutput[];
   readonly targetPlatform: "telegram";
 }
@@ -467,20 +466,17 @@ export type TelegramRawResponse = Readonly<
   )
 >;
 
-export interface TelegramMessageProcessorConfig<Context> {
-  readonly leafSelector: LeafSelector<Context>;
+export interface TelegramMessageProcessorConfig {
+  readonly leafSelector: LeafSelector;
   readonly client: TelegramClient;
 }
 
 /** Represents a Telegram-specific message processor */
-export interface TelegramMessageProcessor<Context>
-  extends RawRequestGeneralizer<
-      TelegramRawRequest,
-      TelegramGenericRequest<Context>
-    >,
-    GenericRequestReceiver<TelegramGenericRequest<Context>>,
+export interface TelegramMessageProcessor
+  extends RawRequestGeneralizer<TelegramRawRequest, TelegramGenericRequest>,
+    GenericRequestReceiver<TelegramGenericRequest>,
     GenericResponseSender<
-      TelegramGenericResponse<Context>,
+      TelegramGenericResponse,
       readonly (
         | _TelegramRawRequest.Message["message"]
         /** If response is pre_checkout_confirmation */
@@ -488,18 +484,14 @@ export interface TelegramMessageProcessor<Context>
       )[]
     > {}
 
-export type TelegramMessageProcessorMiddleware<
-  Context
-> = MessageProcessorMiddleware<Context, TelegramMessageProcessor<Context>>;
-
-export type TelegramDefaultContext = {};
-
-export type TelegramLeafObserver<T> = ContentObserver<
-  TelegramGenericRequest<T & TelegramDefaultContext>
+export type TelegramMessageProcessorMiddleware = MessageProcessorMiddleware<
+  TelegramMessageProcessor
 >;
 
-export type TelegramLeaf<T> = TelegramLeafObserver<T> &
-  ContentObservable<TelegramGenericResponse<T>>;
+export type TelegramLeafObserver = ContentObserver<TelegramGenericRequest>;
+
+export type TelegramLeaf = TelegramLeafObserver &
+  ContentObservable<TelegramGenericResponse>;
 
 export interface TelegramBot {
   readonly id: number;

@@ -7,12 +7,11 @@ const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("catchAll higher order function", () => {
-  interface Context {}
-  let rootLeaf: AmbiguousLeaf<Context>;
+  let rootLeaf: AmbiguousLeaf;
   let catchHandler: Readonly<{ onCatchAll: Parameters<typeof catchAll>[0] }>;
 
   beforeEach(() => {
-    rootLeaf = spy<AmbiguousLeaf<Context>>({
+    rootLeaf = spy<AmbiguousLeaf>({
       next: () => {
         return Promise.reject("");
       },

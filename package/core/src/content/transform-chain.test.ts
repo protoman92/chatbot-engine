@@ -14,7 +14,7 @@ describe("Transform chain", () => {
     const error = new Error("Something happened");
     const erroredLeafName = "error_leaf";
 
-    const errorLeaf = spy<AmbiguousLeaf<{}>>({
+    const errorLeaf = spy<AmbiguousLeaf>({
       next: () => {
         return Promise.reject(error);
       },
@@ -26,7 +26,7 @@ describe("Transform chain", () => {
       },
     });
 
-    const fallbackLeaf = spy<AmbiguousLeaf<{}>>({
+    const fallbackLeaf = spy<AmbiguousLeaf>({
       next: () => {
         return Promise.resolve(NextResult.BREAK);
       },
@@ -86,8 +86,8 @@ describe("Transform chain", () => {
 
   it("Leaf with pipe chain should trigger all wrapped leaves", async () => {
     // Setup
-    const trasformedLeaf: AmbiguousLeaf<{}> = await createTransformChain()
-      .pipe<{}>(async (leaf) => ({
+    const trasformedLeaf: AmbiguousLeaf = await createTransformChain()
+      .pipe(async (leaf) => ({
         ...leaf,
         next: async (request) => {
           const previousResult = await leaf.next(request);

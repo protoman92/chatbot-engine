@@ -1,16 +1,17 @@
+import { ChatbotContext } from "..";
 import { FacebookGenericResponse } from "./facebook";
 import { AmbiguousPlatform } from "./messenger";
 import { AmbiguousGenericRequest } from "./request";
 import { TelegramGenericResponse } from "./telegram";
 
-export interface BaseGenericResponse<Context> {
-  readonly additionalContext?: Partial<Context>;
+export interface BaseGenericResponse {
+  readonly additionalContext?: Partial<ChatbotContext>;
   /**
    * If this response is sent organically (i.e. not manually invoked to send
    * a custom message not triggered by the user), the original request will be
    * available in order to trigger context change requests.
    */
-  readonly originalRequest?: AmbiguousGenericRequest<Context>;
+  readonly originalRequest?: AmbiguousGenericRequest;
   readonly targetID: string;
 }
 
@@ -19,12 +20,12 @@ export interface BaseGenericResponse<Context> {
  * the existing context in persistence (emphasis on addition, not replacement).
  * This is to prevent stale old context replacing latest one.
  */
-export type AmbiguousGenericResponse<Context> =
-  | (FacebookGenericResponse<Context> | TelegramGenericResponse<Context>)
-  | (BaseGenericResponse<Context> & {
+export type AmbiguousGenericResponse =
+  | (FacebookGenericResponse | TelegramGenericResponse)
+  | (BaseGenericResponse & {
       output: readonly (
-        | FacebookGenericResponse<Context>["output"][number]
-        | TelegramGenericResponse<Context>["output"][number]
+        | FacebookGenericResponse["output"][number]
+        | TelegramGenericResponse["output"][number]
       )[];
       targetPlatform: AmbiguousPlatform;
     });

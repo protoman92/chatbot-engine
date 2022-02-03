@@ -1,5 +1,6 @@
 import { isType } from "@haipham/javascript-helper-utils";
 import FormData from "form-data";
+import { ChatbotContext } from "..";
 import {
   chunkString,
   firstSubString,
@@ -58,18 +59,14 @@ export function extractCommand(
 }
 
 /** Map platform request to generic request for generic processing */
-export function createGenericTelegramRequest<Context>(
+export function createGenericTelegramRequest(
   rawRequest: TelegramRawRequest,
   currentBot: TelegramBot
-): readonly TelegramGenericRequest<Context>[] {
+): readonly TelegramGenericRequest[] {
   function processMessageRequest({
     message: { chat, from: user, ...message },
   }: _TelegramRawRequest.Message):
-    | [
-        TelegramUser,
-        _TelegramRawRequest.Chat,
-        TelegramGenericRequestInput<Context>[]
-      ]
+    | [TelegramUser, _TelegramRawRequest.Chat, TelegramGenericRequestInput[]]
     | undefined {
     if ("text" in message) {
       const { text: textWithCommand } = message;
@@ -126,7 +123,7 @@ export function createGenericTelegramRequest<Context>(
   }: _TelegramRawRequest.Callback): [
     TelegramUser,
     _TelegramRawRequest.Chat | undefined,
-    TelegramGenericRequestInput<Context>[]
+    TelegramGenericRequestInput[]
   ] {
     return [user, undefined, [{ payload: data, type: "postback" }]];
   }
@@ -142,7 +139,7 @@ export function createGenericTelegramRequest<Context>(
   }: _TelegramRawRequest.PreCheckout): [
     TelegramUser,
     _TelegramRawRequest.Chat | undefined,
-    TelegramGenericRequestInput<Context>[]
+    TelegramGenericRequestInput[]
   ] {
     return [
       user,
@@ -166,7 +163,7 @@ export function createGenericTelegramRequest<Context>(
   }: _TelegramRawRequest.SuccessfulPayment): [
     TelegramUser,
     _TelegramRawRequest.Chat | undefined,
-    TelegramGenericRequestInput<Context>[]
+    TelegramGenericRequestInput[]
   ] {
     return [
       user,
@@ -190,7 +187,7 @@ export function createGenericTelegramRequest<Context>(
     | [
         TelegramUser,
         _TelegramRawRequest.Chat | undefined,
-        TelegramGenericRequestInput<Context>[]
+        TelegramGenericRequestInput[]
       ]
     | undefined {
     let result: ReturnType<typeof processRequest> | undefined;
@@ -236,17 +233,17 @@ export function createGenericTelegramRequest<Context>(
     rawRequest,
     targetPlatform: "telegram",
     telegramUser,
-    currentContext: {} as Context,
+    currentContext: {} as ChatbotContext,
     targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
     type: "message_trigger",
   }));
 }
 
 /** Create a Telegram response from multiple generic responses */
-function createRawTelegramResponse<Context>({
+function createRawTelegramResponse({
   targetID,
   output,
-}: TelegramGenericResponse<Context>): readonly TelegramRawResponse[] {
+}: TelegramGenericResponse): readonly TelegramRawResponse[] {
   function createDocumentResponse(
     chat_id: string,
     reply_markup: _TelegramRawResponse.ReplyMarkup | undefined,
@@ -404,7 +401,7 @@ function createRawTelegramResponse<Context>({
       content,
       quickReplies,
       parseMode,
-    }: TelegramGenericResponse<Context>["output"][number]
+    }: TelegramGenericResponse["output"][number]
   ): TelegramRawResponse[] {
     const reply_markup = quickReplies && createQuickReplies(quickReplies);
 
@@ -488,16 +485,16 @@ function createRawTelegramResponse<Context>({
 }
 
 /** Create a Telegram message processor */
-export async function createTelegramMessageProcessor<Context>(
-  { leafSelector, client }: TelegramMessageProcessorConfig<Context>,
+export async function createTelegramMessageProcessor(
+  { leafSelector, client }: TelegramMessageProcessorConfig,
   ...middlewares: readonly (
-    | MessageProcessorMiddleware<Context>
-    | TelegramMessageProcessorMiddleware<Context>
+    | MessageProcessorMiddleware
+    | TelegramMessageProcessorMiddleware
   )[]
-): Promise<TelegramMessageProcessor<Context>> {
+): Promise<TelegramMessageProcessor> {
   const currentBot = await client.getCurrentBot();
 
-  const baseProcessor = await createMessageProcessor<Context>(
+  const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
       client,
@@ -510,12 +507,12 @@ export async function createTelegramMessageProcessor<Context>(
       },
       mapResponse: async (genericResponse) => {
         return createRawTelegramResponse(
-          genericResponse as TelegramGenericResponse<Context>
+          genericResponse as TelegramGenericResponse
         );
       },
     },
-    ...(middlewares as MessageProcessorMiddleware<Context>[])
+    ...(middlewares as MessageProcessorMiddleware[])
   );
 
-  return baseProcessor as TelegramMessageProcessor<Context>;
+  return baseProcessor as TelegramMessageProcessor;
 }

@@ -4,9 +4,7 @@ import { createCompositeSubscription } from "../stream";
 import { AmbiguousLeaf, LeafError, LeafTransformer } from "../type";
 
 /** If a leaf throws error while producing content, switch to fallback leaf */
-export function catchError<Context>(
-  fallbackLeaf: AmbiguousLeaf<Context>
-): LeafTransformer<Context, Context> {
+export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
   return async (leaf) => ({
     next: async ({ currentLeafName, ...request }) => {
       try {

@@ -51,14 +51,13 @@ describe("Leaf enumeration", () => {
 });
 
 describe("Leaf selector", () => {
-  interface Context {}
   const targetID = "target-id";
   const targetPlatform = "facebook";
-  let currentLeaf: AmbiguousLeaf<Context>;
+  let currentLeaf: AmbiguousLeaf;
   let selector: TestLeafSelector;
 
   beforeEach(async () => {
-    currentLeaf = spy<AmbiguousLeaf<Context>>(
+    currentLeaf = spy<AmbiguousLeaf>(
       await createLeaf(async () => ({
         checkTextConditions: () => {
           return Promise.reject("");
@@ -83,7 +82,7 @@ describe("Leaf selector", () => {
     const iteration = 1000;
     const validLeafID = 500;
 
-    const enumeratedLeaves: LeafEnumeration<Context>[] = [
+    const enumeratedLeaves: LeafEnumeration[] = [
       ...Array(iteration).keys(),
     ].map((i) => ({
       currentLeaf: instance(currentLeaf),
@@ -94,7 +93,7 @@ describe("Leaf selector", () => {
 
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
     when(selector.triggerLeaf(anything(), anything())).thenCall(
-      async ({ currentLeafName }: LeafEnumeration<{}>) => {
+      async ({ currentLeafName }: LeafEnumeration) => {
         if (currentLeafName === `${validLeafID}`) return NextResult.BREAK;
         return NextResult.FALLTHROUGH;
       }
@@ -118,14 +117,14 @@ describe("Leaf selector", () => {
     // Setup
     let completedCount = 0;
 
-    const enumeratedLeaves: LeafEnumeration<Context>[] = [
-      ...Array(1000).keys(),
-    ].map((i) => ({
-      currentLeaf: instance(currentLeaf),
-      currentLeafName: `${i}`,
-      parentBranch: {},
-      prefixLeafPaths: [],
-    }));
+    const enumeratedLeaves: LeafEnumeration[] = [...Array(1000).keys()].map(
+      (i) => ({
+        currentLeaf: instance(currentLeaf),
+        currentLeafName: `${i}`,
+        parentBranch: {},
+        prefixLeafPaths: [],
+      })
+    );
 
     !!currentLeaf.complete &&
       when(currentLeaf.complete()).thenCall(async () => {
@@ -143,14 +142,14 @@ describe("Leaf selector", () => {
 
   it("Subscribing to response should merge leaf observables", async () => {
     // Setup
-    const enumeratedLeaves: LeafEnumeration<Context>[] = [
-      ...Array(1000).keys(),
-    ].map((i) => ({
-      currentLeaf: instance(currentLeaf),
-      currentLeafName: `${i}`,
-      parentBranch: {},
-      prefixLeafPaths: [],
-    }));
+    const enumeratedLeaves: LeafEnumeration[] = [...Array(1000).keys()].map(
+      (i) => ({
+        currentLeaf: instance(currentLeaf),
+        currentLeafName: `${i}`,
+        parentBranch: {},
+        prefixLeafPaths: [],
+      })
+    );
 
     when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
 

@@ -7,6 +7,6 @@ import { AmbiguousLeaf } from "./leaf";
  *
  * - learn - english -> (bunch of leaves here, e.g. nouns, verbs etc).
  */
-export type Branch<Context, Leaves = KV<AmbiguousLeaf<Context>>> = Readonly<
-  { [x in keyof Leaves]: Leaves[x] | Branch<Context, Leaves> }
+export type Branch<Leaves = KV<AmbiguousLeaf>> = Readonly<
+  { [x in keyof Leaves]: Leaves[x] | Branch<Leaves> }
 >;

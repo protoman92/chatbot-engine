@@ -9,10 +9,10 @@ import { ContentObservable, ContentObserver } from "./stream";
  * Represents a collection of leaf information that is derived from
  * enumerating all possibilities in a key-value branch object.
  */
-export interface LeafEnumeration<Context> {
-  readonly parentBranch: Branch<Context>;
+export interface LeafEnumeration {
+  readonly parentBranch: Branch;
   readonly prefixLeafPaths: readonly string[];
-  readonly currentLeaf: AmbiguousLeaf<Context>;
+  readonly currentLeaf: AmbiguousLeaf;
   readonly currentLeafName: string;
 }
 
@@ -20,38 +20,22 @@ export interface LeafEnumeration<Context> {
  * Compose functions for leaves that support composition of higher-order
  * functions.
  */
-export type LeafTransformer<InContext, OutContext> = (
-  leaf: AmbiguousLeaf<InContext>
-) => Promise<AmbiguousLeaf<OutContext>>;
-
-/** Compose functions that have the same input/output type */
-export interface MonoLeafTransformer<Context>
-  extends LeafTransformer<Context, Context> {}
+export type LeafTransformer = (leaf: AmbiguousLeaf) => Promise<AmbiguousLeaf>;
 
 /**
  * Represents a chain of transformer higher-order functions that transforms a
  * leaf instance declaratively.
  */
-export interface LeafTransformChain<InContext, OutContext> {
-  transform: LeafTransformer<InContext, OutContext>;
-
-  /** This is only used for debugging, and serves no production purposes */
-  checkThis(test?: (ci: InContext, co: OutContext) => unknown): this;
+export interface LeafTransformChain {
+  transform: LeafTransformer;
 
   /** Apply post-transformers on the base leaf */
-  pipe<OutContext1>(
-    fn: LeafTransformer<OutContext, OutContext1>
-  ): LeafTransformChain<InContext, OutContext1>;
-
-  /** This is only used for debugging, and serves no production purposes */
-  forContextOfType<Context>(
-    ctx?: Context
-  ): LeafTransformChain<Context, Context>;
+  pipe(fn: LeafTransformer): LeafTransformChain;
 }
 
-export interface AmbiguousLeafObserver<T>
+export interface AmbiguousLeafObserver
   extends ContentObserver<
-    AmbiguousGenericRequest<T> & Readonly<{ currentLeafName: string }>
+    AmbiguousGenericRequest & Readonly<{ currentLeafName: string }>
   > {}
 
 /**
@@ -61,11 +45,11 @@ export interface AmbiguousLeafObserver<T>
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export type AmbiguousLeaf<T> = AmbiguousLeafObserver<T> &
-  ContentObservable<AmbiguousGenericResponse<T>>;
+export type AmbiguousLeaf = AmbiguousLeafObserver &
+  ContentObservable<AmbiguousGenericResponse>;
 
-export type LeafSelector<T> = ContentObserver<AmbiguousGenericRequest<T>> &
-  ContentObservable<AmbiguousGenericResponse<T>>;
+export type LeafSelector = ContentObserver<AmbiguousGenericRequest> &
+  ContentObservable<AmbiguousGenericResponse>;
 
 export interface ErrorLeafTrackErrorArgs
   extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {

@@ -20,19 +20,19 @@ import {
 } from "../type";
 
 /** Create a generic message processor */
-export async function createMessageProcessor<Context>(
+export async function createMessageProcessor(
   {
     targetPlatform,
     leafSelector,
     client,
     mapRequest,
     mapResponse,
-  }: BaseMessageProcessorConfig<Context>,
-  ...middlewares: readonly MessageProcessorMiddleware<Context>[]
-): Promise<BaseMessageProcessor<Context>> {
-  let finalMessageProcessor: BaseMessageProcessor<Context>;
+  }: BaseMessageProcessorConfig,
+  ...middlewares: readonly MessageProcessorMiddleware[]
+): Promise<BaseMessageProcessor> {
+  let finalMessageProcessor: BaseMessageProcessor;
 
-  const middlewareInput: _MessageProcessorMiddleware.Input<Context> = {
+  const middlewareInput: _MessageProcessorMiddleware.Input = {
     getFinalMessageProcessor: () => {
       return finalMessageProcessor;
     },
@@ -76,28 +76,24 @@ export async function createMessageProcessor<Context>(
  * Create a cross-platform message processor that delegates to the appropriate
  * platform-specific message processor when a request arrives.
  */
-export function createCrossPlatformMessageProcessor<Context>(
+export function createCrossPlatformMessageProcessor(
   {
     facebook,
     telegram,
   }: Readonly<{
-    facebook?: FacebookMessageProcessor<Context>;
-    telegram?: TelegramMessageProcessor<Context>;
+    facebook?: FacebookMessageProcessor;
+    telegram?: TelegramMessageProcessor;
   }>,
   getPlatform: (platformReq: unknown) => AmbiguousPlatform = getRequestPlatform
-): BaseMessageProcessor<Context> {
+): BaseMessageProcessor {
   function switchPlatform<FBR, TLR>(
     platform: AmbiguousPlatform,
     {
       facebookCallback,
       telegramCallback,
     }: Readonly<{
-      facebookCallback: (
-        processor: FacebookMessageProcessor<Context>
-      ) => Promise<FBR>;
-      telegramCallback: (
-        processor: TelegramMessageProcessor<Context>
-      ) => Promise<TLR>;
+      facebookCallback: (processor: FacebookMessageProcessor) => Promise<FBR>;
+      telegramCallback: (processor: TelegramMessageProcessor) => Promise<TLR>;
     }>
   ) {
     switch (platform) {
@@ -133,13 +129,13 @@ export function createCrossPlatformMessageProcessor<Context>(
         facebookCallback: (processor) => {
           return processor.receiveRequest({
             ...args,
-            genericRequest: genericRequest as FacebookGenericRequest<Context>,
+            genericRequest: genericRequest as FacebookGenericRequest,
           });
         },
         telegramCallback: (processor) => {
           return processor.receiveRequest({
             ...args,
-            genericRequest: genericRequest as TelegramGenericRequest<Context>,
+            genericRequest: genericRequest as TelegramGenericRequest,
           });
         },
       });
@@ -149,17 +145,13 @@ export function createCrossPlatformMessageProcessor<Context>(
         facebookCallback: (processor) => {
           return processor.sendResponse({
             ...args,
-            genericResponse: genericResponse as FacebookGenericResponse<
-              Context
-            >,
+            genericResponse: genericResponse as FacebookGenericResponse,
           });
         },
         telegramCallback: (processor) => {
           return processor.sendResponse({
             ...args,
-            genericResponse: genericResponse as TelegramGenericResponse<
-              Context
-            >,
+            genericResponse: genericResponse as TelegramGenericResponse,
           });
         },
       });
@@ -171,10 +163,10 @@ export function createCrossPlatformMessageProcessor<Context>(
  * Create a messenger. Make sure the leaf selector passed here is the same one
  * passed to the message processor.
  */
-export async function createMessenger<Context>({
+export async function createMessenger({
   leafSelector,
   processor,
-}: MessengerConfig<Context>): Promise<Messenger> {
+}: MessengerConfig): Promise<Messenger> {
   await leafSelector.subscribe({
     next: async (response) => {
       await processor.sendResponse({ genericResponse: response });

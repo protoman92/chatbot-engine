@@ -1,4 +1,5 @@
 import { isType, toArray } from "@haipham/javascript-helper-utils";
+import { ChatbotContext } from "..";
 import {
   AmbiguousGenericRequest,
   ContextDAO,
@@ -13,23 +14,23 @@ import {
  * - Generalizing raw request to generic request.
  * - Sending generic response.
  */
-export function saveTelegramMessages<Context>({
+export function saveTelegramMessages({
   contextDAO,
   isEnabled,
   saveMessages,
 }: Readonly<{
-  contextDAO: ContextDAO<Context>;
+  contextDAO: ContextDAO;
   isEnabled: () => Promise<boolean>;
   saveMessages: (
     args: Readonly<{
-      currentContext: Context;
+      currentContext: ChatbotContext;
       rawRequestMessages: readonly (
         | _TelegramRawRequest.Message["message"]
         | _TelegramRawRequest.SuccessfulPayment["message"]
       )[];
     }>
   ) => Promise<void>;
-}>): TelegramMessageProcessorMiddleware<Context> {
+}>): TelegramMessageProcessorMiddleware {
   function extractRawRequestMessage(
     rawRequest: TelegramRawRequest
   ):
@@ -113,23 +114,25 @@ export function saveTelegramMessages<Context>({
 }
 
 /** Save a Telegram user in backend if targetID is not found in context */
-export function saveTelegramUser<Context>({
+export function saveTelegramUser({
   contextDAO,
   isEnabled,
   saveUser,
 }: Readonly<{
-  contextDAO: ContextDAO<Context>;
+  contextDAO: ContextDAO;
   /**
    * If this returns false, do not get user to save. This helps prevent the
    * logic from being called on every request.
    */
   isEnabled: (
-    args: Pick<AmbiguousGenericRequest<Context>, "currentContext">
+    args: Pick<AmbiguousGenericRequest, "currentContext">
   ) => Promise<boolean>;
   saveUser: (
     user: TelegramUser
-  ) => Promise<Readonly<{ readonly additionalContext?: Partial<Context> }>>;
-}>): TelegramMessageProcessorMiddleware<Context> {
+  ) => Promise<
+    Readonly<{ readonly additionalContext?: Partial<ChatbotContext> }>
+  >;
+}>): TelegramMessageProcessorMiddleware {
   return () => async (processor) => {
     return {
       ...processor,

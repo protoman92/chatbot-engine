@@ -1,4 +1,5 @@
 import { omitNull } from "@haipham/javascript-helper-utils";
+import { ChatbotContext } from "..";
 import { chunkString, facebookError } from "../common/utils";
 import {
   FacebookGenericRequest,
@@ -21,9 +22,9 @@ const MAX_LIST_ELEMENT_COUNT = 4;
 const MESSAGE_TEXT_CHARACTER_LIMIT = 640;
 
 /** Map raw request to generic request for generic processing */
-function createFacebookRequest<Context>(
+function createFacebookRequest(
   rawRequest: FacebookRawRequest
-): readonly FacebookGenericRequest<Context>[] {
+): readonly FacebookGenericRequest[] {
   /** Group requests based on target ID */
   function groupRequests(reqs: readonly _FacebookRawRequest.Entry.Messaging[]) {
     const requestMap: {
@@ -40,7 +41,7 @@ function createFacebookRequest<Context>(
 
   function processRequest(
     rawMessaging: _FacebookRawRequest.Entry.Messaging
-  ): FacebookRequestInput<Context>[] {
+  ): FacebookRequestInput[] {
     if ("postback" in rawMessaging) {
       return [{ payload: rawMessaging.postback.payload, type: "postback" }];
     }
@@ -115,7 +116,7 @@ function createFacebookRequest<Context>(
           ...inputs.map((input) => ({
             input,
             targetID,
-            currentContext: {} as Context,
+            currentContext: {} as ChatbotContext,
             rawRequest: rawRequest,
             targetPlatform: "facebook" as const,
             type: "message_trigger" as const,
@@ -123,11 +124,11 @@ function createFacebookRequest<Context>(
         );
 
         return acc1;
-      }, [] as FacebookGenericRequest<Context>[])
+      }, [] as FacebookGenericRequest[])
     );
 
     return acc;
-  }, [] as FacebookGenericRequest<Context>[]);
+  }, [] as FacebookGenericRequest[]);
 }
 
 function createSingleAction(
@@ -145,10 +146,10 @@ function createSingleAction(
 }
 
 /** Create a Facebook response from multiple generic responses */
-function createFacebookResponse<Context>({
+function createFacebookResponse({
   targetID,
   output,
-}: FacebookGenericResponse<Context>): readonly FacebookRawResponse[] {
+}: FacebookGenericResponse): readonly FacebookRawResponse[] {
   function createFileAttachmentMessages({
     attachmentType: type,
     ...attachment
@@ -369,7 +370,7 @@ function createFacebookResponse<Context>({
 
   function createRawResponses(
     targetID: string,
-    response: FacebookGenericResponse<Context>["output"][number]
+    response: FacebookGenericResponse["output"][number]
   ): readonly (FacebookRawResponse | null)[] {
     if (response.content.type === "menu") {
       return [null];
@@ -410,14 +411,14 @@ function createFacebookResponse<Context>({
 }
 
 /** Create a Facebook message processor */
-export async function createFacebookMessageProcessor<Context>(
-  { leafSelector, client }: FacebookMessageProcessorConfig<Context>,
+export async function createFacebookMessageProcessor(
+  { leafSelector, client }: FacebookMessageProcessorConfig,
   ...middlewares: readonly (
-    | MessageProcessorMiddleware<Context>
-    | FacebookMessageProcessorMiddleware<Context>
+    | MessageProcessorMiddleware
+    | FacebookMessageProcessorMiddleware
   )[]
-): Promise<FacebookMessageProcessor<Context>> {
-  const baseProcessor = await createMessageProcessor<Context>(
+): Promise<FacebookMessageProcessor> {
+  const baseProcessor = await createMessageProcessor(
     {
       leafSelector,
       client,
@@ -426,17 +427,17 @@ export async function createFacebookMessageProcessor<Context>(
         return createFacebookRequest(rawRequest as FacebookRawRequest);
       },
       mapResponse: async (res) => {
-        return createFacebookResponse(res as FacebookGenericResponse<Context>);
+        return createFacebookResponse(res as FacebookGenericResponse);
       },
     },
-    ...(middlewares as MessageProcessorMiddleware<Context>[])
+    ...(middlewares as MessageProcessorMiddleware[])
   );
 
   return {
     ...baseProcessor,
     sendResponse: async (
       ...[{ genericResponse, ...args }]: Parameters<
-        FacebookMessageProcessor<Context>["sendResponse"]
+        FacebookMessageProcessor["sendResponse"]
       >
     ) => {
       for (const output of genericResponse.output) {
@@ -456,5 +457,5 @@ export async function createFacebookMessageProcessor<Context>(
 
       return baseProcessor.sendResponse({ ...args, genericResponse });
     },
-  } as FacebookMessageProcessor<Context>;
+  } as FacebookMessageProcessor;
 }

@@ -19,27 +19,25 @@ import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
-export type FacebookRequestInput<Context> =
+export type FacebookRequestInput =
   | Readonly<{ param: string; type: "deeplink" }>
   | Readonly<{ payload: string; type: "postback" }>
   | Readonly<{ coordinate: Coordinates; type: "location" }>
   | Readonly<{ image: string; type: "image" }>
   | Readonly<{ image: string; stickerID: string; type: "sticker" }>
-  | CrossPlatformRequestInput<Context>;
+  | CrossPlatformRequestInput;
 
-export type FacebookGenericRequest<Context> = Readonly<{
+export type FacebookGenericRequest = Readonly<{
   targetPlatform: "facebook";
 }> &
-  BaseRequest<Context> &
+  BaseRequest &
   (
     | (GenericMessageTriggerRequest<FacebookRawRequest> &
-        Readonly<{ input: FacebookRequestInput<Context> }>)
-    | (GenericManualTriggerRequest &
-        Readonly<{ input: FacebookRequestInput<Context> }>)
+        Readonly<{ input: FacebookRequestInput }>)
+    | (GenericManualTriggerRequest & Readonly<{ input: FacebookRequestInput }>)
   );
 
-export interface FacebookGenericResponse<Context>
-  extends BaseGenericResponse<Context & FacebookDefaultContext> {
+export interface FacebookGenericResponse extends BaseGenericResponse {
   readonly output: readonly FacebookGenericResponseOutput[];
   readonly targetPlatform: "facebook";
 }
@@ -432,32 +430,25 @@ export type FacebookRawResponse = Readonly<
     })
 >;
 
-export interface FacebookMessageProcessorConfig<Context> {
-  readonly leafSelector: LeafSelector<Context>;
+export interface FacebookMessageProcessorConfig {
+  readonly leafSelector: LeafSelector;
   readonly client: FacebookClient;
 }
 
 /** Represents a Facebook-specific messenger */
-export interface FacebookMessageProcessor<Context>
-  extends RawRequestGeneralizer<
-      FacebookRawRequest,
-      FacebookGenericRequest<Context>
-    >,
-    GenericRequestReceiver<FacebookGenericRequest<Context>>,
-    GenericResponseSender<FacebookGenericResponse<Context>, unknown> {}
+export interface FacebookMessageProcessor
+  extends RawRequestGeneralizer<FacebookRawRequest, FacebookGenericRequest>,
+    GenericRequestReceiver<FacebookGenericRequest>,
+    GenericResponseSender<FacebookGenericResponse, unknown> {}
 
-export type FacebookMessageProcessorMiddleware<
-  Context
-> = MessageProcessorMiddleware<Context, FacebookMessageProcessor<Context>>;
-
-export type FacebookDefaultContext = {};
-
-export type FacebookLeafObserver<T> = ContentObserver<
-  FacebookGenericRequest<T & FacebookDefaultContext>
+export type FacebookMessageProcessorMiddleware = MessageProcessorMiddleware<
+  FacebookMessageProcessor
 >;
 
-export type FacebookLeaf<T> = FacebookLeafObserver<T> &
-  ContentObservable<FacebookGenericResponse<T>>;
+export type FacebookLeafObserver = ContentObserver<FacebookGenericRequest>;
+
+export type FacebookLeaf = FacebookLeafObserver &
+  ContentObservable<FacebookGenericResponse>;
 
 /** Represents a Facebook user */
 export interface FacebookUser {

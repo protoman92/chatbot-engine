@@ -3,30 +3,31 @@ import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchr
 import { decorateClientMethods } from "@haipham/javascript-helper-decorator";
 import { merge } from "lodash";
 import { inspect } from "util";
+import { ChatbotContext } from "..";
 import { joinObjects } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
 
-export type InMemoryContextData<Context> = {
-  [K in AmbiguousPlatform]: { [K: string]: Context };
+export type InMemoryContextData = {
+  [K in AmbiguousPlatform]: { [K: string]: ChatbotContext };
 };
 
 /** Create an in-memory context DAO store. This is useful for debugging */
-function createInMemoryContextDAO<Context>() {
+function createInMemoryContextDAO() {
   const synchronizer = createAsyncSynchronizer();
-  let storage: InMemoryContextData<Context> = { facebook: {}, telegram: {} };
+  let storage: InMemoryContextData = { facebook: {}, telegram: {} };
 
-  const getContext: ContextDAO<Context>["getContext"] = async ({
+  const getContext: ContextDAO["getContext"] = async ({
     targetID,
     targetPlatform,
   }) => {
     if (storage[targetPlatform][targetID] == null) {
-      storage[targetPlatform][targetID] = {} as Context;
+      storage[targetPlatform][targetID] = {} as ChatbotContext;
     }
 
     return storage[targetPlatform][targetID];
   };
 
-  const baseDAO: ContextDAO<Context> = {
+  const baseDAO: ContextDAO = {
     getContext,
     appendContext: async ({
       additionalContext,
@@ -80,6 +81,6 @@ function createInMemoryContextDAO<Context>() {
 
 export const inMemoryContextDAO = createInMemoryContextDAO();
 
-export default function createDefaultInMemoryContextDAO<Context>() {
-  return inMemoryContextDAO as ContextDAO<Context>;
+export default function createDefaultInMemoryContextDAO() {
+  return inMemoryContextDAO as ContextDAO;
 }

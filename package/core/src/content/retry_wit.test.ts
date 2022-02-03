@@ -12,9 +12,8 @@ const targetID = "target-id";
 const targetPlatform = "facebook" as const;
 
 describe("Wit higher order function", () => {
-  interface Context {}
   let comm: WitClient;
-  let rootLeaf: AmbiguousLeaf<Context>;
+  let rootLeaf: AmbiguousLeaf;
 
   beforeEach(() => {
     comm = spy<WitClient>({
@@ -23,7 +22,7 @@ describe("Wit higher order function", () => {
       },
     });
 
-    rootLeaf = spy<AmbiguousLeaf<Context>>({
+    rootLeaf = spy<AmbiguousLeaf>({
       next: () => {
         return Promise.reject("");
       },
