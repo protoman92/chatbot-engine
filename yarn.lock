@@ -283,39 +283,25 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.2.tgz#30aa825f11d438671d585bd44e7fd564535fc210"
   integrity sha512-82cpyJyKRoQoRi+14ibCeGPu0CwypgtBAdBhq1WfvagpCZNKqwXbKwXllYSMG91DhmG4jt9gN8eP6lGOtozuaw==
 
+"@haipham/javascript-helper-array@^1.0.0":
+  version "1.0.1-alpha.216"
+  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-array/-/javascript-helper-array-1.0.1-alpha.216.tgz#f559563c2e5ffbd42b6f31e09a05939571c9b58c"
+  integrity sha512-MmDnigQcRmB/Cpi+u6RPCznL3fnBPH4AVvhbtOC93vNwlCgsyA4YxsymS+5n0G0ZdgfATGLXE96Wlce1H5YchA==
+
 "@haipham/javascript-helper-async-synchronizer@^1.0.0":
-  version "1.0.1-alpha.206"
-  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-async-synchronizer/-/javascript-helper-async-synchronizer-1.0.1-alpha.206.tgz#7670e09921e057dabdcba2d2af7ca1011263c33f"
-  integrity sha512-zkfpHGMEQ7gdQvSZk+tPoyNFccfnN/+nQP/GBad/Ogw3Aq90OoruGUBwo8k3XK805OTB+2QjH2Xz0nBuXKO/kQ==
-  dependencies:
-    "@haipham/javascript-helper-utils" "^1.0.1-alpha.206+884b7b2"
+  version "1.0.1-alpha.216"
+  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-async-synchronizer/-/javascript-helper-async-synchronizer-1.0.1-alpha.216.tgz#b4044b7da5a4439fa76ec66088cf7659bd117602"
+  integrity sha512-cAF7ja7ayYvTYcYyn+QZ17Yq1UlM1AAzEnKiSmhmv2TX3fTkxJycZVkIRO1xVTTdaK0Aagjm8gZTHDxWhEvJdg==
 
-"@haipham/javascript-helper-client-types@^1.0.1-alpha.206+884b7b2":
-  version "1.0.1-alpha.206"
-  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-client-types/-/javascript-helper-client-types-1.0.1-alpha.206.tgz#41b283a6a2ae4bb32223757deeb89f122beeb5e7"
-  integrity sha512-OLXO65sZDd5IIl1Cl1n3rlU4YXB/szzP/n0/l/eIsxSGy2FtbIHSH3qSBpkTNdclKcoW/SqarzqCaDoQ2k9s9Q==
-  dependencies:
-    "@haipham/javascript-helper-essential-types" "^1.0.1-alpha.206+884b7b2"
+"@haipham/javascript-helper-object@^1.0.0":
+  version "1.0.1-alpha.216"
+  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-object/-/javascript-helper-object-1.0.1-alpha.216.tgz#e18dfce0b30b16373fb28212a3a7c19a291d6fae"
+  integrity sha512-j2tiboLmm2do1bA5M02vcAsIBg0d8Kyh9AWhqih7lzDoX2vAY4CAMkkp4XO+/qMygsZuTrE8PKqrYu2zpoUUPg==
 
-"@haipham/javascript-helper-decorator@^1.0.0":
-  version "1.0.1-alpha.206"
-  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-decorator/-/javascript-helper-decorator-1.0.1-alpha.206.tgz#04ef01c4a949008e6d8573887efc41163e9a7e3b"
-  integrity sha512-x2DpjL+kQcORFJ5qh0sGeg8JRSA0ALLGAX2ynZoOuQ1/sgkN7205zpZoyF6H5o+LHn48ACXnni6vnVB4dmKDWw==
-  dependencies:
-    "@haipham/javascript-helper-essential-types" "^1.0.1-alpha.206+884b7b2"
-
-"@haipham/javascript-helper-essential-types@^1.0.1-alpha.206+884b7b2":
-  version "1.0.1-alpha.206"
-  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-essential-types/-/javascript-helper-essential-types-1.0.1-alpha.206.tgz#4c2aeb93a74ce8b0c0c2fd5b7ea446e3f86aad76"
-  integrity sha512-woh9NYTs35L9a2APC8fFY0n5mQ0MIDjXMH9Gd4fULM7aqKUilvwbY44+0i1tDEPfepvf1TiSGJRXMv6gl5r+dA==
-
-"@haipham/javascript-helper-utils@^1.0.1-alpha.206+884b7b2":
-  version "1.0.1-alpha.206"
-  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-utils/-/javascript-helper-utils-1.0.1-alpha.206.tgz#37346b5ee74a35dfbe2ab0579640c927a6bd9939"
-  integrity sha512-w/Ad0J/4T3TNnjZjwV+le6ZNfoIZo3Q8enkeIRpTNeFeiojrSUywbRLC/j1ahiZ24W2EGezARFCJnQ7rQtQEzg==
-  dependencies:
-    "@haipham/javascript-helper-client-types" "^1.0.1-alpha.206+884b7b2"
-    "@haipham/javascript-helper-essential-types" "^1.0.1-alpha.206+884b7b2"
+"@haipham/javascript-helper-preconditions@^1.0.0":
+  version "1.0.1-alpha.216"
+  resolved "https://registry.yarnpkg.com/@haipham/javascript-helper-preconditions/-/javascript-helper-preconditions-1.0.1-alpha.216.tgz#c459a739d1f541dc40448b487eff83a6290dded0"
+  integrity sha512-AqJiNqNvGch3hUTHqULyWhq5gDh/dMRsGzpbi6KuJFhJT9qMjGDlyuEcFw5u6RpRXFgEZRMfXponTujgDwkglw==
 
 "@hutson/parse-repository-url@^3.0.0":
   version "3.0.2"
@@ -1849,6 +1835,11 @@
   integrity sha512-MPtoySlAZQ37VoLaPcTHCu1RWJ4llDkULYZIzOYxlhxBqYPB0RsRlmMU0R6tahtFe27mIdkHV+551ZWV4PLmVw==
   dependencies:
     "@types/node" "*"
+
+"@types/lodash@^4.14.178":
+  version "4.14.178"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.178.tgz#341f6d2247db528d4a13ddbb374bcdc80406f4f8"
+  integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
 
 "@types/mime@^1":
   version "1.3.2"
@@ -10559,10 +10550,10 @@ trim-newlines@^3.0.0:
   resolved "https://registry.yarnpkg.com/trim-newlines/-/trim-newlines-3.0.1.tgz#260a5d962d8b752425b32f3a7db0dcacd176c144"
   integrity sha512-c1PTsA3tYrIsLGkJkzHF+w9F2EyxfXGo4UyJc4pFL++FMjnq0HJS69T3M7d//gKrFKwy429bouPescbjecU+Zw==
 
-ts-essentials@6.0.5:
-  version "6.0.5"
-  resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-6.0.5.tgz#dd5b98f73bd56dc94d15dfbc0fbf01da3163eb42"
-  integrity sha512-RSAKlpu+E0DCGY8FsbG92EveRLw2Y+UgK3ksX01w1VaHeG01dKkYo/KtAV4q0qPT6nPbLfyerb2YPVSediP+8g==
+ts-essentials@9.1.2:
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-9.1.2.tgz#46db6944b73b4cd603f3d959ef1123c16ba56f59"
+  integrity sha512-EaSmXsAhEiirrTY1Oaa7TSpei9dzuCuFPmjKRJRPamERYtfaGS8/KpOSbjergLz/Y76/aZlV9i/krgzsuWEBbg==
 
 ts-jest@26.3.0:
   version "26.3.0"
@@ -10693,10 +10684,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.2.tgz#7ea7c88777c723c681e33bf7988be5d008d05ac2"
-  integrity sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
+typescript@4.5.5:
+  version "4.5.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.5.tgz#d8c953832d28924a9e3d37c73d729c846c5896f3"
+  integrity sha512-TCTIul70LyWe6IJWT8QSYeA54WQe8EjQFU4wY52Fasj5UKx88LNYKCgBEHcOMOrFF1rKGbD8v/xcNWVUq9SymA==
 
 uglify-js@^3.1.4:
   version "3.14.5"

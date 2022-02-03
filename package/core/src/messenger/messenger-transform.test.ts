@@ -23,15 +23,18 @@ import {
 } from "./messenger-transform";
 import { saveTelegramMessages, saveTelegramUser } from "./telegram-transform";
 
-type Context = Record<string, unknown>;
+declare module ".." {
+  interface ChatbotContext extends Record<string, unknown> {}
+}
+
 const targetPlatform = "facebook";
-let msgProcessor: BaseMessageProcessor<Context>;
+let msgProcessor: BaseMessageProcessor;
 let client: PlatformClient<unknown>;
-let contextDAO: ContextDAO<Context>;
-let middlewareInput: _MessageProcessorMiddleware.Input<Context>;
+let contextDAO: ContextDAO;
+let middlewareInput: _MessageProcessorMiddleware.Input;
 
 beforeEach(async () => {
-  msgProcessor = spy<BaseMessageProcessor<Context>>({
+  msgProcessor = spy<BaseMessageProcessor>({
     generalizeRequest: () => {
       return Promise.reject("");
     },
@@ -52,7 +55,7 @@ beforeEach(async () => {
     },
   });
 
-  contextDAO = spy<ContextDAO<Context>>({
+  contextDAO = spy<ContextDAO>({
     getContext: () => {
       return Promise.reject("");
     },
@@ -92,7 +95,7 @@ describe("Save context on send", () => {
       saveContextOnSend({ contextDAO: instance(contextDAO) })(middlewareInput)
     );
 
-    const genericResponse: AmbiguousGenericResponse<Context> = {
+    const genericResponse: AmbiguousGenericResponse = {
       targetID,
       additionalContext,
       originalRequest: {
@@ -194,7 +197,7 @@ describe("Inject context on receive", () => {
       )
     );
 
-    const genericRequest: AmbiguousGenericRequest<{}> = {
+    const genericRequest: AmbiguousGenericRequest = {
       targetID,
       targetPlatform,
       currentContext: {},
@@ -293,7 +296,7 @@ describe("Save user for target ID", () => {
       })(middlewareInput)
     );
 
-    const genericRequest: AmbiguousGenericRequest<{}> = {
+    const genericRequest: AmbiguousGenericRequest = {
       targetID,
       targetPlatform,
       currentContext: { targetID },
@@ -326,10 +329,10 @@ describe("Save user for target ID", () => {
 
 describe("Save Telegram user for target ID", () => {
   const targetID = 1;
-  let tlMessenger: TelegramMessageProcessor<{}>;
+  let tlMessenger: TelegramMessageProcessor;
 
   beforeEach(() => {
-    tlMessenger = spy<TelegramMessageProcessor<{}>>({
+    tlMessenger = spy<TelegramMessageProcessor>({
       generalizeRequest: () => Promise.reject(""),
       receiveRequest: () => Promise.reject(""),
       sendResponse: () => Promise.reject(""),
@@ -433,12 +436,12 @@ describe("Save Telegram user for target ID", () => {
 describe("Save Telegram messages", () => {
   const targetID = "target-id";
   const targetPlatform: AmbiguousPlatform = "telegram";
-  let contextDAO: ContextDAO<Context>;
+  let contextDAO: ContextDAO;
   let middlewareArgs: Parameters<typeof saveTelegramMessages>[0];
-  let tlMessenger: TelegramMessageProcessor<{}>;
+  let tlMessenger: TelegramMessageProcessor;
 
   beforeEach(() => {
-    contextDAO = spy<ContextDAO<Context>>({
+    contextDAO = spy<ContextDAO>({
       getContext: () => {
         return Promise.reject("");
       },
@@ -460,7 +463,7 @@ describe("Save Telegram messages", () => {
       },
     });
 
-    tlMessenger = spy<TelegramMessageProcessor<{}>>({
+    tlMessenger = spy<TelegramMessageProcessor>({
       generalizeRequest: () => {
         return Promise.reject("");
       },
@@ -505,7 +508,7 @@ describe("Save Telegram messages", () => {
         currentContext: {},
         rawRequest: inRawRequest,
         type: "message_trigger",
-      } as TelegramGenericRequest<Context>,
+      } as TelegramGenericRequest,
     });
 
     await transformed.receiveRequest({
@@ -513,13 +516,11 @@ describe("Save Telegram messages", () => {
         targetID,
         targetPlatform,
         type: "manual_trigger",
-      } as TelegramGenericRequest<Context>,
+      } as TelegramGenericRequest,
     });
 
     await transformed.sendResponse({
-      genericResponse: { targetID, targetPlatform } as TelegramGenericResponse<
-        Context
-      >,
+      genericResponse: { targetID, targetPlatform } as TelegramGenericResponse,
     });
 
     // Then
@@ -555,13 +556,11 @@ describe("Save Telegram messages", () => {
 
     // When
     await transformed.receiveRequest({
-      genericRequest: { type: "message_trigger" } as TelegramGenericRequest<
-        Context
-      >,
+      genericRequest: { type: "message_trigger" } as TelegramGenericRequest,
     });
 
     await transformed.sendResponse({
-      genericResponse: {} as TelegramGenericResponse<Context>,
+      genericResponse: {} as TelegramGenericResponse,
     });
 
     // Then

@@ -10,7 +10,7 @@ describe("catchError higher-order function", () => {
 
   it("Should add error to input if error is encountered", async () => {
     // Setup
-    let fallbackLeaf = await createLeaf<{}>(async () => ({
+    let fallbackLeaf = await createLeaf(async () => ({
       next: async () => NextResult.BREAK,
     }));
 
@@ -53,13 +53,13 @@ describe("catchError higher-order function", () => {
     // Setup
     const overrideLeafName = "error_leaf_name";
 
-    let fallbackLeaf = await createLeaf<{}>(async () => ({
+    let fallbackLeaf = await createLeaf(async () => ({
       next: async () => NextResult.BREAK,
     }));
 
     fallbackLeaf = spy(fallbackLeaf);
 
-    const leafToBeTransformed: AmbiguousLeaf<{}> = {
+    const leafToBeTransformed: AmbiguousLeaf = {
       next: async () => {
         const error: any = new Error("");
         error.currentLeafName = overrideLeafName;

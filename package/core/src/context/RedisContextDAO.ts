@@ -1,11 +1,11 @@
-import { requireAllTruthy } from "@haipham/javascript-helper-utils";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import { createClient, RedisClient } from "redis";
 import { joinObjects, promisify1, promisify2 } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
 
-export function createRedisContextDAO<Context>(
+export function createRedisContextDAO(
   redis: Pick<RedisClient, "get" | "set" | "del">
-): ContextDAO<Context> {
+): ContextDAO {
   function getCacheKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return `${targetPlatform}-${targetID}`;
   }
@@ -14,7 +14,7 @@ export function createRedisContextDAO<Context>(
   const set = promisify2(redis.set).bind(redis);
   const del = promisify1(redis.del).bind(redis);
 
-  const dao: ContextDAO<Context> = {
+  const dao: ContextDAO = {
     getContext: async ({ targetPlatform: platform, targetID }) => {
       const context = await get(getCacheKey(targetID, platform));
       return JSON.parse(context);
@@ -46,7 +46,7 @@ export function createRedisContextDAO<Context>(
   return dao;
 }
 
-export default function createDefaultRedisContextDAO<Context>() {
+export default function createDefaultRedisContextDAO() {
   const { REDIS_HOST = "", REDIS_PORT = "" } = requireAllTruthy({
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: process.env.REDIS_PORT,
@@ -57,6 +57,6 @@ export default function createDefaultRedisContextDAO<Context>() {
     port: parseInt(REDIS_PORT || "", undefined),
   });
 
-  const contextDAO = createRedisContextDAO<Context>(redisClient);
+  const contextDAO = createRedisContextDAO(redisClient);
   return { contextDAO, redisClient };
 }

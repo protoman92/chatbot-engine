@@ -1,3 +1,4 @@
+import { ChatbotContext } from "..";
 import {
   AmbiguousGenericRequest,
   ContextDAO,
@@ -10,11 +11,11 @@ import {
  * there is additional context to save, pull the latest context from storage,
  * append this context to it then save the whole thing.
  */
-export function saveContextOnSend<Context>({
+export function saveContextOnSend({
   contextDAO,
 }: Readonly<{
-  contextDAO: Pick<ContextDAO<Context>, "getContext" | "appendContext">;
-}>): MessageProcessorMiddleware<Context> {
+  contextDAO: Pick<ContextDAO, "getContext" | "appendContext">;
+}>): MessageProcessorMiddleware {
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
       ...processor,
@@ -67,11 +68,11 @@ export function saveContextOnSend<Context>({
  * Inject the relevant context for a target every time a message group is
  * processed.
  */
-export function injectContextOnReceive<Context>({
+export function injectContextOnReceive({
   contextDAO,
 }: Readonly<{
-  contextDAO: Pick<ContextDAO<Context>, "getContext">;
-}>): MessageProcessorMiddleware<Context> {
+  contextDAO: Pick<ContextDAO, "getContext">;
+}>): MessageProcessorMiddleware {
   return () => async (processor) => {
     return {
       ...processor,
@@ -100,19 +101,19 @@ export function injectContextOnReceive<Context>({
   };
 }
 
-export interface SaveUserForTargetIDArgs<Context, RawUser> {
-  readonly contextDAO: ContextDAO<Context>;
+export interface SaveUserForTargetIDArgs<RawUser> {
+  readonly contextDAO: ContextDAO;
   getUser(targetID: string): Promise<RawUser>;
   /**
    * If this returns false, do not get user to save. This helps prevent the
    * logic from being called on every request.
    */
   isEnabled(
-    args: Pick<AmbiguousGenericRequest<Context>, "currentContext">
+    args: Pick<AmbiguousGenericRequest, "currentContext">
   ): Promise<boolean>;
   saveUser(
     rawUser: RawUser
-  ): Promise<Readonly<{ additionalContext?: Partial<Context> }>>;
+  ): Promise<Readonly<{ additionalContext?: Partial<ChatbotContext> }>>;
 }
 
 /**
@@ -120,14 +121,12 @@ export interface SaveUserForTargetIDArgs<Context, RawUser> {
  * happen when the user is chatting for the first time, or the context was
  * recently flushed.
  */
-export function saveUserForTargetID<Context, RawUser>({
+export function saveUserForTargetID<RawUser>({
   contextDAO,
   getUser,
   isEnabled,
   saveUser,
-}: SaveUserForTargetIDArgs<Context, RawUser>): MessageProcessorMiddleware<
-  Context
-> {
+}: SaveUserForTargetIDArgs<RawUser>): MessageProcessorMiddleware {
   return () => async (processor) => {
     return {
       ...processor,
@@ -165,7 +164,7 @@ export function saveUserForTargetID<Context, RawUser>({
  * process. We can choose to ignore set typing errors since they are not so
  * important.
  */
-export function setTypingIndicator<Context>({
+export function setTypingIndicator({
   client,
   onSetTypingError = (error) => {
     throw error;
@@ -173,7 +172,7 @@ export function setTypingIndicator<Context>({
 }: Readonly<{
   client: PlatformClient<unknown>;
   onSetTypingError?: (e: Error) => void;
-}>): MessageProcessorMiddleware<Context> {
+}>): MessageProcessorMiddleware {
   return () => {
     return async (processor) => {
       return {

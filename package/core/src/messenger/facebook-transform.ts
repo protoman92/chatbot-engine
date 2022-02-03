@@ -9,20 +9,18 @@ import {
 } from "./messenger-transform";
 
 /** Save a Facebook user when there is no target ID in the context */
-export function saveFacebookUser<Context>({
+export function saveFacebookUser({
   client,
   ...args
 }: Pick<
-  SaveUserForTargetIDArgs<Context, FacebookUser>,
+  SaveUserForTargetIDArgs<FacebookUser>,
   "contextDAO" | "isEnabled" | "saveUser"
 > &
-  Readonly<{ client: FacebookClient }>): FacebookMessageProcessorMiddleware<
-  Context
-> {
+  Readonly<{ client: FacebookClient }>): FacebookMessageProcessorMiddleware {
   return saveUserForTargetID({
     ...args,
     getUser: (targetID) => {
       return client.getUser(targetID);
     },
-  }) as FacebookMessageProcessorMiddleware<Context>;
+  }) as FacebookMessageProcessorMiddleware;
 }

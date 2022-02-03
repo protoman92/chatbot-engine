@@ -37,44 +37,39 @@ import WebhookRoute from "./route/bootstrap_webhook_route";
 export * from "./interface";
 
 export type ChatbotProjectDependencies<
-  Context,
-  LeafDependencies extends DefaultLeafDependencies<Context>
-> = Omit<LeafDependencies, keyof DefaultLeafDependencies<Context>> &
+  LeafDependencies extends DefaultLeafDependencies
+> = Omit<LeafDependencies, keyof DefaultLeafDependencies> &
   Readonly<{
-    contextDAO: ContextDAO<Context>;
+    contextDAO: ContextDAO;
     messageProcessorMiddlewares?: Readonly<{
       facebook?: readonly (
-        | MessageProcessorMiddleware<Context>
-        | FacebookMessageProcessorMiddleware<Context>
+        | MessageProcessorMiddleware
+        | FacebookMessageProcessorMiddleware
       )[];
       telegram?: readonly (
-        | MessageProcessorMiddleware<Context>
-        | TelegramMessageProcessorMiddleware<Context>
+        | MessageProcessorMiddleware
+        | TelegramMessageProcessorMiddleware
       )[];
     }>;
     onWebhookError: OnWebhookErrorHandler;
   }> &
   (
     | {
-        createLeafSelector: (
-          args: LeafDependencies
-        ) => Promise<LeafSelector<Context>>;
+        createLeafSelector: (args: LeafDependencies) => Promise<LeafSelector>;
         leafSelectorType: "custom";
       }
     | {
-        createBranches: (args: LeafDependencies) => Promise<Branch<Context>>;
+        createBranches: (args: LeafDependencies) => Promise<Branch>;
         formatErrorMessage: ErrorLeafConfig["formatErrorMessage"];
         leafSelectorType: "default";
-        onLeafCatchAll: (
-          request: AmbiguousGenericRequest<Context>
-        ) => Promise<void>;
+        onLeafCatchAll: (request: AmbiguousGenericRequest) => Promise<void>;
         onLeafError?: NonNullable<ErrorLeafConfig["trackError"]>;
       }
   );
 
 export default async function createChatbotRouter<
   Context,
-  LeafDependencies extends DefaultLeafDependencies<Context>
+  LeafDependencies extends DefaultLeafDependencies
 >({
   env,
   facebookClient = createDefaultFacebookClient(),
@@ -85,8 +80,8 @@ export default async function createChatbotRouter<
   env: string;
   facebookClient?: FacebookClient;
   getChatbotProjectDependencies: (
-    args: StrictOmit<DefaultLeafDependencies<Context>, "contextDAO">
-  ) => Promise<ChatbotProjectDependencies<Context, LeafDependencies>>;
+    args: StrictOmit<DefaultLeafDependencies, "contextDAO">
+  ) => Promise<ChatbotProjectDependencies<LeafDependencies>>;
   /**
    * If we don't specify a timeout, the webhook will be repeatedly called
    * again. Need to check for why that's the case, but do not hog the entire
@@ -102,20 +97,18 @@ export default async function createChatbotRouter<
     webhookTimeout,
   });
 
-  let messengerComponents:
-    | Promise<DefaultAsynchronousDependencies<Context>>
-    | undefined;
+  let messengerComponents: Promise<DefaultAsynchronousDependencies> | undefined;
 
   function getAsyncDependencies() {
     if (messengerComponents == null) {
       messengerComponents = new Promise(async (resolve) => {
-        let leafSelector: LeafSelector<Context>;
+        let leafSelector: LeafSelector;
 
         switch (projectDeps.leafSelectorType) {
           case "custom": {
-            leafSelector = await createTransformChain()
-              .forContextOfType<Context>()
-              .transform(await projectDeps.createLeafSelector(dependencies));
+            leafSelector = await createTransformChain().transform(
+              await projectDeps.createLeafSelector(dependencies)
+            );
 
             break;
           }
@@ -125,7 +118,6 @@ export default async function createChatbotRouter<
             const branches = await projectDeps.createBranches(dependencies);
 
             leafSelector = await createTransformChain()
-              .forContextOfType<Context>()
               .pipe(retryWithWit(witClient))
               .pipe(catchAll(projectDeps.onLeafCatchAll))
               .pipe(

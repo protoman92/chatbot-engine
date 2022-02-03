@@ -1,9 +1,9 @@
 import { NextResult } from "../stream";
 import { AmbiguousGenericRequest, LeafTransformer } from "../type";
 
-export function catchAll<Context>(
-  onCatchAll: (request: AmbiguousGenericRequest<Context>) => void
-): LeafTransformer<Context, Context> {
+export function catchAll(
+  onCatchAll: (request: AmbiguousGenericRequest) => void
+): LeafTransformer {
   return async (leaf) => ({
     ...leaf,
     next: async (request) => {

@@ -1,5 +1,6 @@
-import { requireAllTruthy } from "@haipham/javascript-helper-utils";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import { DynamoDB } from "aws-sdk";
+import { ChatbotContext } from "..";
 import { isObject, joinObjects } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";
 
@@ -88,7 +89,7 @@ export const _getContextUpdateArgs = (() => {
     return componentsToPopulate;
   }
 
-  return <Context>(context: Partial<Context>) => {
+  return (context: Partial<ChatbotContext>) => {
     const {
       attributeNames: ExpressionAttributeNames,
       attributeValuesAndUpdateExpression,
@@ -114,15 +115,15 @@ export const _getContextUpdateArgs = (() => {
   };
 })();
 
-export function createDynamoDBContextDAO<Context>({
+export function createDynamoDBContextDAO({
   dynamoDB: ddb,
   tableName,
-}: CreateDynamoDBContextDAOConfig): ContextDAO<Context> {
+}: CreateDynamoDBContextDAOConfig): ContextDAO {
   function getTableKey(targetID: string, targetPlatform: AmbiguousPlatform) {
     return { [KEY_TARGET_ID]: targetID, [KEY_TARGET_PLATFORM]: targetPlatform };
   }
 
-  const dao: ContextDAO<Context> = {
+  const dao: ContextDAO = {
     getContext: async ({ targetID, targetPlatform }) => {
       const { Item = {} } = await ddb
         .get({
@@ -131,7 +132,7 @@ export function createDynamoDBContextDAO<Context>({
         })
         .promise();
 
-      return Item as Context;
+      return Item as ChatbotContext;
     },
     appendContext: async ({
       additionalContext,
@@ -153,7 +154,7 @@ export function createDynamoDBContextDAO<Context>({
         })
         .promise();
 
-      return { newContext, oldContext: actualOldContext as Context };
+      return { newContext, oldContext: actualOldContext as ChatbotContext };
     },
     resetContext: ({ targetID, targetPlatform }) => {
       return ddb
@@ -169,7 +170,7 @@ export function createDynamoDBContextDAO<Context>({
   return dao;
 }
 
-export default function createDefaultDynamoDBContextDAO<Context>() {
+export default function createDefaultDynamoDBContextDAO() {
   const {
     DYNAMO_DB_ENDPOINT = "",
     DYNAMO_DB_REGION = "",
@@ -187,7 +188,7 @@ export default function createDefaultDynamoDBContextDAO<Context>() {
   });
 
   return {
-    contextDAO: createDynamoDBContextDAO<Context>({
+    contextDAO: createDynamoDBContextDAO({
       dynamoDB: ddb,
       tableName: DYNAMO_DB_TABLE_NAME,
     }),

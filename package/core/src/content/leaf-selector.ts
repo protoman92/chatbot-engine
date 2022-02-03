@@ -1,4 +1,4 @@
-import { isType } from "@haipham/javascript-helper-utils";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import { mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import {
@@ -16,19 +16,17 @@ import {
  * leaves.  Each enumerated leaf will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
  */
-export function enumerateLeaves<Context>(
-  branch: Branch<Context>
-): readonly LeafEnumeration<Context>[] {
+export function enumerateLeaves(branch: Branch): readonly LeafEnumeration[] {
   function enumerate(
-    branch: Branch<Context>,
+    branch: Branch,
     prefixPaths?: readonly string[]
-  ): readonly LeafEnumeration<Context>[] {
-    let inputs: LeafEnumeration<Context>[] = [];
+  ): readonly LeafEnumeration[] {
+    let inputs: LeafEnumeration[] = [];
 
     for (const [leafOrBranchID, leafOrBranch] of Object.entries(branch)) {
       const prefixLeafPaths = [...(prefixPaths || []), leafOrBranchID];
 
-      if (isType<AmbiguousLeaf<Context>>(leafOrBranch, "next", "subscribe")) {
+      if (isType<AmbiguousLeaf>(leafOrBranch, "next", "subscribe")) {
         inputs.push({
           parentBranch: branch,
           currentLeaf: leafOrBranch,
@@ -51,9 +49,9 @@ export function enumerateLeaves<Context>(
  * appropriate leaf out of all available leaves, based on the user's input.
  * Said leaf's content will be delivered to the user.
  */
-export function createLeafSelector<Context>(branch: Branch<Context>) {
+export function createLeafSelector(branch: Branch) {
   const _enumeratedLeaves = enumerateLeaves(branch);
-  let outputObservable: ContentObservable<AmbiguousGenericResponse<Context>>;
+  let outputObservable: ContentObservable<AmbiguousGenericResponse>;
   let _subscribeCount = 0;
 
   const selector = {
@@ -64,12 +62,12 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
      * its success.
      */
     triggerLeaf: (
-      { currentLeafName, currentLeaf }: LeafEnumeration<Context>,
-      request: Parameters<LeafSelector<Context>["next"]>[0]
+      { currentLeafName, currentLeaf }: LeafEnumeration,
+      request: Parameters<LeafSelector["next"]>[0]
     ) => {
       return currentLeaf.next({ ...request, currentLeafName });
     },
-    next: async (request: Parameters<LeafSelector<Context>["next"]>[0]) => {
+    next: async (request: Parameters<LeafSelector["next"]>[0]) => {
       const enumeratedLeaves = await selector.enumerateLeaves();
 
       for (const enumLeaf of enumeratedLeaves) {
@@ -89,9 +87,7 @@ export function createLeafSelector<Context>(branch: Branch<Context>) {
         return !!currentLeaf.complete && currentLeaf.complete();
       });
     },
-    subscribe: async (
-      observer: ContentObserver<AmbiguousGenericResponse<Context>>
-    ) => {
+    subscribe: async (observer: ContentObserver<AmbiguousGenericResponse>) => {
       _subscribeCount += 1;
 
       if (selector.subscribeCount() > 1) {

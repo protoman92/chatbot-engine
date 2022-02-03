@@ -12,14 +12,12 @@ import { AmbiguousGenericResponse } from "./response";
 /** Represents all supported platform identifiers */
 export type AmbiguousPlatform = "facebook" | "telegram";
 
-export interface BaseMessageProcessorConfig<Context> {
+export interface BaseMessageProcessorConfig {
   readonly targetPlatform: AmbiguousPlatform;
-  readonly leafSelector: LeafSelector<Context>;
+  readonly leafSelector: LeafSelector;
   readonly client: PlatformClient<unknown>;
-  readonly mapRequest: BaseMessageProcessor<Context>["generalizeRequest"];
-  mapResponse: (
-    res: AmbiguousGenericResponse<Context>
-  ) => Promise<readonly unknown[]>;
+  readonly mapRequest: BaseMessageProcessor["generalizeRequest"];
+  mapResponse: (res: AmbiguousGenericResponse) => Promise<readonly unknown[]>;
 }
 
 export interface RawRequestGeneralizer<RawRequest, GenericRequest> {
@@ -50,14 +48,14 @@ export interface GenericResponseSender<GenericResponse, SendResult> {
  * We define several methods here instead of combining into one in order to
  * apply decorators more effectively.
  */
-export interface BaseMessageProcessor<Context>
-  extends RawRequestGeneralizer<unknown, AmbiguousGenericRequest<Context>>,
-    GenericRequestReceiver<AmbiguousGenericRequest<Context>>,
-    GenericResponseSender<AmbiguousGenericResponse<Context>, unknown> {}
+export interface BaseMessageProcessor
+  extends RawRequestGeneralizer<unknown, AmbiguousGenericRequest>,
+    GenericRequestReceiver<AmbiguousGenericRequest>,
+    GenericResponseSender<AmbiguousGenericResponse, unknown> {}
 
-export interface MessengerConfig<Context> {
-  readonly leafSelector: LeafSelector<Context>;
-  readonly processor: BaseMessageProcessor<Context>;
+export interface MessengerConfig {
+  readonly leafSelector: LeafSelector;
+  readonly processor: BaseMessageProcessor;
 }
 
 /**
@@ -71,17 +69,12 @@ export interface Messenger {
 }
 
 export namespace _MessageProcessorMiddleware {
-  export interface Input<Context> {
-    getFinalMessageProcessor(): BaseMessageProcessor<Context>;
+  export interface Input {
+    getFinalMessageProcessor(): BaseMessageProcessor;
   }
 }
 
 /** Similar in concept to middlewares in systems such as Redux */
 export type MessageProcessorMiddleware<
-  Context,
-  Processor extends BaseMessageProcessor<Context> = BaseMessageProcessor<
-    Context
-  >
-> = (
-  input: _MessageProcessorMiddleware.Input<Context>
-) => Transformer<Processor>;
+  Processor extends BaseMessageProcessor = BaseMessageProcessor
+> = (input: _MessageProcessorMiddleware.Input) => Transformer<Processor>;

@@ -1,4 +1,4 @@
-import { isType } from "@haipham/javascript-helper-utils";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { bridgeEmission, NextResult } from "../stream";
 import {
@@ -123,22 +123,22 @@ describe("Default error leaf", () => {
 });
 
 describe("Leaf for platforms", () => {
-  let fbLeaf: Omit<FacebookLeaf<{}>, "subscribe">;
-  let tlLeaf: Omit<TelegramLeaf<{}>, "subscribe">;
-  let platformLeaf: AmbiguousLeaf<{}>;
+  let fbLeaf: Omit<FacebookLeaf, "subscribe">;
+  let tlLeaf: Omit<TelegramLeaf, "subscribe">;
+  let platformLeaf: AmbiguousLeaf;
 
   beforeEach(async () => {
-    fbLeaf = spy<Omit<FacebookLeaf<{}>, "subscribe">>({
+    fbLeaf = spy<Omit<FacebookLeaf, "subscribe">>({
       next: () => Promise.reject(""),
       complete: () => Promise.reject(""),
     });
 
-    tlLeaf = spy<Omit<TelegramLeaf<{}>, "subscribe">>({
+    tlLeaf = spy<Omit<TelegramLeaf, "subscribe">>({
       next: () => Promise.reject(""),
       complete: () => Promise.reject(""),
     });
 
-    platformLeaf = await createLeaf<{}>(() => {
+    platformLeaf = await createLeaf(() => {
       return createLeafObserver({
         facebook: instance(fbLeaf),
         telegram: instance(tlLeaf),

@@ -1,4 +1,7 @@
-import { isType, requireNotNull } from "@haipham/javascript-helper-utils";
+import {
+  isType,
+  requireNotNull,
+} from "@haipham/javascript-helper-preconditions";
 import GraphemeSplitter from "grapheme-splitter";
 import {
   AmbiguousGenericResponse,
@@ -112,18 +115,18 @@ export function getCrossPlatformOutput(
  * Use this to get a cross-platform response, so as to reuse logic everywhere
  * else.
  */
-export function getCrossPlatformResponse<Context>(
+export function getCrossPlatformResponse(
   args: Readonly<{
     facebook?: readonly FacebookGenericResponseOutput[];
     telegram?: readonly TelegramGenericResponseOutput[];
   }>
 ): (
-  args: Omit<AmbiguousGenericResponse<Context>, "output">
-) => AmbiguousGenericResponse<Context> {
+  args: Omit<AmbiguousGenericResponse, "output">
+) => AmbiguousGenericResponse {
   return ({
     targetPlatform,
     ...args1
-  }: Omit<AmbiguousGenericResponse<Context>, "output">) => {
+  }: Omit<AmbiguousGenericResponse, "output">) => {
     return {
       ...args1,
       targetPlatform,
@@ -162,7 +165,7 @@ export function omitProperties<T extends object, KS extends (keyof T)[]>(
     delete result[key];
   }
 
-  return result;
+  return result as any;
 }
 
 /** Promisify a callback-style function into one that supports promises */

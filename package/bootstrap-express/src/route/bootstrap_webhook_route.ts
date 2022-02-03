@@ -2,10 +2,7 @@ import { AmbiguousPlatform } from "@haipham/chatbot-engine-core";
 import express from "express";
 import { DefaultLeafDependencies, OnWebhookErrorHandler } from "../interface";
 
-export default function <
-  Context,
-  LeafDependencies extends DefaultLeafDependencies<Context>
->({
+export default function <LeafDependencies extends DefaultLeafDependencies>({
   facebookClient,
   getAsyncDependencies,
   onWebhookError,

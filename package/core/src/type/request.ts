@@ -1,18 +1,19 @@
+import { ChatbotContext } from "..";
 import { ContextChangeRequestInput } from "./context";
 import { ErrorRequestInput } from "./error";
 import { FacebookGenericRequest } from "./facebook";
 import { TelegramGenericRequest } from "./telegram";
 import { WitRequestInput } from "./wit";
 
-export type BaseRequest<Context> = Readonly<{
-  currentContext: Context;
+export type BaseRequest = Readonly<{
+  currentContext: ChatbotContext;
   targetID: string;
 }>;
 
-export type CrossPlatformRequestInput<Context> =
+export type CrossPlatformRequestInput =
   | Readonly<{ text: string; type: "text" }>
   | Readonly<{ type: "placebo" }>
-  | ContextChangeRequestInput<Context>
+  | ContextChangeRequestInput
   | ErrorRequestInput
   | WitRequestInput;
 
@@ -26,6 +27,6 @@ export interface GenericManualTriggerRequest {
   readonly type: "manual_trigger";
 }
 
-export type AmbiguousGenericRequest<Context> =
-  | FacebookGenericRequest<Context>
-  | TelegramGenericRequest<Context>;
+export type AmbiguousGenericRequest =
+  | FacebookGenericRequest
+  | TelegramGenericRequest;

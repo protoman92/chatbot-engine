@@ -4,9 +4,7 @@ import { DefaultLeafDependencies } from "../../interface";
 import { mockFacebookClient } from "../client/facebook_client";
 import { mockResponseCapturer } from "../middleware/capture_generic_response";
 
-export default function <Context>({
-  getAsyncDependencies,
-}: DefaultLeafDependencies<Context>) {
+export default function ({ getAsyncDependencies }: DefaultLeafDependencies) {
   const router = express.Router();
 
   router.post("/webhook/reset", async (...[, res]) => {

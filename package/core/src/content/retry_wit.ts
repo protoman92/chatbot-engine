@@ -37,9 +37,7 @@ export function getHighestConfidence({
  * Retry a failing message with wit, by running the input text through wit
  * engine and injecting entities into leaf input.
  */
-export function retryWithWit<Context>(
-  comm: WitClient
-): LeafTransformer<Context, Context> {
+export function retryWithWit(comm: WitClient): LeafTransformer {
   return async (leaf) => ({
     ...leaf,
     next: async (request) => {

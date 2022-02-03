@@ -1,7 +1,7 @@
 import {
   requireAllTruthy,
   requireTruthy,
-} from "@haipham/javascript-helper-utils";
+} from "@haipham/javascript-helper-preconditions";
 import { stringify } from "querystring";
 import { telegramError } from "../common/utils";
 import {
