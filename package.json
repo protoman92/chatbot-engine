@@ -53,7 +53,7 @@
     "url": "git+https://github.com/protoman92/chatbot-engine.git"
   },
   "scripts": {
-    "build": "rm -rf build && tsc",
+    "build": "lerna run build --ignore javascript-helper --ignore microbackend",
     "coveralls": "coveralls < coverage/lcov.info",
     "lerna:bootstrap": "lerna bootstrap --force-local",
     "preinstall": "git submodule update --init",
