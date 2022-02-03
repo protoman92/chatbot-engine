@@ -7,17 +7,17 @@ import {
   TelegramClient,
 } from "@haipham/chatbot-engine-core";
 
-export interface DefaultAsynchronousDependencies<Context> {
-  readonly messageProcessor: BaseMessageProcessor<Context>;
+export interface DefaultAsynchronousDependencies {
+  readonly messageProcessor: BaseMessageProcessor;
   readonly messenger: Messenger;
 }
 
-export interface DefaultLeafDependencies<Context> {
-  readonly contextDAO: ContextDAO<Context>;
+export interface DefaultLeafDependencies {
+  readonly contextDAO: ContextDAO;
   readonly facebookClient: FacebookClient;
   readonly telegramClient: TelegramClient;
   readonly webhookTimeout: number;
-  getAsyncDependencies(): Promise<DefaultAsynchronousDependencies<Context>>;
+  getAsyncDependencies(): Promise<DefaultAsynchronousDependencies>;
 }
 
 export type OnWebhookErrorHandler = (

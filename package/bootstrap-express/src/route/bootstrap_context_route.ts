@@ -2,10 +2,9 @@ import { AmbiguousPlatform } from "@haipham/chatbot-engine-core";
 import express from "express";
 import { DefaultLeafDependencies } from "../interface";
 
-export default function <
-  Context,
-  LeafDependencies extends DefaultLeafDependencies<Context>
->({ contextDAO }: LeafDependencies) {
+export default function <LeafDependencies extends DefaultLeafDependencies>({
+  contextDAO,
+}: LeafDependencies) {
   const router = express.Router();
 
   router.get(

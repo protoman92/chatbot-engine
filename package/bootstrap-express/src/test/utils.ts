@@ -10,12 +10,10 @@ export const chatbotTestConfiguration = {
   baseURL: "",
 };
 
-export async function getSentResponses<Context>({
+export async function getSentResponses({
   targetPlatform,
-}: Pick<AmbiguousGenericRequest<Context>, "targetPlatform">) {
-  const { data } = await axios.request<
-    readonly AmbiguousGenericResponse<Context>[]
-  >({
+}: Pick<AmbiguousGenericRequest, "targetPlatform">) {
+  const { data } = await axios.request<readonly AmbiguousGenericResponse[]>({
     baseURL: chatbotTestConfiguration.baseURL,
     method: "GET",
     url: `/webhook/${targetPlatform}/sent-response`,
@@ -24,9 +22,9 @@ export async function getSentResponses<Context>({
   return data;
 }
 
-export async function mergeMockContextData<Context>({
+export async function mergeMockContextData({
   context: data,
-}: Readonly<{ context: DeepPartial<InMemoryContextData<Context>> }>) {
+}: Readonly<{ context: DeepPartial<InMemoryContextData> }>) {
   await axios.request({
     data,
     baseURL: chatbotTestConfiguration.baseURL,
@@ -35,8 +33,8 @@ export async function mergeMockContextData<Context>({
   });
 }
 
-export async function sendMessageRequest<Context>(
-  data: DeepPartial<AmbiguousGenericRequest<Context>>
+export async function sendMessageRequest(
+  data: DeepPartial<AmbiguousGenericRequest>
 ) {
   await axios.request({
     data,
@@ -64,9 +62,9 @@ export async function getMockContextData<Context>() {
   return data;
 }
 
-export async function setMockContextData<Context>({
+export async function setMockContextData({
   context: data,
-}: Readonly<{ context: DeepPartial<InMemoryContextData<Context>> }>) {
+}: Readonly<{ context: DeepPartial<InMemoryContextData> }>) {
   await axios.request({
     data,
     baseURL: chatbotTestConfiguration.baseURL,
