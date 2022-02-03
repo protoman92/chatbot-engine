@@ -1,4 +1,4 @@
-import { isType } from "@haipham/javascript-helper-utils";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import FormData from "form-data";
 import { ChatbotContext } from "..";
 import {

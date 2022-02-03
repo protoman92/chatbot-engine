@@ -1,4 +1,4 @@
-import { omitNull } from "@haipham/javascript-helper-utils";
+import { omitNull } from "@haipham/javascript-helper-object";
 import { ChatbotContext } from "..";
 import { chunkString, facebookError } from "../common/utils";
 import {

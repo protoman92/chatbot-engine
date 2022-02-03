@@ -1,4 +1,4 @@
-import { requireAllTruthy } from "@haipham/javascript-helper-utils";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import FormData from "form-data";
 import { facebookError } from "../common/utils";
 import {

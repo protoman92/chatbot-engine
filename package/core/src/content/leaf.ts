@@ -1,4 +1,4 @@
-import { requireNotNull } from "@haipham/javascript-helper-utils";
+import { requireNotNull } from "@haipham/javascript-helper-preconditions";
 import { generateUniqueTargetKey } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
 import {

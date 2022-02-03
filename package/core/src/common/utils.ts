@@ -1,4 +1,7 @@
-import { isType, requireNotNull } from "@haipham/javascript-helper-utils";
+import {
+  isType,
+  requireNotNull,
+} from "@haipham/javascript-helper-preconditions";
 import GraphemeSplitter from "grapheme-splitter";
 import {
   AmbiguousGenericResponse,

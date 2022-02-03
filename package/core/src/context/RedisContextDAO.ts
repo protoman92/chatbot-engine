@@ -1,4 +1,4 @@
-import { requireAllTruthy } from "@haipham/javascript-helper-utils";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import { createClient, RedisClient } from "redis";
 import { joinObjects, promisify1, promisify2 } from "../common/utils";
 import { AmbiguousPlatform, ContextDAO } from "../type";

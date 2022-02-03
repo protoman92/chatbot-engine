@@ -1,4 +1,4 @@
-import { omitNull } from "@haipham/javascript-helper-utils";
+import { omitNull } from "@haipham/javascript-helper-object";
 import {
   chunkString,
   firstSubString,

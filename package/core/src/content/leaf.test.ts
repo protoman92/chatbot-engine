@@ -1,4 +1,4 @@
-import { isType } from "@haipham/javascript-helper-utils";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { bridgeEmission, NextResult } from "../stream";
 import {

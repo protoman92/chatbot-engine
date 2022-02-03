@@ -1,4 +1,4 @@
-import { isType } from "@haipham/javascript-helper-utils";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import { mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import {

@@ -237,7 +237,7 @@ describe("Cross platform message processor", () => {
         leafSelector: instance(leafSelector),
       });
 
-      await messenger.processRawRequest({});
+      await messenger.processRawRequest({ rawRequest: {} });
 
       // Then
       verify(processors[targetPlatform]!.generalizeRequest(anything())).once();
@@ -257,13 +257,16 @@ describe("Cross platform message processor", () => {
 
     // When && Then: Facebook
     try {
-      await messenger.processRawRequest({ object: "", entry: {} });
+      await messenger.processRawRequest({
+        rawRequest: { object: "", entry: {} },
+      });
+
       throw new Error("Never should have come here");
     } catch (e) {}
 
     // When && Then: Telegram
     try {
-      await messenger.processRawRequest({ update_id: "" });
+      await messenger.processRawRequest({ rawRequest: { update_id: "" } });
       throw new Error("Never should have come here");
     } catch (e) {}
   });

@@ -1,4 +1,4 @@
-import { isType } from "@haipham/javascript-helper-utils";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import { omitProperties } from "../common/utils";
 import { createCompositeSubscription } from "../stream";
 import { AmbiguousLeaf, LeafError, LeafTransformer } from "../type";

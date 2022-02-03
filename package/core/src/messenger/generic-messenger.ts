@@ -1,4 +1,4 @@
-import { requireNotNull } from "@haipham/javascript-helper-utils";
+import { requireNotNull } from "@haipham/javascript-helper-preconditions";
 import { getRequestPlatform, mapSeries, transform } from "../common/utils";
 import { NextResult } from "../stream";
 import {

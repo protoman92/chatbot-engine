@@ -1,4 +1,5 @@
-import { isType, toArray } from "@haipham/javascript-helper-utils";
+import { toArray } from "@haipham/javascript-helper-array";
+import { isType } from "@haipham/javascript-helper-preconditions";
 import { ChatbotContext } from "..";
 import {
   AmbiguousGenericRequest,

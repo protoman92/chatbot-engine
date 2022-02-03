@@ -1,6 +1,5 @@
 /* istanbul ignore file */
 import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
-import { decorateClientMethods } from "@haipham/javascript-helper-decorator";
 import { merge } from "lodash";
 import { inspect } from "util";
 import { ChatbotContext } from "..";
@@ -29,20 +28,17 @@ function createInMemoryContextDAO() {
 
   const baseDAO: ContextDAO = {
     getContext,
-    appendContext: async ({
-      additionalContext,
-      oldContext,
-      targetPlatform,
-      targetID,
-    }) => {
-      if (oldContext == null) {
-        oldContext = await getContext({ targetPlatform, targetID });
-      }
+    appendContext: synchronizer.synchronize(
+      async ({ additionalContext, oldContext, targetPlatform, targetID }) => {
+        if (oldContext == null) {
+          oldContext = await getContext({ targetPlatform, targetID });
+        }
 
-      const newContext = joinObjects(oldContext, additionalContext);
-      storage[targetPlatform][targetID] = newContext;
-      return { oldContext, newContext };
-    },
+        const newContext = joinObjects(oldContext, additionalContext);
+        storage[targetPlatform][targetID] = newContext;
+        return { oldContext, newContext };
+      }
+    ),
     resetContext: async ({ targetID, targetPlatform }) => {
       delete storage[targetPlatform][targetID];
     },
@@ -66,17 +62,13 @@ function createInMemoryContextDAO() {
     },
   };
 
-  const finalDAO = {
+  return {
     ...dao,
     contextDAO: dao,
     [inspect.custom]() {
       return JSON.stringify(storage, null, 4);
     },
   };
-
-  return decorateClientMethods<typeof finalDAO>({
-    decorator: synchronizer.synchronize,
-  })(finalDAO);
 }
 
 export const inMemoryContextDAO = createInMemoryContextDAO();

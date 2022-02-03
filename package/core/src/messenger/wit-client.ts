@@ -1,4 +1,4 @@
-import { requireAllTruthy } from "@haipham/javascript-helper-utils";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import { HTTPClient, WitClient, WitConfig, WitResponse } from "../type";
 import defaultAxiosClient from "./axios-client";
 

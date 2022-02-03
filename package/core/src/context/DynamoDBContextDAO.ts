@@ -1,4 +1,4 @@
-import { requireAllTruthy } from "@haipham/javascript-helper-utils";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import { DynamoDB } from "aws-sdk";
 import { ChatbotContext } from "..";
 import { isObject, joinObjects } from "../common/utils";
