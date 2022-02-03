@@ -14,49 +14,48 @@ import {
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendApp {
-    readonly chatbot: Readonly<{
-      facebookClient?: FacebookClient;
-      telegramClient?: TelegramClient;
-    }>;
+    readonly facebookClient: FacebookClient;
+    readonly telegramClient: TelegramClient;
   }
 }
 
 export default {
-  get chatbot(): IMicrobackendApp["chatbot"] {
+  get facebookClient(): IMicrobackendApp["facebookClient"] {
     return initializeOnce(
       (this as unknown) as IMicrobackendApp,
-      "chatbot",
+      "facebookClient",
       () => {
         const helpers = createPluginHelpers(PLUGIN_NAME);
-        const chatbot = {} as IMicrobackendApp["chatbot"];
 
-        initializeOnce(chatbot, "facebookClient", () => {
-          if (!enableFacebookMessenger) {
-            throw helpers.createError(
-              `enableFacebookMessenger is currently false, please make sure`,
-              `the correct flag has been supplied to the plugin options and`,
-              `the appropriate Facebook messenger configuration is available`,
-              `in app.config`
-            );
-          }
+        if (!enableFacebookMessenger) {
+          throw helpers.createError(
+            `enableFacebookMessenger is currently false, please make sure`,
+            `the correct flag has been supplied to the plugin options and`,
+            `the appropriate Facebook messenger configuration is available`,
+            `in app.config`
+          );
+        }
 
-          return createDefaultFacebookClient();
-        });
+        return createDefaultFacebookClient();
+      }
+    );
+  },
+  get telegramClient(): IMicrobackendApp["telegramClient"] {
+    return initializeOnce(
+      (this as unknown) as IMicrobackendApp,
+      "telegramClient",
+      () => {
+        const helpers = createPluginHelpers(PLUGIN_NAME);
+        if (!enableTelegramMessenger) {
+          throw helpers.createError(
+            `enableTelegramMessenger is currently false, please make sure`,
+            `the correct flag has been supplied to the plugin options and`,
+            `the appropriate Telegram messenger configuration is available`,
+            `in app.config`
+          );
+        }
 
-        initializeOnce(chatbot, "telegramClient", () => {
-          if (!enableTelegramMessenger) {
-            throw helpers.createError(
-              `enableTelegramMessenger is currently false, please make sure`,
-              `the correct flag has been supplied to the plugin options and`,
-              `the appropriate Telegram messenger configuration is available`,
-              `in app.config`
-            );
-          }
-
-          return createDefaultTelegramClient({ defaultParseMode: "html" });
-        });
-
-        return chatbot;
+        return createDefaultTelegramClient({ defaultParseMode: "html" });
       }
     );
   },
