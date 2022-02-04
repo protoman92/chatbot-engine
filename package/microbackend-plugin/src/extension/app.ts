@@ -1,16 +1,21 @@
 import {
-  createDefaultFacebookClient,
-  createDefaultTelegramClient,
+  createFacebookClient,
+  createTelegramClient,
+  defaultAxiosClient,
   FacebookClient,
+  FacebookConfig,
   TelegramClient,
+  TelegramConfig,
+  _TelegramRawResponse,
 } from "@haipham/chatbot-engine-core";
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
-import { PLUGIN_NAME } from "../utils";
+import joi from "joi";
 import {
   enableFacebookMessenger,
   enableTelegramMessenger,
 } from "../feature_switch";
+import { PLUGIN_NAME } from "../utils";
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendApp {
@@ -26,7 +31,7 @@ export default {
     return initializeOnce(
       (this as unknown) as IMicrobackendApp,
       "chatbotEngine",
-      () => {
+      (app) => {
         const helpers = createPluginHelpers(PLUGIN_NAME);
 
         return {
@@ -35,16 +40,40 @@ export default {
               this as IMicrobackendApp["chatbotEngine"],
               "facebookClient",
               () => {
-                if (!enableFacebookMessenger) {
-                  throw helpers.createError(
-                    `enableFacebookMessenger is currently false, please make`,
-                    `sure the correct flag has been supplied to the plugin`,
-                    `options and the appropriate Facebook messenger`,
-                    `configuration is available in app.config`
-                  );
+                const { error: validationError } = joi
+                  .object({
+                    config: joi.object<FacebookConfig, true>({
+                      apiVersion: joi.string().required(),
+                      pageToken: joi.string().required(),
+                      verifyToken: joi.string().required(),
+                    }),
+                    enableFacebookMessenger: joi
+                      .boolean()
+                      .equal(true)
+                      .error(
+                        new Error(
+                          [
+                            `enableFacebookMessenger is currently false, please`,
+                            `make sure the correct flag has been supplied to`,
+                            `the plugin options and the appropriate Facebook`,
+                            `messenger configuration is available in app.config`,
+                          ].join(" ")
+                        )
+                      ),
+                  })
+                  .validate({
+                    enableFacebookMessenger,
+                    config: app.config.chatbotEngine.facebook.client,
+                  });
+
+                if (validationError != null) {
+                  throw helpers.createError(validationError.message);
                 }
 
-                return createDefaultFacebookClient();
+                return createFacebookClient(
+                  defaultAxiosClient,
+                  app.config.chatbotEngine.facebook.client
+                );
               }
             );
           },
@@ -53,18 +82,48 @@ export default {
               (this as unknown) as IMicrobackendApp["chatbotEngine"],
               "telegramClient",
               () => {
-                const helpers = createPluginHelpers(PLUGIN_NAME);
-                if (!enableTelegramMessenger) {
-                  throw helpers.createError(
-                    `enableTelegramMessenger is currently false, please make`,
-                    `sure the correct flag has been supplied to the plugin`,
-                    `options and the appropriate Telegram messenger`,
-                    `configuration is available in app.config`
-                  );
+                const { error: validationError } = joi
+                  .object({
+                    config: joi.object<TelegramConfig, true>({
+                      authToken: joi.string().required(),
+                      defaultParseMode: joi
+                        .string()
+                        .valid(
+                          Object.keys((): {
+                            [K in _TelegramRawResponse.ParseMode]: boolean;
+                          } => {
+                            return { html: true, markdown: true };
+                          })
+                        )
+                        .optional(),
+                      defaultPaymentProviderToken: joi.string().optional(),
+                    }),
+                    enableTelegramMessenger: joi
+                      .boolean()
+                      .equal(true)
+                      .error(
+                        new Error(
+                          [
+                            `enableTelegramMessenger is currently false, please`,
+                            `make sure the correct flag has been supplied to`,
+                            `the plugin options and the appropriate Telegram`,
+                            `messenger configuration is available in app.config`,
+                          ].join(" ")
+                        )
+                      ),
+                  })
+                  .validate({
+                    enableTelegramMessenger,
+                    config: app.config.chatbotEngine.telegram.client,
+                  });
+
+                if (validationError != null) {
+                  throw helpers.createError(validationError.message);
                 }
 
-                return createDefaultTelegramClient({
+                return createTelegramClient(defaultAxiosClient, {
                   defaultParseMode: "html",
+                  ...app.config.chatbotEngine.telegram.client,
                 });
               }
             );

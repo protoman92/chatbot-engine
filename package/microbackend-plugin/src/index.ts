@@ -1,4 +1,8 @@
-import { Branch } from "@haipham/chatbot-engine-core";
+import {
+  Branch,
+  FacebookConfig,
+  TelegramConfig,
+} from "@haipham/chatbot-engine-core";
 import {
   IMicrobackendPluginDefaultOptions,
   IMicrobackendRequest,
@@ -14,6 +18,13 @@ export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendPluginRegistry {
     ["@microbackend/plugin-chatbot-engine"]: IPluginOptions;
+  }
+
+  interface IMicrobackendConfig {
+    readonly chatbotEngine: Readonly<{
+      facebook: Readonly<{ client: FacebookConfig }>;
+      telegram: Readonly<{ client: TelegramConfig }>;
+    }>;
   }
 }
 
