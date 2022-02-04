@@ -143,7 +143,7 @@ export default function createDefaultTelegramClient(
   >
 ) {
   const { TELEGRAM_AUTH_TOKEN: authToken } = requireAllTruthy({
-    TELEGRAM_AUTH_TOKEN: process.env.TELEGRAM_AUTH_TOKEN,
+    TELEGRAM_AUTH_TOKEN: process.env["TELEGRAM_AUTH_TOKEN"],
   });
 
   return createTelegramClient(defaultAxiosClient, { ...args, authToken });

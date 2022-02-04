@@ -61,8 +61,16 @@
   },
   "version": "1.0.0",
   "workspaces": [
-    "package/*",
-    "package/javascript-helper/package/*",
-    "package/microbackend/package/*"
+    "package/bootstrap-express",
+    "package/core",
+    "package/microbackend-plugin-express",
+    "package/javascript-helper/package/array",
+    "package/javascript-helper/package/async_synchronizer",
+    "package/javascript-helper/package/object",
+    "package/javascript-helper/package/preconditions",
+    "package/microbackend/package/common_utils",
+    "package/microbackend/package/build_utils",
+    "package/microbackend/package/plugin_core",
+    "package/microbackend/package/plugin_express"
   ]
 }

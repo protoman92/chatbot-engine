@@ -209,10 +209,10 @@ function createFacebookResponse({
         attachment: {
           type: "template",
           payload: {
-            text: chunkTexts[chunkTexts.length - 1],
+            text: chunkTexts[chunkTexts.length - 1]!,
             template_type: "button",
-            buttons: actions.map((a) => {
-              return createSingleAction(a);
+            buttons: actions.map((action) => {
+              return createSingleAction(action);
             }),
           },
         },
