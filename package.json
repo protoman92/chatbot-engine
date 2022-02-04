@@ -3,40 +3,12 @@
   "bugs": {
     "url": "https://github.com/protoman92/chatbot-engine/issues"
   },
-  "dependencies": {
-    "aws-sdk": "2.973.0",
-    "axios": "0.21.2",
-    "form-data": "3.0.0",
-    "formidable": "1.2.2",
-    "grapheme-splitter": "1.0.4",
-    "lodash-es": "4.17.21",
-    "redis": "3.1.1"
-  },
+  "dependencies": {},
   "description": "Experimental chatbot engine",
   "devDependencies": {
-    "@types/formidable": "1.0.31",
-    "@types/jest": "26.0.10",
-    "@types/redis": "2.8.18",
-    "babel-jest": "26.3.0",
-    "bignumber.js": "8.1.1",
-    "coveralls": "3.1.0",
-    "del": "5.1.0",
-    "form-data": "3.0.0",
-    "formidable": "1.2.2",
-    "fs-extra": "9.0.1",
-    "grapheme-splitter": "1.0.4",
-    "jest": "26.4.2",
     "lerna": "4.0.0",
-    "nodemon": "2.0.4",
     "prettier": "2.0.5",
-    "redis": "3.1.1",
-    "snyk": "1.370.1",
-    "source-map-support": "0.5.19",
-    "ts-essentials": "9.1.2",
-    "ts-jest": "26.3.0",
-    "ts-mockito": "2.6.1",
-    "ts-node": "8.10.2",
-    "typescript": "4.5.5"
+    "snyk": "1.370.1"
   },
   "files": [
     "dist"
@@ -51,6 +23,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/protoman92/chatbot-engine.git"
+  },
+  "resolutions": {
+    "@types/node": "^17.0.14"
   },
   "scripts": {
     "build": "lerna run build --ignore javascript-helper --ignore microbackend",
@@ -68,6 +43,7 @@
     "package/javascript-helper/package/async_synchronizer",
     "package/javascript-helper/package/object",
     "package/javascript-helper/package/preconditions",
+    "package/microbackend/package/cli",
     "package/microbackend/package/common_utils",
     "package/microbackend/package/build_utils",
     "package/microbackend/package/plugin_core",
