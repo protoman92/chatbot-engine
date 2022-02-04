@@ -1,3 +1,4 @@
+import { PLUGIN_NAME } from "@/utils";
 import {
   createFacebookClient,
   createTelegramClient,
@@ -11,7 +12,6 @@ import {
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
 import joi from "joi";
-import { PLUGIN_NAME } from "../utils";
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendApp {

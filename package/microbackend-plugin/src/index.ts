@@ -1,4 +1,5 @@
 import {
+  AmbiguousPlatform,
   Branch,
   FacebookConfig,
   TelegramConfig,
@@ -19,8 +20,41 @@ declare module "@microbackend/plugin-core" {
 
   interface IMicrobackendConfig {
     readonly chatbotEngine: Readonly<{
-      facebook: Readonly<{ client: FacebookConfig; isEnabled: boolean }>;
+      facebook: Readonly<{
+        client: FacebookConfig;
+        isEnabled: boolean;
+        /**
+         * This route handles the webhook challenge for Facebook messenger.
+         * If not provided, defaults to /webhook/facebook.
+         */
+        webhookChallengeRoute?: string;
+      }>;
       telegram: Readonly<{ client: TelegramConfig; isEnabled: boolean }>;
+      /**
+       * Since we must respond to POST calls from service providers with 200,
+       * when errors happen, we will implicitly handle them with this callback.
+       */
+      onWebhookError?: (
+        args: Readonly<{
+          error: Error;
+          payload: unknown;
+          platform: AmbiguousPlatform;
+        }>
+      ) => AsyncOrSync<void>;
+      /**
+       * This route handles the webhook payload from all service providers. The
+       * actual platform-specific logic happens at the messenger level. It
+       * should be publicly available so that the service providers can call it
+       * with POST when new messages arrive.
+       * It must contain a route param for platform. If not provided, defaults
+       * to /webhook/:platform.
+       */
+      webhookHandlerRoute?: string;
+      /**
+       * If we don't specify a timeout for Telegram, the webhook will be
+       * repeatedly called again.
+       */
+      webhookTimeoutMs?: number;
     }>;
   }
 }

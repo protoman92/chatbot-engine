@@ -68,7 +68,6 @@ export type ChatbotProjectDependencies<
   );
 
 export default async function createChatbotRouter<
-  Context,
   LeafDependencies extends DefaultLeafDependencies
 >({
   env,

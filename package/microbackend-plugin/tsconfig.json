@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "build"
+    "baseUrl": "src",
+    "outDir": "build",
+    "paths": {
+      "@/*": ["*"]
+    }
   },
   "exclude": ["build"],
   "extends": "../microbackend/tsconfig.json"

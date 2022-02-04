@@ -1,3 +1,4 @@
+import { PLUGIN_NAME } from "@/utils";
 import {
   BaseMessageProcessor,
   Branch,
@@ -27,7 +28,6 @@ import {
   IMicrobackendBranchCreator,
   MicrobackendBranch,
 } from "..";
-import { PLUGIN_NAME } from "../utils";
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendRequest {

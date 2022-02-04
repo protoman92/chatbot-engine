@@ -11,6 +11,7 @@
     "@microbackend/plugin-core": "^1.0.1",
     "@microbackend/plugin-express": "^1.0.1",
     "ts-essentials": "^9.1.2",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.5.4",
     "webpack": "^5.64.0"
   },
