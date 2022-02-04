@@ -8,6 +8,7 @@
     "@microbackend/plugin-core": "^1.0.1",
     "@microbackend/plugin-express": "^1.0.1",
     "string-replace-loader": "^3.0.3",
+    "ts-essentials": "^9.1.2",
     "typescript": "^4.5.4",
     "webpack": "^5.64.0"
   },

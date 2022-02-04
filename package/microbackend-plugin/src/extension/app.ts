@@ -10,11 +10,11 @@ import { PLUGIN_NAME } from "../utils";
 import {
   enableFacebookMessenger,
   enableTelegramMessenger,
-} from "./feature-switch";
+} from "../feature_switch";
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendApp {
-    readonly chatbot: Readonly<{
+    readonly chatbotEngine: Readonly<{
       readonly facebookClient: FacebookClient;
       readonly telegramClient: TelegramClient;
     }>;
@@ -22,17 +22,17 @@ declare module "@microbackend/plugin-core" {
 }
 
 export default {
-  get chatbot(): IMicrobackendApp["chatbot"] {
+  get chatbotEngine(): IMicrobackendApp["chatbotEngine"] {
     return initializeOnce(
       (this as unknown) as IMicrobackendApp,
-      "chatbot",
+      "chatbotEngine",
       () => {
         const helpers = createPluginHelpers(PLUGIN_NAME);
 
         return {
-          get facebookClient(): IMicrobackendApp["chatbot"]["facebookClient"] {
+          get facebookClient(): IMicrobackendApp["chatbotEngine"]["facebookClient"] {
             return initializeOnce(
-              this as IMicrobackendApp["chatbot"],
+              this as IMicrobackendApp["chatbotEngine"],
               "facebookClient",
               () => {
                 if (!enableFacebookMessenger) {
@@ -48,9 +48,9 @@ export default {
               }
             );
           },
-          get telegramClient(): IMicrobackendApp["chatbot"]["telegramClient"] {
+          get telegramClient(): IMicrobackendApp["chatbotEngine"]["telegramClient"] {
             return initializeOnce(
-              (this as unknown) as IMicrobackendApp["chatbot"],
+              (this as unknown) as IMicrobackendApp["chatbotEngine"],
               "telegramClient",
               () => {
                 const helpers = createPluginHelpers(PLUGIN_NAME);
