@@ -3,7 +3,7 @@
   "dependencies": {
     "joi": "^17.5.0"
   },
-  "description": "Micro-backend chatbot-engine plugin",
+  "description": "Micro-backend chatbot-engine plugin for express.js",
   "devDependencies": {
     "@haipham/chatbot-engine-core": "^1.0.0",
     "@microbackend/build-utils": "^1.0.1",
@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "main": "build/src/index.js",
-  "name": "@microbackend/plugin-chatbot-engine",
+  "name": "@microbackend/plugin-chatbot-engine-express",
   "peerDependencies": {
     "@haipham/chatbot-engine-core": "^1.0.0",
     "@microbackend/common-utils": "^1.0.1",
