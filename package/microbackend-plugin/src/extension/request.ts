@@ -27,10 +27,6 @@ import {
   IMicrobackendBranchCreator,
   MicrobackendBranch,
 } from "..";
-import {
-  enableFacebookMessenger,
-  enableTelegramMessenger,
-} from "../feature_switch";
 import { PLUGIN_NAME } from "../utils";
 
 declare module "@microbackend/plugin-core" {
@@ -69,9 +65,8 @@ export default {
                   if (typeof BranchCreator !== "function") {
                     throw helpers.createError(
                       `branch creator ${extKey} must be a function producing a`,
-                      "branch, or a class that extends",
-                      "MicrobackendBranch (imported from",
-                      `"@microbackend/plugin-chatbot-engine").`
+                      "branch, or a class that extends MicrobackendBranch",
+                      `(imported from "@microbackend/plugin-chatbot-engine")`
                     );
                   }
 
@@ -134,26 +129,24 @@ export default {
                 let facebookProcessor: FacebookMessageProcessor | undefined;
                 let telegramProcessor: TelegramMessageProcessor | undefined;
 
-                if (enableFacebookMessenger) {
+                if (req.app.config.chatbotEngine.facebook.isEnabled) {
                   facebookProcessor = await createFacebookMessageProcessor({
                     leafSelector,
                     client: req.app.chatbotEngine.facebookClient,
                   });
                 }
 
-                if (enableTelegramMessenger) {
+                if (req.app.config.chatbotEngine.telegram.isEnabled) {
                   telegramProcessor = await createTelegramMessageProcessor({
                     leafSelector,
                     client: req.app.chatbotEngine.telegramClient,
                   });
                 }
 
-                const messageProcessor = createCrossPlatformMessageProcessor({
+                return createCrossPlatformMessageProcessor({
                   facebook: facebookProcessor,
                   telegram: telegramProcessor,
                 });
-
-                return messageProcessor;
               }
             );
           },
@@ -163,15 +156,8 @@ export default {
               "messenger",
               async () => {
                 const leafSelector = await req.chatbotEngine.leafSelector;
-                const messageProcessor = await req.chatbotEngine
-                  .messageProcessor;
-
-                const messenger = await createMessenger({
-                  leafSelector,
-                  processor: messageProcessor,
-                });
-
-                return messenger;
+                const processor = await req.chatbotEngine.messageProcessor;
+                return createMessenger({ leafSelector, processor });
               }
             );
           },

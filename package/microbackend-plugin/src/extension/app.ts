@@ -11,10 +11,6 @@ import {
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
 import joi from "joi";
-import {
-  enableFacebookMessenger,
-  enableTelegramMessenger,
-} from "../feature_switch";
 import { PLUGIN_NAME } from "../utils";
 
 declare module "@microbackend/plugin-core" {
@@ -47,23 +43,22 @@ export default {
                       pageToken: joi.string().required(),
                       verifyToken: joi.string().required(),
                     }),
-                    enableFacebookMessenger: joi
+                    isEnabled: joi
                       .boolean()
                       .equal(true)
                       .error(
                         new Error(
                           [
-                            `enableFacebookMessenger is currently false, please`,
-                            `make sure the correct flag has been supplied to`,
-                            `the plugin options and the appropriate Facebook`,
-                            `messenger configuration is available in app.config`,
+                            `Facebook messenger is not enabled, please make`,
+                            `sure the appropriate Facebook messenger`,
+                            `configuration is available in app.config`,
                           ].join(" ")
                         )
                       ),
                   })
                   .validate({
-                    enableFacebookMessenger,
                     config: app.config.chatbotEngine.facebook.client,
+                    isEnabled: app.config.chatbotEngine.facebook.isEnabled,
                   });
 
                 if (validationError != null) {
@@ -98,23 +93,22 @@ export default {
                         .optional(),
                       defaultPaymentProviderToken: joi.string().optional(),
                     }),
-                    enableTelegramMessenger: joi
+                    isEnabled: joi
                       .boolean()
                       .equal(true)
                       .error(
                         new Error(
                           [
-                            `enableTelegramMessenger is currently false, please`,
-                            `make sure the correct flag has been supplied to`,
-                            `the plugin options and the appropriate Telegram`,
-                            `messenger configuration is available in app.config`,
+                            `Telegram messenger is not enabled, please make`,
+                            `sure the appropriate Telegram messenger`,
+                            `configuration is available in app.config`,
                           ].join(" ")
                         )
                       ),
                   })
                   .validate({
-                    enableTelegramMessenger,
                     config: app.config.chatbotEngine.telegram.client,
+                    isEnabled: app.config.chatbotEngine.telegram.isEnabled,
                   });
 
                 if (validationError != null) {

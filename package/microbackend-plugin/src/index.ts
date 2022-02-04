@@ -10,10 +10,7 @@ import {
 import "@microbackend/plugin-express";
 import { AsyncOrSync } from "ts-essentials";
 
-export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {
-  readonly enableFacebookMessenger?: boolean;
-  readonly enableTelegramMessenger?: boolean;
-}
+export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendPluginRegistry {
@@ -22,8 +19,8 @@ declare module "@microbackend/plugin-core" {
 
   interface IMicrobackendConfig {
     readonly chatbotEngine: Readonly<{
-      facebook: Readonly<{ client: FacebookConfig }>;
-      telegram: Readonly<{ client: TelegramConfig }>;
+      facebook: Readonly<{ client: FacebookConfig; isEnabled: boolean }>;
+      telegram: Readonly<{ client: TelegramConfig; isEnabled: boolean }>;
     }>;
   }
 }
