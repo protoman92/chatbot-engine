@@ -148,7 +148,7 @@ export async function mapSeries<T1, T2>(
   const mappedData: T2[] = [];
 
   for (let i = 0; i < data.length; i += 1) {
-    const mappedDatum = await fn(data[i], i);
+    const mappedDatum = await fn(data[i] as T1, i);
     mappedData.push(mappedDatum);
   }
 

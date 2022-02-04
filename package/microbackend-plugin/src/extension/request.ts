@@ -1,9 +1,14 @@
 import {
   BaseMessageProcessor,
+  catchAll,
+  catchError,
   createCrossPlatformMessageProcessor,
+  createDefaultErrorLeaf,
   createFacebookMessageProcessor,
+  createLeafSelector,
   createMessenger,
   createTelegramMessageProcessor,
+  createTransformChain,
   FacebookMessageProcessor,
   LeafSelector,
   Messenger,
@@ -20,60 +25,94 @@ import {
 
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendRequest {
-    readonly leafSelector: LeafSelector;
-    readonly messageProcessor: Promise<BaseMessageProcessor>;
-    readonly messenger: Promise<Messenger>;
+    readonly chatbot: Readonly<{
+      leafSelector: Promise<LeafSelector>;
+      messageProcessor: Promise<BaseMessageProcessor>;
+      messenger: Promise<Messenger>;
+    }>;
   }
 }
 
 export default {
-  get leafSelector(): IMicrobackendRequest["leafSelector"] {
-    throw new Error("Not implemented");
-  },
-  get messageProcessor(): IMicrobackendRequest["messageProcessor"] {
+  get chatbot(): IMicrobackendRequest["chatbot"] {
     return initializeOnce(
       (this as unknown) as IMicrobackendRequest,
-      "messageProcessor",
-      async (req) => {
-        let facebookProcessor: FacebookMessageProcessor | undefined;
-        let telegramProcessor: TelegramMessageProcessor | undefined;
+      "chatbot",
+      (req) => {
+        return {
+          get leafSelector(): IMicrobackendRequest["chatbot"]["leafSelector"] {
+            return initializeOnce(
+              (this as unknown) as IMicrobackendRequest["chatbot"],
+              "leafSelector",
+              async () => {
+                const leafSelector = await createTransformChain()
+                  .pipe(catchAll(() => {}))
+                  .pipe(
+                    catchError(
+                      await createDefaultErrorLeaf({
+                        formatErrorMessage: () => {
+                          return "";
+                        },
+                        trackError: () => {},
+                      })
+                    )
+                  )
+                  .transform(createLeafSelector({}));
 
-        if (enableFacebookMessenger) {
-          facebookProcessor = await createFacebookMessageProcessor({
-            client: req.app.facebookClient,
-            leafSelector: req.leafSelector,
-          });
-        }
+                return leafSelector;
+              }
+            );
+          },
+          get messageProcessor(): IMicrobackendRequest["chatbot"]["messageProcessor"] {
+            return initializeOnce(
+              (this as unknown) as IMicrobackendRequest["chatbot"],
+              "messageProcessor",
+              async () => {
+                const leafSelector = await req.chatbot.leafSelector;
+                let facebookProcessor: FacebookMessageProcessor | undefined;
+                let telegramProcessor: TelegramMessageProcessor | undefined;
 
-        if (enableTelegramMessenger) {
-          telegramProcessor = await createTelegramMessageProcessor({
-            client: req.app.telegramClient,
-            leafSelector: req.leafSelector,
-          });
-        }
+                if (enableFacebookMessenger) {
+                  facebookProcessor = await createFacebookMessageProcessor({
+                    leafSelector,
+                    client: req.app.chatbot.facebookClient,
+                  });
+                }
 
-        const messageProcessor = createCrossPlatformMessageProcessor({
-          facebook: facebookProcessor,
-          telegram: telegramProcessor,
-        });
+                if (enableTelegramMessenger) {
+                  telegramProcessor = await createTelegramMessageProcessor({
+                    leafSelector,
+                    client: req.app.chatbot.telegramClient,
+                  });
+                }
 
-        return messageProcessor;
-      }
-    );
-  },
-  get messenger(): IMicrobackendRequest["messenger"] {
-    return initializeOnce(
-      (this as unknown) as IMicrobackendRequest,
-      "messenger",
-      async (req) => {
-        const messageProcessor = await req.messageProcessor;
+                const messageProcessor = createCrossPlatformMessageProcessor({
+                  facebook: facebookProcessor,
+                  telegram: telegramProcessor,
+                });
 
-        const messenger = await createMessenger({
-          leafSelector: req.leafSelector,
-          processor: messageProcessor,
-        });
+                return messageProcessor;
+              }
+            );
+          },
+          get messenger(): IMicrobackendRequest["chatbot"]["messenger"] {
+            return initializeOnce(
+              (this as unknown) as IMicrobackendRequest["chatbot"],
+              "messenger",
+              async () => {
+                const leafSelector = await req.chatbot.leafSelector;
+                const messageProcessor = await req.chatbot.messageProcessor;
 
-        return messenger;
+                const messenger = await createMessenger({
+                  leafSelector,
+                  processor: messageProcessor,
+                });
+
+                return messenger;
+              }
+            );
+          },
+        };
       }
     );
   },

@@ -77,7 +77,7 @@ export function createContentSubject<T>(): ContentSubject<T> {
 
       await mapSeries(
         Object.entries(observerMap),
-        async ([id, obs]) => !!obs.complete && obs.complete()
+        async ([, obs]) => !!obs.complete && obs.complete()
       );
 
       isCompleted = true;
