@@ -21,7 +21,7 @@ import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
 export type TelegramGenericRequestInput = Readonly<
-  | { command: string; text?: string; type: "command" }
+  | { command: string; text?: string | undefined; type: "command" }
   | { coordinate: Coordinates; type: "location" }
   | {
       document: _TelegramRawRequest.DocumentDetails;
@@ -432,7 +432,7 @@ export namespace _TelegramRawResponse {
 export type TelegramRawResponse = Readonly<
   {
     headers?: Readonly<{ [x: string]: string }>;
-    parseMode?: _TelegramRawResponse.ParseMode;
+    parseMode?: _TelegramRawResponse.ParseMode | undefined;
   } & (
     | {
         action: "answerPreCheckoutQuery";
@@ -452,7 +452,7 @@ export type TelegramRawResponse = Readonly<
         body: _TelegramRawResponse.SendMessage &
           Readonly<{
             chat_id: string;
-            reply_markup?: _TelegramRawResponse.ReplyMarkup;
+            reply_markup?: _TelegramRawResponse.ReplyMarkup | undefined;
           }>;
       }
     | {
@@ -460,7 +460,7 @@ export type TelegramRawResponse = Readonly<
         body: _TelegramRawResponse.SendPhoto &
           Readonly<{
             chat_id: string;
-            reply_markup?: _TelegramRawResponse.ReplyMarkup;
+            reply_markup?: _TelegramRawResponse.ReplyMarkup | undefined;
           }>;
       }
   )

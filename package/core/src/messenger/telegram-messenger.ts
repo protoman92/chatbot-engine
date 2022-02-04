@@ -249,7 +249,7 @@ function createRawTelegramResponse({
     reply_markup: _TelegramRawResponse.ReplyMarkup | undefined,
     {
       fileData: document,
-      fileName: filename,
+      fileName,
       text: caption,
     }: _TelegramGenericResponseOutput.Content.Document
   ): _TelegramRawResponse.SendDocument {
@@ -263,7 +263,8 @@ function createRawTelegramResponse({
     }
 
     formData.append("chat_id", chat_id);
-    formData.append("document", document, { filename });
+    /** Force ! to avoid TS complaining about undefined vs optional */
+    formData.append("document", document, { filename: fileName! });
     return formData;
   }
 

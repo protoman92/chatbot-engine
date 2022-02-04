@@ -1,6 +1,6 @@
 export interface ErrorRequestInput {
   readonly error: Error;
-  readonly erroredLeaf?: string;
+  readonly erroredLeaf?: string | undefined;
   readonly type: "error";
 }
 

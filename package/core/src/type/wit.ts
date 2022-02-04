@@ -38,6 +38,6 @@ export interface WitClient {
 
 export interface WitRequestInput
   extends Pick<WitResponse, "entities" | "intents" | "traits"> {
-  readonly highestConfidence?: WitHighestConfidence;
+  readonly highestConfidence?: WitHighestConfidence | undefined;
   readonly type: "wit";
 }
