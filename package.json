@@ -28,14 +28,17 @@
     "@types/node": "^17.0.14"
   },
   "scripts": {
-    "build": "lerna run build --ignore javascript-helper --ignore microbackend",
+    "build": "lerna run build",
     "coveralls": "coveralls < coverage/lcov.info",
+    "gen": "lerna run gen",
     "lerna:bootstrap": "lerna bootstrap --force-local",
+    "microbackend:cli": "node package/microbackend/package/cli/bin/run",
     "preinstall": "git submodule update --init",
     "test": "jest"
   },
   "version": "1.0.0",
   "workspaces": [
+    "example/*",
     "package/bootstrap-express",
     "package/core",
     "package/microbackend-plugin-express",
@@ -43,10 +46,6 @@
     "package/javascript-helper/package/async_synchronizer",
     "package/javascript-helper/package/object",
     "package/javascript-helper/package/preconditions",
-    "package/microbackend/package/cli",
-    "package/microbackend/package/common_utils",
-    "package/microbackend/package/build_utils",
-    "package/microbackend/package/plugin_core",
-    "package/microbackend/package/plugin_express"
+    "package/microbackend/package/*"
   ]
 }

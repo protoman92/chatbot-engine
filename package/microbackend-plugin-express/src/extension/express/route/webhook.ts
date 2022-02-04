@@ -1,14 +1,14 @@
-import {
-  DEFAULT_FACEBOOK_WEBHOOK_CHALLENGE_ROUTE,
-  DEFAULT_WEBHOOK_HANDLER_ROUTE,
-  DEFAULT_WEBHOOK_TIMEOUT_MS
-} from "@/utils";
 import { AmbiguousPlatform } from "@haipham/chatbot-engine-core";
 import {
   handleExpressError,
-  MicrobackendRoute
+  MicrobackendRoute,
 } from "@microbackend/plugin-express";
 import express from "express";
+import {
+  DEFAULT_FACEBOOK_WEBHOOK_CHALLENGE_ROUTE,
+  DEFAULT_WEBHOOK_HANDLER_ROUTE,
+  DEFAULT_WEBHOOK_TIMEOUT_MS,
+} from "../../../utils";
 
 export default class WebhookRoute extends MicrobackendRoute {
   get handler(): MicrobackendRoute["handler"] {
