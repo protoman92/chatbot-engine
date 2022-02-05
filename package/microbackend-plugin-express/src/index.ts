@@ -13,6 +13,21 @@ import { AsyncOrSync } from "ts-essentials";
 
 export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 
+export interface IMicrobackendFacebookConfig {
+  readonly client: FacebookConfig;
+  readonly isEnabled: boolean;
+  /**
+   * This route handles the webhook challenge for Facebook messenger.
+   * If not provided, defaults to /webhook/facebook.
+   */
+  readonly webhookChallengeRoute?: string;
+}
+
+export interface IMicrobackendTelegramConfig {
+  readonly client: TelegramConfig;
+  readonly isEnabled: boolean;
+}
+
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendPluginRegistry {
     ["@microbackend/plugin-chatbot-engine"]: IPluginOptions;
@@ -20,16 +35,8 @@ declare module "@microbackend/plugin-core" {
 
   interface IMicrobackendConfig {
     readonly chatbotEngine: Readonly<{
-      facebook: Readonly<{
-        client: FacebookConfig;
-        isEnabled: boolean;
-        /**
-         * This route handles the webhook challenge for Facebook messenger.
-         * If not provided, defaults to /webhook/facebook.
-         */
-        webhookChallengeRoute?: string;
-      }>;
-      telegram: Readonly<{ client: TelegramConfig; isEnabled: boolean }>;
+      facebook: IMicrobackendFacebookConfig;
+      telegram: IMicrobackendTelegramConfig;
       /**
        * Since we must respond to POST calls from service providers with 200,
        * when errors happen, we will implicitly handle them with this callback.

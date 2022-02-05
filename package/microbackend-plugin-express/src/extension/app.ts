@@ -10,7 +10,8 @@ import {
 } from "@haipham/chatbot-engine-core";
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
-import joi from "joi";
+import joi, { ObjectSchema, StrictSchemaMap } from "joi";
+import { IMicrobackendFacebookConfig, IMicrobackendTelegramConfig } from "..";
 import { PLUGIN_NAME } from "../utils";
 
 declare module "@microbackend/plugin-core" {
@@ -37,29 +38,28 @@ export default {
               "facebookClient",
               () => {
                 const { error: validationError } = joi
-                  .object({
-                    config: joi.object<FacebookConfig, true>({
-                      apiVersion: joi.string().required(),
-                      pageToken: joi.string().required(),
-                      verifyToken: joi.string().required(),
-                    }),
+                  .object<IMicrobackendFacebookConfig, true>({
+                    client: joi.object<FacebookConfig, true>({
+                      apiVersion: joi.string().min(1).required(),
+                      pageToken: joi.string().min(1).required(),
+                      verifyToken: joi.string().min(1).required(),
+                    }) as ObjectSchema<StrictSchemaMap<FacebookConfig>>,
                     isEnabled: joi
                       .boolean()
+                      .required()
                       .equal(true)
                       .error(
                         new Error(
                           [
-                            `Facebook messenger is not enabled, please make`,
-                            `sure the appropriate Facebook messenger`,
-                            `configuration is available in app.config.`,
+                            `Facebook messenger is not enabled, please make sure`,
+                            `the appropriate Facebook messenger configuration`,
+                            `is available in app.config.`,
                           ].join(" ")
                         )
                       ),
+                    webhookChallengeRoute: joi.string().min(1),
                   })
-                  .validate({
-                    config: app.config.chatbotEngine.facebook.client,
-                    isEnabled: app.config.chatbotEngine.facebook.isEnabled,
-                  });
+                  .validate(app.config.chatbotEngine.facebook);
 
                 if (validationError != null) {
                   throw helpers.createError(validationError.message);
@@ -78,24 +78,25 @@ export default {
               "telegramClient",
               () => {
                 const { error: validationError } = joi
-                  .object({
-                    config: joi.object<TelegramConfig, true>({
-                      authToken: joi.string().required(),
+                  .object<IMicrobackendTelegramConfig, true>({
+                    client: joi.object<TelegramConfig, true>({
+                      authToken: joi.string().min(1).required(),
                       defaultParseMode: joi
                         .string()
                         .valid(
-                          Object.keys((): {
+                          ...Object.keys((): {
                             [K in _TelegramRawResponse.ParseMode]: boolean;
                           } => {
                             return { html: true, markdown: true };
                           })
                         )
                         .optional(),
-                      defaultPaymentProviderToken: joi.string().optional(),
-                    }),
+                      defaultPaymentProviderToken: joi.string().min(1),
+                    }) as ObjectSchema<StrictSchemaMap<TelegramConfig>>,
                     isEnabled: joi
                       .boolean()
                       .equal(true)
+                      .required()
                       .error(
                         new Error(
                           [
@@ -106,10 +107,7 @@ export default {
                         )
                       ),
                   })
-                  .validate({
-                    config: app.config.chatbotEngine.telegram.client,
-                    isEnabled: app.config.chatbotEngine.telegram.isEnabled,
-                  });
+                  .validate(app.config.chatbotEngine.telegram);
 
                 if (validationError != null) {
                   throw helpers.createError(validationError.message);

@@ -18,6 +18,8 @@ export default class WebhookRoute extends MicrobackendRoute {
     const webhookTimeout =
       chatbotConfig.webhookTimeoutMs || DEFAULT_WEBHOOK_TIMEOUT_MS;
 
+    router.use(express.json());
+
     if (chatbotConfig.facebook.isEnabled) {
       router.get(
         chatbotConfig.facebook.webhookChallengeRoute ||
@@ -39,7 +41,7 @@ export default class WebhookRoute extends MicrobackendRoute {
 
         try {
           await Promise.race([
-            messenger.processRawRequest(req.body),
+            messenger.processRawRequest({ rawRequest: req.body }),
             (async function () {
               await new Promise((resolve) => {
                 setTimeout(() => {

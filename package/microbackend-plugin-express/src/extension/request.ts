@@ -111,8 +111,9 @@ export default {
               "leafSelector",
               async () => {
                 const branch = await req.chatbotEngine.branches;
+                const leafSelector = createLeafSelector(branch);
 
-                const leafSelector = await createTransformChain()
+                return createTransformChain()
                   .pipe(catchAll(() => {}))
                   .pipe(
                     catchError(
@@ -124,9 +125,7 @@ export default {
                       })
                     )
                   )
-                  .transform(createLeafSelector(branch));
-
-                return leafSelector;
+                  .transform(leafSelector);
               }
             );
           },
