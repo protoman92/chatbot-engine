@@ -11,11 +11,13 @@ type TestLeafSelector = ReturnType<
 describe("Leaf enumeration", () => {
   it("Should enumerate leaves correctly", async () => {
     // Setup && When
-    const enumerated = enumerateLeaves({
+    const enumerated = await enumerateLeaves({
       branch1: {
         branch12: {
           leaf12: await createLeaf(() => ({
-            next: async () => NextResult.BREAK,
+            next: async () => {
+              return NextResult.BREAK;
+            },
           })),
           branch123: {},
         },
@@ -24,8 +26,10 @@ describe("Leaf enumeration", () => {
         branch21: {
           branch213: {},
           branch223: {
-            leaf223: await createLeaf(() => ({
-              next: async () => NextResult.BREAK,
+            leaf223: createLeaf(() => ({
+              next: async () => {
+                return NextResult.BREAK;
+              },
             })),
           },
         },

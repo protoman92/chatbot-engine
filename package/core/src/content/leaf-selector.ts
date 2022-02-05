@@ -7,6 +7,7 @@ import {
   Branch,
   ContentObservable,
   ContentObserver,
+  ContentSubscription,
   LeafEnumeration,
   LeafSelector,
 } from "../type";
@@ -16,29 +17,33 @@ import {
  * leaves.  Each enumerated leaf will be run through a pipeline to check whether
  * it contains valid content to deliver to the user.
  */
-export function enumerateLeaves(branch: Branch): readonly LeafEnumeration[] {
-  function enumerate(
+export async function enumerateLeaves(
+  branch: Branch
+): Promise<readonly LeafEnumeration[]> {
+  async function enumerate(
     branch: Branch,
     prefixPaths?: readonly string[]
-  ): readonly LeafEnumeration[] {
-    let inputs: LeafEnumeration[] = [];
+  ): Promise<readonly LeafEnumeration[]> {
+    let allLeaves: LeafEnumeration[] = [];
 
-    for (const [leafOrBranchID, leafOrBranch] of Object.entries(branch)) {
+    for (const [leafOrBranchID, leafOrBranchAsync] of Object.entries(branch)) {
       const prefixLeafPaths = [...(prefixPaths || []), leafOrBranchID];
+      const leafOrBranch = await Promise.resolve(leafOrBranchAsync);
 
       if (isType<AmbiguousLeaf>(leafOrBranch, "next", "subscribe")) {
-        inputs.push({
+        allLeaves.push({
           parentBranch: branch,
           currentLeaf: leafOrBranch,
           currentLeafName: leafOrBranchID,
           prefixLeafPaths,
         });
       } else {
-        inputs = inputs.concat(enumerate(leafOrBranch, prefixLeafPaths));
+        const newLeaves = await enumerate(leafOrBranch, prefixLeafPaths);
+        allLeaves = [...allLeaves, ...newLeaves];
       }
     }
 
-    return inputs;
+    return allLeaves;
   }
 
   return enumerate(branch);
@@ -51,12 +56,16 @@ export function enumerateLeaves(branch: Branch): readonly LeafEnumeration[] {
  */
 export function createLeafSelector(branch: Branch) {
   const _enumeratedLeaves = enumerateLeaves(branch);
-  let outputObservable: ContentObservable<AmbiguousGenericResponse>;
+  let outputObservable: Promise<ContentObservable<AmbiguousGenericResponse>>;
   let _subscribeCount = 0;
 
   const selector = {
-    enumerateLeaves: async () => _enumeratedLeaves,
-    subscribeCount: () => _subscribeCount,
+    enumerateLeaves: async (): typeof _enumeratedLeaves => {
+      return _enumeratedLeaves;
+    },
+    subscribeCount: (): typeof _subscribeCount => {
+      return _subscribeCount;
+    },
     /**
      * Trigger the production of content for a leaf, but does not guarantee
      * its success.
@@ -64,10 +73,12 @@ export function createLeafSelector(branch: Branch) {
     triggerLeaf: (
       { currentLeafName, currentLeaf }: LeafEnumeration,
       request: Parameters<LeafSelector["next"]>[0]
-    ) => {
+    ): ReturnType<typeof currentLeaf["next"]> => {
       return currentLeaf.next({ ...request, currentLeafName });
     },
-    next: async (request: Parameters<LeafSelector["next"]>[0]) => {
+    next: async (
+      request: Parameters<LeafSelector["next"]>[0]
+    ): Promise<NextResult> => {
       const enumeratedLeaves = await selector.enumerateLeaves();
 
       for (const enumLeaf of enumeratedLeaves) {
@@ -80,14 +91,16 @@ export function createLeafSelector(branch: Branch) {
 
       return NextResult.FALLTHROUGH;
     },
-    complete: async () => {
+    complete: async (): Promise<unknown> => {
       const enumeratedLeaves = await selector.enumerateLeaves();
 
       return mapSeries(enumeratedLeaves, async ({ currentLeaf }) => {
-        return !!currentLeaf.complete && currentLeaf.complete();
+        return currentLeaf.complete?.call(undefined);
       });
     },
-    subscribe: async (observer: ContentObserver<AmbiguousGenericResponse>) => {
+    subscribe: (
+      observer: ContentObserver<AmbiguousGenericResponse>
+    ): Promise<ContentSubscription> => {
       _subscribeCount += 1;
 
       if (selector.subscribeCount() > 1) {
@@ -98,16 +111,20 @@ export function createLeafSelector(branch: Branch) {
       }
 
       if (!outputObservable) {
-        const enumeratedLeaves = await selector.enumerateLeaves();
-
-        outputObservable = mergeObservables(
-          ...enumeratedLeaves.map(({ currentLeaf }) => {
-            return currentLeaf;
-          })
-        );
+        outputObservable = selector
+          .enumerateLeaves()
+          .then((enumeratedLeaves) => {
+            return mergeObservables(
+              ...enumeratedLeaves.map(({ currentLeaf }) => {
+                return currentLeaf;
+              })
+            );
+          });
       }
 
-      return outputObservable.subscribe(observer);
+      return outputObservable.then((observable) => {
+        return observable.subscribe(observer);
+      });
     },
   };
 
