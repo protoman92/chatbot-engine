@@ -51,7 +51,7 @@ export default {
                           [
                             `Facebook messenger is not enabled, please make`,
                             `sure the appropriate Facebook messenger`,
-                            `configuration is available in app.config`,
+                            `configuration is available in app.config.`,
                           ].join(" ")
                         )
                       ),
@@ -101,7 +101,7 @@ export default {
                           [
                             `Telegram messenger is not enabled, please make`,
                             `sure the appropriate Telegram messenger`,
-                            `configuration is available in app.config`,
+                            `configuration is available in app.config.`,
                           ].join(" ")
                         )
                       ),

@@ -58,7 +58,17 @@ export default {
                 const branches: Writable<Branch> = {};
 
                 for (const extKey in exts) {
-                  const BranchCreator = exts[extKey] as
+                  if (extKey === "default") {
+                    continue;
+                  }
+
+                  let ext = exts[extKey];
+
+                  if (ext.default != null) {
+                    ext = ext.default;
+                  }
+
+                  const BranchCreator = ext as
                     | IMicrobackendBranchCreator
                     | typeof MicrobackendBranch;
 
@@ -66,7 +76,7 @@ export default {
                     throw helpers.createError(
                       `branch creator ${extKey} must be a function producing a`,
                       "branch, or a class that extends MicrobackendBranch",
-                      `(imported from "@microbackend/plugin-chatbot-engine")`
+                      `(imported from "@microbackend/plugin-chatbot-engine").`
                     );
                   }
 

@@ -60,7 +60,7 @@ export function createLeafSelector(branch: Branch) {
   let _subscribeCount = 0;
 
   const selector = {
-    enumerateLeaves: async (): typeof _enumeratedLeaves => {
+    enumerateLeaves: async (): Promise<readonly LeafEnumeration[]> => {
       return _enumeratedLeaves;
     },
     subscribeCount: (): typeof _subscribeCount => {

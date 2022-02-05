@@ -28,7 +28,7 @@
     "@types/node": "^17.0.14"
   },
   "scripts": {
-    "build": "lerna run build",
+    "build": "lerna run build --ignore microbackend",
     "coveralls": "coveralls < coverage/lcov.info",
     "gen": "lerna run gen",
     "lerna:bootstrap": "lerna bootstrap --force-local",
@@ -46,6 +46,7 @@
     "package/javascript-helper/package/async_synchronizer",
     "package/javascript-helper/package/object",
     "package/javascript-helper/package/preconditions",
+    "package/microbackend",
     "package/microbackend/package/*"
   ]
 }
