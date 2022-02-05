@@ -1,0 +1,4 @@
+{
+  "exec": "node build/index.js",
+  "watch": ["build/**"]
+}

@@ -354,9 +354,9 @@ export namespace _FacebookRawResponse {
           payload: Readonly<{
             elements: readonly Readonly<{
               title: string;
-              subtitle?: string;
-              image_url?: string;
-              buttons?: readonly _FacebookRawResponse.Button[];
+              subtitle?: string | undefined;
+              image_url?: string | undefined;
+              buttons?: readonly _FacebookRawResponse.Button[] | undefined;
             }>[];
             template_type: "generic";
           }>;
@@ -368,9 +368,9 @@ export namespace _FacebookRawResponse {
       readonly message: Readonly<{
         attachment: Readonly<{
           payload: Readonly<{
-            buttons?: readonly _FacebookRawResponse.Button[];
+            buttons?: readonly _FacebookRawResponse.Button[] | undefined;
             elements: readonly Readonly<{
-              buttons?: readonly _FacebookRawResponse.Button[];
+              buttons?: readonly _FacebookRawResponse.Button[] | undefined;
               title: string;
               subtitle?: string | undefined;
             }>[];
@@ -425,7 +425,7 @@ export type FacebookRawResponse = Readonly<
   ) &
     (Omit<_FacebookRawResponse.Message, "message"> & {
       message: {
-        quick_replies?: readonly _FacebookRawResponse.QuickReply[];
+        quick_replies?: readonly _FacebookRawResponse.QuickReply[] | undefined;
       } & _FacebookRawResponse.Message["message"];
     })
 >;

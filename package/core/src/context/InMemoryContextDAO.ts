@@ -23,7 +23,7 @@ function createInMemoryContextDAO() {
       storage[targetPlatform][targetID] = {} as ChatbotContext;
     }
 
-    return storage[targetPlatform][targetID];
+    return storage[targetPlatform][targetID]!;
   };
 
   const baseDAO: ContextDAO = {

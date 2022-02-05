@@ -17,7 +17,7 @@ export interface ContextDAO {
     args: Readonly<{
       additionalContext: Partial<ChatbotContext>;
       /** If this is specified, we do not need to refetch it from database */
-      oldContext?: ChatbotContext;
+      oldContext?: ChatbotContext | undefined;
       targetID: string;
       targetPlatform: AmbiguousPlatform;
     }>

@@ -42,5 +42,9 @@
   "license": "MIT",
   "main": "src/index.ts",
   "name": "@haipham/chatbot-engine-core",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
   "version": "1.0.0"
 }

@@ -29,7 +29,7 @@ describe("Redis context DAO", () => {
     // Setup
     const context = { a: 1, b: 2 };
 
-    when(redis.get(anything(), anything())).thenCall((param1, param2) => {
+    when(redis.get(anything(), anything())).thenCall((...[, param2]) => {
       param2(null, JSON.stringify(context));
     });
 
@@ -73,7 +73,7 @@ describe("Redis context DAO", () => {
 
   it("Should clear context on reset call", async () => {
     // Setup
-    when(redis.del(anything(), anything())).thenCall((param1, param2) => {
+    when(redis.del(anything(), anything())).thenCall((...[, param2]) => {
       param2(null, true);
     });
 

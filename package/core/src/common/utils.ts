@@ -3,6 +3,7 @@ import {
   requireNotNull,
 } from "@haipham/javascript-helper-preconditions";
 import GraphemeSplitter from "grapheme-splitter";
+import { AsyncOrSync } from "ts-essentials";
 import {
   AmbiguousGenericResponse,
   AmbiguousPlatform,
@@ -143,12 +144,12 @@ export function joinObjects<T>(oldObject: T, newObject?: Partial<T>): T {
 /** Map a series of values to a series of promises, and maintain their order */
 export async function mapSeries<T1, T2>(
   data: T1[] | readonly T1[],
-  fn: (datum: T1, index: number) => Promise<T2>
+  fn: (datum: T1, index: number) => AsyncOrSync<T2>
 ): Promise<readonly T2[]> {
   const mappedData: T2[] = [];
 
   for (let i = 0; i < data.length; i += 1) {
-    const mappedDatum = await fn(data[i], i);
+    const mappedDatum = await Promise.resolve(fn(data[i] as T1, i));
     mappedData.push(mappedDatum);
   }
 
@@ -257,7 +258,7 @@ export async function transform<T>(
   let newTransformed = original;
 
   for (const func of fs) {
-    newTransformed = await func(newTransformed);
+    newTransformed = await Promise.resolve(func(newTransformed));
   }
 
   return newTransformed;

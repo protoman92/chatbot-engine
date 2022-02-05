@@ -4,7 +4,7 @@ import { AmbiguousGenericRequest, LeafTransformer } from "../type";
 export function catchAll(
   onCatchAll: (request: AmbiguousGenericRequest) => void
 ): LeafTransformer {
-  return async (leaf) => ({
+  return (leaf) => ({
     ...leaf,
     next: async (request) => {
       const result = await leaf.next(request);

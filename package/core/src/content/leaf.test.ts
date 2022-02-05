@@ -18,7 +18,7 @@ const targetPlatform = "facebook" as const;
 describe("Create leaf with observer", () => {
   it("Should add originalRequest to response", async () => {
     // Setup
-    const leaf = await createLeaf(async (observer) => ({
+    const leaf = await createLeaf((observer) => ({
       next: async ({ targetID }) => {
         await observer.next({
           targetID,
@@ -52,7 +52,7 @@ describe("Create leaf with observer", () => {
     const currentLeafName = "current_leaf_name";
     const error = new Error("some_error");
 
-    const leaf = await createLeaf(async () => ({
+    const leaf = await createLeaf(() => ({
       next: async () => {
         throw error;
       },

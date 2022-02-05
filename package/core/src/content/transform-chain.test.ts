@@ -111,7 +111,7 @@ describe("Transform chain", () => {
         )
       )
       .transform(
-        await createLeaf(async (observer) => ({
+        await createLeaf((observer) => ({
           next: async ({ targetID, targetPlatform, input }) => {
             const text = (input as { text: string }).text;
 

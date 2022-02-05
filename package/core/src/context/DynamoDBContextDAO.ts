@@ -176,9 +176,9 @@ export default function createDefaultDynamoDBContextDAO() {
     DYNAMO_DB_REGION = "",
     DYNAMO_DB_TABLE_NAME = "",
   } = requireAllTruthy({
-    DYNAMO_DB_ENDPOINT: process.env.DYNAMO_DB_ENDPOINT,
-    DYNAMO_DB_REGION: process.env.DYNAMO_DB_REGION,
-    DYNAMO_DB_TABLE_NAME: process.env.DYNAMO_DB_TABLE_NAME,
+    DYNAMO_DB_ENDPOINT: process.env["DYNAMO_DB_ENDPOINT"],
+    DYNAMO_DB_REGION: process.env["DYNAMO_DB_REGION"],
+    DYNAMO_DB_TABLE_NAME: process.env["DYNAMO_DB_TABLE_NAME"],
   });
 
   const ddb = new DynamoDB.DocumentClient({
