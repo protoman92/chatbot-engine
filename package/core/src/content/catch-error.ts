@@ -5,7 +5,7 @@ import { AmbiguousLeaf, LeafError, LeafTransformer } from "../type";
 
 /** If a leaf throws error while producing content, switch to fallback leaf */
 export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
-  return async (leaf) => ({
+  return (leaf) => ({
     next: async ({ currentLeafName, ...request }) => {
       try {
         return await leaf.next({ ...request, currentLeafName });

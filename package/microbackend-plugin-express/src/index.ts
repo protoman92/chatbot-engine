@@ -68,7 +68,7 @@ export interface IMicrobackendBranchArgs {
 }
 
 export interface IMicrobackendBranch {
-  readonly branch: () => AsyncOrSync<Branch>;
+  readonly branch: AsyncOrSync<Branch>;
 }
 
 export type IMicrobackendBranchCreator = (
@@ -78,5 +78,5 @@ export type IMicrobackendBranchCreator = (
 export abstract class MicrobackendBranch implements IMicrobackendBranch {
   constructor(protected args: IMicrobackendBranchArgs) {}
 
-  abstract branch(): AsyncOrSync<Branch>;
+  abstract get branch(): IMicrobackendBranch["branch"];
 }

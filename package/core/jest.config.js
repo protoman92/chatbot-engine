@@ -2,8 +2,8 @@ const path = require("path");
 
 module.exports = {
   collectCoverage: false,
-  roots: ["<rootDir>"],
   moduleNameMapper: { "^lodash-es$": "lodash" },
+  roots: ["<rootDir>"],
   testMatch: [path.join("<rootDir>", "**", "*.(test|spec).ts")],
   testEnvironment: "node",
   transform: {

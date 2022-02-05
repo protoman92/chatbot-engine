@@ -484,7 +484,7 @@ describe("Save Telegram messages", () => {
 
     const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
     when(contextDAO.getContext(anything())).thenResolve({});
-    when(middlewareArgs.isEnabled()).thenResolve(true);
+    when(middlewareArgs.isEnabled()).thenReturn(true);
     when(middlewareArgs.saveMessages(anything())).thenResolve(undefined);
     when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
     when(tlMessenger.sendResponse(anything())).thenResolve([
@@ -539,7 +539,7 @@ describe("Save Telegram messages", () => {
 
   it("Should not trigger if not enabled", async () => {
     // Setup
-    when(middlewareArgs.isEnabled()).thenResolve(false);
+    when(middlewareArgs.isEnabled()).thenReturn(false);
     when(tlMessenger.receiveRequest(anything())).thenResolve(undefined);
     when(tlMessenger.sendResponse(anything())).thenResolve([
       {} as _TelegramRawRequest.Message["message"],

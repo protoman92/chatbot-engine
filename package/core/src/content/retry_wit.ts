@@ -38,7 +38,7 @@ export function getHighestConfidence({
  * engine and injecting entities into leaf input.
  */
 export function retryWithWit(comm: WitClient): LeafTransformer {
-  return async (leaf) => ({
+  return (leaf) => ({
     ...leaf,
     next: async (request) => {
       let result = await leaf.next(request);

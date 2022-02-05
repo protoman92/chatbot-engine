@@ -34,7 +34,7 @@
     "lerna:bootstrap": "lerna bootstrap --force-local",
     "microbackend:cli": "node package/microbackend/package/cli/bin/run",
     "preinstall": "git submodule update --init",
-    "test": "jest"
+    "test": "lerna run test"
   },
   "version": "1.0.0",
   "workspaces": [

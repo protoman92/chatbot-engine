@@ -11,6 +11,7 @@ import {
   NextContentObserver,
   TelegramLeafObserver,
 } from "../type";
+import { AsyncOrSync } from "ts-essentials";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -21,7 +22,7 @@ export async function createLeaf(
     observer: NextContentObserver<
       Omit<AmbiguousGenericResponse, "originalRequest">
     >
-  ) => Promise<Omit<AmbiguousLeaf, "subscribe">>
+  ) => AsyncOrSync<Omit<AmbiguousLeaf, "subscribe">>
 ): Promise<AmbiguousLeaf> {
   let originalRequests: Record<
     ReturnType<typeof generateUniqueTargetKey>,
@@ -40,7 +41,7 @@ export async function createLeaf(
     },
   };
 
-  const baseLeaf = await fn(subject);
+  const baseLeaf = await Promise.resolve(fn(subject));
 
   return {
     next: (request) => {
@@ -67,7 +68,7 @@ export function createDefaultErrorLeaf({
   formatErrorMessage,
   trackError,
 }: ErrorLeafConfig): Promise<AmbiguousLeaf> {
-  return createLeaf(async (observer) => ({
+  return createLeaf((observer) => ({
     next: async ({ input, targetID, targetPlatform }) => {
       if (input.type !== "error") return NextResult.FALLTHROUGH;
       const { error, erroredLeaf } = input;
@@ -114,8 +115,8 @@ export async function createLeafObserver({
       }
     },
     complete: async () => {
-      !!facebook && !!facebook.complete && (await facebook.complete());
-      !!telegram && !!telegram.complete && (await telegram.complete());
+      await facebook?.complete?.call(undefined);
+      await telegram?.complete?.call(undefined);
     },
   };
 }

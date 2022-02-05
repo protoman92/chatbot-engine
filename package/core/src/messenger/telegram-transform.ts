@@ -1,5 +1,6 @@
 import { toArray } from "@haipham/javascript-helper-array";
 import { isType } from "@haipham/javascript-helper-preconditions";
+import { AsyncOrSync } from "ts-essentials";
 import { ChatbotContext } from "..";
 import {
   AmbiguousGenericRequest,
@@ -21,7 +22,7 @@ export function saveTelegramMessages({
   saveMessages,
 }: Readonly<{
   contextDAO: ContextDAO;
-  isEnabled: () => Promise<boolean>;
+  isEnabled: () => AsyncOrSync<boolean>;
   saveMessages: (
     args: Readonly<{
       currentContext: ChatbotContext;
@@ -30,7 +31,7 @@ export function saveTelegramMessages({
         | _TelegramRawRequest.SuccessfulPayment["message"]
       )[];
     }>
-  ) => Promise<void>;
+  ) => AsyncOrSync<void>;
 }>): TelegramMessageProcessorMiddleware {
   function extractRawRequestMessage(
     rawRequest: TelegramRawRequest
@@ -50,12 +51,12 @@ export function saveTelegramMessages({
   }
 
   return () => {
-    return async (processor) => {
+    return (processor) => {
       return {
         ...processor,
         receiveRequest: async ({ genericRequest, ...args }) => {
           if (
-            !(await isEnabled()) ||
+            !(await Promise.resolve(isEnabled())) ||
             genericRequest.type !== "message_trigger"
           ) {
             return processor.receiveRequest({ ...args, genericRequest });
@@ -70,10 +71,12 @@ export function saveTelegramMessages({
             ...(rawRequestMessages == null
               ? []
               : [
-                  saveMessages({
-                    rawRequestMessages: toArray(rawRequestMessages),
-                    currentContext: genericRequest.currentContext,
-                  }),
+                  Promise.resolve(
+                    saveMessages({
+                      rawRequestMessages: toArray(rawRequestMessages),
+                      currentContext: genericRequest.currentContext,
+                    })
+                  ),
                 ]),
           ]);
 
@@ -85,7 +88,7 @@ export function saveTelegramMessages({
             ...args,
           });
 
-          if (await isEnabled()) {
+          if (await Promise.resolve(isEnabled())) {
             const currentContext = await contextDAO.getContext({
               targetID: genericResponse.targetID,
               targetPlatform: genericResponse.targetPlatform,
@@ -104,7 +107,9 @@ export function saveTelegramMessages({
               rawRequestMessages.push(sendResult);
             }
 
-            await saveMessages({ currentContext, rawRequestMessages });
+            await Promise.resolve(
+              saveMessages({ currentContext, rawRequestMessages })
+            );
           }
 
           return sendResults;
@@ -127,10 +132,10 @@ export function saveTelegramUser({
    */
   isEnabled: (
     args: Pick<AmbiguousGenericRequest, "currentContext">
-  ) => Promise<boolean>;
+  ) => AsyncOrSync<boolean>;
   saveUser: (
     user: TelegramUser
-  ) => Promise<
+  ) => AsyncOrSync<
     Readonly<{ readonly additionalContext?: Partial<ChatbotContext> }>
   >;
 }>): TelegramMessageProcessorMiddleware {
@@ -149,8 +154,10 @@ export function saveTelegramUser({
           telegramUser,
         } = genericRequest;
 
-        if (await isEnabled({ currentContext })) {
-          const { additionalContext = {} } = await saveUser(telegramUser);
+        if (await Promise.resolve(isEnabled({ currentContext }))) {
+          const { additionalContext = {} } = await Promise.resolve(
+            saveUser(telegramUser)
+          );
 
           const { newContext } = await contextDAO.appendContext({
             additionalContext,

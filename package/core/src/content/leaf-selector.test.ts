@@ -14,7 +14,7 @@ describe("Leaf enumeration", () => {
     const enumerated = enumerateLeaves({
       branch1: {
         branch12: {
-          leaf12: await createLeaf(async () => ({
+          leaf12: await createLeaf(() => ({
             next: async () => NextResult.BREAK,
           })),
           branch123: {},
@@ -24,7 +24,7 @@ describe("Leaf enumeration", () => {
         branch21: {
           branch213: {},
           branch223: {
-            leaf223: await createLeaf(async () => ({
+            leaf223: await createLeaf(() => ({
               next: async () => NextResult.BREAK,
             })),
           },
@@ -58,7 +58,7 @@ describe("Leaf selector", () => {
 
   beforeEach(async () => {
     currentLeaf = spy<AmbiguousLeaf>(
-      await createLeaf(async () => ({
+      await createLeaf(() => ({
         checkTextConditions: () => {
           return Promise.reject("");
         },

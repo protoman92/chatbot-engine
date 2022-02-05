@@ -1,3 +1,4 @@
+import { AsyncOrSync } from "ts-essentials";
 import { AmbiguousPlatform } from ".";
 import { Branch } from "./branch";
 import { ErrorRequestInput } from "./error";
@@ -20,7 +21,9 @@ export interface LeafEnumeration {
  * Compose functions for leaves that support composition of higher-order
  * functions.
  */
-export type LeafTransformer = (leaf: AmbiguousLeaf) => Promise<AmbiguousLeaf>;
+export type LeafTransformer = (
+  leaf: AmbiguousLeaf
+) => AsyncOrSync<AmbiguousLeaf>;
 
 /**
  * Represents a chain of transformer higher-order functions that transforms a

@@ -1,3 +1,4 @@
+import { AsyncOrSync } from "ts-essentials";
 import { mapSeries } from "../common/utils";
 import {
   ContentObservable,
@@ -18,16 +19,19 @@ export enum NextResult {
 
 /** Create a subscription with custom unsubscribe logic */
 export function createSubscription(
-  unsub: () => Promise<unknown>
+  unsub: () => AsyncOrSync<unknown>
 ): ContentSubscription {
   let isUnsubscribed = false;
 
   return {
-    unsubscribe: async () => {
-      if (!isUnsubscribed) {
-        await unsub();
-        isUnsubscribed = true;
+    /** Synchronize access to isUnsubscribed */
+    unsubscribe: () => {
+      if (isUnsubscribed) {
+        return Promise.resolve(undefined);
       }
+
+      isUnsubscribed = true;
+      return Promise.resolve(unsub());
     },
   };
 }
@@ -51,18 +55,22 @@ export function createContentSubject<T>(): ContentSubject<T> {
   let isCompleted = false;
 
   return {
-    subscribe: async (observer) => {
+    subscribe: (observer) => {
       const observerID = currentID;
       currentID += 1;
       observerMap[observerID] = observer;
 
-      return createSubscription(async () => {
-        delete observerMap[observerID];
-        return !!observer.complete && observer.complete();
-      });
+      return Promise.resolve(
+        createSubscription(async () => {
+          delete observerMap[observerID];
+          return observer.complete?.call(undefined);
+        })
+      );
     },
-    next: async (contents) => {
-      if (isCompleted) return NextResult.FALLTHROUGH;
+    next: (contents) => {
+      if (isCompleted) {
+        return Promise.resolve(NextResult.FALLTHROUGH);
+      }
 
       return mapSeries(Object.entries(observerMap), ([, obs]) => {
         return obs.next(contents);
@@ -72,15 +80,16 @@ export function createContentSubject<T>(): ContentSubject<T> {
           : NextResult.FALLTHROUGH
       );
     },
-    complete: async () => {
-      if (isCompleted) return;
-
-      await mapSeries(
-        Object.entries(observerMap),
-        async ([, obs]) => !!obs.complete && obs.complete()
-      );
+    complete: () => {
+      if (isCompleted) {
+        return Promise.resolve(undefined);
+      }
 
       isCompleted = true;
+
+      return mapSeries(Object.values(observerMap), (obs) => {
+        return obs.complete?.call(undefined);
+      });
     },
   };
 }

@@ -79,13 +79,12 @@ export default {
                     branch = await Promise.resolve(
                       new ((BranchCreator as unknown) as new (
                         args: IMicrobackendBranchArgs
-                      ) => IMicrobackendBranch)(creatorArgs).branch()
+                      ) => IMicrobackendBranch)(creatorArgs).branch
                     );
                   } else {
                     branch = await Promise.resolve(
-                      (BranchCreator as IMicrobackendBranchCreator)(
-                        creatorArgs
-                      ).branch()
+                      (BranchCreator as IMicrobackendBranchCreator)(creatorArgs)
+                        .branch
                     );
                   }
 

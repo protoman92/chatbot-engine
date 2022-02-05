@@ -1,3 +1,5 @@
+import { AsyncOrSync } from "ts-essentials";
+
 export type KV<V> = Readonly<{ [K: string]: V }>;
 
 export interface Coordinates {
@@ -5,4 +7,4 @@ export interface Coordinates {
   readonly longitude: number;
 }
 
-export type Transformer<T> = (original: T) => Promise<T>;
+export type Transformer<T> = (original: T) => AsyncOrSync<T>;

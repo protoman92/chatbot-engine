@@ -43,7 +43,8 @@
   "main": "src/index.ts",
   "name": "@haipham/chatbot-engine-core",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest"
   },
   "version": "1.0.0"
 }
