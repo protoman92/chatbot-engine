@@ -16,6 +16,7 @@ export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 
 export interface IMicrobackendFacebookConfig {
   readonly client: FacebookConfig;
+  /** If true, create and register the Facebook messenger. */
   readonly isEnabled: boolean;
   /**
    * This route handles the webhook challenge for Facebook messenger.
@@ -26,6 +27,7 @@ export interface IMicrobackendFacebookConfig {
 
 export interface IMicrobackendTelegramConfig {
   readonly client: TelegramConfig;
+  /** If true, create and register the Telegram messenger. */
   readonly isEnabled: boolean;
 }
 
