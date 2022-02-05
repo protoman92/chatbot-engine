@@ -1,5 +1,6 @@
 import {
   Branch,
+  ErrorLeafConfig,
   FacebookConfig,
   TelegramConfig,
 } from "@haipham/chatbot-engine-core";
@@ -55,6 +56,14 @@ declare module "@microbackend/plugin-core" {
           error: Error
         ) => AsyncOrSync<void>;
       }>;
+      /**
+       * When an error happens during leaf operations, we might want to catch
+       * it and show an error message to the user (e.g. something went wrong)
+       * instead of escaping silently.
+       * If this function is not provided, the original error message will be
+       * shown to the user.
+       */
+      formatLeafError: ErrorLeafConfig["formatErrorMessage"];
       /**
        * This route handles the webhook payload from all service providers. The
        * actual platform-specific logic happens at the messenger level. It

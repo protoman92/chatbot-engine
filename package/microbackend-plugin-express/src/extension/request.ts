@@ -1,7 +1,6 @@
 import {
   BaseMessageProcessor,
   Branch,
-  catchAll,
   catchError,
   createCrossPlatformMessageProcessor,
   createDefaultErrorLeaf,
@@ -125,13 +124,11 @@ export default {
                 const leafSelector = createLeafSelector(branch);
 
                 return createTransformChain()
-                  .pipe(catchAll(() => {}))
                   .pipe(
                     catchError(
                       await createDefaultErrorLeaf({
-                        formatErrorMessage: () => {
-                          return "";
-                        },
+                        formatErrorMessage:
+                          req.app.config.chatbotEngine.formatLeafError,
                         trackError: (args) => {
                           req.chatbotEngine.callbacks.onError?.call(
                             undefined,
