@@ -25,6 +25,7 @@ import {
   IMicrobackendBranch,
   IMicrobackendBranchArgs,
   IMicrobackendBranchCreator,
+  LeafHandlingError,
   MicrobackendBranch,
 } from "..";
 import { PLUGIN_NAME } from "../utils";
@@ -33,6 +34,7 @@ declare module "@microbackend/plugin-core" {
   interface IMicrobackendRequest {
     readonly chatbotEngine: Readonly<{
       branches: Promise<Branch>;
+      callbacks: IMicrobackendConfig["chatbotEngine"]["callbacks"];
       leafSelector: Promise<LeafSelector>;
       messageProcessor: Promise<BaseMessageProcessor>;
       messenger: Promise<Messenger>;
@@ -105,6 +107,15 @@ export default {
               }
             );
           },
+          get callbacks(): IMicrobackendRequest["chatbotEngine"]["callbacks"] {
+            return initializeOnce(
+              (this as unknown) as IMicrobackendRequest["chatbotEngine"],
+              "callbacks",
+              () => {
+                return req.app.config.chatbotEngine.callbacks;
+              }
+            );
+          },
           get leafSelector(): IMicrobackendRequest["chatbotEngine"]["leafSelector"] {
             return initializeOnce(
               (this as unknown) as IMicrobackendRequest["chatbotEngine"],
@@ -121,7 +132,13 @@ export default {
                         formatErrorMessage: () => {
                           return "";
                         },
-                        trackError: () => {},
+                        trackError: (args) => {
+                          req.chatbotEngine.callbacks.onError?.call(
+                            undefined,
+                            req,
+                            new LeafHandlingError(args)
+                          );
+                        },
                       })
                     )
                   )

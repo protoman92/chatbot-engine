@@ -8,6 +8,7 @@ import {
   DEFAULT_FACEBOOK_WEBHOOK_CHALLENGE_ROUTE,
   DEFAULT_WEBHOOK_HANDLER_ROUTE,
   DEFAULT_WEBHOOK_TIMEOUT_MS,
+  WebhookHandlingError,
 } from "../../../utils";
 
 export default class WebhookRoute extends MicrobackendRoute {
@@ -53,11 +54,15 @@ export default class WebhookRoute extends MicrobackendRoute {
             })(),
           ]);
         } catch (error) {
-          await chatbotConfig.onWebhookError?.call(undefined, {
-            error,
-            payload: req.body,
-            platform: req.params["platform"] as AmbiguousPlatform,
-          });
+          await req.chatbotEngine.callbacks.onError?.call(
+            undefined,
+            req,
+            new WebhookHandlingError(
+              error,
+              req.body,
+              req.params["platform"] as AmbiguousPlatform
+            )
+          );
         }
 
         /** Must always respond with 200 for service provider */

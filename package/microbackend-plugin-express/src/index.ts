@@ -1,5 +1,4 @@
 import {
-  AmbiguousPlatform,
   Branch,
   FacebookConfig,
   TelegramConfig,
@@ -10,6 +9,7 @@ import {
 } from "@microbackend/plugin-core";
 import "@microbackend/plugin-express";
 import { AsyncOrSync } from "ts-essentials";
+export { LeafHandlingError, WebhookHandlingError } from "./utils";
 
 export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 
@@ -37,17 +37,24 @@ declare module "@microbackend/plugin-core" {
     readonly chatbotEngine: Readonly<{
       facebook: IMicrobackendFacebookConfig;
       telegram: IMicrobackendTelegramConfig;
-      /**
-       * Since we must respond to POST calls from service providers with 200,
-       * when errors happen, we will implicitly handle them with this callback.
-       */
-      onWebhookError?: (
-        args: Readonly<{
-          error: Error;
-          payload: unknown;
-          platform: AmbiguousPlatform;
-        }>
-      ) => AsyncOrSync<void>;
+      callbacks: Readonly<{
+        /**
+         * This callback will be invoked in 2 cases:
+         * - When there is an error thrown by the leaf that is handling the
+         *   webhook payload.
+         * - When there is an error with the process of handling a webhook
+         *   payload (e.g. during parsing request, sending response etc) that
+         *   is not related to leaf operations. Since we must respond to POST
+         *   calls from service providers with 200, when errors happen, we will
+         *   implicitly handle them with this callback.
+         * The error details will differ in each situation, in terms of
+         * granularity.
+         */
+        onError?: (
+          req: IMicrobackendRequest,
+          error: Error
+        ) => AsyncOrSync<void>;
+      }>;
       /**
        * This route handles the webhook payload from all service providers. The
        * actual platform-specific logic happens at the messenger level. It

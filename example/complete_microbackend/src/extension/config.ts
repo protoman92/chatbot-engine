@@ -16,8 +16,10 @@ export default class CommonConfig extends MicrobackendConfig {
           client: { authToken: process.env["TELEGRAM_AUTH_TOKEN"] },
           isEnabled: true,
         },
-        onWebhookError: ({ error }) => {
-          console.error("Webhook error:", error);
+        callbacks: {
+          onError: (...[, error]) => {
+            console.error("Error:", error);
+          },
         },
       },
     };
