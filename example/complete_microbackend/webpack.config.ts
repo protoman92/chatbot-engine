@@ -2,7 +2,7 @@ import createMicrobackendConfig, {
   mergeConfigs,
 } from "@microbackend/plugin-core/build/webpack.build";
 import path from "path";
-import { Configuration } from "webpack"
+import { Configuration } from "webpack";
 import nodeExternals from "webpack-node-externals";
 import "./src/interface/microbackend";
 
@@ -10,7 +10,7 @@ const config = (async (): Promise<Configuration> => {
   const coreConfig = await createMicrobackendConfig({
     pluginOptions: {
       "@microbackend/plugin-env-vars": {
-        requiredEnvVariables: ["NODE_ENV"],
+        requiredEnvVariables: ["NODE_ENV", "TELEGRAM_AUTH_TOKEN"],
       },
     },
   });
