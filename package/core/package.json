@@ -14,7 +14,6 @@
   "devDependencies": {
     "@types/formidable": "1.0.31",
     "@types/lodash": "^4.14.178",
-    "@types/redis": "2.8.18",
     "bignumber.js": "8.1.1",
     "coveralls": "3.1.0",
     "del": "5.1.0",
@@ -23,7 +22,6 @@
     "grapheme-splitter": "1.0.4",
     "nodemon": "2.0.4",
     "prettier": "2.0.5",
-    "redis": "3.1.1",
     "snyk": "1.370.1",
     "source-map-support": "0.5.19",
     "ts-essentials": "9.1.2",
@@ -34,9 +32,6 @@
   "license": "MIT",
   "main": "src/index.ts",
   "name": "@haipham/chatbot-engine-core",
-  "peerDependencies": {
-    "redis": "3.1.1"
-  },
   "scripts": {
     "build": "tsc",
     "test": "jest"

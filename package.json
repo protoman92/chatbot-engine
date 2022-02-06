@@ -39,13 +39,14 @@
     "lerna:bootstrap": "lerna bootstrap --force-local",
     "microbackend:cli": "node package/microbackend/package/cli/bin/run",
     "preinstall": "git submodule update --init",
-    "test": "yarn --cwd package/core test && yarn --cwd package/context-dao-dynamodb test"
+    "test": "yarn --cwd package/core test && yarn --cwd package/context-dao-dynamodb test && yarn --cwd package/context-dao-redis test"
   },
   "version": "1.0.0",
   "workspaces": [
     "example/*",
     "package/bootstrap-express",
     "package/context-dao-dynamodb",
+    "package/context-dao-redis",
     "package/core",
     "package/microbackend-plugin-express",
     "package/javascript-helper/package/array",

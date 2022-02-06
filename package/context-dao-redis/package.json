@@ -1,0 +1,24 @@
+{
+  "author": "Hai Pham <swiften.svc@gmail.com>",
+  "dependencies": {
+    "@haipham/chatbot-engine-core": "^1.0.0",
+    "@haipham/javascript-helper-async-synchronizer": "^1.0.0",
+    "@haipham/javascript-helper-preconditions": "^1.0.0"
+  },
+  "description": "chatbot-engine context DAO with Redis",
+  "devDependencies": {
+    "@types/redis": "^2.8.18",
+    "redis": "^3.1.1"
+  },
+  "license": "MIT",
+  "main": "src/index.ts",
+  "name": "@haipham/chatbot-engine-context-dao-redis",
+  "peerDependencies": {
+    "redis": "^3.1.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "version": "1.0.0"
+}

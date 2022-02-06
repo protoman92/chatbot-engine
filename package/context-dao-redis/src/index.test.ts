@@ -1,8 +1,7 @@
+import { ContextDAO, joinObjects } from "@haipham/chatbot-engine-core";
 import { RedisClient } from "redis";
 import { anything, instance, spy, verify, when } from "ts-mockito";
-import { joinObjects } from "../common/utils";
-import { ContextDAO } from "../type";
-import { createRedisContextDAO } from "./RedisContextDAO";
+import { createRedisContextDAO } from ".";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
