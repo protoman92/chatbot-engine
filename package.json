@@ -30,6 +30,7 @@
   },
   "resolutions": {
     "@types/node": "^17.0.14",
+    "axios": "^0.25.0",
     "jest": "26.4.2"
   },
   "scripts": {
