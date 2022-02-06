@@ -1,4 +1,5 @@
 import {
+  ContextDAO,
   createFacebookClient,
   createTelegramClient,
   defaultAxiosClient,
@@ -17,6 +18,7 @@ import { PLUGIN_NAME } from "../utils";
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendApp {
     readonly chatbotEngine: Readonly<{
+      readonly contextDAO: ContextDAO;
       readonly facebookClient: FacebookClient;
       readonly telegramClient: TelegramClient;
     }>;
@@ -32,6 +34,9 @@ export default {
         const helpers = createPluginHelpers(PLUGIN_NAME);
 
         return {
+          get contextDAO(): IMicrobackendApp["chatbotEngine"]["contextDAO"] {
+            return app.config.chatbotEngine.contextDAO;
+          },
           get facebookClient(): IMicrobackendApp["chatbotEngine"]["facebookClient"] {
             return initializeOnce(
               this as IMicrobackendApp["chatbotEngine"],
@@ -57,6 +62,7 @@ export default {
                           ].join(" ")
                         )
                       ),
+                    middlewares: joi.array().required(),
                     webhookChallengeRoute: joi.string().min(1),
                   })
                   .validate(app.config.chatbotEngine.facebook);
@@ -106,6 +112,7 @@ export default {
                           ].join(" ")
                         )
                       ),
+                    middlewares: joi.array().required(),
                   })
                   .validate(app.config.chatbotEngine.telegram);
 

@@ -153,17 +153,23 @@ export default {
                 let telegramProcessor: TelegramMessageProcessor | undefined;
 
                 if (req.app.config.chatbotEngine.facebook.isEnabled) {
-                  facebookProcessor = await createFacebookMessageProcessor({
-                    leafSelector,
-                    client: req.app.chatbotEngine.facebookClient,
-                  });
+                  facebookProcessor = await createFacebookMessageProcessor(
+                    {
+                      leafSelector,
+                      client: req.app.chatbotEngine.facebookClient,
+                    },
+                    ...req.app.config.chatbotEngine.facebook.middlewares
+                  );
                 }
 
                 if (req.app.config.chatbotEngine.telegram.isEnabled) {
-                  telegramProcessor = await createTelegramMessageProcessor({
-                    leafSelector,
-                    client: req.app.chatbotEngine.telegramClient,
-                  });
+                  telegramProcessor = await createTelegramMessageProcessor(
+                    {
+                      leafSelector,
+                      client: req.app.chatbotEngine.telegramClient,
+                    },
+                    ...req.app.config.chatbotEngine.telegram.middlewares
+                  );
                 }
 
                 return createCrossPlatformMessageProcessor({

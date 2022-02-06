@@ -1,8 +1,12 @@
 import {
   Branch,
+  ContextDAO,
   ErrorLeafConfig,
   FacebookConfig,
+  FacebookMessageProcessorMiddleware,
+  MessageProcessorMiddleware,
   TelegramConfig,
+  TelegramMessageProcessorMiddleware,
 } from "@haipham/chatbot-engine-core";
 import {
   IMicrobackendPluginDefaultOptions,
@@ -16,10 +20,15 @@ export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 
 export interface IMicrobackendFacebookConfig {
   readonly client: FacebookConfig;
-  /** If true, create and register the Facebook messenger. */
+  /** If true, create and register the Facebook message processor. */
   readonly isEnabled: boolean;
+  /** Middlewares to apply to the Facebook message processor. */
+  readonly middlewares: (
+    | MessageProcessorMiddleware
+    | FacebookMessageProcessorMiddleware
+  )[];
   /**
-   * This route handles the webhook challenge for Facebook messenger.
+   * This route handles the webhook challenge for Facebook message processor.
    * If not provided, defaults to /webhook/facebook.
    */
   readonly webhookChallengeRoute?: string;
@@ -27,8 +36,13 @@ export interface IMicrobackendFacebookConfig {
 
 export interface IMicrobackendTelegramConfig {
   readonly client: TelegramConfig;
-  /** If true, create and register the Telegram messenger. */
+  /** If true, create and register the Telegram message processor. */
   readonly isEnabled: boolean;
+  /** Middlewares to apply to the Telegram message processor. */
+  readonly middlewares: (
+    | MessageProcessorMiddleware
+    | TelegramMessageProcessorMiddleware
+  )[];
 }
 
 declare module "@microbackend/plugin-core" {
@@ -59,6 +73,11 @@ declare module "@microbackend/plugin-core" {
         ) => AsyncOrSync<void>;
       }>;
       /**
+       * The context DAO instance to use for all message processors.
+       * If not provided, defaults to the in-memory context DAO.
+       */
+      contextDAO: ContextDAO;
+      /**
        * When an error happens during leaf operations, we might want to catch
        * it and show an error message to the user (e.g. something went wrong)
        * instead of escaping silently.
@@ -77,7 +96,7 @@ declare module "@microbackend/plugin-core" {
       webhookHandlerRoute?: string;
       /**
        * If we don't specify a timeout for Telegram, the webhook will be
-       * repeatedly called again.
+       * repeatedly called again. If not provided, defaults to 20 seconds.
        */
       webhookTimeoutMs?: number;
     }>;
