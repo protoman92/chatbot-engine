@@ -1,4 +1,4 @@
-import { _getContextUpdateArgs } from "./DynamoDBContextDAO";
+import { _getContextUpdateArgs } from ".";
 
 describe("DynamoDB context DAO", () => {
   it("Getting context update arguments should work correctly", () => {

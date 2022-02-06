@@ -1,8 +1,13 @@
+import {
+  AmbiguousPlatform,
+  ChatbotContext,
+  ContextDAO,
+  isObject,
+  joinObjects,
+} from "@haipham/chatbot-engine-core";
 import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 import { DynamoDB } from "aws-sdk";
-import { ChatbotContext } from "..";
-import { isObject, joinObjects } from "../common/utils";
-import { AmbiguousPlatform, ContextDAO } from "../type";
+import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
 
 interface CreateDynamoDBContextDAOConfig {
   readonly dynamoDB: DynamoDB.DocumentClient;
@@ -123,6 +128,8 @@ export function createDynamoDBContextDAO({
     return { [KEY_TARGET_ID]: targetID, [KEY_TARGET_PLATFORM]: targetPlatform };
   }
 
+  const synchronizer = createAsyncSynchronizer();
+
   const dao: ContextDAO = {
     getContext: async ({ targetID, targetPlatform }) => {
       const { Item = {} } = await ddb
@@ -134,28 +141,25 @@ export function createDynamoDBContextDAO({
 
       return Item as ChatbotContext;
     },
-    appendContext: async ({
-      additionalContext,
-      oldContext,
-      targetID,
-      targetPlatform,
-    }) => {
-      if (oldContext == null) {
-        oldContext = await dao.getContext({ targetPlatform, targetID });
+    appendContext: synchronizer.synchronize(
+      async ({ additionalContext, oldContext, targetID, targetPlatform }) => {
+        if (oldContext == null) {
+          oldContext = await dao.getContext({ targetPlatform, targetID });
+        }
+
+        const newContext = joinObjects(oldContext, additionalContext);
+
+        const { Attributes: actualOldContext } = await ddb
+          .put({
+            Item: { ...getTableKey(targetID, targetPlatform), ...newContext },
+            ReturnValues: "ALL_OLD",
+            TableName: tableName,
+          })
+          .promise();
+
+        return { newContext, oldContext: actualOldContext as ChatbotContext };
       }
-
-      const newContext = joinObjects(oldContext, additionalContext);
-
-      const { Attributes: actualOldContext } = await ddb
-        .put({
-          Item: { ...getTableKey(targetID, targetPlatform), ...newContext },
-          ReturnValues: "ALL_OLD",
-          TableName: tableName,
-        })
-        .promise();
-
-      return { newContext, oldContext: actualOldContext as ChatbotContext };
-    },
+    ),
     resetContext: ({ targetID, targetPlatform }) => {
       return ddb
         .delete({
