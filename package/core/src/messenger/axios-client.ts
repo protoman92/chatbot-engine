@@ -8,7 +8,7 @@ export function createAxiosClient(axiosInstance: AxiosInstance = axios) {
       const { url, headers, maxContentLength, query: params } = request;
 
       /** Force ! to avoid TS complaining about undefined vs optional */
-      const config = { headers, maxContentLength: maxContentLength! };
+      const config = { headers: headers!, maxContentLength: maxContentLength! };
 
       const { data } = await (function () {
         switch (request.method) {
