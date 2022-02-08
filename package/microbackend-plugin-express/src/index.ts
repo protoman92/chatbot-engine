@@ -1,14 +1,20 @@
 import {
+  BaseMessageProcessor,
   Branch,
   ContextDAO,
   ErrorLeafConfig,
+  FacebookClient,
   FacebookConfig,
   FacebookMessageProcessorMiddleware,
+  LeafSelector,
   MessageProcessorMiddleware,
+  Messenger,
+  TelegramClient,
   TelegramConfig,
   TelegramMessageProcessorMiddleware,
 } from "@haipham/chatbot-engine-core";
 import {
+  IMicrobackendApp,
   IMicrobackendPluginDefaultOptions,
   IMicrobackendRequest,
 } from "@microbackend/plugin-core";
@@ -48,6 +54,24 @@ export interface IMicrobackendTelegramConfig {
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendPluginRegistry {
     ["@microbackend/plugin-chatbot-engine"]: IPluginOptions;
+  }
+
+  interface IMicrobackendApp {
+    readonly chatbotEngine: Readonly<{
+      readonly contextDAO: ContextDAO;
+      readonly facebookClient: FacebookClient;
+      readonly telegramClient: TelegramClient;
+    }>;
+  }
+
+  interface IMicrobackendRequest {
+    readonly chatbotEngine: Readonly<{
+      branches: Promise<Branch>;
+      callbacks: IMicrobackendConfig["chatbotEngine"]["callbacks"];
+      leafSelector: Promise<LeafSelector>;
+      messageProcessor: Promise<BaseMessageProcessor>;
+      messenger: Promise<Messenger>;
+    }>;
   }
 
   interface IMicrobackendConfig {
@@ -121,6 +145,18 @@ export type IMicrobackendBranchCreator = (
 
 export abstract class MicrobackendBranch implements IMicrobackendBranch {
   constructor(protected args: IMicrobackendBranchArgs) {}
+
+  get app(): IMicrobackendApp {
+    return this.args.request.app;
+  }
+
+  get facebookClient(): FacebookClient {
+    return this.app.chatbotEngine.facebookClient;
+  }
+
+  get telegramClient(): TelegramClient {
+    return this.app.chatbotEngine.telegramClient;
+  }
 
   abstract get branch(): IMicrobackendBranch["branch"];
 }

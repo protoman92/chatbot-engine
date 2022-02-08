@@ -1,11 +1,8 @@
 import {
-  ContextDAO,
   createFacebookClient,
   createTelegramClient,
   defaultAxiosClient,
-  FacebookClient,
   FacebookConfig,
-  TelegramClient,
   TelegramConfig,
   _TelegramRawResponse,
 } from "@haipham/chatbot-engine-core";
@@ -14,16 +11,6 @@ import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
 import joi, { ObjectSchema, StrictSchemaMap } from "joi";
 import { IMicrobackendFacebookConfig, IMicrobackendTelegramConfig } from "..";
 import { PLUGIN_NAME } from "../utils";
-
-declare module "@microbackend/plugin-core" {
-  interface IMicrobackendApp {
-    readonly chatbotEngine: Readonly<{
-      readonly contextDAO: ContextDAO;
-      readonly facebookClient: FacebookClient;
-      readonly telegramClient: TelegramClient;
-    }>;
-  }
-}
 
 export default {
   get chatbotEngine(): IMicrobackendApp["chatbotEngine"] {

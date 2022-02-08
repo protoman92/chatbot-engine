@@ -1,5 +1,4 @@
 import {
-  BaseMessageProcessor,
   Branch,
   catchError,
   createCrossPlatformMessageProcessor,
@@ -10,8 +9,6 @@ import {
   createTelegramMessageProcessor,
   createTransformChain,
   FacebookMessageProcessor,
-  LeafSelector,
-  Messenger,
   TelegramMessageProcessor,
 } from "@haipham/chatbot-engine-core";
 import { createPluginHelpers } from "@microbackend/common-utils";
@@ -28,18 +25,6 @@ import {
   MicrobackendBranch,
 } from "..";
 import { PLUGIN_NAME } from "../utils";
-
-declare module "@microbackend/plugin-core" {
-  interface IMicrobackendRequest {
-    readonly chatbotEngine: Readonly<{
-      branches: Promise<Branch>;
-      callbacks: IMicrobackendConfig["chatbotEngine"]["callbacks"];
-      leafSelector: Promise<LeafSelector>;
-      messageProcessor: Promise<BaseMessageProcessor>;
-      messenger: Promise<Messenger>;
-    }>;
-  }
-}
 
 export default {
   get chatbotEngine(): IMicrobackendRequest["chatbotEngine"] {

@@ -72,34 +72,32 @@ import { createLeaf, NextResult } from "@haipham/chatbot-engine-core";
 import { MicrobackendBranch } from "@microbackend/plugin-chatbot-engine-express";
 
 export default class PlaceholderBranch extends MicrobackendBranch {
-  get branch(): MicrobackendBranch["branch"] {
-    return {
-      respondToMessage: createLeaf((obs) => {
-        return {
-          next: async ({ targetID, targetPlatform }) => {
-            if (input.type !== "text") {
-              return NextResult.FALLTHROUGH;
-            }
+  branch = {
+    respondToMessage: createLeaf((obs) => {
+      return {
+        next: async ({ targetID, targetPlatform }) => {
+          if (input.type !== "text") {
+            return NextResult.FALLTHROUGH;
+          }
 
-            await obs.next({
-              targetID,
-              targetPlatform,
-              output: [
-                {
-                  content: {
-                    text: "Received your message",
-                    type: "text",
-                  },
+          await obs.next({
+            targetID,
+            targetPlatform,
+            output: [
+              {
+                content: {
+                  text: "Received your message",
+                  type: "text",
                 },
-              ],
-            });
+              },
+            ],
+          });
 
-            return NextResult.BREAK;
-          },
-        };
-      }),
-    };
-  }
+          return NextResult.BREAK;
+        },
+      };
+    }),
+  };
 }
 ```
 
