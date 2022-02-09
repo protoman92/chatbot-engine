@@ -5,10 +5,12 @@ import {
 import GraphemeSplitter from "grapheme-splitter";
 import { AsyncOrSync } from "ts-essentials";
 import {
-  AmbiguousGenericResponse,
+  AmbiguousGenericRequest,
   AmbiguousPlatform,
+  FacebookGenericRequest,
   FacebookGenericResponseOutput,
   FacebookRawRequest,
+  TelegramGenericRequest,
   TelegramGenericResponseOutput,
   TelegramRawRequest,
   Transformer,
@@ -95,45 +97,6 @@ export function generateUniqueTargetKey({
   targetPlatform,
 }: Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>) {
   return `${targetPlatform}_${targetID}`;
-}
-
-/**
- * Use this to get a cross-platform output, so as to reuse logic everywhere
- * else.
- */
-export function getCrossPlatformOutput(
-  args: Readonly<{
-    facebook?: readonly FacebookGenericResponseOutput[];
-    telegram?: readonly TelegramGenericResponseOutput[];
-  }>
-): <P extends AmbiguousPlatform>(platform: P) => NonNullable<typeof args[P]> {
-  return <P extends AmbiguousPlatform>(platform: P) => {
-    return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
-  };
-}
-
-/**
- * Use this to get a cross-platform response, so as to reuse logic everywhere
- * else.
- */
-export function getCrossPlatformResponse(
-  args: Readonly<{
-    facebook?: readonly FacebookGenericResponseOutput[];
-    telegram?: readonly TelegramGenericResponseOutput[];
-  }>
-): (
-  args: Omit<AmbiguousGenericResponse, "output">
-) => AmbiguousGenericResponse {
-  return ({
-    targetPlatform,
-    ...args1
-  }: Omit<AmbiguousGenericResponse, "output">) => {
-    return {
-      ...args1,
-      targetPlatform,
-      output: requireNotNull(args[targetPlatform]) as any,
-    };
-  };
 }
 
 /** Join two objects to form a new object */
@@ -248,6 +211,40 @@ export async function toPromise<T>(
   }
 
   return convertible;
+}
+
+/**
+ * Use this to get a cross-platform output, so as to reuse logic everywhere
+ * else.
+ */
+export function switchPlatformOutput(
+  args: Readonly<{
+    facebook?: readonly FacebookGenericResponseOutput[];
+    telegram?: readonly TelegramGenericResponseOutput[];
+  }>
+): <P extends AmbiguousPlatform>(platform: P) => NonNullable<typeof args[P]> {
+  return <P extends AmbiguousPlatform>(platform: P) => {
+    return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
+  };
+}
+
+/** Allow platform-specific request handling logic that returns any result */
+export async function switchPlatformRequest<Result>(
+  request: AmbiguousGenericRequest,
+  handlers: Readonly<{
+    facebook?: (args: FacebookGenericRequest) => AsyncOrSync<Result>;
+    telegram?: (args: TelegramGenericRequest) => AsyncOrSync<Result>;
+  }>
+): Promise<Result> {
+  if (request.targetPlatform === "facebook" && handlers.facebook != null) {
+    return handlers.facebook(request);
+  }
+
+  if (request.targetPlatform === "telegram" && handlers.telegram != null) {
+    return handlers.telegram(request);
+  }
+
+  throw new Error(`Unsupported platform for ${JSON.stringify(request)}`);
 }
 
 /** Transform an object with transformers to create a new wrapped object */

@@ -1,26 +1,77 @@
 import { omitNull } from "@haipham/javascript-helper-object";
+import { switchPlatformRequest } from ".";
+import { AmbiguousGenericRequest, AmbiguousPlatform } from "..";
 import {
   chunkString,
   firstSubString,
-  getCrossPlatformOutput,
   lastSubstring,
   mapSeries,
+  switchPlatformOutput,
 } from "./utils";
 
 describe("Common utilities", () => {
-  it("Getting cross platform output should work", async () => {
+  it("Switching cross platform output should work", async () => {
     // Setup && When
-    const fbOutput = await getCrossPlatformOutput({
+    const fbOutput = await switchPlatformOutput({
       facebook: [{ content: { text: "", type: "text" } }],
     })("facebook");
 
-    const tlOutput = await getCrossPlatformOutput({
+    const tlOutput = await switchPlatformOutput({
       telegram: [{ content: { text: "", type: "text" } }],
     })("telegram");
 
     // Then
     expect(fbOutput).toEqual([{ content: { text: "", type: "text" } }]);
     expect(tlOutput).toEqual([{ content: { text: "", type: "text" } }]);
+  });
+
+  it("Switching cross platform request should work", async () => {
+    // Setup
+    const facebookHandler = jest.fn();
+    const telegramHandler = jest.fn();
+    facebookHandler.mockResolvedValueOnce(1);
+    telegramHandler.mockResolvedValueOnce(2);
+
+    // When
+    const facebookResult = await switchPlatformRequest(
+      { targetPlatform: "facebook" } as AmbiguousGenericRequest,
+      { facebook: facebookHandler, telegram: telegramHandler }
+    );
+
+    const telegramResult = await switchPlatformRequest(
+      { targetPlatform: "telegram" } as AmbiguousGenericRequest,
+      { facebook: facebookHandler, telegram: telegramHandler }
+    );
+
+    const switchError1 = await switchPlatformRequest(
+      { targetPlatform: "abc" as AmbiguousPlatform } as AmbiguousGenericRequest,
+      { facebook: facebookHandler, telegram: telegramHandler }
+    ).catch((error) => {
+      return error.message;
+    });
+
+    const switchError2 = await switchPlatformRequest(
+      { targetPlatform: "facebook" } as AmbiguousGenericRequest,
+      {}
+    ).catch((error) => {
+      return error.message;
+    });
+
+    const switchError3 = await switchPlatformRequest(
+      { targetPlatform: "telegram" } as AmbiguousGenericRequest,
+      {}
+    ).catch((error) => {
+      return error.message;
+    });
+
+    // Then
+    expect(facebookHandler).toHaveBeenCalledTimes(1);
+    expect(telegramHandler).toHaveBeenCalledTimes(1);
+    expect(facebookResult).toEqual(1);
+    expect(telegramResult).toEqual(2);
+    expect(switchError1).toMatchSnapshot();
+    expect(switchError2).toMatchSnapshot();
+    expect(switchError3).toMatchSnapshot();
   });
 
   it("Map series should maintain order", async function () {
