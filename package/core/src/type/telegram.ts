@@ -255,8 +255,10 @@ export namespace _TelegramRawRequest {
   export interface VideoDetails {
     readonly duration: number;
     readonly file_id: string;
+    readonly file_name: string;
     readonly file_unique_id: string;
     readonly file_size: number;
+    readonly mime_type: string;
     readonly width: number;
     readonly height: number;
   }

@@ -351,9 +351,11 @@ describe("Create generic Telegram requests", () => {
     const video: _TelegramRawRequest.VideoDetails = {
       duration: 0,
       file_id: "0",
+      file_name: "",
       file_size: 0,
       file_unique_id: "",
       height: 0,
+      mime_type: "",
       width: 0,
     };
 
