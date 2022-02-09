@@ -59,6 +59,7 @@ export type TelegramGenericRequestInput = Readonly<
       telegramPaymentChargeID: string;
       type: "successful_payment";
     }
+  | { video: _TelegramRawRequest.VideoDetails; type: "video" }
   | CrossPlatformRequestInput
 >;
 
@@ -251,6 +252,15 @@ export namespace _TelegramRawRequest {
     readonly height: number;
   }
 
+  export interface VideoDetails {
+    readonly duration: number;
+    readonly file_id: string;
+    readonly file_unique_id: string;
+    readonly file_size: number;
+    readonly width: number;
+    readonly height: number;
+  }
+
   export namespace Message {
     export interface Document {
       readonly chat: Chat;
@@ -296,6 +306,14 @@ export namespace _TelegramRawRequest {
       readonly message_id: number;
       readonly text: string;
     }
+
+    export interface Video {
+      readonly chat: Chat;
+      readonly date: number;
+      readonly from: TelegramUser;
+      readonly message_id: number;
+      readonly video: VideoDetails;
+    }
   }
 
   export interface Message {
@@ -305,7 +323,8 @@ export namespace _TelegramRawRequest {
       | Message.Location
       | Message.NewChatMember
       | Message.Photo
-      | Message.Text;
+      | Message.Text
+      | Message.Video;
     readonly update_id: number;
   }
 

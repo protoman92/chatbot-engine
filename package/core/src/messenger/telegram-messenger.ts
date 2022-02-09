@@ -115,6 +115,10 @@ export function createGenericTelegramRequest(
       return [user, chat, [{ images: message.photo, type: "image" }]];
     }
 
+    if ("video" in message) {
+      return [user, chat, [{ type: "video", video: message.video }]];
+    }
+
     return undefined;
   }
 

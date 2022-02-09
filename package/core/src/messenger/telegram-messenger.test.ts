@@ -345,6 +345,40 @@ describe("Create generic Telegram requests", () => {
       },
     ]);
   });
+
+  it("Should return video input type if a video is attached", async () => {
+    // Setup
+    const video: _TelegramRawRequest.VideoDetails = {
+      duration: 0,
+      file_id: "0",
+      file_size: 0,
+      file_unique_id: "",
+      height: 0,
+      width: 0,
+    };
+
+    const rawRequest: TelegramRawRequest = {
+      message: { video, chat, from, date: 0, message_id: 0 },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
+
+    // Then
+    expect(genericRequest).toEqual([
+      {
+        currentBot,
+        rawRequest,
+        currentContext: {},
+        input: { video, type: "video" },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
 });
 
 describe("Utilities", () => {
