@@ -34,17 +34,18 @@ export function createTelegramClient(
   }
 
   async function communicate<Result>(
-    ...params: Parameters<HTTPClient["communicate"]>
+    ...params: Parameters<HTTPClient["requestWithErrorCapture"]>
   ): Promise<Result> {
-    const response = await client.communicate<
-      _TelegramClient.APIResponse<Result>
+    const response = await client.requestWithErrorCapture<
+      _TelegramClient.APIResponse.Success<Result>,
+      _TelegramClient.APIResponse.Failure
     >(...params);
 
-    if (response.ok) {
-      return response.result;
+    if (response.data != null) {
+      return response.data.result;
+    } else {
+      throw new Error(response.error.description);
     }
-
-    throw new Error(response.description);
   }
 
   const telegramClient: TelegramClient = {

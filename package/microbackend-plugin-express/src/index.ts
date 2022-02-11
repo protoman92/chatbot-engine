@@ -20,7 +20,7 @@ import {
 } from "@microbackend/plugin-core";
 import "@microbackend/plugin-express";
 import { AsyncOrSync } from "ts-essentials";
-export { LeafHandlingError, WebhookHandlingError } from "./utils";
+export * from "./utils";
 
 export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 

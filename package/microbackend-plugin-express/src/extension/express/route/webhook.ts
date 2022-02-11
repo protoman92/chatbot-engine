@@ -26,9 +26,10 @@ export default class WebhookRoute extends MicrobackendRoute {
         chatbotConfig.facebook.webhookChallengeRoute ||
           DEFAULT_FACEBOOK_WEBHOOK_CHALLENGE_ROUTE,
         handleExpressError(async (req, res) => {
-          const challenge = await req.app.chatbotEngine.facebookClient.resolveVerifyChallenge(
-            req.query
-          );
+          const challenge =
+            await req.app.chatbotEngine.facebookClient.resolveVerifyChallenge(
+              req.query
+            );
 
           res.status(200).send(challenge);
         })
@@ -73,7 +74,5 @@ export default class WebhookRoute extends MicrobackendRoute {
     return router;
   }
 
-  get route(): MicrobackendRoute["route"] {
-    return "/";
-  }
+  route = "/";
 }

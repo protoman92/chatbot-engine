@@ -9,7 +9,7 @@ export function createWitClient(
 ): WitClient {
   return {
     validate: (message) => {
-      return client.communicate<WitResponse>({
+      return client.request<WitResponse>({
         method: "GET",
         url: `https://api.wit.ai/message?q=${encodeURI(message)}`,
         headers: { Authorization: `Bearer ${config.authorizationToken}` },

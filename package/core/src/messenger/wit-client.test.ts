@@ -8,7 +8,11 @@ describe("Wit client", () => {
   let witClient: WitClient;
 
   beforeEach(() => {
-    comm = spy<HTTPClient>({ communicate: () => Promise.reject("") });
+    comm = spy<HTTPClient>({
+      request: () => Promise.reject(""),
+      requestWithErrorCapture: () => Promise.reject(""),
+    });
+
     witConfig = spy<WitConfig>({ authorizationToken: "" });
     witClient = createWitClient(instance(comm), instance(witConfig));
   });
@@ -16,7 +20,7 @@ describe("Wit client", () => {
   it("Should communicate with wit API correctly", async () => {
     // Setup
     const authorizationToken = "some-auth-token";
-    when(comm.communicate(anything())).thenResolve({});
+    when(comm.request(anything())).thenResolve({});
     when(witConfig.authorizationToken).thenReturn(authorizationToken);
 
     // When
@@ -25,7 +29,7 @@ describe("Wit client", () => {
 
     // Then
     verify(
-      comm.communicate(
+      comm.request(
         deepEqual({
           method: "GET",
           url: `https://api.wit.ai/message?q=${message}`,

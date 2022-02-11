@@ -546,10 +546,6 @@ export namespace _TelegramClient {
       readonly ok: false;
     }
   }
-
-  export type APIResponse<Result> =
-    | APIResponse.Success<Result>
-    | APIResponse.Failure;
 }
 
 /** A Telegram-specific client */

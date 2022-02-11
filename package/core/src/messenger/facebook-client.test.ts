@@ -9,7 +9,8 @@ describe("Facebook client", () => {
 
   beforeEach(async () => {
     client = spy<HTTPClient>({
-      communicate: () => Promise.reject(""),
+      request: () => Promise.reject(""),
+      requestWithErrorCapture: () => Promise.reject(""),
     });
 
     config = spy<FacebookConfig>({
@@ -72,14 +73,14 @@ describe("Facebook client", () => {
 
   it("Should send menu settings correctly", async () => {
     // Setup
-    when(client.communicate(anything())).thenResolve({});
+    when(client.request(anything())).thenResolve({});
 
     // When
     await fbClient.sendMenuSettings({ persistent_menu: [], psid: "" });
 
     // Then
     verify(
-      client.communicate(
+      client.request(
         deepEqual({
           body: { persistent_menu: [], psid: "" },
           headers: { "Content-Type": "application/json" },
@@ -93,7 +94,7 @@ describe("Facebook client", () => {
 
   it("Should send messages correctly", async () => {
     // Setup
-    when(client.communicate(anything())).thenResolve({});
+    when(client.request(anything())).thenResolve({});
 
     // When
     await fbClient.sendResponse({
@@ -104,7 +105,7 @@ describe("Facebook client", () => {
 
     // Then
     verify(
-      client.communicate(
+      client.request(
         deepEqual({
           body: {
             message: { text: "" },
@@ -121,7 +122,7 @@ describe("Facebook client", () => {
 
   it("Should set typing indicator correctly", async () => {
     // Setup
-    when(client.communicate(anything())).thenResolve({});
+    when(client.request(anything())).thenResolve({});
 
     // When
     await fbClient.setTypingIndicator("", true);
@@ -129,7 +130,7 @@ describe("Facebook client", () => {
 
     // Then
     verify(
-      client.communicate(
+      client.request(
         deepEqual({
           body: { recipient: { id: "" }, sender_action: "typing_on" },
           headers: { "Content-Type": "application/json" },
@@ -140,7 +141,7 @@ describe("Facebook client", () => {
     ).once();
 
     verify(
-      client.communicate(
+      client.request(
         deepEqual({
           body: { recipient: { id: "" }, sender_action: "typing_off" },
           headers: { "Content-Type": "application/json" },

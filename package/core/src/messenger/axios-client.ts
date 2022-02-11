@@ -1,10 +1,10 @@
-import axios, { AxiosInstance } from "axios";
+import axiosStatic, { AxiosInstance } from "axios";
 import { HTTPClient } from "../type";
 
 /** Create a default HTTP client using axios */
-export function createAxiosClient(axiosInstance: AxiosInstance = axios) {
+export function createAxiosClient(axios: AxiosInstance = axiosStatic) {
   const client: HTTPClient = {
-    communicate: async (request) => {
+    request: async (request) => {
       const { url, headers, maxContentLength, query: params } = request;
 
       /** Force ! to avoid TS complaining about undefined vs optional */
@@ -13,14 +13,24 @@ export function createAxiosClient(axiosInstance: AxiosInstance = axios) {
       const { data } = await (function () {
         switch (request.method) {
           case "GET":
-            return axiosInstance.get(url, { params, ...config });
+            return axios.get(url, { params, ...config });
 
           case "POST":
-            return axiosInstance.post(url, request.body, { params, ...config });
+            return axios.post(url, request.body, { params, ...config });
         }
       })();
 
       return data;
+    },
+    requestWithErrorCapture: async (request) => {
+      try {
+        const data = await client.request(request);
+        return { data: data as any };
+      } catch (error) {
+        const _error = error as any;
+        const errorData = _error?.response?.data ?? _error;
+        return { error: errorData };
+      }
     },
   };
 

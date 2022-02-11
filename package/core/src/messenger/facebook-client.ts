@@ -20,14 +20,14 @@ export function createFacebookClient(
     }/${additionalPaths.join("/")}?access_token=${config.pageToken}`;
   }
 
-  async function get<T>(...additionalPaths: string[]) {
-    return client.communicate<T>({
+  async function get<Data>(...additionalPaths: string[]) {
+    return client.request<Data>({
       method: "GET",
       url: formatURL(...additionalPaths),
     });
   }
 
-  async function post<T>({
+  async function post<Data>({
     additionalPaths,
     body,
     headers: additionalHeaders,
@@ -37,7 +37,7 @@ export function createFacebookClient(
     body: unknown;
   }> &
     Pick<_HTTPRequest.POST, "headers" | "maxContentLength">) {
-    return client.communicate<T>({
+    return client.request<Data>({
       body,
       method: "POST",
       url: formatURL(...additionalPaths),
