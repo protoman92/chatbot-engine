@@ -4,19 +4,26 @@ export default class CommonConfig extends MicrobackendConfig {
   get config(): MicrobackendConfig["config"] {
     return {
       chatbotEngine: {
-        facebook: {
-          client: {
-            apiVersion: "v1",
-            pageToken: "placeholder",
-            verifyToken: "placeholder",
+        leaf: {
+          onError: (...[, error]) => {
+            console.error("Error:", error);
           },
-          isEnabled: true,
         },
-        telegram: {
-          client: { authToken: process.env["TELEGRAM_AUTH_TOKEN"] },
-          isEnabled: true,
+        messenger: {
+          facebook: {
+            client: {
+              apiVersion: "v1",
+              pageToken: "placeholder",
+              verifyToken: "placeholder",
+            },
+            isEnabled: true,
+          },
+          telegram: {
+            client: { authToken: process.env["TELEGRAM_AUTH_TOKEN"] },
+            isEnabled: true,
+          },
         },
-        callbacks: {
+        webhook: {
           onError: (...[, error]) => {
             console.error("Error:", error);
           },

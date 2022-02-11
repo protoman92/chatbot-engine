@@ -91,15 +91,6 @@ export default {
               }
             );
           },
-          get callbacks(): IMicrobackendRequest["chatbotEngine"]["callbacks"] {
-            return initializeOnce(
-              (this as unknown) as IMicrobackendRequest["chatbotEngine"],
-              "callbacks",
-              () => {
-                return req.app.config.chatbotEngine.callbacks;
-              }
-            );
-          },
           get leafSelector(): IMicrobackendRequest["chatbotEngine"]["leafSelector"] {
             return initializeOnce(
               (this as unknown) as IMicrobackendRequest["chatbotEngine"],
@@ -113,9 +104,9 @@ export default {
                     catchError(
                       await createDefaultErrorLeaf({
                         formatErrorMessage:
-                          req.app.config.chatbotEngine.formatLeafError,
+                          req.app.config.chatbotEngine.leaf.formatErrorMessage,
                         trackError: (args) => {
-                          req.chatbotEngine.callbacks.onError?.call(
+                          req.app.config.chatbotEngine.leaf.onError?.call(
                             undefined,
                             req,
                             new LeafHandlingError(args)
@@ -137,23 +128,25 @@ export default {
                 let facebookProcessor: FacebookMessageProcessor | undefined;
                 let telegramProcessor: TelegramMessageProcessor | undefined;
 
-                if (req.app.config.chatbotEngine.facebook.isEnabled) {
+                if (req.app.config.chatbotEngine.messenger.facebook.isEnabled) {
                   facebookProcessor = await createFacebookMessageProcessor(
                     {
                       leafSelector,
                       client: req.app.chatbotEngine.facebookClient,
                     },
-                    ...req.app.config.chatbotEngine.facebook.middlewares
+                    ...req.app.config.chatbotEngine.messenger.facebook
+                      .middlewares
                   );
                 }
 
-                if (req.app.config.chatbotEngine.telegram.isEnabled) {
+                if (req.app.config.chatbotEngine.messenger.telegram.isEnabled) {
                   telegramProcessor = await createTelegramMessageProcessor(
                     {
                       leafSelector,
                       client: req.app.chatbotEngine.telegramClient,
                     },
-                    ...req.app.config.chatbotEngine.telegram.middlewares
+                    ...req.app.config.chatbotEngine.messenger.telegram
+                      .middlewares
                   );
                 }
 

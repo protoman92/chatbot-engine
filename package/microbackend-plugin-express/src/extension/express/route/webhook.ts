@@ -4,27 +4,17 @@ import {
   MicrobackendRoute,
 } from "@microbackend/plugin-express";
 import express from "express";
-import {
-  DEFAULT_FACEBOOK_WEBHOOK_CHALLENGE_ROUTE,
-  DEFAULT_WEBHOOK_HANDLER_ROUTE,
-  DEFAULT_WEBHOOK_TIMEOUT_MS,
-  WebhookHandlingError,
-} from "../../../utils";
+import { WebhookHandlingError } from "../../../utils";
 
 export default class WebhookRoute extends MicrobackendRoute {
   get handler(): MicrobackendRoute["handler"] {
     const router = express.Router();
     const chatbotConfig = this.args.app.config.chatbotEngine;
-
-    const webhookTimeout =
-      chatbotConfig.webhookTimeoutMs || DEFAULT_WEBHOOK_TIMEOUT_MS;
-
     router.use(express.json());
 
-    if (chatbotConfig.facebook.isEnabled) {
+    if (chatbotConfig.messenger.facebook.isEnabled) {
       router.get(
-        chatbotConfig.facebook.webhookChallengeRoute ||
-          DEFAULT_FACEBOOK_WEBHOOK_CHALLENGE_ROUTE,
+        chatbotConfig.webhook.facebook.challengeRoute,
         handleExpressError(async (req, res) => {
           const challenge =
             await req.app.chatbotEngine.facebookClient.resolveVerifyChallenge(
@@ -37,7 +27,7 @@ export default class WebhookRoute extends MicrobackendRoute {
     }
 
     router.post(
-      chatbotConfig.webhookHandlerRoute || DEFAULT_WEBHOOK_HANDLER_ROUTE,
+      chatbotConfig.webhook.handlerRoute,
       handleExpressError(async (req, res) => {
         const messenger = await req.chatbotEngine.messenger;
 
@@ -48,14 +38,14 @@ export default class WebhookRoute extends MicrobackendRoute {
               await new Promise((resolve) => {
                 setTimeout(() => {
                   resolve(undefined);
-                }, webhookTimeout);
+                }, chatbotConfig.webhook.timeoutMs);
               });
 
               throw new Error("Webhook timed out");
             })(),
           ]);
         } catch (error) {
-          await req.chatbotEngine.callbacks.onError?.call(
+          await chatbotConfig.webhook.onError?.call(
             undefined,
             req,
             new WebhookHandlingError(
