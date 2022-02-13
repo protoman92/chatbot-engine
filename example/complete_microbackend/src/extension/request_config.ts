@@ -1,11 +1,11 @@
-import { MicrobackendConfig } from "@microbackend/plugin-core";
+import { MicrobackendRequestConfig } from "@microbackend/plugin-core";
 
-export default class CommonConfig extends MicrobackendConfig {
-  get config(): MicrobackendConfig["config"] {
+export default class CommonConfig extends MicrobackendRequestConfig {
+  get config(): MicrobackendRequestConfig["config"] {
     return {
       chatbotEngine: {
         leaf: {
-          onError: (...[, error]) => {
+          onError: (error) => {
             console.error("Error:", error);
           },
         },
@@ -16,15 +16,13 @@ export default class CommonConfig extends MicrobackendConfig {
               pageToken: "placeholder",
               verifyToken: "placeholder",
             },
-            isEnabled: true,
           },
           telegram: {
             client: { authToken: process.env["TELEGRAM_AUTH_TOKEN"] },
-            isEnabled: true,
           },
         },
         webhook: {
-          onError: (...[, error]) => {
+          onError: (error) => {
             console.error("Error:", error);
           },
         },

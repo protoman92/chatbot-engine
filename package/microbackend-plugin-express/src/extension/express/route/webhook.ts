@@ -9,17 +9,15 @@ import { WebhookHandlingError } from "../../../utils";
 export default class WebhookRoute extends MicrobackendRoute {
   get handler(): MicrobackendRoute["handler"] {
     const router = express.Router();
-    const chatbotConfig = this.args.app.config.chatbotEngine;
     router.use(express.json());
 
-    if (chatbotConfig.messenger.facebook.isEnabled) {
+    if (this.args.app.config.chatbotEngine.messenger.facebook.isEnabled) {
       router.get(
-        chatbotConfig.webhook.facebook.challengeRoute,
+        this.args.app.config.chatbotEngine.webhook.facebook.challengeRoute,
         handleExpressError(async (req, res) => {
-          const challenge =
-            await req.app.chatbotEngine.facebookClient.resolveVerifyChallenge(
-              req.query
-            );
+          const challenge = await req.chatbotEngine.facebookClient.resolveVerifyChallenge(
+            req.query
+          );
 
           res.status(200).send(challenge);
         })
@@ -27,7 +25,7 @@ export default class WebhookRoute extends MicrobackendRoute {
     }
 
     router.post(
-      chatbotConfig.webhook.handlerRoute,
+      this.args.app.config.chatbotEngine.webhook.handlerRoute,
       handleExpressError(async (req, res) => {
         const messenger = await req.chatbotEngine.messenger;
 
@@ -38,16 +36,15 @@ export default class WebhookRoute extends MicrobackendRoute {
               await new Promise((resolve) => {
                 setTimeout(() => {
                   resolve(undefined);
-                }, chatbotConfig.webhook.timeoutMs);
+                }, req.config.chatbotEngine.webhook.timeoutMs);
               });
 
               throw new Error("Webhook timed out");
             })(),
           ]);
         } catch (error) {
-          await chatbotConfig.webhook.onError?.call(
+          await req.config.chatbotEngine.webhook.onError?.call(
             undefined,
-            req,
             new WebhookHandlingError(
               error,
               req.body,

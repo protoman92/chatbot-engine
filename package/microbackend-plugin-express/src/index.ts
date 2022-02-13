@@ -25,78 +25,34 @@ export * from "./utils";
 
 export interface IPluginOptions extends IMicrobackendPluginDefaultOptions {}
 
-export interface IMicrobackendFacebookConfig {
-  readonly client: FacebookConfig;
-  /** If true, create and register the Facebook message processor. */
-  readonly isEnabled: boolean;
-  /** Middlewares to apply to the Facebook message processor. */
-  readonly middlewares: (
-    | MessageProcessorMiddleware
-    | FacebookMessageProcessorMiddleware
-  )[];
-}
-
-export interface IMicrobackendTelegramConfig {
-  readonly client: TelegramConfig;
-  /** If true, create and register the Telegram message processor. */
-  readonly isEnabled: boolean;
-  /** Middlewares to apply to the Telegram message processor. */
-  readonly middlewares: (
-    | MessageProcessorMiddleware
-    | TelegramMessageProcessorMiddleware
-  )[];
-}
-
 declare module "@microbackend/plugin-core" {
   interface IMicrobackendPluginRegistry {
     ["@microbackend/plugin-chatbot-engine"]: IPluginOptions;
   }
 
-  interface IMicrobackendApp {
-    readonly chatbotEngine: Readonly<{
-      readonly contextDAO: ContextDAO;
-      readonly facebookClient: FacebookClient;
-      readonly telegramClient: TelegramClient;
-    }>;
-  }
-
   interface IMicrobackendRequest {
     readonly chatbotEngine: Readonly<{
+      contextDAO: ContextDAO;
       branches: Promise<Branch>;
+      facebookClient: FacebookClient;
       leafSelector: Promise<LeafSelector>;
       messageProcessor: Promise<BaseMessageProcessor>;
       messenger: Promise<Messenger>;
+      telegramClient: TelegramClient;
     }>;
   }
 
-  interface IMicrobackendConfig {
+  interface IMicrobackendAppConfig {
     readonly chatbotEngine: Readonly<{
-      leaf: Readonly<{
-        /**
-         * When an error happens during leaf operations, we might want to catch
-         * it and show an error message to the user (e.g. something went wrong)
-         * instead of escaping silently.
-         * If this function is not provided, the original error message will be
-         * shown to the user.
-         */
-        formatErrorMessage: ErrorLeafConfig["formatErrorMessage"];
-        /**
-         * This callback will be invoked when there is an error thrown by the
-         * leaf that is handling the webhook payload.
-         */
-        onError?: (
-          req: IMicrobackendRequest,
-          error: LeafHandlingError
-        ) => AsyncOrSync<void>;
-      }>;
       messenger: Readonly<{
-        /**
-         * The context DAO instance to use for all message processors.
-         * If not provided, defaults to the in-memory context DAO.
-         */
-        contextDAO: ContextDAO;
-        facebook: IMicrobackendFacebookConfig;
-        telegram: IMicrobackendTelegramConfig;
+        facebook: Readonly<{
+          /** If true, create and register the Facebook message processor. */
+          isEnabled: boolean;
+        }>;
+        telegram: Readonly<{
+          /** If true, create and register the Telegram message processor. */
+          isEnabled: boolean;
+        }>;
       }>;
       webhook: Readonly<{
         facebook: Readonly<{
@@ -115,6 +71,51 @@ declare module "@microbackend/plugin-core" {
          * to /webhook/:platform.
          */
         handlerRoute: string;
+      }>;
+    }>;
+  }
+
+  interface IMicrobackendRequestConfig {
+    readonly chatbotEngine: Readonly<{
+      /**
+       * The context DAO instance to use for all message processors.
+       * If not provided, defaults to the in-memory context DAO.
+       */
+      contextDAO: ContextDAO;
+      leaf: Readonly<{
+        /**
+         * When an error happens during leaf operations, we might want to catch
+         * it and show an error message to the user (e.g. something went wrong)
+         * instead of escaping silently.
+         * If this function is not provided, the original error message will be
+         * shown to the user.
+         */
+        formatErrorMessage: ErrorLeafConfig["formatErrorMessage"];
+        /**
+         * This callback will be invoked when there is an error thrown by the
+         * leaf that is handling the webhook payload.
+         */
+        onError?: (error: LeafHandlingError) => AsyncOrSync<void>;
+      }>;
+      messenger: Readonly<{
+        facebook: Readonly<{
+          client: FacebookConfig;
+          /** Middlewares to apply to the Facebook message processor. */
+          middlewares: (
+            | MessageProcessorMiddleware
+            | FacebookMessageProcessorMiddleware
+          )[];
+        }>;
+        telegram: Readonly<{
+          client: TelegramConfig;
+          /** Middlewares to apply to the Telegram message processor. */
+          middlewares: (
+            | MessageProcessorMiddleware
+            | TelegramMessageProcessorMiddleware
+          )[];
+        }>;
+      }>;
+      webhook: Readonly<{
         /**
          * This callback will be invoked when there is an error with the process
          * of handling a webhookpayload (e.g. during parsing request, sending
@@ -122,10 +123,7 @@ declare module "@microbackend/plugin-core" {
          * respond to POST calls from service providers with 200, when errors
          * happen, we will implicitly handle them with this callback.
          */
-        onError?: (
-          req: IMicrobackendRequest,
-          error: WebhookHandlingError
-        ) => AsyncOrSync<void>;
+        onError?: (error: WebhookHandlingError) => AsyncOrSync<void>;
         /**
          * If we don't specify a timeout for Telegram, the webhook will be
          * repeatedly called again. If not provided, defaults to 20 seconds.
@@ -159,12 +157,16 @@ export abstract class MicrobackendBranch implements IMicrobackendBranch {
     return this.args.request.app;
   }
 
+  get request(): IMicrobackendRequest {
+    return this.args.request;
+  }
+
   get facebookClient(): FacebookClient {
-    return this.app.chatbotEngine.facebookClient;
+    return this.request.chatbotEngine.facebookClient;
   }
 
   get telegramClient(): TelegramClient {
-    return this.app.chatbotEngine.telegramClient;
+    return this.request.chatbotEngine.telegramClient;
   }
 
   abstract get branch(): IMicrobackendBranch["branch"];
