@@ -9,7 +9,8 @@ describe("Telegram client", () => {
 
   beforeEach(() => {
     client = spy<HTTPClient>({
-      communicate: () => Promise.reject(""),
+      request: () => Promise.reject(""),
+      requestWithErrorCapture: () => Promise.reject(""),
     });
 
     config = spy<TelegramConfig>({
@@ -25,10 +26,8 @@ describe("Telegram client", () => {
     // Setup
     const result = 10000;
 
-    when(client.communicate(anything())).thenResolve({
-      result,
-      description: "some-description",
-      ok: true,
+    when(client.requestWithErrorCapture(anything())).thenResolve({
+      data: { result, description: "some-description", ok: true },
     });
 
     // When
@@ -45,9 +44,8 @@ describe("Telegram client", () => {
     // Setup
     const description = "some-error";
 
-    when(client.communicate(anything())).thenResolve({
-      description,
-      ok: false,
+    when(client.requestWithErrorCapture(anything())).thenResolve({
+      error: { description, ok: false },
     });
 
     try {
@@ -68,21 +66,23 @@ describe("Telegram client", () => {
     await tlClient.setTypingIndicator("", false);
 
     // Then
-    verify(client.communicate(anything())).never();
+    verify(client.requestWithErrorCapture(anything())).never();
   });
 
   it("Should delete message with the correct chat and message IDs", async () => {
     // Setup
     const chatID = "chat-id";
     const messageID = "message-id";
-    when(client.communicate(anything())).thenResolve({ ok: true });
+    when(client.requestWithErrorCapture(anything())).thenResolve({
+      data: { ok: true },
+    });
 
     // When
     await tlClient.deleteMessage({ chatID, messageID });
 
     // Then
     verify(
-      client.communicate(
+      client.requestWithErrorCapture(
         deepEqual({
           method: "GET",
           query: { chat_id: chatID, message_id: messageID },
@@ -95,7 +95,9 @@ describe("Telegram client", () => {
   it("Should include payment provider token if sending invoice", async () => {
     // Setup
     const chatID = "chat-id";
-    when(client.communicate(anything())).thenResolve({ ok: true });
+    when(client.requestWithErrorCapture(anything())).thenResolve({
+      data: { ok: true },
+    });
 
     // When
     await tlClient.sendResponse({
@@ -112,7 +114,7 @@ describe("Telegram client", () => {
 
     // Then
     verify(
-      client.communicate(
+      client.requestWithErrorCapture(
         deepEqual({
           method: "POST",
           headers: {},

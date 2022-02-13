@@ -1,8 +1,6 @@
 {
   "author": "Hai Pham &lt;swiften.svc@gmail.com&gt;",
   "dependencies": {
-    "@microbackend/build-utils": "^1.0.1",
-    "@microbackend/cli": "^1.0.1",
     "@microbackend/common-utils": "^1.0.1",
     "@microbackend/plugin-core": "^1.0.1",
     "@microbackend/plugin-express": "^1.0.1",
@@ -10,6 +8,8 @@
   },
   "description": "",
   "devDependencies": {
+    "@microbackend/build-utils": "^1.0.1",
+    "@microbackend/cli": "^1.0.1",
     "@microbackend/plugin-chatbot-engine-express": "^1.0.0",
     "@microbackend/plugin-env-vars": "^1.0.1",
     "@microbackend/plugin-hmr": "^1.0.1",

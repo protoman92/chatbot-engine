@@ -15,14 +15,14 @@ import { PLUGIN_NAME } from "../utils";
 export default {
   get chatbotEngine(): IMicrobackendApp["chatbotEngine"] {
     return initializeOnce(
-      (this as unknown) as IMicrobackendApp,
+      this as unknown as IMicrobackendApp,
       "chatbotEngine",
       (app) => {
         const helpers = createPluginHelpers(PLUGIN_NAME);
 
         return {
           get contextDAO(): IMicrobackendApp["chatbotEngine"]["contextDAO"] {
-            return app.config.chatbotEngine.contextDAO;
+            return app.config.chatbotEngine.messenger.contextDAO;
           },
           get facebookClient(): IMicrobackendApp["chatbotEngine"]["facebookClient"] {
             return initializeOnce(
@@ -50,9 +50,8 @@ export default {
                         )
                       ),
                     middlewares: joi.array().required(),
-                    webhookChallengeRoute: joi.string().min(1),
                   })
-                  .validate(app.config.chatbotEngine.facebook);
+                  .validate(app.config.chatbotEngine.messenger.facebook);
 
                 if (validationError != null) {
                   throw helpers.createError(validationError.message);
@@ -101,7 +100,7 @@ export default {
                       ),
                     middlewares: joi.array().required(),
                   })
-                  .validate(app.config.chatbotEngine.telegram);
+                  .validate(app.config.chatbotEngine.messenger.telegram);
 
                 if (validationError != null) {
                   throw helpers.createError(validationError.message);
@@ -109,7 +108,7 @@ export default {
 
                 return createTelegramClient(defaultAxiosClient, {
                   defaultParseMode: "html",
-                  ...app.config.chatbotEngine.telegram.client,
+                  ...app.config.chatbotEngine.messenger.telegram.client,
                 });
               }
             );

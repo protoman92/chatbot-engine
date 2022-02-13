@@ -34,7 +34,7 @@ describe("Axios client", () => {
     const maxContentLength = 0;
     const query = { a: 1, b: 2 };
 
-    const getData = await client.communicate({
+    const getData = await client.requestWithErrorCapture({
       url,
       headers,
       query,
@@ -42,7 +42,7 @@ describe("Axios client", () => {
       method: "GET",
     });
 
-    const postData = await client.communicate({
+    const postData = await client.requestWithErrorCapture({
       url,
       body,
       headers,
@@ -60,29 +60,36 @@ describe("Axios client", () => {
 
     verify(axios.get(url, configAssert)).once();
     verify(axios.post(url, deepEqual(body), configAssert)).once();
-    expect(getData).toEqual(response.data);
-    expect(postData).toEqual(response.data);
+    expect(getData).toEqual({ data: response.data });
+    expect(postData).toEqual({ data: response.data });
   });
 
-  it("Should throw error if call fails", async () => {
+  it("Should not throw error if call fails with error capture", async () => {
     // Setup
     const url = "some-url";
-    const error = new Error("Something happened");
+    const error: any = new Error("Something happened");
     when(axios.get(anything(), anything())).thenThrow(error);
 
-    // When
-    try {
-      await client.communicate({
-        url,
-        headers: {},
-        query: {},
-        method: "GET",
-      });
+    // When && Then: error has not response data
+    let response = await client.requestWithErrorCapture({
+      url,
+      headers: {},
+      query: {},
+      method: "GET",
+    });
 
-      throw new Error("Never should have come here");
-    } catch ({ message }) {
-      // Then
-      expect(message).toEqual(error.message);
-    }
+    expect(response.error).toHaveProperty("message", error.message);
+
+    // When && Then: error has response data
+    error.response = { data: { description: "Something happened" } };
+
+    response = await client.requestWithErrorCapture({
+      url,
+      headers: {},
+      query: {},
+      method: "GET",
+    });
+
+    expect(response.error).toEqual(error.response.data);
   });
 });

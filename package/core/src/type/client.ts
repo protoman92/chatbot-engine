@@ -2,7 +2,7 @@ import { KV } from "./common";
 import { AxiosRequestConfig } from "axios";
 
 export namespace _HTTPRequest {
-  export interface Base
+  interface Base
     extends Pick<AxiosRequestConfig, "headers" | "maxContentLength"> {
     readonly query?: KV<unknown>;
     readonly url: string;
@@ -20,9 +20,16 @@ export namespace _HTTPRequest {
 
 export type HTTPRequest = _HTTPRequest.GET | _HTTPRequest.POST;
 
+export type HTTPResponse<Data, Error> = Readonly<
+  { error?: undefined; data: Data } | { error: Error; data?: undefined }
+>;
+
 /** Handle HTTP communication */
 export interface HTTPClient {
-  communicate<T>(request: HTTPRequest): Promise<T>;
+  request<Data>(request: HTTPRequest): Promise<Data>;
+  requestWithErrorCapture<Data, Error>(
+    request: HTTPRequest
+  ): Promise<HTTPResponse<Data, Error>>;
 }
 
 /**
