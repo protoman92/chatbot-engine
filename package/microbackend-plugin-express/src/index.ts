@@ -30,15 +30,20 @@ declare module "@microbackend/plugin-core" {
     ["@microbackend/plugin-chatbot-engine"]: IPluginOptions;
   }
 
+  interface IMicrobackendApp {
+    readonly chatbotEngine: Readonly<{
+      facebookClient: FacebookClient;
+      telegramClient: TelegramClient;
+    }>;
+  }
+
   interface IMicrobackendRequest {
     readonly chatbotEngine: Readonly<{
       contextDAO: ContextDAO;
       branches: Promise<Branch>;
-      facebookClient: FacebookClient;
       leafSelector: Promise<LeafSelector>;
       messageProcessor: Promise<BaseMessageProcessor>;
       messenger: Promise<Messenger>;
-      telegramClient: TelegramClient;
     }>;
   }
 
@@ -46,10 +51,12 @@ declare module "@microbackend/plugin-core" {
     readonly chatbotEngine: Readonly<{
       messenger: Readonly<{
         facebook: Readonly<{
+          client: FacebookConfig;
           /** If true, create and register the Facebook message processor. */
           isEnabled: boolean;
         }>;
         telegram: Readonly<{
+          client: TelegramConfig;
           /** If true, create and register the Telegram message processor. */
           isEnabled: boolean;
         }>;
@@ -99,7 +106,6 @@ declare module "@microbackend/plugin-core" {
       }>;
       messenger: Readonly<{
         facebook: Readonly<{
-          client: FacebookConfig;
           /** Middlewares to apply to the Facebook message processor. */
           middlewares: (
             | MessageProcessorMiddleware
@@ -107,7 +113,6 @@ declare module "@microbackend/plugin-core" {
           )[];
         }>;
         telegram: Readonly<{
-          client: TelegramConfig;
           /** Middlewares to apply to the Telegram message processor. */
           middlewares: (
             | MessageProcessorMiddleware
@@ -162,11 +167,11 @@ export abstract class MicrobackendBranch implements IMicrobackendBranch {
   }
 
   get facebookClient(): FacebookClient {
-    return this.request.chatbotEngine.facebookClient;
+    return this.app.chatbotEngine.facebookClient;
   }
 
   get telegramClient(): TelegramClient {
-    return this.request.chatbotEngine.telegramClient;
+    return this.app.chatbotEngine.telegramClient;
   }
 
   abstract get branch(): IMicrobackendBranch["branch"];

@@ -9,8 +9,8 @@ export default class DefaultConfig extends MicrobackendAppConfig {
     return {
       chatbotEngine: {
         messenger: {
-          facebook: { isEnabled: false },
-          telegram: { isEnabled: false },
+          facebook: { client: {}, isEnabled: false },
+          telegram: { client: {}, isEnabled: false },
         },
         webhook: {
           facebook: {

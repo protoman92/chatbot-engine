@@ -13,8 +13,8 @@ export default class DefaultConfig extends MicrobackendRequestConfig {
           },
         },
         messenger: {
-          facebook: { client: {}, middlewares: [] },
-          telegram: { client: {}, middlewares: [] },
+          facebook: { middlewares: [] },
+          telegram: { middlewares: [] },
         },
         webhook: {
           timeoutMs: DEFAULT_WEBHOOK_TIMEOUT_MS,
