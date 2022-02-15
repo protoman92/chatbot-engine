@@ -1,5 +1,5 @@
 {
-  "author": "Hai Pham &lt;swiften.svc@gmail.com&gt;",
+  "author": "Hai Pham <swiften.svc@gmail.com>",
   "dependencies": {
     "@microbackend/common-utils": "^1.0.1",
     "@microbackend/plugin-core": "^1.0.1",
