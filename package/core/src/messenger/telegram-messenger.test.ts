@@ -137,6 +137,46 @@ describe("Create generic Telegram requests", () => {
     ]);
   });
 
+  it("Should return group created input type if a new group is created", async () => {
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: {
+        from,
+        chat: {
+          all_members_are_administrators: true,
+          id: 0,
+          title: "Group title",
+          type: "group",
+        },
+        date: 0,
+        message_id: 0,
+        group_chat_created: true,
+      },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
+
+    // Then
+    expect(genericRequest).toEqual([
+      {
+        currentBot,
+        rawRequest,
+        currentContext: {},
+        input: {
+          areAllMembersAdministrators: true,
+          groupName: "Group title",
+          type: "group_chat_created",
+        },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        type: "message_trigger",
+      },
+    ]);
+  });
+
   it("Should return photo input type if photos are attached", async () => {
     // Setup
     const photo: _TelegramRawRequest.PhotoDetails = {

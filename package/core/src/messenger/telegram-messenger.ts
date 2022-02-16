@@ -64,7 +64,7 @@ export function createGenericTelegramRequest(
   currentBot: TelegramBot
 ): readonly TelegramGenericRequest[] {
   function processMessageRequest({
-    message: { chat, from: user, ...message },
+    message: { from: user, ...message },
   }: _TelegramRawRequest.Message):
     | [TelegramUser, _TelegramRawRequest.Chat, TelegramGenericRequestInput[]]
     | undefined {
@@ -76,29 +76,52 @@ export function createGenericTelegramRequest(
         textWithCommand
       );
 
-      if (!!command) {
+      if (command) {
         return [
           user,
-          chat,
-          [{ command, text: !!text ? text : undefined, type: "command" }],
+          message.chat,
+          [{ command, text: text || undefined, type: "command" }],
         ];
       } else {
-        return [user, chat, [{ text, type: "text" }]];
+        return [user, message.chat, [{ text, type: "text" }]];
       }
     }
 
     if ("document" in message) {
-      return [user, chat, [{ document: message.document, type: "document" }]];
+      return [
+        user,
+        message.chat,
+        [{ document: message.document, type: "document" }],
+      ];
+    }
+
+    if ("group_chat_created" in message) {
+      return [
+        user,
+        message.chat,
+        [
+          {
+            areAllMembersAdministrators:
+              message.chat.all_members_are_administrators,
+            groupName: message.chat.title,
+            type: "group_chat_created",
+          },
+        ],
+      ];
     }
 
     if ("location" in message) {
-      return [user, chat, [{ coordinate: message.location, type: "location" }]];
+      return [
+        user,
+        message.chat,
+        [{ coordinate: message.location, type: "location" }],
+      ];
     }
 
     if ("new_chat_members" in message) {
       return [
         user,
-        chat,
+        message.chat,
         [{ newChatMembers: message.new_chat_members, type: "joined_chat" }],
       ];
     }
@@ -106,17 +129,17 @@ export function createGenericTelegramRequest(
     if ("left_chat_member" in message) {
       return [
         user,
-        chat,
+        message.chat,
         [{ leftChatMembers: [message.left_chat_member], type: "left_chat" }],
       ];
     }
 
     if ("photo" in message) {
-      return [user, chat, [{ images: message.photo, type: "image" }]];
+      return [user, message.chat, [{ images: message.photo, type: "image" }]];
     }
 
     if ("video" in message) {
-      return [user, chat, [{ type: "video", video: message.video }]];
+      return [user, message.chat, [{ type: "video", video: message.video }]];
     }
 
     return undefined;
@@ -238,7 +261,7 @@ export function createGenericTelegramRequest(
     targetPlatform: "telegram",
     telegramUser,
     currentContext: {} as ChatbotContext,
-    targetID: !!chat ? `${chat.id}` : `${telegramUser.id}`,
+    targetID: chat != null ? `${chat.id}` : `${telegramUser.id}`,
     type: "message_trigger",
   }));
 }
@@ -258,11 +281,11 @@ function createRawTelegramResponse({
     }: _TelegramGenericResponseOutput.Content.Document
   ): _TelegramRawResponse.SendDocument {
     const formData = new FormData();
-    if (!!caption) {
+    if (caption) {
       formData.append("caption", caption);
     }
 
-    if (!!reply_markup) {
+    if (reply_markup != null) {
       formData.append("reply_markup", reply_markup);
     }
 

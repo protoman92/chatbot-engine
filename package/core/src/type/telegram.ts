@@ -32,6 +32,11 @@ export type TelegramGenericRequestInput = Readonly<
       type: "image";
     }
   | {
+      areAllMembersAdministrators: boolean;
+      groupName: string;
+      type: "group_chat_created";
+    }
+  | {
       leftChatMembers: readonly (TelegramBot | TelegramUser)[];
       type: "left_chat";
     }
@@ -215,7 +220,9 @@ export namespace _TelegramRawRequest {
     }
 
     export interface Group {
+      readonly all_members_are_administrators: boolean;
       readonly id: number;
+      readonly title: string;
       readonly type: "group";
     }
   }
@@ -272,6 +279,14 @@ export namespace _TelegramRawRequest {
       readonly document: DocumentDetails;
     }
 
+    export interface GroupChatCreated {
+      readonly chat: Chat.Group;
+      readonly date: number;
+      readonly from: TelegramUser;
+      readonly group_chat_created: boolean;
+      readonly message_id: number;
+    }
+
     export interface LeftChatMember {
       readonly chat: Chat;
       readonly from: TelegramUser;
@@ -321,6 +336,7 @@ export namespace _TelegramRawRequest {
   export interface Message {
     readonly message:
       | Message.Document
+      | Message.GroupChatCreated
       | Message.LeftChatMember
       | Message.Location
       | Message.NewChatMember
