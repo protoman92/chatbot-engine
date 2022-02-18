@@ -1,5 +1,5 @@
 import { createLeaf, NextResult } from "@haipham/chatbot-engine-core";
-import { IMicrobackendBranchCreator } from "@microbackend/plugin-chatbot-engine-express";
+import { IMicrobackendBranchCreator } from "@microbackend/plugin-chatbot-engine-core";
 
 export default ((): IMicrobackendBranchCreator => {
   return () => {

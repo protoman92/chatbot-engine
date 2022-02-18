@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "outDir": "build"
+  },
+  "exclude": ["build"],
+  "extends": "../microbackend/tsconfig.json"
+}

@@ -1,5 +1,5 @@
 import { createLeaf, NextResult } from "@haipham/chatbot-engine-core";
-import { MicrobackendBranch } from "@microbackend/plugin-chatbot-engine-express";
+import { MicrobackendBranch } from "@microbackend/plugin-chatbot-engine-core";
 
 export default class CatchAllBranch extends MicrobackendBranch {
   get branch(): MicrobackendBranch["branch"] {
