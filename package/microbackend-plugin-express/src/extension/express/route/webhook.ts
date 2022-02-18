@@ -11,10 +11,9 @@ export default class WebhookRoute extends MicrobackendRoute {
     const router = express.Router();
     router.use(express.json());
 
-    if (this.args.app.config.chatbotEngine.messenger.facebook.isEnabled) {
+    if (this.app.config.chatbotEngine.messenger.facebook.isEnabled) {
       router.get(
-        this.args.app.config.chatbotEngineExpress.webhook.facebook
-          .challengeRoute,
+        this.app.config.chatbotEngineExpress.webhook.facebook.challengeRoute,
         handleExpressError(async (req, res) => {
           const challenge =
             await req.app.chatbotEngine.facebookClient.resolveVerifyChallenge(
@@ -27,14 +26,14 @@ export default class WebhookRoute extends MicrobackendRoute {
     }
 
     router.post(
-      this.args.app.config.chatbotEngineExpress.webhook.handlerRoute,
+      this.app.config.chatbotEngineExpress.webhook.handlerRoute,
       handleExpressError(async (req, res) => {
         const messenger = await req.chatbotEngine.messenger;
 
         try {
           await Promise.race([
             messenger.processRawRequest({ rawRequest: req.body }),
-            (async function () {
+            (async () => {
               await new Promise((resolve) => {
                 setTimeout(() => {
                   resolve(undefined);
