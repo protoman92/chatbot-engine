@@ -146,13 +146,13 @@ export function createGenericTelegramRequest(
   }
 
   function processCallbackRequest({
-    callback_query: { data, from: user },
+    callback_query: { data, from: user, message },
   }: _TelegramRawRequest.Callback): [
     TelegramUser,
     _TelegramRawRequest.Chat | undefined,
     TelegramGenericRequestInput[]
   ] {
-    return [user, undefined, [{ payload: data, type: "postback" }]];
+    return [user, message?.chat, [{ payload: data, type: "postback" }]];
   }
 
   function processPreCheckoutRequest({
@@ -261,7 +261,7 @@ export function createGenericTelegramRequest(
     targetPlatform: "telegram",
     telegramUser,
     currentContext: {} as ChatbotContext,
-    targetID: chat != null ? `${chat.id}` : `${telegramUser.id}`,
+    targetID: chat != null ? chat.id.toString() : telegramUser.id.toString(),
     type: "message_trigger",
   }));
 }
