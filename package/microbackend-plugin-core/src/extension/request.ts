@@ -66,7 +66,7 @@ export default {
                   );
                 }
 
-                const creatorArgs: IMicrobackendBranchArgs = { request: req };
+                const creatorArgs: IMicrobackendBranchArgs = { req };
                 let branch: Branch;
 
                 if (

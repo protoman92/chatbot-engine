@@ -106,7 +106,7 @@ declare module "@microbackend/plugin-core" {
 }
 
 export interface IMicrobackendBranchArgs {
-  readonly request: IMicrobackendRequest;
+  readonly req: IMicrobackendRequest;
 }
 
 export interface IMicrobackendBranch {
@@ -121,11 +121,11 @@ export abstract class MicrobackendBranch implements IMicrobackendBranch {
   constructor(protected args: IMicrobackendBranchArgs) {}
 
   get app(): IMicrobackendApp {
-    return this.args.request.app;
+    return this.args.req.app;
   }
 
-  get request(): IMicrobackendRequest {
-    return this.args.request;
+  get req(): IMicrobackendRequest {
+    return this.args.req;
   }
 
   get facebookClient(): FacebookClient {
