@@ -58,212 +58,242 @@ export function extractCommand(
   }
 }
 
+function processMessageRequest({
+  currentBot,
+  message: {
+    message: { from: user, ...message },
+  },
+}: Readonly<{
+  currentBot: TelegramBot;
+  message: _TelegramRawRequest.Message;
+}>):
+  | Readonly<{
+      chat: _TelegramRawRequest.Chat;
+      inputs: TelegramGenericRequestInput[];
+      user: TelegramUser;
+    }>
+  | undefined {
+  if ("text" in message) {
+    const { text: textWithCommand } = message;
+
+    const [command, text] = extractCommand(
+      currentBot.username,
+      textWithCommand
+    );
+
+    if (command) {
+      return {
+        user,
+        chat: message.chat,
+        inputs: [{ command, text: text || undefined, type: "command" }],
+      };
+    } else {
+      return { user, chat: message.chat, inputs: [{ text, type: "text" }] };
+    }
+  }
+
+  if ("document" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [{ document: message.document, type: "document" }],
+    };
+  }
+
+  if ("group_chat_created" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [
+        {
+          areAllMembersAdministrators:
+            message.chat.all_members_are_administrators,
+          groupName: message.chat.title,
+          type: "group_chat_created",
+        },
+      ],
+    };
+  }
+
+  if ("location" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [{ coordinate: message.location, type: "location" }],
+    };
+  }
+
+  if ("new_chat_members" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [
+        { newChatMembers: message.new_chat_members, type: "joined_chat" },
+      ],
+    };
+  }
+
+  if ("left_chat_member" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [
+        { leftChatMembers: [message.left_chat_member], type: "left_chat" },
+      ],
+    };
+  }
+
+  if ("photo" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [{ images: message.photo, type: "image" }],
+    };
+  }
+
+  if ("video" in message) {
+    return {
+      user,
+      chat: message.chat,
+      inputs: [{ type: "video", video: message.video }],
+    };
+  }
+
+  return undefined;
+}
+
+function processCallbackRequest({
+  callback_query: { data, from: user, message },
+}: _TelegramRawRequest.Callback): Readonly<{
+  chat: _TelegramRawRequest.Chat;
+  inputs: TelegramGenericRequestInput[];
+  user: TelegramUser;
+}> {
+  return {
+    user,
+    chat: message.chat,
+    inputs: [{ payload: data, type: "postback" }],
+  };
+}
+
+function processPreCheckoutRequest({
+  pre_checkout_query: {
+    currency,
+    from: user,
+    id: checkoutID,
+    invoice_payload: payload,
+    total_amount: amount,
+  },
+}: _TelegramRawRequest.PreCheckout): Readonly<{
+  user: TelegramUser;
+  chat: _TelegramRawRequest.Chat | undefined;
+  inputs: TelegramGenericRequestInput[];
+}> {
+  return {
+    user,
+    chat: undefined,
+    inputs: [{ amount, checkoutID, currency, payload, type: "pre_checkout" }],
+  };
+}
+
+function processSuccessfulPaymentRequest({
+  message: {
+    chat,
+    from: user,
+    successful_payment: {
+      currency,
+      invoice_payload: payload,
+      provider_payment_charge_id: providerPaymentChargeID,
+      telegram_payment_charge_id: telegramPaymentChargeID,
+      total_amount: amount,
+    },
+  },
+}: _TelegramRawRequest.SuccessfulPayment): Readonly<{
+  chat: _TelegramRawRequest.Chat | undefined;
+  inputs: TelegramGenericRequestInput[];
+  user: TelegramUser;
+}> {
+  return {
+    user,
+    chat,
+    inputs: [
+      {
+        amount,
+        currency,
+        payload,
+        providerPaymentChargeID,
+        telegramPaymentChargeID,
+        type: "successful_payment",
+      },
+    ],
+  };
+}
+
 /** Map platform request to generic request for generic processing */
 export function createGenericTelegramRequest(
   rawRequest: TelegramRawRequest,
   currentBot: TelegramBot
 ): readonly TelegramGenericRequest[] {
-  function processMessageRequest({
-    message: { from: user, ...message },
-  }: _TelegramRawRequest.Message):
-    | [TelegramUser, _TelegramRawRequest.Chat, TelegramGenericRequestInput[]]
-    | undefined {
-    if ("text" in message) {
-      const { text: textWithCommand } = message;
+  let requestData:
+    | Readonly<{
+        chat: _TelegramRawRequest.Chat | undefined;
+        inputs: TelegramGenericRequestInput[];
+        user: TelegramUser;
+      }>
+    | undefined;
 
-      const [command, text] = extractCommand(
-        currentBot.username,
-        textWithCommand
-      );
+  if (isType<_TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
+    requestData = processCallbackRequest(rawRequest);
+  } else if (
+    isType<_TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
+  ) {
+    requestData = processPreCheckoutRequest(rawRequest);
+  } else if ("message" in rawRequest) {
+    const { message, ...restRequest } = rawRequest;
 
-      if (command) {
-        return [
-          user,
-          message.chat,
-          [{ command, text: text || undefined, type: "command" }],
-        ];
-      } else {
-        return [user, message.chat, [{ text, type: "text" }]];
-      }
-    }
-
-    if ("document" in message) {
-      return [
-        user,
-        message.chat,
-        [{ document: message.document, type: "document" }],
-      ];
-    }
-
-    if ("group_chat_created" in message) {
-      return [
-        user,
-        message.chat,
-        [
-          {
-            areAllMembersAdministrators:
-              message.chat.all_members_are_administrators,
-            groupName: message.chat.title,
-            type: "group_chat_created",
-          },
-        ],
-      ];
-    }
-
-    if ("location" in message) {
-      return [
-        user,
-        message.chat,
-        [{ coordinate: message.location, type: "location" }],
-      ];
-    }
-
-    if ("new_chat_members" in message) {
-      return [
-        user,
-        message.chat,
-        [{ newChatMembers: message.new_chat_members, type: "joined_chat" }],
-      ];
-    }
-
-    if ("left_chat_member" in message) {
-      return [
-        user,
-        message.chat,
-        [{ leftChatMembers: [message.left_chat_member], type: "left_chat" }],
-      ];
-    }
-
-    if ("photo" in message) {
-      return [user, message.chat, [{ images: message.photo, type: "image" }]];
-    }
-
-    if ("video" in message) {
-      return [user, message.chat, [{ type: "video", video: message.video }]];
-    }
-
-    return undefined;
-  }
-
-  function processCallbackRequest({
-    callback_query: { data, from: user, message },
-  }: _TelegramRawRequest.Callback): [
-    TelegramUser,
-    _TelegramRawRequest.Chat | undefined,
-    TelegramGenericRequestInput[]
-  ] {
-    return [user, message?.chat, [{ payload: data, type: "postback" }]];
-  }
-
-  function processPreCheckoutRequest({
-    pre_checkout_query: {
-      currency,
-      from: user,
-      id: checkoutID,
-      invoice_payload: payload,
-      total_amount: amount,
-    },
-  }: _TelegramRawRequest.PreCheckout): [
-    TelegramUser,
-    _TelegramRawRequest.Chat | undefined,
-    TelegramGenericRequestInput[]
-  ] {
-    return [
-      user,
-      undefined,
-      [{ amount, checkoutID, currency, payload, type: "pre_checkout" }],
-    ];
-  }
-
-  function processSuccessfulPaymentRequest({
-    message: {
-      chat,
-      from: user,
-      successful_payment: {
-        currency,
-        invoice_payload: payload,
-        provider_payment_charge_id: providerPaymentChargeID,
-        telegram_payment_charge_id: telegramPaymentChargeID,
-        total_amount: amount,
-      },
-    },
-  }: _TelegramRawRequest.SuccessfulPayment): [
-    TelegramUser,
-    _TelegramRawRequest.Chat | undefined,
-    TelegramGenericRequestInput[]
-  ] {
-    return [
-      user,
-      chat,
-      [
-        {
-          amount,
-          currency,
-          payload,
-          providerPaymentChargeID,
-          telegramPaymentChargeID,
-          type: "successful_payment",
-        },
-      ],
-    ];
-  }
-
-  function processRequest(
-    request: TelegramRawRequest
-  ):
-    | [
-        TelegramUser,
-        _TelegramRawRequest.Chat | undefined,
-        TelegramGenericRequestInput[]
-      ]
-    | undefined {
-    let result: ReturnType<typeof processRequest> | undefined;
-
-    if (isType<_TelegramRawRequest.Callback>(request, "callback_query")) {
-      result = processCallbackRequest(request);
-    } else if (
-      isType<_TelegramRawRequest.PreCheckout>(request, "pre_checkout_query")
+    if (
+      isType<_TelegramRawRequest.SuccessfulPayment["message"]>(
+        message,
+        "successful_payment"
+      )
     ) {
-      result = processPreCheckoutRequest(request);
-    } else if ("message" in request) {
-      const { message, ...restRequest } = request;
-
-      if (
-        isType<_TelegramRawRequest.SuccessfulPayment["message"]>(
-          message,
-          "successful_payment"
-        )
-      ) {
-        result = processSuccessfulPaymentRequest({ message, ...restRequest });
-      } else {
-        result = processMessageRequest({ message, ...restRequest });
-      }
+      requestData = processSuccessfulPaymentRequest({
+        message,
+        ...restRequest,
+      });
+    } else {
+      requestData = processMessageRequest({
+        currentBot,
+        message: { message, ...restRequest },
+      });
     }
-
-    return result;
   }
 
-  const processed = processRequest(rawRequest);
-
-  if (processed == null) {
+  if (requestData == null) {
     console.error(
       telegramError(`Invalid request: ${JSON.stringify(rawRequest)}`)
     );
+
     return [];
   }
 
-  const [telegramUser, chat, inputs] = processed;
+  const { chat, inputs, user: telegramUser } = requestData;
 
-  return inputs.map((input) => ({
-    currentBot,
-    input,
-    rawRequest,
-    targetPlatform: "telegram",
-    telegramUser,
-    currentContext: {} as ChatbotContext,
-    targetID: chat != null ? chat.id.toString() : telegramUser.id.toString(),
-    type: "message_trigger",
-  }));
+  return inputs.map(
+    (input): TelegramGenericRequest => {
+      return {
+        currentBot,
+        input,
+        rawRequest,
+        telegramUser,
+        chatType: chat?.type,
+        targetPlatform: "telegram",
+        currentContext: {} as ChatbotContext,
+        targetID: chat?.id.toString() || telegramUser.id.toString(),
+        type: "message_trigger",
+      };
+    }
+  );
 }
 
 /** Create a Telegram response from multiple generic responses */

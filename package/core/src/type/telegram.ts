@@ -74,6 +74,7 @@ export type TelegramGenericRequest = Readonly<
   } & BaseRequest &
     (
       | (GenericMessageTriggerRequest<TelegramRawRequest> & {
+          chatType: _TelegramRawRequest.Chat["type"] | undefined;
           currentBot: TelegramBot;
           telegramUser: TelegramUser;
           input: TelegramGenericRequestInput;

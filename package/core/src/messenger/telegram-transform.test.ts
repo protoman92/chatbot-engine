@@ -99,6 +99,7 @@ describe("Inject context on receive", () => {
     const genericRequest: TelegramGenericRequest = {
       targetID,
       targetPlatform,
+      chatType: "private",
       currentBot: {} as TelegramBot,
       currentContext: {},
       input: { text: "", type: "text" },
@@ -217,6 +218,7 @@ describe("Save Telegram user for target ID", () => {
     // When
     await transformed.receiveRequest({
       genericRequest: {
+        chatType: "private",
         currentBot: { id: 0, first_name: "", username: "" },
         currentContext: { targetID: targetID.toString() },
         input: { text: "", type: "text" },

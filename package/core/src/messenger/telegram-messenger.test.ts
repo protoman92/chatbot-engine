@@ -37,6 +37,7 @@ describe("Create generic Telegram requests", () => {
       {
         rawRequest,
         currentBot,
+        chatType: "private",
         currentContext: {},
         input: { command: "test", text: "me", type: "command" },
         targetID: "0",
@@ -62,6 +63,7 @@ describe("Create generic Telegram requests", () => {
       {
         rawRequest,
         currentBot,
+        chatType: "private",
         currentContext: {},
         input: { command: "test", text: undefined, type: "command" },
         targetID: "0",
@@ -87,6 +89,7 @@ describe("Create generic Telegram requests", () => {
       {
         rawRequest,
         currentBot,
+        chatType: "private",
         currentContext: {},
         input: { text: "test", type: "text" },
         targetID: "0",
@@ -127,6 +130,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: { document: document, type: "document" },
         targetID: "0",
@@ -163,6 +167,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "group",
         currentContext: {},
         input: {
           areAllMembersAdministrators: true,
@@ -200,6 +205,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: { images: [photo], type: "image" },
         targetID: "0",
@@ -231,6 +237,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: { newChatMembers: [from], type: "joined_chat" },
         targetID: "0",
@@ -262,6 +269,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: { leftChatMembers: [from], type: "left_chat" },
         targetID: "0",
@@ -295,6 +303,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: { coordinate: location, type: "location" },
         targetID: "0",
@@ -326,6 +335,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: undefined,
         currentContext: {},
         input: {
           amount: 100,
@@ -369,6 +379,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: {
           amount: 100,
@@ -412,6 +423,7 @@ describe("Create generic Telegram requests", () => {
       {
         currentBot,
         rawRequest,
+        chatType: "private",
         currentContext: {},
         input: { video, type: "video" },
         targetID: "0",

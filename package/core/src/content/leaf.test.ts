@@ -166,6 +166,7 @@ describe("Leaf for platforms", () => {
 
     await platformLeaf.next({
       targetID,
+      chatType: "private",
       currentBot: {
         id: 1,
         first_name: "",
@@ -220,6 +221,7 @@ describe("Leaf for platforms", () => {
     try {
       await platformObserver.next({
         targetID,
+        chatType: "private",
         currentBot: {
           id: 1,
           first_name: "",

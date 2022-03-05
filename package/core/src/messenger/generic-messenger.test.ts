@@ -206,6 +206,7 @@ describe("Cross platform message processor", () => {
     when(tlProcessor.generalizeRequest(anything())).thenResolve([
       {
         targetID,
+        chatType: "private",
         currentBot: { id: 0, first_name: "", username: "" },
         currentContext: {},
         input: { text: "", type: "text" },
