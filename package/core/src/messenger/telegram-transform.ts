@@ -12,6 +12,47 @@ import {
 } from "../type";
 
 /**
+ * Inject the relevant context for a target every time a message group is
+ * processed. The reason why Telegram has a custom context injector is because
+ * we should be using the current user's telegram ID instead of the targetID,
+ * since the latter could be pointing to a group ID when in group setting.
+ */
+export function injectTelegramContextOnReceive({
+  contextDAO,
+}: Readonly<{
+  contextDAO: Pick<ContextDAO, "getContext">;
+}>): TelegramMessageProcessorMiddleware {
+  return () => {
+    return async (processor) => {
+      return {
+        ...processor,
+        receiveRequest: async ({ genericRequest, ...args }) => {
+          if (genericRequest.type !== "message_trigger") {
+            return processor.receiveRequest({ ...args, genericRequest });
+          }
+
+          let currentContext = await contextDAO.getContext({
+            targetID: genericRequest.telegramUser.id.toString(),
+            targetPlatform: genericRequest.targetPlatform,
+          });
+
+          /** Allow the request's context to override stored context */
+          currentContext = {
+            ...currentContext,
+            ...genericRequest.currentContext,
+          };
+
+          return processor.receiveRequest({
+            ...args,
+            genericRequest: { ...genericRequest, currentContext },
+          });
+        },
+      };
+    };
+  };
+}
+
+/**
  * Allow saving Telegram messages when:
  * - Generalizing raw request to generic request.
  * - Sending generic response.

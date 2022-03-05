@@ -2,9 +2,64 @@ import { ChatbotContext } from "..";
 import {
   AmbiguousGenericRequest,
   ContextDAO,
+  FacebookMessageProcessorMiddleware,
   MessageProcessorMiddleware,
   PlatformClient,
 } from "../type";
+
+/**
+ * Inject the relevant context for a target every time a message group is
+ * processed.
+ */
+function injectContextOnReceive({
+  contextDAO,
+}: Readonly<{
+  contextDAO: Pick<ContextDAO, "getContext">;
+}>): MessageProcessorMiddleware {
+  return () => {
+    return async (processor) => {
+      return {
+        ...processor,
+        receiveRequest: async ({ genericRequest, ...args }) => {
+          if (genericRequest.input.type === "context_change") {
+            return processor.receiveRequest({ ...args, genericRequest });
+          }
+
+          let currentContext = await contextDAO.getContext({
+            targetID: genericRequest.targetID,
+            targetPlatform: genericRequest.targetPlatform,
+          });
+
+          /** Allow the request's context to override stored context */
+          currentContext = {
+            ...currentContext,
+            ...genericRequest.currentContext,
+          };
+
+          return processor.receiveRequest({
+            ...args,
+            genericRequest: { ...genericRequest, currentContext },
+          });
+        },
+      };
+    };
+  };
+}
+
+const injectFacebookContextOnReceive = injectContextOnReceive as (
+  ...args: Parameters<typeof injectContextOnReceive>
+) => FacebookMessageProcessorMiddleware;
+
+/**
+ * Instead of grouping all platform-specific context injection mechanisms
+ * under one function, we shall export this platform-by-platform, and provide
+ * a customized implementation when necesssary.
+ *
+ * For example, the Telegram context injection must use the current user's ID
+ * instead of the targetID, because the targetID could be pointing to a
+ * group's ID (if the bot is responding to messages in a group).
+ */
+export { injectFacebookContextOnReceive };
 
 /**
  * Save the context every time a message group is sent to a target ID. If
@@ -59,43 +114,6 @@ export function saveContextOnSend({
         }
 
         return result;
-      },
-    };
-  };
-}
-
-/**
- * Inject the relevant context for a target every time a message group is
- * processed.
- */
-export function injectContextOnReceive({
-  contextDAO,
-}: Readonly<{
-  contextDAO: Pick<ContextDAO, "getContext">;
-}>): MessageProcessorMiddleware {
-  return () => async (processor) => {
-    return {
-      ...processor,
-      receiveRequest: async ({ genericRequest, ...args }) => {
-        if (genericRequest.input.type === "context_change") {
-          return processor.receiveRequest({ ...args, genericRequest });
-        }
-
-        let currentContext = await contextDAO.getContext({
-          targetID: genericRequest.targetID,
-          targetPlatform: genericRequest.targetPlatform,
-        });
-
-        /** Allow the request's context to override stored context */
-        currentContext = {
-          ...currentContext,
-          ...genericRequest.currentContext,
-        };
-
-        return processor.receiveRequest({
-          ...args,
-          genericRequest: { ...genericRequest, currentContext },
-        });
       },
     };
   };

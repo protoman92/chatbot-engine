@@ -11,14 +11,18 @@ export {
   createMessenger,
 } from "./generic-messenger";
 export {
-  injectContextOnReceive,
+  injectFacebookContextOnReceive,
   saveContextOnSend,
   saveUserForTargetID,
   setTypingIndicator,
 } from "./messenger-transform";
 export { createTelegramClient } from "./telegram-client";
 export { createTelegramMessageProcessor } from "./telegram-messenger";
-export { saveTelegramMessages, saveTelegramUser } from "./telegram-transform";
+export {
+  injectTelegramContextOnReceive,
+  saveTelegramMessages,
+  saveTelegramUser,
+} from "./telegram-transform";
 export { createWitClient } from "./wit-client";
 export {
   defaultWitClient,
