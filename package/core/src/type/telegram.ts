@@ -74,7 +74,7 @@ export type TelegramGenericRequest = Readonly<
   } & BaseRequest &
     (
       | (GenericMessageTriggerRequest<TelegramRawRequest> & {
-          chatType: _TelegramRawRequest.Chat["type"] | undefined;
+          chatType: TelegramChatType | undefined;
           currentBot: TelegramBot;
           telegramUser: TelegramUser;
           input: TelegramGenericRequestInput;
@@ -213,18 +213,27 @@ export interface TelegramGenericResponseOutput
   readonly parseMode?: "html" | "markdown";
 }
 
+export namespace _TelegramChatType {
+  export type Group = "group";
+  export type Private = "private";
+}
+
+export type TelegramChatType =
+  | _TelegramChatType.Group
+  | _TelegramChatType.Private;
+
 export namespace _TelegramRawRequest {
   namespace Chat {
     export interface Private {
       readonly id: number;
-      readonly type: "private";
+      readonly type: _TelegramChatType.Private;
     }
 
     export interface Group {
       readonly all_members_are_administrators: boolean;
       readonly id: number;
       readonly title: string;
-      readonly type: "group";
+      readonly type: _TelegramChatType.Group;
     }
   }
 
