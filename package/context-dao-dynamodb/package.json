@@ -1,20 +1,16 @@
 {
   "author": "Hai Pham <swiften.svc@gmail.com>",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.53.0",
+    "@aws-sdk/lib-dynamodb": "^3.53.0",
     "@haipham/chatbot-engine-core": "^1.0.0",
     "@haipham/javascript-helper-async-synchronizer": "^1.0.0",
     "@haipham/javascript-helper-preconditions": "^1.0.0"
   },
   "description": "chatbot-engine context DAO with DynamoDB",
-  "devDependencies": {
-    "aws-sdk": "^2.973.0"
-  },
   "license": "MIT",
   "main": "src/index.ts",
   "name": "@haipham/chatbot-engine-context-dao-dynamodb",
-  "peerDependencies": {
-    "aws-sdk": "^2.973.0"
-  },
   "scripts": {
     "build": "tsc",
     "test": "jest"

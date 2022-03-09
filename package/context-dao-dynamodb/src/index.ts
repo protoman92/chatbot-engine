@@ -1,3 +1,10 @@
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 import {
   AmbiguousPlatform,
   ChatbotContext,
@@ -5,12 +12,11 @@ import {
   isObject,
   joinObjects,
 } from "@haipham/chatbot-engine-core";
-import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
-import { DynamoDB } from "aws-sdk";
 import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
+import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
 
 interface CreateDynamoDBContextDAOConfig {
-  readonly dynamoDB: DynamoDB.DocumentClient;
+  readonly dynamoDB: DynamoDBDocumentClient;
   readonly tableName: string;
 }
 
@@ -132,12 +138,12 @@ export function createDynamoDBContextDAO({
 
   const dao: ContextDAO = {
     getContext: async ({ targetID, targetPlatform }) => {
-      const { Item = {} } = await ddb
-        .get({
+      const { Item = {} } = await ddb.send(
+        new GetCommand({
           Key: getTableKey(targetID, targetPlatform),
           TableName: tableName,
         })
-        .promise();
+      );
 
       return Item as ChatbotContext;
     },
@@ -149,53 +155,69 @@ export function createDynamoDBContextDAO({
 
         const newContext = joinObjects(oldContext, additionalContext);
 
-        const { Attributes: actualOldContext } = await ddb
-          .put({
+        const { Attributes: actualOldContext } = await ddb.send(
+          new PutCommand({
             Item: { ...getTableKey(targetID, targetPlatform), ...newContext },
             ReturnValues: "ALL_OLD",
             TableName: tableName,
           })
-          .promise();
+        );
 
         return { newContext, oldContext: actualOldContext as ChatbotContext };
       }
     ),
-    resetContext: ({ targetID, targetPlatform }) => {
-      return ddb
-        .delete({
+    resetContext: async ({ targetID, targetPlatform }) => {
+      const { Attributes } = await ddb.send(
+        new DeleteCommand({
           Key: getTableKey(targetID, targetPlatform),
           ReturnValues: "NONE",
           TableName: tableName,
         })
-        .promise();
+      );
+
+      return Attributes;
     },
   };
 
   return dao;
 }
 
-export default function createDefaultDynamoDBContextDAO() {
+export function createDefaultDynamoDBContextDAO({
+  dynamoDBEndpoint = process.env["DYNAMO_DB_ENDPOINT"],
+  dynamoDBRegion = process.env["DYNAMO_DB_REGION"],
+  dynamoDBTableName = process.env["DYNAMO_DB_TABLE_NAME"],
+}: Readonly<{
+  dynamoDBEndpoint?: string;
+  dynamoDBRegion?: string;
+  dynamoDBTableName?: string;
+}> = {}) {
   const {
-    DYNAMO_DB_ENDPOINT = "",
-    DYNAMO_DB_REGION = "",
-    DYNAMO_DB_TABLE_NAME = "",
-  } = requireAllTruthy({
-    DYNAMO_DB_ENDPOINT: process.env["DYNAMO_DB_ENDPOINT"],
-    DYNAMO_DB_REGION: process.env["DYNAMO_DB_REGION"],
-    DYNAMO_DB_TABLE_NAME: process.env["DYNAMO_DB_TABLE_NAME"],
+    dynamoDBEndpoint: ddbEndpoint,
+    dynamoDBRegion: ddbRegion,
+    dynamoDBTableName: ddbTableName,
+  } = requireAllTruthy({ dynamoDBEndpoint, dynamoDBRegion, dynamoDBTableName });
+
+  const baseClient = new DynamoDBClient({
+    apiVersion: "latest",
+    endpoint: ddbEndpoint,
+    region: ddbRegion,
   });
 
-  const ddb = new DynamoDB.DocumentClient({
-    apiVersion: "latest",
-    endpoint: DYNAMO_DB_ENDPOINT,
-    region: DYNAMO_DB_REGION,
+  const docClient = DynamoDBDocumentClient.from(baseClient, {
+    marshallOptions: {
+      convertClassInstanceToMap: true,
+      removeUndefinedValues: true,
+    },
+    unmarshallOptions: {},
   });
 
   return {
     contextDAO: createDynamoDBContextDAO({
-      dynamoDB: ddb,
-      tableName: DYNAMO_DB_TABLE_NAME,
+      dynamoDB: docClient,
+      tableName: ddbTableName,
     }),
-    dynamoDBClient: ddb,
+    dynamoDBClient: docClient,
   };
 }
+
+export default createDefaultDynamoDBContextDAO;
