@@ -182,20 +182,16 @@ export function createDynamoDBContextDAO({
   return dao;
 }
 
-export function createDefaultDynamoDBContextDAO({
+/** Create a DynamoDB client that's readily usable for a context DAO */
+export function createCompatibleDynamoDBClient({
   dynamoDBEndpoint = process.env["DYNAMO_DB_ENDPOINT"],
   dynamoDBRegion = process.env["DYNAMO_DB_REGION"],
-  dynamoDBTableName = process.env["DYNAMO_DB_TABLE_NAME"],
 }: Readonly<{
   dynamoDBEndpoint?: string;
   dynamoDBRegion?: string;
-  dynamoDBTableName?: string;
-}> = {}) {
-  const {
-    dynamoDBEndpoint: ddbEndpoint,
-    dynamoDBRegion: ddbRegion,
-    dynamoDBTableName: ddbTableName,
-  } = requireAllTruthy({ dynamoDBEndpoint, dynamoDBRegion, dynamoDBTableName });
+}> = {}): DynamoDBDocumentClient {
+  const { dynamoDBEndpoint: ddbEndpoint, dynamoDBRegion: ddbRegion } =
+    requireAllTruthy({ dynamoDBEndpoint, dynamoDBRegion });
 
   const baseClient = new DynamoDBClient({
     apiVersion: "latest",
@@ -211,13 +207,26 @@ export function createDefaultDynamoDBContextDAO({
     unmarshallOptions: {},
   });
 
-  return {
-    contextDAO: createDynamoDBContextDAO({
-      dynamoDB: docClient,
-      tableName: ddbTableName,
-    }),
-    dynamoDBClient: docClient,
-  };
+  return docClient;
+}
+
+export function createDefaultDynamoDBContextDAO({
+  dynamoDBTableName = process.env["DYNAMO_DB_TABLE_NAME"],
+  ...dynamoDBArgs
+}: Parameters<typeof createCompatibleDynamoDBClient>[0] &
+  Readonly<{ dynamoDBTableName?: string }> = {}): ContextDAO {
+  const { dynamoDBTableName: ddbTableName } = requireAllTruthy({
+    dynamoDBTableName,
+  });
+
+  const dynamoDBClient = createCompatibleDynamoDBClient(dynamoDBArgs);
+
+  const contextDAO = createDynamoDBContextDAO({
+    dynamoDB: dynamoDBClient,
+    tableName: ddbTableName,
+  });
+
+  return contextDAO;
 }
 
 export default createDefaultDynamoDBContextDAO;
