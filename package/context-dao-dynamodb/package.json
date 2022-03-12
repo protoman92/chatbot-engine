@@ -1,8 +1,8 @@
 {
   "author": "Hai Pham <swiften.svc@gmail.com>",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.53.0",
-    "@aws-sdk/lib-dynamodb": "^3.53.0",
+    "@aws-sdk/client-dynamodb": "^3.54.0",
+    "@aws-sdk/lib-dynamodb": "^3.54.0",
     "@haipham/chatbot-engine-core": "^1.0.0",
     "@haipham/javascript-helper-async-synchronizer": "^1.0.0",
     "@haipham/javascript-helper-preconditions": "^1.0.0"
