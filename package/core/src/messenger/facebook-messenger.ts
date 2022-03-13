@@ -119,7 +119,7 @@ function createFacebookRequest(
             currentContext: {} as ChatbotContext,
             rawRequest: rawRequest,
             targetPlatform: "facebook" as const,
-            type: "message_trigger" as const,
+            triggerType: "message" as const,
           }))
         );
 

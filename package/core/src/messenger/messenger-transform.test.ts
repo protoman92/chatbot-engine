@@ -95,7 +95,7 @@ describe("Save context on send", () => {
         targetID: "some-other-id",
         rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
-        type: "message_trigger",
+        triggerType: "message",
       },
       output: [],
       targetPlatform: "telegram",
@@ -129,7 +129,7 @@ describe("Save context on send", () => {
               type: "context_change",
             },
             targetPlatform: "telegram",
-            type: "manual_trigger",
+            triggerType: "manual",
           },
         })
       )
@@ -170,7 +170,7 @@ describe("Save user for target ID", () => {
           newContext: {},
           type: "context_change",
         },
-        type: "manual_trigger",
+        triggerType: "manual",
       },
     });
 
@@ -211,7 +211,7 @@ describe("Save user for target ID", () => {
       currentContext: { targetID },
       input: { text: "", type: "text" },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger",
+      triggerType: "message",
     };
 
     // When
@@ -258,7 +258,7 @@ describe("Set typing indicator", () => {
           input: { text: "", type: "text" },
           rawRequest: {} as FacebookRawRequest,
           targetPlatform: "facebook",
-          type: "message_trigger",
+          triggerType: "message",
         },
         output: [],
       },
@@ -297,7 +297,7 @@ describe("Set typing indicator", () => {
           input: { text: "", type: "text" },
           rawRequest: {} as FacebookRawRequest,
           targetPlatform: "facebook",
-          type: "message_trigger",
+          triggerType: "message",
         },
         output: [],
       },

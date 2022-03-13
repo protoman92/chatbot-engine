@@ -83,7 +83,7 @@ describe("Inject context on receive", () => {
           newContext: {},
           type: "context_change",
         },
-        type: "manual_trigger",
+        triggerType: "manual",
       },
     });
 
@@ -105,7 +105,7 @@ describe("Inject context on receive", () => {
       input: { text: "", type: "text" },
       rawRequest: {} as TelegramRawRequest,
       telegramUser: { id: 1 } as TelegramUser,
-      type: "message_trigger",
+      triggerType: "message",
     };
 
     when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
@@ -180,7 +180,7 @@ describe("Save Telegram user for target ID", () => {
         },
         targetID: `${targetID}`,
         targetPlatform: "telegram",
-        type: "manual_trigger",
+        triggerType: "manual",
       },
     });
 
@@ -233,7 +233,7 @@ describe("Save Telegram user for target ID", () => {
           is_bot: false,
         },
         rawRequest: {} as TelegramRawRequest,
-        type: "message_trigger",
+        triggerType: "message",
       },
     });
 
@@ -298,7 +298,7 @@ describe("Save Telegram messages", () => {
         targetPlatform,
         currentContext: {},
         rawRequest: inRawRequest,
-        type: "message_trigger",
+        triggerType: "message",
       } as TelegramGenericRequest,
     });
 
@@ -306,7 +306,7 @@ describe("Save Telegram messages", () => {
       genericRequest: {
         targetID,
         targetPlatform,
-        type: "manual_trigger",
+        triggerType: "manual",
       } as TelegramGenericRequest,
     });
 
@@ -347,7 +347,7 @@ describe("Save Telegram messages", () => {
 
     // When
     await transformed.receiveRequest({
-      genericRequest: { type: "message_trigger" } as TelegramGenericRequest,
+      genericRequest: { triggerType: "message" } as TelegramGenericRequest,
     });
 
     await transformed.sendResponse({

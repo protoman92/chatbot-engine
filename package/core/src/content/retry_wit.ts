@@ -54,10 +54,10 @@ export function retryWithWit(comm: WitClient): LeafTransformer {
         const highestConfidence = getHighestConfidence(response);
 
         result = await leaf.next({
-          ...omitProperties(request, "input", "rawRequest", "type"),
+          ...omitProperties(request, "input", "rawRequest", "triggerType"),
           input: { entities, highestConfidence, intents, traits, type: "wit" },
           targetPlatform: request.targetPlatform,
-          type: "manual_trigger",
+          triggerType: "manual",
         });
       }
 

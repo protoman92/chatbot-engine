@@ -20,10 +20,10 @@ export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
         }
 
         return fallbackLeaf.next({
-          ...omitProperties(request, "input", "rawRequest", "type"),
+          ...omitProperties(request, "input", "rawRequest", "triggerType"),
           currentLeafName,
           input: { erroredLeaf, error: error as Error, type: "error" },
-          type: "manual_trigger",
+          triggerType: "manual",
         });
       }
     },

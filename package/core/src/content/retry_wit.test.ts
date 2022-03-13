@@ -78,7 +78,7 @@ describe("Wit higher order function", () => {
         oldContext: {},
         type: "context_change",
       },
-      type: "manual_trigger",
+      triggerType: "manual",
     });
 
     // Then
@@ -98,7 +98,7 @@ describe("Wit higher order function", () => {
       currentLeafName: "",
       input: { text: "some-text", type: "text" },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger",
+      triggerType: "message",
     });
 
     // Then
@@ -145,7 +145,7 @@ describe("Wit higher order function", () => {
       currentLeafName: "",
       input: { text, type: "text" },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger",
+      triggerType: "message",
     });
 
     // Then
@@ -164,7 +164,7 @@ describe("Wit higher order function", () => {
             traits: {},
             type: "wit",
           },
-          type: "manual_trigger",
+          triggerType: "manual",
         })
       )
     ).once();

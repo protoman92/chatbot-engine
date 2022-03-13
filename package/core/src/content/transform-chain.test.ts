@@ -53,7 +53,7 @@ describe("Transform chain", () => {
         erroredLeaf: "",
         type: "error",
       },
-      type: "manual_trigger",
+      triggerType: "manual",
     });
 
     await transformed.subscribe({
@@ -73,7 +73,7 @@ describe("Transform chain", () => {
           currentContext: { a: 1, b: 2 },
           currentLeafName: erroredLeafName,
           input: { error, erroredLeaf: erroredLeafName, type: "error" },
-          type: "manual_trigger",
+          triggerType: "manual",
         })
       )
     ).once();
@@ -142,7 +142,7 @@ describe("Transform chain", () => {
       currentLeafName: "",
       input: { text: "", type: "text" },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger",
+      triggerType: "message",
     });
 
     // Then

@@ -108,7 +108,7 @@ export function saveContextOnSend({
               },
               targetID: genericResponse.targetID,
               targetPlatform: genericResponse.targetPlatform,
-              type: "manual_trigger",
+              triggerType: "manual",
             },
           });
         }

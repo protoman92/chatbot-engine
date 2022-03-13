@@ -72,7 +72,7 @@ describe("Inject context on receive", () => {
           newContext: {},
           type: "context_change",
         },
-        type: "manual_trigger",
+        triggerType: "manual",
       },
     });
 
@@ -103,7 +103,7 @@ describe("Inject context on receive", () => {
       currentContext: {},
       input: { text: "", type: "text" },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger",
+      triggerType: "message",
     };
 
     // When

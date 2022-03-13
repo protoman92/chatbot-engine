@@ -27,7 +27,7 @@ export function injectTelegramContextOnReceive({
       return {
         ...processor,
         receiveRequest: async ({ genericRequest, ...args }) => {
-          if (genericRequest.type !== "message_trigger") {
+          if (genericRequest.triggerType !== "message") {
             return processor.receiveRequest({ ...args, genericRequest });
           }
 
@@ -98,7 +98,7 @@ export function saveTelegramMessages({
         receiveRequest: async ({ genericRequest, ...args }) => {
           if (
             !(await Promise.resolve(isEnabled())) ||
-            genericRequest.type !== "message_trigger"
+            genericRequest.triggerType !== "message"
           ) {
             return processor.receiveRequest({ ...args, genericRequest });
           }
@@ -184,7 +184,7 @@ export function saveTelegramUser({
     return {
       ...processor,
       receiveRequest: async ({ genericRequest, ...args }) => {
-        if (genericRequest.type !== "message_trigger") {
+        if (genericRequest.triggerType !== "message") {
           return processor.receiveRequest({ ...args, genericRequest });
         }
 

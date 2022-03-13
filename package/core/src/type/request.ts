@@ -19,12 +19,12 @@ export type CrossPlatformRequestInput =
 
 export interface GenericMessageTriggerRequest<RawRequest> {
   readonly rawRequest: RawRequest;
-  readonly type: "message_trigger";
+  readonly triggerType: "message";
 }
 
 export interface GenericManualTriggerRequest {
   readonly rawRequest?: undefined;
-  readonly type: "manual_trigger";
+  readonly triggerType: "manual";
 }
 
 export type AmbiguousGenericRequest =

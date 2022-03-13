@@ -37,7 +37,7 @@ describe("catchAll higher order function", () => {
       currentLeafName: "",
       rawRequest: {} as FacebookRawRequest,
       input: { text: "", type: "text" },
-      type: "message_trigger",
+      triggerType: "message",
     });
 
     // Then
@@ -63,7 +63,7 @@ describe("catchAll higher order function", () => {
         oldContext: {},
         type: "context_change",
       },
-      type: "manual_trigger",
+      triggerType: "manual",
     });
 
     // Then
@@ -85,7 +85,7 @@ describe("catchAll higher order function", () => {
       currentLeafName: "",
       input: { text: "", type: "text" as const },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger" as const,
+      triggerType: "message" as const,
     };
 
     const result = await transformed.next(genericRequest);

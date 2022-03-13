@@ -120,7 +120,7 @@ describe("Generic message processor", () => {
         targetPlatform,
         rawRequest: {} as FacebookRawRequest,
         input: { type: "placebo" },
-        type: "message_trigger",
+        triggerType: "message",
       },
     });
 
@@ -133,7 +133,7 @@ describe("Generic message processor", () => {
           targetPlatform,
           rawRequest: {} as FacebookRawRequest,
           input: { type: "placebo" },
-          type: "message_trigger",
+          triggerType: "message",
         })
       )
     ).once();
@@ -199,7 +199,7 @@ describe("Cross platform message processor", () => {
         input: { text: "", type: "text" },
         rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
 
@@ -220,7 +220,7 @@ describe("Cross platform message processor", () => {
           language_code: "en" as const,
           is_bot: false,
         },
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
 
@@ -312,7 +312,7 @@ describe("Generic messenger", () => {
         input: { text: "", type: "text" },
         rawRequest: {} as FacebookRawRequest,
         targetPlatform: "facebook",
-        type: "message_trigger",
+        triggerType: "message",
       },
       output: [],
     };

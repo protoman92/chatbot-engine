@@ -43,7 +43,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -69,7 +69,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -95,7 +95,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -136,7 +136,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -177,7 +177,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -211,7 +211,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -243,7 +243,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -275,7 +275,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -309,7 +309,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -347,7 +347,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -392,7 +392,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });
@@ -429,7 +429,7 @@ describe("Create generic Telegram requests", () => {
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
-        type: "message_trigger",
+        triggerType: "message",
       },
     ]);
   });

@@ -38,7 +38,7 @@ describe("catchError higher-order function", () => {
         oldContext: {},
         type: "context_change",
       },
-      type: "manual_trigger",
+      triggerType: "manual",
     });
 
     // Then
@@ -83,7 +83,7 @@ describe("catchError higher-order function", () => {
         oldContext: {},
         type: "context_change",
       },
-      type: "manual_trigger",
+      triggerType: "manual",
     });
 
     // Then

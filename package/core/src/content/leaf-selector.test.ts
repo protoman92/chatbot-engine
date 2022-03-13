@@ -110,7 +110,7 @@ describe("Leaf selector", () => {
       currentContext: {},
       input: { text: "", type: "text" },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger",
+      triggerType: "message",
     });
 
     // Then
@@ -196,7 +196,7 @@ describe("Leaf selector", () => {
         currentContext: {},
         input: { text: "", type: "text" },
         rawRequest: {} as FacebookRawRequest,
-        type: "message_trigger",
+        triggerType: "message",
       });
 
       // Then

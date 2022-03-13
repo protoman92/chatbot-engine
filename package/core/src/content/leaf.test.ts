@@ -33,7 +33,7 @@ describe("Create leaf with observer", () => {
       currentLeafName: "",
       input: { text: "", type: "text" as const },
       rawRequest: {} as FacebookRawRequest,
-      type: "message_trigger" as const,
+      triggerType: "message" as const,
     };
 
     // When
@@ -63,7 +63,7 @@ describe("Create leaf with observer", () => {
         currentContext: {},
         input: { text: "", type: "text" },
         rawRequest: {} as FacebookRawRequest,
-        type: "message_trigger",
+        triggerType: "message",
       });
     } catch (e) {
       // Then
@@ -91,7 +91,7 @@ describe("Default error leaf", () => {
       currentContext: {},
       currentLeafName: errorLeafName,
       input: { error, erroredLeaf: errorLeafName, type: "error" },
-      type: "manual_trigger",
+      triggerType: "manual",
     });
 
     // Then

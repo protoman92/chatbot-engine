@@ -290,7 +290,7 @@ export function createGenericTelegramRequest(
         targetPlatform: "telegram",
         currentContext: {} as ChatbotContext,
         targetID: chat?.id.toString() || telegramUser.id.toString(),
-        type: "message_trigger",
+        triggerType: "message",
       };
     }
   );
