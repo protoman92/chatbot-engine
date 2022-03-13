@@ -1,16 +1,12 @@
 import { isType } from "@haipham/javascript-helper-preconditions";
-import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
+import { deepEqual, instance, spy, verify } from "ts-mockito";
 import { bridgeEmission, NextResult } from "../stream";
 import {
-  AmbiguousLeaf,
   ErrorLeafConfig,
-  FacebookLeaf,
   FacebookRawRequest,
-  TelegramLeaf,
-  TelegramRawRequest,
   _FacebookGenericResponseOutput,
 } from "../type";
-import { createDefaultErrorLeaf, createLeaf, createLeafObserver } from "./leaf";
+import { createDefaultErrorLeaf, createLeaf } from "./leaf";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;
@@ -119,131 +115,5 @@ describe("Default error leaf", () => {
     } else {
       throw new Error("Never should have come here");
     }
-  });
-});
-
-describe("Leaf for platforms", () => {
-  let fbLeaf: Omit<FacebookLeaf, "subscribe">;
-  let tlLeaf: Omit<TelegramLeaf, "subscribe">;
-  let platformLeaf: AmbiguousLeaf;
-
-  beforeEach(async () => {
-    fbLeaf = spy<Omit<FacebookLeaf, "subscribe">>({
-      next: () => Promise.reject(""),
-      complete: () => Promise.reject(""),
-    });
-
-    tlLeaf = spy<Omit<TelegramLeaf, "subscribe">>({
-      next: () => Promise.reject(""),
-      complete: () => Promise.reject(""),
-    });
-
-    platformLeaf = await createLeaf(() => {
-      return createLeafObserver({
-        facebook: instance(fbLeaf),
-        telegram: instance(tlLeaf),
-      });
-    });
-  });
-
-  it("Should work for different platforms", async () => {
-    // Setup
-    when(fbLeaf.next(anything())).thenResolve(NextResult.BREAK);
-    when(fbLeaf.complete!()).thenResolve({});
-    when(tlLeaf.next(anything())).thenResolve(NextResult.BREAK);
-    when(tlLeaf.complete!()).thenResolve({});
-
-    // When
-    await platformLeaf.next({
-      targetID,
-      currentContext: {},
-      currentLeafName: "",
-      input: { text: "", type: "text" },
-      rawRequest: {} as FacebookRawRequest,
-      targetPlatform: "facebook",
-      type: "message_trigger",
-    });
-
-    await platformLeaf.next({
-      targetID,
-      chatType: "private",
-      currentBot: {
-        id: 1,
-        first_name: "",
-        username: "",
-      },
-      currentContext: {},
-      currentLeafName: "",
-      input: { text: "", type: "text" },
-      rawRequest: {} as TelegramRawRequest,
-      targetPlatform: "telegram",
-      telegramUser: {
-        id: 1,
-        first_name: "",
-        last_name: "",
-        language_code: "en",
-        is_bot: false,
-        username: "",
-      },
-      type: "message_trigger",
-    });
-
-    await platformLeaf.complete!();
-    await platformLeaf.subscribe({ next: async () => NextResult.BREAK });
-
-    // Then
-    verify(fbLeaf.next(anything())).once();
-    verify(fbLeaf.complete!()).once();
-    verify(tlLeaf.next(anything())).once();
-    verify(tlLeaf.complete!()).once();
-  });
-
-  it("Should throw error if platform is not available", async () => {
-    // Setup
-    const platformObserver = await createLeafObserver({});
-
-    // When && Then: Facebook
-    try {
-      await platformObserver.next({
-        targetID,
-        currentContext: {},
-        currentLeafName: "",
-        input: { text: "", type: "text" },
-        rawRequest: {} as FacebookRawRequest,
-        targetPlatform: "facebook",
-        type: "message_trigger",
-      });
-
-      throw new Error("Never should have come here");
-    } catch (e) {}
-
-    // When && Then: Telegram
-    try {
-      await platformObserver.next({
-        targetID,
-        chatType: "private",
-        currentBot: {
-          id: 1,
-          first_name: "",
-          username: "",
-        },
-        currentContext: {},
-        currentLeafName: "",
-        input: { text: "", type: "text" },
-        rawRequest: {} as TelegramRawRequest,
-        targetPlatform: "telegram",
-        telegramUser: {
-          id: 1,
-          first_name: "",
-          last_name: "",
-          language_code: "en",
-          is_bot: false,
-          username: "",
-        },
-        type: "message_trigger",
-      });
-
-      throw new Error("Never should have come here");
-    } catch (e) {}
   });
 });

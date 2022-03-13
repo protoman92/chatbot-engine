@@ -1,17 +1,13 @@
-import { requireNotNull } from "@haipham/javascript-helper-preconditions";
+import { AsyncOrSync } from "ts-essentials";
 import { generateUniqueTargetKey } from "../common/utils";
 import { createContentSubject, NextResult } from "../stream";
 import {
   AmbiguousGenericResponse,
   AmbiguousLeaf,
-  AmbiguousLeafObserver,
   ErrorLeafConfig,
-  FacebookLeafObserver,
   LeafError,
   NextContentObserver,
-  TelegramLeafObserver,
 } from "../type";
-import { AsyncOrSync } from "ts-essentials";
 
 /**
  * Create a leaf from a base leaf with a default subject for broadcasting
@@ -37,7 +33,7 @@ export async function createLeaf(
       return baseSubject.next({
         ...response,
         originalRequest: originalRequests[generateUniqueTargetKey(response)],
-      } as AmbiguousGenericResponse);
+      });
     },
   };
 
@@ -56,7 +52,9 @@ export async function createLeaf(
       await baseLeaf.complete?.call(undefined);
       await baseSubject.complete?.call(undefined);
     },
-    subscribe: (observer) => baseSubject.subscribe(observer),
+    subscribe: (observer) => {
+      return baseSubject.subscribe(observer);
+    },
   };
 }
 
@@ -70,7 +68,10 @@ export function createDefaultErrorLeaf({
 }: ErrorLeafConfig): Promise<AmbiguousLeaf> {
   return createLeaf((observer) => ({
     next: async ({ input, targetID, targetPlatform }) => {
-      if (input.type !== "error") return NextResult.FALLTHROUGH;
+      if (input.type !== "error") {
+        return NextResult.FALLTHROUGH;
+      }
+
       const { error, erroredLeaf } = input;
 
       if (trackError != null) {
@@ -81,42 +82,9 @@ export function createDefaultErrorLeaf({
         targetID,
         targetPlatform,
         output: [
-          {
-            content: {
-              type: "text",
-              text: formatErrorMessage(error),
-            },
-          },
+          { content: { type: "text", text: formatErrorMessage(error) } },
         ],
       });
     },
   }));
-}
-
-/**
- * Create a leaf observer that handles content for different platforms, based
- * on the leaf input.
- */
-export async function createLeafObserver({
-  facebook,
-  telegram,
-}: Readonly<{
-  facebook?: FacebookLeafObserver;
-  telegram?: TelegramLeafObserver;
-}>): Promise<AmbiguousLeafObserver> {
-  return {
-    next: async (request) => {
-      switch (request.targetPlatform) {
-        case "facebook":
-          return requireNotNull(facebook).next(request);
-
-        case "telegram":
-          return requireNotNull(telegram).next(request);
-      }
-    },
-    complete: async () => {
-      await facebook?.complete?.call(undefined);
-      await telegram?.complete?.call(undefined);
-    },
-  };
 }
