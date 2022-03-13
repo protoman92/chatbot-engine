@@ -10,7 +10,7 @@ const config = (async (): Promise<Configuration> => {
   const coreConfig = await createMicrobackendConfig({
     pluginOptions: {
       "@microbackend/plugin-env-vars": {
-        requiredEnvVariables: ["NODE_ENV", "TELEGRAM_AUTH_TOKEN"],
+        requiredEnvVariables: ["TELEGRAM_AUTH_TOKEN"],
       },
     },
   });
