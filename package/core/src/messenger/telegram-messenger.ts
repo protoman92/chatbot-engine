@@ -11,7 +11,6 @@ import {
   MessageProcessorMiddleware,
   TelegramBot,
   TelegramGenericRequest,
-  TelegramGenericRequestInput,
   TelegramGenericResponse,
   TelegramMessageProcessor,
   TelegramMessageProcessorConfig,
@@ -19,6 +18,7 @@ import {
   TelegramRawRequest,
   TelegramRawResponse,
   TelegramUser,
+  _TelegramGenericRequest,
   _TelegramGenericResponseOutput,
   _TelegramRawRequest,
   _TelegramRawResponse,
@@ -69,7 +69,7 @@ function processMessageRequest({
 }>):
   | Readonly<{
       chat: _TelegramRawRequest.Chat;
-      inputs: TelegramGenericRequestInput[];
+      inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
       user: TelegramUser;
     }>
   | undefined {
@@ -166,7 +166,7 @@ function processCallbackRequest({
   callback_query: { data, from: user, message },
 }: _TelegramRawRequest.Callback): Readonly<{
   chat: _TelegramRawRequest.Chat;
-  inputs: TelegramGenericRequestInput[];
+  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
   user: TelegramUser;
 }> {
   return {
@@ -185,9 +185,9 @@ function processPreCheckoutRequest({
     total_amount: amount,
   },
 }: _TelegramRawRequest.PreCheckout): Readonly<{
-  user: TelegramUser;
   chat: _TelegramRawRequest.Chat | undefined;
-  inputs: TelegramGenericRequestInput[];
+  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+  user: TelegramUser;
 }> {
   return {
     user,
@@ -210,7 +210,7 @@ function processSuccessfulPaymentRequest({
   },
 }: _TelegramRawRequest.SuccessfulPayment): Readonly<{
   chat: _TelegramRawRequest.Chat | undefined;
-  inputs: TelegramGenericRequestInput[];
+  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
   user: TelegramUser;
 }> {
   return {
@@ -237,7 +237,7 @@ export function createGenericTelegramRequest(
   let requestData:
     | Readonly<{
         chat: _TelegramRawRequest.Chat | undefined;
-        inputs: TelegramGenericRequestInput[];
+        inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
         user: TelegramUser;
       }>
     | undefined;

@@ -5,24 +5,24 @@ import { FacebookGenericRequest } from "./facebook";
 import { TelegramGenericRequest } from "./telegram";
 import { WitRequestInput } from "./wit";
 
-export type BaseRequest = Readonly<{
-  currentContext: ChatbotContext;
-  targetID: string;
-}>;
-
-export type CrossPlatformRequestInput =
-  | Readonly<{ text: string; type: "text" }>
-  | Readonly<{ type: "placebo" }>
-  | ContextChangeRequestInput
-  | ErrorRequestInput
-  | WitRequestInput;
+export interface CommonGenericRequest {
+  readonly currentContext: ChatbotContext;
+  readonly targetID: string;
+}
 
 export interface GenericMessageTriggerRequest<RawRequest> {
+  readonly input:
+    | Readonly<{ text: string; type: "text" }>
+    | Readonly<{ type: "placebo" }>;
   readonly rawRequest: RawRequest;
   readonly triggerType: "message";
 }
 
 export interface GenericManualTriggerRequest {
+  readonly input:
+    | ContextChangeRequestInput
+    | ErrorRequestInput
+    | WitRequestInput;
   readonly rawRequest?: undefined;
   readonly triggerType: "manual";
 }

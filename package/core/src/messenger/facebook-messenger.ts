@@ -9,8 +9,8 @@ import {
   FacebookMessageProcessorMiddleware,
   FacebookRawRequest,
   FacebookRawResponse,
-  FacebookRequestInput,
   MessageProcessorMiddleware,
+  _FacebookGenericRequest,
   _FacebookGenericResponseOutput,
   _FacebookRawRequest,
   _FacebookRawResponse,
@@ -41,7 +41,7 @@ function createFacebookRequest(
 
   function processRequest(
     rawMessaging: _FacebookRawRequest.Entry.Messaging
-  ): FacebookRequestInput[] {
+  ): readonly _FacebookGenericRequest.MessageTrigger["input"][] {
     if ("postback" in rawMessaging) {
       return [{ payload: rawMessaging.postback.payload, type: "postback" }];
     }
@@ -113,22 +113,24 @@ function createFacebookRequest(
     acc.push(
       ...requests.map(processRequest).reduce((acc1, inputs) => {
         acc1.push(
-          ...inputs.map((input) => ({
-            input,
-            targetID,
-            currentContext: {} as ChatbotContext,
-            rawRequest: rawRequest,
-            targetPlatform: "facebook" as const,
-            triggerType: "message" as const,
-          }))
+          ...inputs.map(
+            (input): _FacebookGenericRequest.MessageTrigger => ({
+              input,
+              targetID,
+              currentContext: {} as ChatbotContext,
+              rawRequest: rawRequest,
+              targetPlatform: "facebook",
+              triggerType: "message",
+            })
+          )
         );
 
         return acc1;
-      }, [] as FacebookGenericRequest[])
+      }, [] as _FacebookGenericRequest.MessageTrigger[])
     );
 
     return acc;
-  }, [] as FacebookGenericRequest[]);
+  }, [] as _FacebookGenericRequest.MessageTrigger[]);
 }
 
 function createSingleAction(

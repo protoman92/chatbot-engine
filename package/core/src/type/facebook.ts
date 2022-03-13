@@ -1,5 +1,6 @@
 import { AppendOptions } from "form-data";
 import { ReadStream } from "fs";
+import { StrictOmit } from "ts-essentials";
 import { GenericManualTriggerRequest } from ".";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
@@ -10,32 +11,36 @@ import {
   MessageProcessorMiddleware,
   RawRequestGeneralizer,
 } from "./messenger";
-import {
-  BaseRequest,
-  CrossPlatformRequestInput,
-  GenericMessageTriggerRequest,
-} from "./request";
+import { CommonGenericRequest, GenericMessageTriggerRequest } from "./request";
 import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
-export type FacebookRequestInput =
-  | Readonly<{ param: string; type: "deeplink" }>
-  | Readonly<{ payload: string; type: "postback" }>
-  | Readonly<{ coordinate: Coordinates; type: "location" }>
-  | Readonly<{ image: string; type: "image" }>
-  | Readonly<{ image: string; stickerID: string; type: "sticker" }>
-  | CrossPlatformRequestInput;
+export namespace _FacebookGenericRequest {
+  interface BaseRequest extends CommonGenericRequest {
+    readonly targetPlatform: "facebook";
+  }
 
-export type FacebookGenericRequest = Readonly<{
-  targetPlatform: "facebook";
-}> &
-  BaseRequest &
-  (
-    | (GenericMessageTriggerRequest<FacebookRawRequest> &
-        Readonly<{ input: FacebookRequestInput }>)
-    | (GenericManualTriggerRequest & Readonly<{ input: FacebookRequestInput }>)
-  );
+  export interface ManualTrigger
+    extends BaseRequest,
+      GenericManualTriggerRequest {}
+
+  export interface MessageTrigger
+    extends BaseRequest,
+      StrictOmit<GenericMessageTriggerRequest<FacebookRawRequest>, "input"> {
+    readonly input:
+      | Readonly<{ param: string; type: "deeplink" }>
+      | Readonly<{ payload: string; type: "postback" }>
+      | Readonly<{ coordinate: Coordinates; type: "location" }>
+      | Readonly<{ image: string; type: "image" }>
+      | Readonly<{ image: string; stickerID: string; type: "sticker" }>
+      | GenericMessageTriggerRequest<FacebookRawRequest>["input"];
+  }
+}
+
+export type FacebookGenericRequest =
+  | _FacebookGenericRequest.ManualTrigger
+  | _FacebookGenericRequest.MessageTrigger;
 
 export interface FacebookGenericResponse extends BaseGenericResponse {
   readonly output: readonly FacebookGenericResponseOutput[];

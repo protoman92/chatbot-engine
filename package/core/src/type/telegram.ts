@@ -11,8 +11,7 @@ import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import {
-  BaseRequest,
-  CrossPlatformRequestInput,
+  CommonGenericRequest,
   GenericManualTriggerRequest,
   GenericMessageTriggerRequest,
 } from "./request";
@@ -20,70 +19,74 @@ import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
-export type TelegramGenericRequestInput = Readonly<
-  | { command: string; text?: string | undefined; type: "command" }
-  | { coordinate: Coordinates; type: "location" }
-  | {
-      document: _TelegramRawRequest.DocumentDetails;
-      type: "document";
-    }
-  | {
-      images: readonly _TelegramRawRequest.PhotoDetails[];
-      type: "image";
-    }
-  | {
-      areAllMembersAdministrators: boolean;
-      groupName: string;
-      type: "group_chat_created";
-    }
-  | {
-      leftChatMembers: readonly (TelegramBot | TelegramUser)[];
-      type: "left_chat";
-    }
-  | {
-      newChatMembers: readonly (TelegramBot | TelegramUser)[];
-      type: "joined_chat";
-    }
-  | { payload: string; type: "postback" }
-  /**
-   * Need to answer this with a pre-checkout confirmation response for the
-   * payment to go through.
-   */
-  | {
-      amount: number;
-      checkoutID: string;
-      currency: string;
-      payload: string;
-      type: "pre_checkout";
-    }
-  | {
-      amount: number;
-      currency: string;
-      payload: string;
-      providerPaymentChargeID: string;
-      telegramPaymentChargeID: string;
-      type: "successful_payment";
-    }
-  | { video: _TelegramRawRequest.VideoDetails; type: "video" }
-  | CrossPlatformRequestInput
->;
+export namespace _TelegramGenericRequest {
+  interface BaseRequest extends CommonGenericRequest {
+    readonly targetPlatform: "telegram";
+  }
 
-export type TelegramGenericRequest = Readonly<
-  {
-    targetPlatform: "telegram";
-  } & BaseRequest &
-    (
-      | (GenericMessageTriggerRequest<TelegramRawRequest> & {
-          chatType: TelegramChatType | undefined;
-          currentBot: TelegramBot;
-          telegramUser: TelegramUser;
-          input: TelegramGenericRequestInput;
-        })
-      | (GenericManualTriggerRequest & {
-          input: TelegramGenericRequestInput;
-        })
-    )
->;
+  export interface ManualTrigger
+    extends BaseRequest,
+      GenericManualTriggerRequest {}
+
+  export interface MessageTrigger
+    extends BaseRequest,
+      StrictOmit<GenericMessageTriggerRequest<TelegramRawRequest>, "input"> {
+    readonly chatType: TelegramChatType | undefined;
+    readonly currentBot: TelegramBot;
+    readonly telegramUser: TelegramUser;
+    readonly input: Readonly<
+      | { command: string; text?: string | undefined; type: "command" }
+      | { coordinate: Coordinates; type: "location" }
+      | {
+          document: _TelegramRawRequest.DocumentDetails;
+          type: "document";
+        }
+      | {
+          images: readonly _TelegramRawRequest.PhotoDetails[];
+          type: "image";
+        }
+      | {
+          areAllMembersAdministrators: boolean;
+          groupName: string;
+          type: "group_chat_created";
+        }
+      | {
+          leftChatMembers: readonly (TelegramBot | TelegramUser)[];
+          type: "left_chat";
+        }
+      | {
+          newChatMembers: readonly (TelegramBot | TelegramUser)[];
+          type: "joined_chat";
+        }
+      | { payload: string; type: "postback" }
+      /**
+       * Need to answer this with a pre-checkout confirmation response for the
+       * payment to go through.
+       */
+      | {
+          amount: number;
+          checkoutID: string;
+          currency: string;
+          payload: string;
+          type: "pre_checkout";
+        }
+      | {
+          amount: number;
+          currency: string;
+          payload: string;
+          providerPaymentChargeID: string;
+          telegramPaymentChargeID: string;
+          type: "successful_payment";
+        }
+      | { video: _TelegramRawRequest.VideoDetails; type: "video" }
+      | GenericMessageTriggerRequest<TelegramRawRequest>["input"]
+    >;
+  }
+}
+
+export type TelegramGenericRequest =
+  | _TelegramGenericRequest.ManualTrigger
+  | _TelegramGenericRequest.MessageTrigger;
 
 export interface TelegramGenericResponse extends BaseGenericResponse {
   readonly output: readonly TelegramGenericResponseOutput[];
