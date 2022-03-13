@@ -5,7 +5,7 @@ describe("Content stream and subject", () => {
   it("Should receive updates on subscription", async () => {
     // Setup
     let nextCount = 0;
-    let completeCount = 0;
+    let completedCount = 0;
     const subject = createContentSubject();
 
     // When
@@ -14,7 +14,9 @@ describe("Content stream and subject", () => {
         nextCount += 1;
         return NextResult.BREAK;
       },
-      complete: async () => (completeCount += 1),
+      complete: async () => {
+        completedCount += 1;
+      },
     });
 
     await subject.next(1);
@@ -24,13 +26,13 @@ describe("Content stream and subject", () => {
 
     // Then
     expect(nextCount).toEqual(3);
-    expect(completeCount).toEqual(1);
+    expect(completedCount).toEqual(1);
   });
 
   it("Should complete all internal observers on complete", async () => {
     // Setup
     let nextCount = 0;
-    let completeCount = 0;
+    let completedCount = 0;
     const subject = createContentSubject();
 
     // When
@@ -39,7 +41,9 @@ describe("Content stream and subject", () => {
         nextCount += 1;
         return NextResult.BREAK;
       },
-      complete: async () => (completeCount += 1),
+      complete: async () => {
+        completedCount += 1;
+      },
     });
 
     await subject.complete();
@@ -49,7 +53,7 @@ describe("Content stream and subject", () => {
     await subject.next(1);
 
     // Then
-    expect(completeCount).toEqual(1);
+    expect(completedCount).toEqual(1);
     expect(nextCount).toBeFalsy();
   });
 
@@ -70,7 +74,9 @@ describe("Content stream and subject", () => {
         receivedValues.push(content);
         return NextResult.BREAK;
       },
-      complete: async () => (completedCount += 1),
+      complete: async () => {
+        completedCount += 1;
+      },
     });
 
     await mapSeries(subjects, (subject, i) => subject.next(i));

@@ -10,7 +10,7 @@ export function createTransformChain(): LeafTransformChain {
       pipeTransformers.push(fn);
       return transformChain;
     },
-    transform: async (leaf) => {
+    transform: (leaf) => {
       return transform(leaf, ...pipeTransformers);
     },
   };

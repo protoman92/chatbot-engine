@@ -130,7 +130,7 @@ describe("Leaf selector", () => {
       })
     );
 
-    !!currentLeaf.complete &&
+    currentLeaf.complete != null &&
       when(currentLeaf.complete()).thenCall(async () => {
         completedCount += 1;
       });
@@ -184,7 +184,7 @@ describe("Leaf selector", () => {
   it("Should throw error if no enumerated leaves found", async () => {
     // Setup
     when(selector.enumerateLeaves()).thenResolve([]);
-    when(selector.triggerLeaf(anything(), anything())).thenResolve(
+    when(selector.triggerLeaf(anything(), anything())).thenReturn(
       NextResult.BREAK
     );
 

@@ -28,13 +28,13 @@ export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
       }
     },
     complete: async () => {
-      !!leaf.complete && (await leaf.complete());
-      !!fallbackLeaf.complete && (await fallbackLeaf.complete());
+      await leaf.complete?.call(undefined);
+      await fallbackLeaf.complete?.call(undefined);
     },
     subscribe: async (observer) => {
       return createCompositeSubscription(
-        await leaf.subscribe(observer),
-        await fallbackLeaf.subscribe(observer)
+        await Promise.resolve(leaf.subscribe(observer)),
+        await Promise.resolve(fallbackLeaf.subscribe(observer))
       );
     },
   });

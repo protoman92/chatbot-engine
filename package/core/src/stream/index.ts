@@ -19,7 +19,7 @@ export enum NextResult {
 
 /** Create a subscription with custom unsubscribe logic */
 export function createSubscription(
-  unsub: () => AsyncOrSync<unknown>
+  unsub: () => AsyncOrSync<void>
 ): ContentSubscription {
   let isUnsubscribed = false;
 
@@ -44,7 +44,11 @@ export function createCompositeSubscription(
   ...subs: ContentSubscription[]
 ): ContentSubscription {
   return createSubscription(() => {
-    return mapSeries(subs, (sub) => sub.unsubscribe());
+    return mapSeries(subs, (sub) => {
+      return sub.unsubscribe();
+    }).then(() => {
+      return undefined;
+    });
   });
 }
 
@@ -60,16 +64,14 @@ export function createContentSubject<T>(): ContentSubject<T> {
       currentID += 1;
       observerMap[observerID] = observer;
 
-      return Promise.resolve(
-        createSubscription(async () => {
-          delete observerMap[observerID];
-          return observer.complete?.call(undefined);
-        })
-      );
+      return createSubscription(async () => {
+        delete observerMap[observerID];
+        await observer.complete?.call(undefined);
+      });
     },
     next: (contents) => {
       if (isCompleted) {
-        return Promise.resolve(NextResult.FALLTHROUGH);
+        return NextResult.FALLTHROUGH;
       }
 
       return mapSeries(Object.entries(observerMap), ([, obs]) => {
@@ -82,13 +84,15 @@ export function createContentSubject<T>(): ContentSubject<T> {
     },
     complete: () => {
       if (isCompleted) {
-        return Promise.resolve(undefined);
+        return undefined;
       }
 
       isCompleted = true;
 
       return mapSeries(Object.values(observerMap), (obs) => {
         return obs.complete?.call(undefined);
+      }).then(() => {
+        return undefined;
       });
     },
   };
@@ -118,13 +122,15 @@ export function bridgeEmission<I, O>(
 ): (input: I) => Promise<O> {
   return (input) => {
     return new Promise(async (resolve) => {
-      const subscription = await source.subscribe({
-        next: async (content) => {
-          resolve(content);
-          await subscription.unsubscribe();
-          return NextResult.BREAK;
-        },
-      });
+      const subscription = await Promise.resolve(
+        source.subscribe({
+          next: async (content) => {
+            resolve(content);
+            await subscription.unsubscribe();
+            return NextResult.BREAK;
+          },
+        })
+      );
 
       source.next(input);
     });

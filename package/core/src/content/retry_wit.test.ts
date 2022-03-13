@@ -62,7 +62,7 @@ describe("Wit higher order function", () => {
 
   it("Should return original request result if invalid input type", async () => {
     // Setup
-    when(rootLeaf.next(anything())).thenResolve(NextResult.FALLTHROUGH);
+    when(rootLeaf.next(anything())).thenReturn(NextResult.FALLTHROUGH);
     const transformer = await retryWithWit(instance(comm));
     const transformed = await transformer(instance(rootLeaf));
 
@@ -87,7 +87,7 @@ describe("Wit higher order function", () => {
 
   it("Wit engine should not fire if no fallthrough from root leaf", async () => {
     // Setup
-    when(rootLeaf.next(anything())).thenResolve(NextResult.BREAK);
+    when(rootLeaf.next(anything())).thenReturn(NextResult.BREAK);
     const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When

@@ -43,10 +43,14 @@ export async function createLeaf(
     next: (request) => {
       originalRequests[generateUniqueTargetKey(request)] = request;
 
-      return baseLeaf.next(request).catch((error) => {
-        (error as LeafError).currentLeafName = request.currentLeafName;
-        throw error;
-      });
+      return (async () => {
+        try {
+          return await Promise.resolve(baseLeaf.next(request));
+        } catch (error) {
+          (error as LeafError).currentLeafName = request.currentLeafName;
+          throw error;
+        }
+      })();
     },
     complete: async () => {
       await baseLeaf.complete?.call(undefined);
@@ -67,7 +71,7 @@ export function createDefaultErrorLeaf({
   trackError,
 }: ErrorLeafConfig): Promise<AmbiguousLeaf> {
   return createLeaf((observer) => ({
-    next: async ({ input, targetID, targetPlatform }) => {
+    next: ({ input, targetID, targetPlatform }) => {
       if (input.type !== "error") {
         return NextResult.FALLTHROUGH;
       }

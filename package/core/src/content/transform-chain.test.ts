@@ -19,7 +19,7 @@ describe("Transform chain", () => {
         return Promise.reject(error);
       },
       complete: () => {
-        return Promise.resolve({});
+        return Promise.resolve(undefined);
       },
       subscribe: () => {
         return Promise.resolve(createSubscription(async () => {}));
@@ -31,7 +31,7 @@ describe("Transform chain", () => {
         return Promise.resolve(NextResult.BREAK);
       },
       complete: () => {
-        return Promise.resolve({});
+        return Promise.resolve(undefined);
       },
       subscribe: () => {
         return Promise.resolve(createSubscription(async () => {}));

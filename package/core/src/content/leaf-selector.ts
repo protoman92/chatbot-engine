@@ -91,11 +91,11 @@ export function createLeafSelector(branch: Branch) {
 
       return NextResult.FALLTHROUGH;
     },
-    complete: async (): Promise<unknown> => {
-      const enumeratedLeaves = await selector.enumerateLeaves();
-
-      return mapSeries(enumeratedLeaves, async ({ currentLeaf }) => {
+    complete: (): Promise<void> => {
+      return mapSeries(selector.enumerateLeaves(), async ({ currentLeaf }) => {
         return currentLeaf.complete?.call(undefined);
+      }).then(() => {
+        return undefined;
       });
     },
     subscribe: (
