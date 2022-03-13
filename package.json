@@ -49,6 +49,7 @@
     "package/context-dao-dynamodb",
     "package/context-dao-redis",
     "package/core",
+    "package/microbackend-plugin-core",
     "package/microbackend-plugin-express",
     "package/javascript-helper/package/array",
     "package/javascript-helper/package/async_synchronizer",
