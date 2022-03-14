@@ -5,8 +5,18 @@ export default class CommonConfig extends MicrobackendAppConfig {
     return {
       chatbotEngine: {
         messenger: {
-          facebook: { isEnabled: true },
-          telegram: { isEnabled: true },
+          facebook: {
+            client: {
+              apiVersion: "v1",
+              pageToken: "placeholder",
+              verifyToken: "placeholder",
+            },
+            isEnabled: true,
+          },
+          telegram: {
+            client: { authToken: process.env["TELEGRAM_AUTH_TOKEN"] },
+            isEnabled: true,
+          },
         },
       },
     };

@@ -9,23 +9,7 @@ export default class CommonConfig extends MicrobackendRequestConfig {
             console.error("Error:", error);
           },
         },
-        messenger: {
-          facebook: {
-            client: {
-              apiVersion: "v1",
-              pageToken: "placeholder",
-              verifyToken: "placeholder",
-            },
-          },
-          telegram: {
-            client: { authToken: process.env["TELEGRAM_AUTH_TOKEN"] },
-          },
-        },
-        webhook: {
-          onError: (error) => {
-            console.error("Error:", error);
-          },
-        },
+        messenger: { facebook: {}, telegram: {} },
       },
     };
   }

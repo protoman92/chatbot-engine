@@ -11,7 +11,7 @@ export interface BaseGenericResponse {
    * a custom message not triggered by the user), the original request will be
    * available in order to trigger context change requests.
    */
-  readonly originalRequest?: AmbiguousGenericRequest;
+  readonly originalRequest?: AmbiguousGenericRequest | undefined;
   readonly targetID: string;
 }
 
