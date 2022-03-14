@@ -301,7 +301,7 @@ describe("Generic messenger", () => {
       processor: instance(processor),
     });
 
-    const { next, complete } = capture(leafSelector.subscribe).first()[0];
+    const { next } = capture(leafSelector.subscribe).first()[0];
 
     const genericResponse: AmbiguousGenericResponse = {
       targetID,
@@ -320,7 +320,6 @@ describe("Generic messenger", () => {
     await next(genericResponse);
 
     // Then
-    expect(complete).toBeTruthy();
     verify(processor.sendResponse(deepEqual({ genericResponse }))).once();
   });
 });

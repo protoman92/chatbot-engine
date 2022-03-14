@@ -27,10 +27,6 @@ export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
         });
       }
     },
-    complete: async () => {
-      await leaf.complete?.call(undefined);
-      await fallbackLeaf.complete?.call(undefined);
-    },
     subscribe: async (observer) => {
       return createCompositeSubscription(
         await Promise.resolve(leaf.subscribe(observer)),

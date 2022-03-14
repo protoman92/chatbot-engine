@@ -172,7 +172,6 @@ export async function createMessenger({
       await processor.sendResponse({ genericResponse: response });
       return NextResult.BREAK;
     },
-    complete: async () => {},
   });
 
   return {

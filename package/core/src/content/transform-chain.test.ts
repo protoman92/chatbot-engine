@@ -18,9 +18,6 @@ describe("Transform chain", () => {
       next: () => {
         return Promise.reject(error);
       },
-      complete: () => {
-        return Promise.resolve(undefined);
-      },
       subscribe: () => {
         return Promise.resolve(createSubscription(async () => {}));
       },
@@ -29,9 +26,6 @@ describe("Transform chain", () => {
     const fallbackLeaf = spy<AmbiguousLeaf>({
       next: () => {
         return Promise.resolve(NextResult.BREAK);
-      },
-      complete: () => {
-        return Promise.resolve(undefined);
       },
       subscribe: () => {
         return Promise.resolve(createSubscription(async () => {}));
@@ -62,8 +56,6 @@ describe("Transform chain", () => {
       },
     });
 
-    await transformed.complete!();
-
     // Then
     verify(
       fallbackLeaf.next(
@@ -77,9 +69,7 @@ describe("Transform chain", () => {
         })
       )
     ).once();
-    verify(fallbackLeaf.complete!()).once();
     verify(fallbackLeaf.subscribe(anything())).once();
-    verify(errorLeaf.complete!()).once();
     verify(errorLeaf.subscribe(anything())).once;
     expect(nextResult).toEqual(NextResult.BREAK);
   });

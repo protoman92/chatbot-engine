@@ -117,33 +117,6 @@ describe("Leaf selector", () => {
     verify(selector.triggerLeaf(anything(), anything())).times(validLeafID + 1);
   });
 
-  it("Completing stream should trigger complete from all leaves", async () => {
-    // Setup
-    let completedCount = 0;
-
-    const enumeratedLeaves: LeafEnumeration[] = [...Array(1000).keys()].map(
-      (i) => ({
-        currentLeaf: instance(currentLeaf),
-        currentLeafName: `${i}`,
-        parentBranch: {},
-        prefixLeafPaths: [],
-      })
-    );
-
-    currentLeaf.complete != null &&
-      when(currentLeaf.complete()).thenCall(async () => {
-        completedCount += 1;
-      });
-
-    when(selector.enumerateLeaves()).thenResolve(enumeratedLeaves);
-
-    // When
-    await instance(selector).complete();
-
-    // Then
-    expect(completedCount).toEqual(enumeratedLeaves.length);
-  });
-
   it("Subscribing to response should merge leaf observables", async () => {
     // Setup
     const enumeratedLeaves: LeafEnumeration[] = [...Array(1000).keys()].map(

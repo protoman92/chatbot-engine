@@ -66,7 +66,6 @@ export function createContentSubject<T>(): ContentSubject<T> {
 
       return createSubscription(async () => {
         delete observerMap[observerID];
-        await observer.complete?.call(undefined);
       });
     },
     next: (contents) => {
@@ -81,19 +80,6 @@ export function createContentSubject<T>(): ContentSubject<T> {
           ? NextResult.BREAK
           : NextResult.FALLTHROUGH
       );
-    },
-    complete: () => {
-      if (isCompleted) {
-        return undefined;
-      }
-
-      isCompleted = true;
-
-      return mapSeries(Object.values(observerMap), (obs) => {
-        return obs.complete?.call(undefined);
-      }).then(() => {
-        return undefined;
-      });
     },
   };
 }

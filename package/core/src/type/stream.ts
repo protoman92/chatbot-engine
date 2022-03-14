@@ -13,9 +13,7 @@ export interface NextContentObserver<T> {
 }
 
 /** Represents an observer for contents of some type */
-export interface ContentObserver<T> extends NextContentObserver<T> {
-  complete?(): AsyncOrSync<void>;
-}
+export interface ContentObserver<T> extends NextContentObserver<T> {}
 
 /** Observe some contents on subscription */
 export interface ContentObservable<T> {

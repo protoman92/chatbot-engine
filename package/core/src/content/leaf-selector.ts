@@ -1,5 +1,4 @@
 import { isType } from "@haipham/javascript-helper-preconditions";
-import { mapSeries } from "../common/utils";
 import { mergeObservables, NextResult } from "../stream";
 import {
   AmbiguousGenericResponse,
@@ -90,13 +89,6 @@ export function createLeafSelector(branch: Branch) {
       }
 
       return NextResult.FALLTHROUGH;
-    },
-    complete: (): Promise<void> => {
-      return mapSeries(selector.enumerateLeaves(), async ({ currentLeaf }) => {
-        return currentLeaf.complete?.call(undefined);
-      }).then(() => {
-        return undefined;
-      });
     },
     subscribe: (
       observer: ContentObserver<AmbiguousGenericResponse>

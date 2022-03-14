@@ -52,10 +52,6 @@ export async function createLeaf(
         }
       })();
     },
-    complete: async () => {
-      await baseLeaf.complete?.call(undefined);
-      await baseSubject.complete?.call(undefined);
-    },
     subscribe: (observer) => {
       return baseSubject.subscribe(observer);
     },
