@@ -65,6 +65,7 @@ describe("Generic message processor", () => {
       genericResponse: {
         targetID,
         targetPlatform,
+        originalRequest: {} as AmbiguousGenericRequest,
         output: [{ content: { text: "", type: "text" } }],
       },
     });
@@ -92,6 +93,7 @@ describe("Generic message processor", () => {
       genericResponse: {
         targetID,
         targetPlatform,
+        originalRequest: {} as AmbiguousGenericRequest,
         output: [{ content: { text: "", type: "text" } }],
       },
     });

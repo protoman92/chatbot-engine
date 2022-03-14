@@ -1,11 +1,11 @@
 import { AsyncOrSync } from "ts-essentials";
-import { generateUniqueTargetKey } from "../common/utils";
-import { createContentSubject } from "../stream";
+import { createContentSubject, createSubscription } from "../stream";
 import {
   AmbiguousGenericResponse,
   AmbiguousLeaf,
   ContentObservable,
   ContentObserver,
+  ContentSubscription,
   ErrorLeafConfig,
   LeafError,
   NextContentObserver,
@@ -56,47 +56,62 @@ export async function createLeaf(
     >
   ) => AsyncOrSync<Omit<AmbiguousLeaf, "subscribe">>
 ): Promise<AmbiguousLeaf> {
-  let originalRequests: Record<
-    ReturnType<typeof generateUniqueTargetKey>,
-    AmbiguousGenericResponse["originalRequest"]
+  const observerMap: Record<
+    string,
+    Parameters<AmbiguousLeaf["subscribe"]>[0]
   > = {};
 
-  const baseSubject = createContentSubject<
-    AmbiguousGenericResponse,
-    NextResult
-  >((...nextOutputs) => {
-    return nextOutputs.every((nextOutput) => nextOutput === NextResult.BREAK)
-      ? NextResult.BREAK
-      : NextResult.FALLTHROUGH;
-  });
-
-  const subject: typeof baseSubject = {
-    ...baseSubject,
-    next: (response) => {
-      return baseSubject.next({
-        ...response,
-        originalRequest: originalRequests[generateUniqueTargetKey(response)],
-      });
-    },
-  };
-
-  const baseLeaf = await Promise.resolve(fn(subject));
+  let observerID = 1;
 
   return {
-    next: (request) => {
-      originalRequests[generateUniqueTargetKey(request)] = request;
+    next: async (request) => {
+      const baseSubject = createContentSubject<
+        AmbiguousGenericResponse,
+        NextResult
+      >((...nextOutputs) => {
+        return nextOutputs.every(
+          (nextOutput) => nextOutput === NextResult.BREAK
+        )
+          ? NextResult.BREAK
+          : NextResult.FALLTHROUGH;
+      });
 
-      return (async () => {
-        try {
-          return await Promise.resolve(baseLeaf.next(request));
-        } catch (error) {
-          (error as LeafError).currentLeafName = request.currentLeafName;
-          throw error;
+      const subject: typeof baseSubject = {
+        ...baseSubject,
+        next: (response) => {
+          return baseSubject.next({ ...response, originalRequest: request });
+        },
+      };
+
+      let subscriptions: ContentSubscription[] = [];
+
+      for (const observer of Object.values(observerMap)) {
+        const subscription = await subject.subscribe(observer);
+        subscriptions.push(subscription);
+      }
+
+      try {
+        const baseLeaf = await Promise.resolve(fn(subject));
+        return await Promise.resolve(baseLeaf.next(request));
+      } catch (error) {
+        (error as LeafError).currentLeafName = request.currentLeafName;
+        throw error;
+      } finally {
+        for (const subscription of subscriptions) {
+          await Promise.resolve(subscription.unsubscribe());
         }
-      })();
+      }
     },
     subscribe: (observer) => {
-      return baseSubject.subscribe(observer);
+      const currentID = observerID;
+      observerID += 1;
+      observerMap[currentID] = observer;
+
+      const subscription = createSubscription(() => {
+        delete observerMap[currentID];
+      });
+
+      return Promise.resolve(subscription);
     },
   };
 }
