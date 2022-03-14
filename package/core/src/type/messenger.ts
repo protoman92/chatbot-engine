@@ -1,3 +1,4 @@
+import { ContentObservable, ContentObserver } from ".";
 import {
   GenericRequestToReceive,
   GenericResponseToSend,
@@ -63,10 +64,9 @@ export interface MessengerConfig {
  * handling data to sending response. Note that each generic messenger should
  * have a generic messenger that handles requests one-by-one.
  */
-export interface Messenger {
-  /** Process a raw request from end-to-end */
-  processRawRequest(args: RawRequestToGeneralize<unknown>): Promise<unknown>;
-}
+export interface Messenger
+  extends ContentObservable<ContentObserver<void, void>>,
+    ContentObserver<RawRequestToGeneralize<unknown>, void> {}
 
 export namespace _MessageProcessorMiddleware {
   export interface Input {

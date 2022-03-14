@@ -7,6 +7,7 @@ import {
   verify,
   when,
 } from "ts-mockito";
+import { createSubscription } from "..";
 import {
   AmbiguousGenericRequest,
   AmbiguousGenericResponse,
@@ -158,26 +159,26 @@ describe("Cross platform message processor", () => {
     });
 
     fbProcessor = spy<FacebookMessageProcessor>({
-      generalizeRequest: () => {
-        return Promise.resolve([]);
+      generalizeRequest: async () => {
+        return [];
       },
-      receiveRequest: () => {
-        return Promise.resolve(undefined);
+      receiveRequest: async () => {
+        return undefined;
       },
-      sendResponse: () => {
-        return Promise.resolve({});
+      sendResponse: async () => {
+        return {};
       },
     });
 
     tlProcessor = spy<TelegramMessageProcessor>({
-      generalizeRequest: () => {
-        return Promise.resolve([]);
+      generalizeRequest: async () => {
+        return [];
       },
-      receiveRequest: () => {
-        return Promise.resolve(undefined);
+      receiveRequest: async () => {
+        return undefined;
       },
-      sendResponse: () => {
-        return Promise.resolve([]);
+      sendResponse: async () => {
+        return [];
       },
     });
 
@@ -238,7 +239,7 @@ describe("Cross platform message processor", () => {
         leafSelector: instance(leafSelector),
       });
 
-      await messenger.processRawRequest({ rawRequest: {} });
+      await messenger.next({ rawRequest: {} });
 
       // Then
       verify(processors[targetPlatform]!.generalizeRequest(anything())).once();
@@ -258,7 +259,7 @@ describe("Cross platform message processor", () => {
 
     // When && Then: Facebook
     try {
-      await messenger.processRawRequest({
+      await messenger.next({
         rawRequest: { object: "", entry: {} },
       });
 
@@ -267,7 +268,7 @@ describe("Cross platform message processor", () => {
 
     // When && Then: Telegram
     try {
-      await messenger.processRawRequest({ rawRequest: { update_id: "" } });
+      await messenger.next({ rawRequest: { update_id: "" } });
       throw new Error("Never should have come here");
     } catch (e) {}
   });
@@ -279,27 +280,40 @@ describe("Generic messenger", () => {
 
   beforeEach(() => {
     leafSelector = spy<LeafSelector>({
-      next: () => Promise.reject(""),
-      subscribe: () => Promise.reject(""),
+      next: () => {
+        return Promise.reject("");
+      },
+      subscribe: () => {
+        return Promise.reject("");
+      },
     });
 
     processor = spy<BaseMessageProcessor>({
-      generalizeRequest: () => Promise.resolve([]),
-      receiveRequest: () => Promise.resolve(undefined),
-      sendResponse: () => Promise.resolve({}),
+      generalizeRequest: async () => {
+        return [];
+      },
+      receiveRequest: async () => {
+        return undefined;
+      },
+      sendResponse: async () => {
+        return {};
+      },
     });
   });
 
   it("Should trigger send with valid response", async () => {
     // Setup
-    when(leafSelector.subscribe(anything())).thenResolve();
+    const subscription = createSubscription(() => {});
+    when(leafSelector.subscribe(anything())).thenResolve(subscription);
     when(processor.sendResponse(anything())).thenResolve();
 
     // When
-    await createMessenger({
+    const messenger = await createMessenger({
       leafSelector: instance(leafSelector),
       processor: instance(processor),
     });
+
+    const messengerSubscription = await messenger.subscribe({ next: () => {} });
 
     const { next } = capture(leafSelector.subscribe).first()[0];
 
@@ -320,6 +334,7 @@ describe("Generic messenger", () => {
     await next(genericResponse);
 
     // Then
+    messengerSubscription.unsubscribe();
     verify(processor.sendResponse(deepEqual({ genericResponse }))).once();
   });
 });

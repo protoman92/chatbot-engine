@@ -55,9 +55,11 @@ export function createContentSubject<I, O>(
       currentID += 1;
       observerMap[observerID] = observer;
 
-      return createSubscription(async () => {
+      const subscription = createSubscription(() => {
         delete observerMap[observerID];
       });
+
+      return Promise.resolve(subscription);
     },
     next: (contents) => {
       return mapSeries(Object.entries(observerMap), ([, obs]) => {

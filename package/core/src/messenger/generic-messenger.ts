@@ -167,15 +167,8 @@ export async function createMessenger({
   leafSelector,
   processor,
 }: MessengerConfig): Promise<Messenger> {
-  await leafSelector.subscribe({
-    next: async (response) => {
-      await processor.sendResponse({ genericResponse: response });
-      return NextResult.BREAK;
-    },
-  });
-
   return {
-    processRawRequest: async ({ rawRequest, ...args }) => {
+    next: async ({ rawRequest, ...args }) => {
       const genericRequests = await processor.generalizeRequest({
         ...args,
         rawRequest,
@@ -183,7 +176,20 @@ export async function createMessenger({
 
       return mapSeries(genericRequests, (genericRequest) => {
         return processor.receiveRequest({ ...args, genericRequest });
+      }).then(() => {
+        return undefined;
       });
+    },
+    subscribe: async (observer) => {
+      const subscription = await leafSelector.subscribe({
+        next: async (response) => {
+          await processor.sendResponse({ genericResponse: response });
+          await observer.next(undefined);
+          return NextResult.BREAK;
+        },
+      });
+
+      return subscription;
     },
   };
 }

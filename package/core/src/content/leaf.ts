@@ -31,15 +31,13 @@ export function bridgeEmission<I, O>(
 ): (input: I) => Promise<O> {
   return (input) => {
     return new Promise(async (resolve) => {
-      const subscription = await Promise.resolve(
-        source.subscribe({
-          next: async (content) => {
-            resolve(content);
-            await subscription.unsubscribe();
-            return NextResult.BREAK;
-          },
-        })
-      );
+      const subscription = await source.subscribe({
+        next: async (content) => {
+          resolve(content);
+          await subscription.unsubscribe();
+          return NextResult.BREAK;
+        },
+      });
 
       source.next(input);
     });

@@ -3,7 +3,7 @@ import { AsyncOrSync } from "ts-essentials";
 /** Represents a subscription to some content stream */
 export interface ContentSubscription {
   /** Unsubscribe from the underlying stream */
-  unsubscribe(): AsyncOrSync<void>;
+  unsubscribe(): Promise<void>;
 }
 
 /** Represents an observer that accepts contents of some type */
@@ -19,7 +19,7 @@ export interface ContentObservable<
   Observer extends ContentObserver<unknown, unknown>
 > {
   /** Subscribe to this stream's contents */
-  subscribe(observer: Observer): AsyncOrSync<ContentSubscription>;
+  subscribe(observer: Observer): Promise<ContentSubscription>;
 }
 
 /** Represents both an observable and an observer */

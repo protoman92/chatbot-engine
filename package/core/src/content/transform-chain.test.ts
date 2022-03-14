@@ -18,17 +18,17 @@ describe("Transform chain", () => {
       next: () => {
         return Promise.reject(error);
       },
-      subscribe: () => {
-        return Promise.resolve(createSubscription(async () => {}));
+      subscribe: async () => {
+        return createSubscription(async () => {});
       },
     });
 
     const fallbackLeaf = spy<AmbiguousLeaf>({
-      next: () => {
-        return Promise.resolve(NextResult.BREAK);
+      next: async () => {
+        return NextResult.BREAK;
       },
-      subscribe: () => {
-        return Promise.resolve(createSubscription(async () => {}));
+      subscribe: async () => {
+        return createSubscription(async () => {});
       },
     });
 

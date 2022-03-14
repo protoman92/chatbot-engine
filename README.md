@@ -77,9 +77,9 @@ const tlClient = createTelegramClient(client, {
 A branch contains many leaves, and potentially other sub-branches. Let's see how we can implement a simple leaf:
 
 ```javascript
-export default async function () {
+export default function () {
   return {
-    sayHello: await createLeaf((observer) => ({
+    sayHello: createLeaf((observer) => ({
       /**
        * This request contains the information sent by the user, via the input
        * field. It also tells you the user's platform and ID.
@@ -129,9 +129,9 @@ export default async function () {
 In the above example, you'll see that an `additionalContext` was specified in `observer.next`. This will trigger a modification of the user's context object in persistence, and fire a `context_change` request that you can catch and process:
 
 ```javascript
-export default async function () {
+export default function () {
   return {
-    onCounterChangeTrigger: await createLeaf((observer) => ({
+    onCounterChangeTrigger: createLeaf((observer) => ({
       next: async (request) => {
         const { currentContext, input, targetID, targetPlatform } = request;
 
@@ -142,6 +142,7 @@ export default async function () {
         ) {
           return NextResult.FALLTHROUGH;
         }
+
         await observer.next({
           targetID,
           targetPlatform,
@@ -158,9 +159,9 @@ export default async function () {
 This mechanism is especially useful when you want to trigger flows automatically after a new state. For example, you can implement a state machine for some input flow, which can be triggered from anywhere:
 
 ```javascript
-export default async function ({ appClient }: Config) {
+export default function ({ appClient }: Config) {
   return {
-    onStartEditingTrigger: await createLeaf((observer) => ({
+    onStartEditingTrigger: createLeaf((observer) => ({
       next: async (request) => {
         const { currentContext, input, targetID, targetPlatform } = request;
 
@@ -201,7 +202,7 @@ export default async function ({ appClient }: Config) {
         return NextResult.BREAK;
       },
     })),
-    onEnterNameTrigger: await createLeaf((observer) => ({
+    onEnterNameTrigger: createLeaf((observer) => ({
       next: async (request) => {
         const { currentContext, input, targetID, targetPlatform } = request;
 
@@ -239,10 +240,10 @@ This is pretty similar to how [Redux](https://github.com/reduxjs/redux) manages 
 After you have the leaves ready, the branches are easy to set up:
 
 ```javascript
-export default async function (args: Config) {
+export default function (args: Config) {
   return {
-    editProfile: await createEditProfile(args),
-    sayHello: await createSayHello(),
+    editProfile: createEditProfile(args),
+    sayHello: createSayHello(),
   };
 }
 ```
@@ -293,6 +294,15 @@ const crossProcessor = createCrossPlatformMessageProcessor({
 });
 
 const messenger = createMessenger(crossProcessor);
+
+/**
+ * The messenger implements the observer interface, so you need to call
+ * subscribe on it to start the engine. The resulting subscription object can
+ * be used to clean up after the server stops.
+ */
+const subscription = messenger.subscribe({
+  next: console.log,
+});
 ```
 
 ### Set up the server
@@ -309,12 +319,12 @@ app.get("/api/facebook", async ({ query }, res) => {
 });
 
 app.post("/api/facebook", async ({ body }, res) => {
-  await messenger.processPlatformRequest(body);
+  await messenger.next(body);
   res.sendStatus(204);
 });
 
 app.post("/api/telegram", async ({ body }, res) => {
-  await messenger.processPlatformRequest(body);
+  await messenger.next(body);
   res.sendStatus(204);
 });
 
