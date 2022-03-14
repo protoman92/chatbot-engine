@@ -106,6 +106,7 @@ export function saveContextOnSend({
                 changedContext: genericResponse.additionalContext,
                 type: "context_change",
               },
+              originalRequest: genericResponse.originalRequest,
               targetID: genericResponse.targetID,
               targetPlatform: genericResponse.targetPlatform,
               triggerType: "manual",

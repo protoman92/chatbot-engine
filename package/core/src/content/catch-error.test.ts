@@ -1,6 +1,6 @@
 import { capture, instance, spy } from "ts-mockito";
 import { createSubscription } from "../stream";
-import { AmbiguousLeaf } from "../type";
+import { AmbiguousGenericRequest, AmbiguousLeaf } from "../type";
 import { catchError } from "./catch-error";
 import { createLeaf, NextResult } from "./leaf";
 
@@ -32,6 +32,7 @@ describe("catchError higher-order function", () => {
       targetID,
       targetPlatform,
       currentContext: {},
+      originalRequest: {} as AmbiguousGenericRequest,
       input: {
         changedContext: {},
         newContext: {},
@@ -83,6 +84,7 @@ describe("catchError higher-order function", () => {
         oldContext: {},
         type: "context_change",
       },
+      originalRequest: {} as AmbiguousGenericRequest,
       triggerType: "manual",
     });
 

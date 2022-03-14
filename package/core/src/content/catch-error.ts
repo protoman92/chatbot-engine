@@ -6,11 +6,11 @@ import { AmbiguousLeaf, LeafError, LeafTransformer } from "../type";
 /** If a leaf throws error while producing content, switch to fallback leaf */
 export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
   return (leaf) => ({
-    next: async ({ currentLeafName, ...request }) => {
+    next: async (request) => {
       try {
-        return await leaf.next({ ...request, currentLeafName });
+        return await leaf.next(request);
       } catch (error) {
-        let erroredLeaf = currentLeafName;
+        let erroredLeaf = request.currentLeafName;
 
         if (
           isType<LeafError>(error, "currentLeafName") &&
@@ -21,8 +21,8 @@ export function catchError(fallbackLeaf: AmbiguousLeaf): LeafTransformer {
 
         return fallbackLeaf.next({
           ...omitProperties(request, "input", "rawRequest", "triggerType"),
-          currentLeafName,
           input: { erroredLeaf, error: error as Error, type: "error" },
+          originalRequest: request,
           triggerType: "manual",
         });
       }

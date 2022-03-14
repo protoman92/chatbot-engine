@@ -1,6 +1,7 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { transform } from "../common/utils";
 import {
+  AmbiguousGenericRequest,
   ContextDAO,
   TelegramBot,
   TelegramGenericRequest,
@@ -83,6 +84,7 @@ describe("Inject context on receive", () => {
           newContext: {},
           type: "context_change",
         },
+        originalRequest: {} as AmbiguousGenericRequest,
         triggerType: "manual",
       },
     });
@@ -178,6 +180,7 @@ describe("Save Telegram user for target ID", () => {
           newContext: {},
           type: "context_change",
         },
+        originalRequest: {} as AmbiguousGenericRequest,
         targetID: `${targetID}`,
         targetPlatform: "telegram",
         triggerType: "manual",

@@ -56,6 +56,7 @@ export function retryWithWit(comm: WitClient): LeafTransformer {
         result = await leaf.next({
           ...omitProperties(request, "input", "rawRequest", "triggerType"),
           input: { entities, highestConfidence, intents, traits, type: "wit" },
+          originalRequest: request,
           targetPlatform: request.targetPlatform,
           triggerType: "manual",
         });

@@ -128,6 +128,7 @@ describe("Save context on send", () => {
               newContext: finalContext,
               type: "context_change",
             },
+            originalRequest: genericResponse.originalRequest,
             targetPlatform: "telegram",
             triggerType: "manual",
           },
@@ -170,6 +171,7 @@ describe("Save user for target ID", () => {
           newContext: {},
           type: "context_change",
         },
+        originalRequest: {} as AmbiguousGenericRequest,
         triggerType: "manual",
       },
     });

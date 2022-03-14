@@ -72,6 +72,7 @@ describe("Inject context on receive", () => {
           newContext: {},
           type: "context_change",
         },
+        originalRequest: {} as AmbiguousGenericRequest,
         triggerType: "manual",
       },
     });

@@ -1,5 +1,6 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import {
+  AmbiguousGenericRequest,
   AmbiguousLeaf,
   FacebookRawRequest,
   WitClient,
@@ -78,6 +79,7 @@ describe("Wit higher order function", () => {
         oldContext: {},
         type: "context_change",
       },
+      originalRequest: {} as AmbiguousGenericRequest,
       triggerType: "manual",
     });
 
@@ -138,7 +140,7 @@ describe("Wit higher order function", () => {
     const transformed = await retryWithWit(instance(comm))(instance(rootLeaf));
 
     // When
-    await transformed.next({
+    const genericRequest: Parameters<typeof transformed["next"]>[0] = {
       targetID,
       targetPlatform,
       currentContext: {},
@@ -146,7 +148,9 @@ describe("Wit higher order function", () => {
       input: { text, type: "text" },
       rawRequest: {} as FacebookRawRequest,
       triggerType: "message",
-    });
+    };
+
+    await transformed.next(genericRequest);
 
     // Then
     verify(comm.validate(text)).once();
@@ -164,6 +168,7 @@ describe("Wit higher order function", () => {
             traits: {},
             type: "wit",
           },
+          originalRequest: genericRequest,
           triggerType: "manual",
         })
       )

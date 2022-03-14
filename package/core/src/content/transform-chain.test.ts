@@ -1,6 +1,10 @@
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
 import { createSubscription } from "../stream";
-import { AmbiguousLeaf, FacebookRawRequest } from "../type";
+import {
+  AmbiguousGenericRequest,
+  AmbiguousLeaf,
+  FacebookRawRequest,
+} from "../type";
 import { catchError } from "./catch-error";
 import { createDefaultErrorLeaf, createLeaf, NextResult } from "./leaf";
 import { createTransformChain } from "./transform-chain";
@@ -37,7 +41,7 @@ describe("Transform chain", () => {
       .transform(instance(errorLeaf));
 
     // When
-    const nextResult = await transformed.next({
+    const genericRequest: Parameters<typeof transformed["next"]>[0] = {
       targetID,
       targetPlatform,
       currentContext: { a: 1, b: 2 },
@@ -47,8 +51,11 @@ describe("Transform chain", () => {
         erroredLeaf: "",
         type: "error",
       },
+      originalRequest: {} as AmbiguousGenericRequest,
       triggerType: "manual",
-    });
+    };
+
+    const nextResult = await transformed.next(genericRequest);
 
     await transformed.subscribe({
       next: async () => {
@@ -65,6 +72,7 @@ describe("Transform chain", () => {
           currentContext: { a: 1, b: 2 },
           currentLeafName: erroredLeafName,
           input: { error, erroredLeaf: erroredLeafName, type: "error" },
+          originalRequest: genericRequest,
           triggerType: "manual",
         })
       )

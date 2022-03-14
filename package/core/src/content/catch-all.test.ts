@@ -1,5 +1,9 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { AmbiguousLeaf, FacebookRawRequest } from "../type";
+import {
+  AmbiguousGenericRequest,
+  AmbiguousLeaf,
+  FacebookRawRequest,
+} from "../type";
 import { catchAll } from "./catch-all";
 import { NextResult } from "./leaf";
 
@@ -57,6 +61,7 @@ describe("catchAll higher order function", () => {
       targetPlatform,
       currentContext: {},
       currentLeafName: "",
+      originalRequest: {} as AmbiguousGenericRequest,
       input: {
         changedContext: {},
         newContext: {},

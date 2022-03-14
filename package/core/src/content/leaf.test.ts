@@ -2,6 +2,7 @@ import { isType } from "@haipham/javascript-helper-preconditions";
 import { StrictOmit } from "ts-essentials";
 import { deepEqual, instance, spy, verify } from "ts-mockito";
 import {
+  AmbiguousGenericRequest,
   AmbiguousGenericResponse,
   ErrorLeafConfig,
   FacebookRawRequest,
@@ -166,6 +167,7 @@ describe("Default error leaf", () => {
       currentContext: {},
       currentLeafName: errorLeafName,
       input: { error, erroredLeaf: errorLeafName, type: "error" },
+      originalRequest: {} as AmbiguousGenericRequest,
       triggerType: "manual",
     });
 

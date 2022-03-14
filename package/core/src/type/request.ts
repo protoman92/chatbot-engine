@@ -23,6 +23,7 @@ export interface GenericManualTriggerRequest {
     | ContextChangeRequestInput
     | ErrorRequestInput
     | WitRequestInput;
+  readonly originalRequest: AmbiguousGenericRequest;
   readonly rawRequest?: undefined;
   readonly triggerType: "manual";
 }
