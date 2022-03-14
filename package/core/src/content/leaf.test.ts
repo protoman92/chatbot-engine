@@ -1,12 +1,16 @@
 import { isType } from "@haipham/javascript-helper-preconditions";
 import { deepEqual, instance, spy, verify } from "ts-mockito";
-import { bridgeEmission, NextResult } from "../stream";
 import {
   ErrorLeafConfig,
   FacebookRawRequest,
   _FacebookGenericResponseOutput,
 } from "../type";
-import { createDefaultErrorLeaf, createLeaf } from "./leaf";
+import {
+  bridgeEmission,
+  createDefaultErrorLeaf,
+  createLeaf,
+  NextResult,
+} from "./leaf";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;

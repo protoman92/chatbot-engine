@@ -2,6 +2,7 @@ import { AppendOptions } from "form-data";
 import { ReadStream } from "fs";
 import { StrictOmit } from "ts-essentials";
 import { GenericManualTriggerRequest } from ".";
+import { NextResult } from "../content/leaf";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
@@ -450,10 +451,13 @@ export type FacebookMessageProcessorMiddleware = MessageProcessorMiddleware<
   FacebookMessageProcessor
 >;
 
-export type FacebookLeafObserver = ContentObserver<FacebookGenericRequest>;
+export type FacebookLeafObserver = ContentObserver<
+  FacebookGenericRequest,
+  NextResult
+>;
 
 export type FacebookLeaf = FacebookLeafObserver &
-  ContentObservable<FacebookGenericResponse>;
+  ContentObservable<ContentObserver<FacebookGenericResponse, NextResult>>;
 
 /** Represents a Facebook user */
 export interface FacebookUser {

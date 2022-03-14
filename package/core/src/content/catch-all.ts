@@ -1,5 +1,5 @@
-import { NextResult } from "../stream";
 import { AmbiguousGenericRequest, LeafTransformer } from "../type";
+import { NextResult } from "./leaf";
 
 export function catchAll(
   onCatchAll: (request: AmbiguousGenericRequest) => void

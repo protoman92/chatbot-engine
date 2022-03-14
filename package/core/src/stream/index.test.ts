@@ -1,17 +1,19 @@
+import { createContentSubject, mergeObservables } from ".";
 import { mapSeries } from "../common/utils";
-import { createContentSubject, mergeObservables, NextResult } from ".";
 
 describe("Content stream and subject", () => {
   it("Should receive updates on subscription", async () => {
     // Setup
     let nextCount = 0;
-    const subject = createContentSubject();
+
+    const subject = createContentSubject<any, void>(() => {
+      return undefined;
+    });
 
     // When
     const subscription = await subject.subscribe({
       next: async () => {
         nextCount += 1;
-        return NextResult.BREAK;
       },
     });
 
@@ -29,7 +31,9 @@ describe("Content stream and subject", () => {
     const subjectCount = 1000;
 
     const subjects = [...Array(subjectCount).keys()].map(() => {
-      return createContentSubject<number>();
+      return createContentSubject<number, void>(() => {
+        return undefined;
+      });
     });
 
     const receivedValues: number[] = [];
@@ -38,7 +42,6 @@ describe("Content stream and subject", () => {
     const subscription = await mergeObservables(...subjects).subscribe({
       next: async (content) => {
         receivedValues.push(content);
-        return NextResult.BREAK;
       },
     });
 

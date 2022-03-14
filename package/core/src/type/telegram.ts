@@ -7,6 +7,7 @@ import {
   MessageProcessorMiddleware,
   RawRequestGeneralizer,
 } from ".";
+import { NextResult } from "../content/leaf";
 import { PlatformClient } from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
@@ -538,10 +539,13 @@ export type TelegramMessageProcessorMiddleware = MessageProcessorMiddleware<
   TelegramMessageProcessor
 >;
 
-export type TelegramLeafObserver = ContentObserver<TelegramGenericRequest>;
+export type TelegramLeafObserver = ContentObserver<
+  TelegramGenericRequest,
+  NextResult
+>;
 
 export type TelegramLeaf = TelegramLeafObserver &
-  ContentObservable<TelegramGenericResponse>;
+  ContentObservable<ContentObserver<TelegramGenericResponse, NextResult>>;
 
 export interface TelegramBot {
   readonly id: number;

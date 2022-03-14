@@ -1,8 +1,8 @@
 import { anything, deepEqual, instance, spy, verify } from "ts-mockito";
-import { createSubscription, NextResult } from "../stream";
+import { createSubscription } from "../stream";
 import { AmbiguousLeaf, FacebookRawRequest } from "../type";
 import { catchError } from "./catch-error";
-import { createDefaultErrorLeaf, createLeaf } from "./leaf";
+import { createDefaultErrorLeaf, createLeaf, NextResult } from "./leaf";
 import { createTransformChain } from "./transform-chain";
 
 const targetID = "target-id";

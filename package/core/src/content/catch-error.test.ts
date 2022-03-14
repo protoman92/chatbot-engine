@@ -1,8 +1,8 @@
 import { capture, instance, spy } from "ts-mockito";
-import { createSubscription, NextResult } from "../stream";
+import { createSubscription } from "../stream";
 import { AmbiguousLeaf } from "../type";
 import { catchError } from "./catch-error";
-import { createLeaf } from "./leaf";
+import { createLeaf, NextResult } from "./leaf";
 
 describe("catchError higher-order function", () => {
   const targetID = "target-id";

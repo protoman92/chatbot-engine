@@ -1,7 +1,7 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { NextResult } from "../stream";
 import { AmbiguousLeaf, FacebookRawRequest } from "../type";
 import { catchAll } from "./catch-all";
+import { NextResult } from "./leaf";
 
 const targetID = "target-id";
 const targetPlatform = "facebook" as const;

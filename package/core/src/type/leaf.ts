@@ -1,5 +1,6 @@
 import { AsyncOrSync } from "ts-essentials";
 import { AmbiguousPlatform } from ".";
+import { NextResult } from "../content/leaf";
 import { Branch } from "./branch";
 import { ErrorRequestInput } from "./error";
 import { AmbiguousGenericRequest } from "./request";
@@ -38,7 +39,8 @@ export interface LeafTransformChain {
 
 export interface AmbiguousLeafObserver
   extends ContentObserver<
-    AmbiguousGenericRequest & Readonly<{ currentLeafName: string }>
+    AmbiguousGenericRequest & Readonly<{ currentLeafName: string }>,
+    NextResult
   > {}
 
 /**
@@ -49,10 +51,13 @@ export interface AmbiguousLeafObserver
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
 export type AmbiguousLeaf = AmbiguousLeafObserver &
-  ContentObservable<AmbiguousGenericResponse>;
+  ContentObservable<ContentObserver<AmbiguousGenericResponse, NextResult>>;
 
-export type LeafSelector = ContentObserver<AmbiguousGenericRequest> &
-  ContentObservable<AmbiguousGenericResponse>;
+export type LeafSelector = ContentObserver<
+  AmbiguousGenericRequest,
+  NextResult
+> &
+  ContentObservable<ContentObserver<AmbiguousGenericResponse, NextResult>>;
 
 export interface ErrorLeafTrackErrorArgs
   extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {

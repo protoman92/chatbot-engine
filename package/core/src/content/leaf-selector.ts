@@ -1,5 +1,5 @@
 import { isType } from "@haipham/javascript-helper-preconditions";
-import { mergeObservables, NextResult } from "../stream";
+import { mergeObservables } from "../stream";
 import {
   AmbiguousGenericResponse,
   AmbiguousLeaf,
@@ -10,6 +10,7 @@ import {
   LeafEnumeration,
   LeafSelector,
 } from "../type";
+import { NextResult } from "./leaf";
 
 /**
  * Enumerate a key-value branch object to produce the entire list of enumerated
@@ -55,7 +56,11 @@ export async function enumerateLeaves(
  */
 export function createLeafSelector(branch: Branch) {
   const _enumeratedLeaves = enumerateLeaves(branch);
-  let outputObservable: Promise<ContentObservable<AmbiguousGenericResponse>>;
+
+  let outputObservable: Promise<ContentObservable<
+    ContentObserver<AmbiguousGenericResponse, NextResult>
+  >>;
+
   let _subscribeCount = 0;
 
   const selector = {
@@ -91,7 +96,7 @@ export function createLeafSelector(branch: Branch) {
       return NextResult.FALLTHROUGH;
     },
     subscribe: (
-      observer: ContentObserver<AmbiguousGenericResponse>
+      observer: ContentObserver<AmbiguousGenericResponse, NextResult>
     ): Promise<ContentSubscription> => {
       _subscribeCount += 1;
 

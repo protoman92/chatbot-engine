@@ -1,11 +1,11 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { NextResult } from "../stream";
 import {
   AmbiguousLeaf,
   FacebookRawRequest,
   WitClient,
   WitResponse,
 } from "../type";
+import { NextResult } from "./leaf";
 import { getHighestConfidence, retryWithWit } from "./retry_wit";
 
 const targetID = "target-id";

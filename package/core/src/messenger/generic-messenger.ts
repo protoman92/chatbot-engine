@@ -1,6 +1,6 @@
 import { requireNotNull } from "@haipham/javascript-helper-preconditions";
 import { getRequestPlatform, mapSeries, transform } from "../common/utils";
-import { NextResult } from "../stream";
+import { NextResult } from "../content/leaf";
 import {
   AmbiguousPlatform,
   BaseMessageProcessor,

@@ -1,5 +1,4 @@
 import { AsyncOrSync } from "ts-essentials";
-import { NextResult } from "../stream";
 
 /** Represents a subscription to some content stream */
 export interface ContentSubscription {
@@ -8,20 +7,22 @@ export interface ContentSubscription {
 }
 
 /** Represents an observer that accepts contents of some type */
-export interface NextContentObserver<T> {
-  next(content: T): AsyncOrSync<NextResult>;
+export interface NextContentObserver<I, O> {
+  next(content: I): AsyncOrSync<O>;
 }
 
 /** Represents an observer for contents of some type */
-export interface ContentObserver<T> extends NextContentObserver<T> {}
+export interface ContentObserver<I, O> extends NextContentObserver<I, O> {}
 
 /** Observe some contents on subscription */
-export interface ContentObservable<T> {
+export interface ContentObservable<
+  Observer extends ContentObserver<unknown, unknown>
+> {
   /** Subscribe to this stream's contents */
-  subscribe(observer: ContentObserver<T>): AsyncOrSync<ContentSubscription>;
+  subscribe(observer: Observer): AsyncOrSync<ContentSubscription>;
 }
 
 /** Represents both an observable and an observer */
-export interface ContentSubject<T>
-  extends ContentObservable<T>,
-    Required<ContentObserver<T>> {}
+export interface ContentSubject<I, O>
+  extends ContentObservable<ContentObserver<I, O>>,
+    ContentObserver<I, O> {}

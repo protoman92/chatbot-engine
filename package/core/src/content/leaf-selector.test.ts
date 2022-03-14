@@ -1,7 +1,6 @@
 import { anything, instance, spy, verify, when } from "ts-mockito";
-import { NextResult } from "../stream";
 import { AmbiguousLeaf, FacebookRawRequest, LeafEnumeration } from "../type";
-import { createLeaf } from "./leaf";
+import { createLeaf, NextResult } from "./leaf";
 import { createLeafSelector, enumerateLeaves } from "./leaf-selector";
 
 type TestLeafSelector = ReturnType<
@@ -70,9 +69,6 @@ describe("Leaf selector", () => {
           return Promise.reject("");
         },
         next: () => {
-          return Promise.reject("");
-        },
-        complete: () => {
           return Promise.reject("");
         },
       }))

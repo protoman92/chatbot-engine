@@ -1,11 +1,11 @@
 import { omitProperties } from "../common/utils";
-import { NextResult } from "../stream";
 import {
   LeafTransformer,
   WitClient,
   WitHighestConfidence,
   WitResponse,
 } from "../type";
+import { NextResult } from "./leaf";
 
 export function getHighestConfidence({
   intents,
