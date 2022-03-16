@@ -14,6 +14,7 @@ import {
 } from "@haipham/chatbot-engine-core";
 import { createAsyncSynchronizer } from "@haipham/javascript-helper-async-synchronizer";
 import { requireAllTruthy } from "@haipham/javascript-helper-preconditions";
+import { Credentials as AWSCredentials } from "@aws-sdk/types";
 
 interface CreateDynamoDBContextDAOConfig {
   readonly dynamoDB: DynamoDBDocumentClient;
@@ -184,9 +185,11 @@ export function createDynamoDBContextDAO({
 
 /** Create a DynamoDB client that's readily usable for a context DAO */
 export function createCompatibleDynamoDBClient({
+  awsCredentials,
   dynamoDBEndpoint = process.env["DYNAMO_DB_ENDPOINT"],
   dynamoDBRegion = process.env["DYNAMO_DB_REGION"],
 }: Readonly<{
+  awsCredentials?: AWSCredentials;
   dynamoDBEndpoint?: string;
   dynamoDBRegion?: string;
 }> = {}): DynamoDBDocumentClient {
@@ -195,6 +198,7 @@ export function createCompatibleDynamoDBClient({
 
   const baseClient = new DynamoDBClient({
     apiVersion: "latest",
+    credentials: awsCredentials,
     endpoint: ddbEndpoint,
     region: ddbRegion,
   });
