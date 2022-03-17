@@ -1,11 +1,15 @@
-import { AsyncOrSync } from "ts-essentials";
+import { AsyncOrSync, StrictOmit } from "ts-essentials";
 import { AmbiguousPlatform } from ".";
 import { NextResult } from "../content/leaf";
 import { Branch } from "./branch";
 import { ErrorRequestInput } from "./error";
 import { AmbiguousGenericRequest } from "./request";
 import { AmbiguousGenericResponse } from "./response";
-import { ContentObservable, ContentObserver } from "./stream";
+import {
+  ContentObservable,
+  ContentObserver,
+  NextContentObserver,
+} from "./stream";
 
 /**
  * Represents a collection of leaf information that is derived from
@@ -37,12 +41,6 @@ export interface LeafTransformChain {
   pipe(fn: LeafTransformer): LeafTransformChain;
 }
 
-export interface AmbiguousLeafObserver
-  extends ContentObserver<
-    AmbiguousGenericRequest & Readonly<{ currentLeafName: string }>,
-    NextResult
-  > {}
-
 /**
  * Represents a sequence of messenges that have some commonalities among each
  * other. When the user replies to a trigger message, they enter a leaf.
@@ -50,8 +48,33 @@ export interface AmbiguousLeafObserver
  *
  * The name "Leaf" is inspired by the leaf-like pattern of messages.
  */
-export type AmbiguousLeaf = AmbiguousLeafObserver &
-  ContentObservable<ContentObserver<AmbiguousGenericResponse, NextResult>>;
+export interface AmbiguousLeaf
+  extends ContentObserver<
+      AmbiguousGenericRequest & Readonly<{ currentLeafName: string }>,
+      NextResult
+    >,
+    ContentObservable<ContentObserver<AmbiguousGenericResponse, NextResult>> {}
+
+export namespace _CreateLeaf {
+  export type GenericResponseToNext = StrictOmit<
+    AmbiguousGenericResponse,
+    "originalRequest" | "targetID" | "targetPlatform"
+  > &
+    /**
+     * By default, the response will use the targetID and targetPlatform
+     * from the request. We can override this behavior by manually
+     * supplying different targetID/targetPlatform values - which is useful
+     * for when we want the bot to send a message to another chat instead
+     * of the current one.
+     */
+    Partial<Pick<AmbiguousGenericResponse, "targetID" | "targetPlatform">>;
+}
+
+export type CreateLeaf = (
+  fn: (
+    observer: NextContentObserver<_CreateLeaf.GenericResponseToNext, NextResult>
+  ) => AsyncOrSync<Omit<AmbiguousLeaf, "subscribe">>
+) => Promise<AmbiguousLeaf>;
 
 export type LeafSelector = ContentObserver<
   AmbiguousGenericRequest,
@@ -59,14 +82,16 @@ export type LeafSelector = ContentObserver<
 > &
   ContentObservable<ContentObserver<AmbiguousGenericResponse, NextResult>>;
 
-export interface ErrorLeafTrackErrorArgs
-  extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {
-  readonly targetID: string;
-  readonly targetPlatform: AmbiguousPlatform;
+export namespace _ErrorLeafConfig {
+  export interface TrackErrorArgs
+    extends Pick<ErrorRequestInput, "error" | "erroredLeaf"> {
+    readonly targetID: string;
+    readonly targetPlatform: AmbiguousPlatform;
+  }
 }
 
 export interface ErrorLeafConfig {
   /** Customize error message to show to user */
   formatErrorMessage(error: Error): string;
-  trackError?(errorData: ErrorLeafTrackErrorArgs): void;
+  trackError?(errorData: _ErrorLeafConfig.TrackErrorArgs): void;
 }

@@ -30,7 +30,7 @@ describe("catchAll higher order function", () => {
   it("Should not catch all if root leaf does not fall through", async () => {
     // Setup
     when(rootLeaf.next(anything())).thenReturn(NextResult.BREAK);
-    const transformer = await catchAll(instance(catchHandler).onCatchAll);
+    const transformer = catchAll(instance(catchHandler).onCatchAll);
     const transformed = await transformer(instance(rootLeaf));
 
     // When

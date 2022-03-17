@@ -1,4 +1,3 @@
-import { AsyncOrSync } from "ts-essentials";
 import { createContentSubject, createSubscription } from "../stream";
 import {
   AmbiguousGenericResponse,
@@ -6,9 +5,10 @@ import {
   ContentObservable,
   ContentObserver,
   ContentSubscription,
+  CreateLeaf,
   ErrorLeafConfig,
   LeafError,
-  NextContentObserver,
+  _CreateLeaf,
 } from "../type";
 
 /**
@@ -48,14 +48,7 @@ export function bridgeEmission<I, O>(
  * Create a leaf from a base leaf with a default subject for broadcasting
  * contents.
  */
-export async function createLeaf(
-  fn: (
-    observer: NextContentObserver<
-      Omit<AmbiguousGenericResponse, "originalRequest">,
-      NextResult
-    >
-  ) => AsyncOrSync<Omit<AmbiguousLeaf, "subscribe">>
-): Promise<AmbiguousLeaf> {
+export const createLeaf: CreateLeaf = async (fn) => {
   const observerMap: Record<
     string,
     Parameters<AmbiguousLeaf["subscribe"]>[0]
@@ -66,7 +59,8 @@ export async function createLeaf(
   return {
     next: async (request) => {
       const baseSubject = createContentSubject<
-        AmbiguousGenericResponse,
+        Pick<AmbiguousGenericResponse, "originalRequest"> &
+          _CreateLeaf.GenericResponseToNext,
         NextResult
       >((...nextOutputs) => {
         return nextOutputs.every(
@@ -79,7 +73,12 @@ export async function createLeaf(
       const subject: typeof baseSubject = {
         ...baseSubject,
         next: (response) => {
-          return baseSubject.next({ ...response, originalRequest: request });
+          return baseSubject.next({
+            targetID: request.targetID,
+            targetPlatform: request.targetPlatform,
+            ...response,
+            originalRequest: request,
+          });
         },
       };
 
@@ -114,7 +113,7 @@ export async function createLeaf(
       return Promise.resolve(subscription);
     },
   };
-}
+};
 
 /**
  * Create an error leaf that will be used to deliver error messages if no
