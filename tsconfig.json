@@ -4,6 +4,7 @@
     "alwaysStrict": true,
     "declaration": true,
     "downlevelIteration": true,
+    "exactOptionalPropertyTypes": false,
     "esModuleInterop": true,
     "module": "commonjs",
     "noEmit": true,
