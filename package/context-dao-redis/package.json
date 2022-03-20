@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "prebuild": "rm -rf build",
     "test": "jest"
   },
   "version": "1.0.0"

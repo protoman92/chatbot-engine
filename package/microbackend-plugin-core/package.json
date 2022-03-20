@@ -25,7 +25,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepublish": "rm -rf build && yarn build"
+    "prebuild": "rm -rf build",
+    "prepublish": "yarn build"
   },
   "types": "build/src/index.d.ts",
   "version": "1.0.0"
