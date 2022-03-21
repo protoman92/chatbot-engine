@@ -45,17 +45,12 @@
   "version": "1.0.0",
   "workspaces": [
     "example/*",
-    "package/bootstrap-express",
-    "package/context-dao-dynamodb",
-    "package/context-dao-redis",
-    "package/core",
-    "package/microbackend-plugin-core",
-    "package/microbackend-plugin-express",
-    "package/javascript-helper/package/array",
-    "package/javascript-helper/package/async_synchronizer",
-    "package/javascript-helper/package/object",
-    "package/javascript-helper/package/preconditions",
-    "package/microbackend",
-    "package/microbackend/package/*"
+    "package/*",
+    "lib/javascript-helper/package/array",
+    "lib/javascript-helper/package/async_synchronizer",
+    "lib/javascript-helper/package/object",
+    "lib/javascript-helper/package/preconditions",
+    "lib/microbackend",
+    "lib/microbackend/package/*"
   ]
 }

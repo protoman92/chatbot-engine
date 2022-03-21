@@ -1,9 +1,6 @@
-[submodule "src/bootstrap/javascript-helper"]
-	path = src/bootstrap/javascript-helper
+[submodule "lib/javascript-helper"]
+	path = lib/javascript-helper
 	url = https://github.com/protoman92/javascript-helper.git
-[submodule "package/microbackend"]
-	path = package/microbackend
+[submodule "lib/microbackend"]
+	path = lib/microbackend
 	url = https://github.com/protoman92/microbackend.git
-[submodule "package/javascript-helper"]
-	path = package/javascript-helper
-	url = https://github.com/protoman92/javascript-helper.git

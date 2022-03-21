@@ -3,5 +3,5 @@
     "outDir": "build"
   },
   "exclude": ["build"],
-  "extends": "../microbackend/tsconfig.json"
+  "extends": "../../lib/microbackend/tsconfig.json"
 }
