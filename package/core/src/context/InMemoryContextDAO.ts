@@ -15,7 +15,7 @@ function createInMemoryContextDAO() {
   const synchronizer = createAsyncSynchronizer();
   let storage: InMemoryContextData = { facebook: {}, telegram: {} };
 
-  const getContext: ContextDAO["getContext"] = async ({
+  const getContext: ContextDAO["getContext"] = ({
     targetID,
     targetPlatform,
   }) => {
@@ -23,7 +23,7 @@ function createInMemoryContextDAO() {
       storage[targetPlatform][targetID] = {} as ChatbotContext;
     }
 
-    return storage[targetPlatform][targetID]!;
+    return Promise.resolve(storage[targetPlatform][targetID]!);
   };
 
   const baseDAO: ContextDAO = {
@@ -39,8 +39,9 @@ function createInMemoryContextDAO() {
         return { oldContext, newContext };
       }
     ),
-    resetContext: async ({ targetID, targetPlatform }) => {
+    resetContext: ({ targetID, targetPlatform }) => {
       delete storage[targetPlatform][targetID];
+      return Promise.resolve(undefined);
     },
   };
 
@@ -49,16 +50,20 @@ function createInMemoryContextDAO() {
     getAllContext: async () => {
       return storage;
     },
-    overrideStorage: async (custom: typeof storage) => {
+    overrideStorage: (custom: typeof storage) => {
       storage = custom;
+      return Promise.resolve(undefined);
     },
-    mergeStorage: async (additionalStorage: typeof storage) => {
+    mergeStorage: (additionalStorage: typeof storage) => {
       storage = merge(storage, additionalStorage);
+      return Promise.resolve(undefined);
     },
-    resetStorage: async () => {
+    resetStorage: () => {
       for (const key in storage) {
         storage[key as keyof typeof storage] = {};
       }
+
+      return Promise.resolve(undefined);
     },
   };
 
