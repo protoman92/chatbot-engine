@@ -35,27 +35,22 @@ const MESSAGE_TEXT_CHARACTER_LIMIT = 4096;
  * command does not exist, fallback to the base input text for instruction.
  */
 export function extractCommand(
-  username: string,
   textWithCommand: string
-): [string, string] {
-  const usernamePing = `@${username}`;
+): Readonly<{
+  botUsername: string | undefined;
+  command: string | undefined;
+  text: string;
+}> {
+  const { command, text = textWithCommand, username: botUsername } =
+    textWithCommand.match(
+      /^\/(?<command>\w*)\s*(\@(?<username>\w+))*\s*(?<text>(.|\s)*)$/
+    )?.groups ?? {};
 
-  if (textWithCommand.includes(usernamePing)) {
-    /** In this case, the bot is in a group, so it needs to be pinged */
-    const [, command = "", text = textWithCommand] =
-      textWithCommand.match(
-        new RegExp(`^\\/\(\\w*\)\\s*${usernamePing}\\s*\(\(.|\\s\)*\)$`, "im")
-      ) || [];
-
-    return [command.trim(), text.trim()];
-  } else {
-    const [, command = "", text = textWithCommand] =
-      textWithCommand.match(
-        new RegExp(`^\\/\(\\w*\)\\s*\(\(.|\\s\)*\)$`, "im")
-      ) || [];
-
-    return [command.trim(), text.trim()];
-  }
+  return {
+    botUsername: botUsername?.trim(),
+    command: command?.trim(),
+    text: text.trim(),
+  };
 }
 
 function processMessageRequest({
@@ -75,17 +70,27 @@ function processMessageRequest({
   | undefined {
   if ("text" in message) {
     const { text: textWithCommand } = message;
-
-    const [command, text] = extractCommand(
-      currentBot.username,
-      textWithCommand
-    );
+    const { botUsername, command, text } = extractCommand(textWithCommand);
 
     if (command) {
       return {
         user,
         chat: message.chat,
-        inputs: [{ command, text: text || undefined, type: "command" }],
+        inputs: [
+          {
+            command,
+            /**
+             * Two cases where this can be true:
+             * - The user is chatting with the bot in a private chat, or;
+             * - The user pings the bot by username.
+             */
+            isMeantForThisBot:
+              !botUsername || botUsername === currentBot.username,
+            pingedBotUsername: botUsername,
+            text: text || undefined,
+            type: "command",
+          },
+        ],
       };
     } else {
       return { user, chat: message.chat, inputs: [{ text, type: "text" }] };

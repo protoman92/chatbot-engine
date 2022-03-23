@@ -10,7 +10,7 @@ import {
 } from "./telegram-messenger";
 
 describe("Create generic Telegram requests", () => {
-  const currentBot: TelegramBot = { first_name: "", id: 0, username: "" };
+  const currentBot: TelegramBot = { first_name: "", id: 0, username: "mybot" };
   const chat: _TelegramRawRequest.Chat = { id: 0, type: "private" };
 
   const from: TelegramUser = {
@@ -39,7 +39,13 @@ describe("Create generic Telegram requests", () => {
         currentBot,
         chatType: "private",
         currentContext: {},
-        input: { command: "test", text: "me", type: "command" },
+        input: {
+          command: "test",
+          isMeantForThisBot: true,
+          pingedBotUsername: undefined,
+          text: "me",
+          type: "command",
+        },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -65,7 +71,45 @@ describe("Create generic Telegram requests", () => {
         currentBot,
         chatType: "private",
         currentContext: {},
-        input: { command: "test", text: undefined, type: "command" },
+        input: {
+          command: "test",
+          isMeantForThisBot: true,
+          pingedBotUsername: undefined,
+          text: undefined,
+          type: "command",
+        },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        triggerType: "message",
+      },
+    ]);
+  });
+
+  it("Should make sure isMeantForThisBot is false if another bot is pinged", async () => {
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      message: { chat, from, message_id: 0, text: "/test@notmybot me" },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
+
+    // Then
+    expect(genericRequest).toEqual([
+      {
+        rawRequest,
+        currentBot,
+        chatType: "private",
+        currentContext: {},
+        input: {
+          command: "test",
+          isMeantForThisBot: false,
+          pingedBotUsername: "notmybot",
+          text: "me",
+          type: "command",
+        },
         targetID: "0",
         targetPlatform: "telegram",
         telegramUser: from,
@@ -437,46 +481,70 @@ describe("Create generic Telegram requests", () => {
 
 describe("Utilities", () => {
   it("Should extract input command and text correctly", async () => {
-    const username = "haipham";
-
     // Setup && When && Then 1
-    const [command1, text1] = extractCommand(
-      username,
-      `/start    @haipham    run123  `
-    );
+    const {
+      botUsername: botUsername1,
+      command: command1,
+      text: text1,
+    } = extractCommand(`/start    @haipham    run123  `);
+    expect(botUsername1).toEqual("haipham");
     expect(command1).toEqual("start");
     expect(text1).toEqual("run123");
 
     // Setup && When && Then 2
-    const [command2, text2] = extractCommand(username, "run123");
+    const {
+      botUsername: botUsername2,
+      command: command2,
+      text: text2,
+    } = extractCommand("run123");
+    expect(botUsername2).toBeFalsy();
     expect(command2).toBeFalsy();
     expect(text2).toEqual("run123");
 
     // Setup && When && Then 3
-    const [command3, text3] = extractCommand(username, `/start @haiphamrun123`);
+    const {
+      botUsername: botUsername3,
+      command: command3,
+      text: text3,
+    } = extractCommand(`/start @haiphamrun123`);
+    expect(botUsername3).toEqual("haiphamrun123");
     expect(command3).toEqual("start");
-    expect(text3).toEqual("run123");
+    expect(text3).toBeFalsy();
 
     // Setup && When && Then 4
-    const [command4, text4] = extractCommand(username, `/start@haiphamrun123`);
+    const {
+      botUsername: botUsername4,
+      command: command4,
+      text: text4,
+    } = extractCommand(`/start@haiphamrun123`);
+    expect(botUsername4).toEqual("haiphamrun123");
     expect(command4).toEqual("start");
-    expect(text4).toEqual("run123");
+    expect(text4).toBeFalsy();
 
     // Setup && When && Then 5
-    const [command5, text5] = extractCommand(
-      username,
+    const {
+      botUsername: botUsername5,
+      command: command5,
+      text: text5,
+    } = extractCommand(
       `/start@haipham run123
 456
 789
       `
     );
+    expect(botUsername5).toEqual("haipham");
     expect(command5).toEqual("start");
     expect(text5).toEqual(`run123
 456
 789`);
 
     // Setup && When && Then 6
-    const [command6, text6] = extractCommand(username, "/start run123");
+    const {
+      botUsername: botUsername6,
+      command: command6,
+      text: text6,
+    } = extractCommand("/start run123");
+    expect(botUsername6).toBeFalsy();
     expect(command6).toEqual("start");
     expect(text6).toEqual("run123");
   });

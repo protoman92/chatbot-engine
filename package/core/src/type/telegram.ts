@@ -36,7 +36,17 @@ export namespace _TelegramGenericRequest {
     readonly currentBot: TelegramBot;
     readonly telegramUser: TelegramUser;
     readonly input: Readonly<
-      | { command: string; text?: string | undefined; type: "command" }
+      | {
+          command: string;
+          /**
+           * In a group setting, the user may ping another bot's command, so
+           * this command can be used to determine if this bot should respond.
+           */
+          isMeantForThisBot: boolean;
+          pingedBotUsername: string | undefined;
+          text: string | undefined;
+          type: "command";
+        }
       | { coordinate: Coordinates; type: "location" }
       | {
           document: _TelegramRawRequest.DocumentDetails;
