@@ -218,15 +218,14 @@ export async function toPromise<T>(
  * Use this to get a cross-platform output, so as to reuse logic everywhere
  * else.
  */
-export function switchPlatformOutput(
+export function switchOutputForPlatform<P extends AmbiguousPlatform>(
+  platform: P,
   args: Readonly<{
     facebook?: readonly FacebookGenericResponseOutput[];
     telegram?: readonly TelegramGenericResponseOutput[];
   }>
-): <P extends AmbiguousPlatform>(platform: P) => NonNullable<typeof args[P]> {
-  return <P extends AmbiguousPlatform>(platform: P) => {
-    return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
-  };
+): NonNullable<typeof args[P]> {
+  return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
 }
 
 /** Allow platform-specific request handling logic that returns any result */

@@ -4,7 +4,7 @@ import {
   defaultAxiosClient,
   FacebookConfig,
   TelegramConfig,
-  _TelegramRawResponse
+  _TelegramRawResponse,
 } from "@haipham/chatbot-engine-core";
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
@@ -28,7 +28,7 @@ export default {
                   apiVersion: joi.string().min(1).required(),
                   pageToken: joi.string().min(1).required(),
                   verifyToken: joi.string().min(1).required(),
-                }) ,
+                }),
                 isEnabled: joi
                   .boolean()
                   .required()
@@ -68,11 +68,11 @@ export default {
                     .string()
                     .valid(
                       ...Object.keys(
-                        (): {
+                        ((): {
                           [K in _TelegramRawResponse.ParseMode]: boolean;
                         } => {
                           return { html: true, markdown: true };
-                        }
+                        })()
                       )
                     )
                     .optional(),

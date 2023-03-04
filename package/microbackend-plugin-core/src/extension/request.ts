@@ -73,7 +73,7 @@ export default {
                   Object.getPrototypeOf(BranchCreator) === MicrobackendBranch
                 ) {
                   branch = await Promise.resolve(
-                    new (BranchCreator as unknown as new (
+                    new ((BranchCreator as unknown) as new (
                       args: IMicrobackendBranchArgs
                     ) => IMicrobackendBranch)(creatorArgs).branch
                   );

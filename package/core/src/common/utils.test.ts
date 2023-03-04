@@ -6,19 +6,19 @@ import {
   firstSubString,
   lastSubstring,
   mapSeries,
-  switchPlatformOutput,
+  switchOutputForPlatform,
 } from "./utils";
 
 describe("Common utilities", () => {
   it("Switching cross platform output should work", async () => {
     // Setup && When
-    const fbOutput = await switchPlatformOutput({
+    const fbOutput = switchOutputForPlatform("facebook", {
       facebook: [{ content: { text: "", type: "text" } }],
-    })("facebook");
+    });
 
-    const tlOutput = await switchPlatformOutput({
+    const tlOutput = switchOutputForPlatform("telegram", {
       telegram: [{ content: { text: "", type: "text" } }],
-    })("telegram");
+    });
 
     // Then
     expect(fbOutput).toEqual([{ content: { text: "", type: "text" } }]);
