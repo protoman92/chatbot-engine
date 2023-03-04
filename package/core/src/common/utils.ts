@@ -186,7 +186,7 @@ export function promisify2<
  * Require some keys for an object. This makes sure the specified keys do not
  * point to undefined or null values.
  */
-export function requireKeys<T, K extends keyof T>(
+export function requireKeys<T, K extends Extract<keyof T, string>>(
   object: T,
   ...keys: K[]
 ): T & Required<{ [K1 in K]: NonNullable<T[K1]> }> {

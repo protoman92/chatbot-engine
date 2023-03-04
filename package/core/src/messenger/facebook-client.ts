@@ -79,7 +79,9 @@ export function createFacebookClient(
     uploadAttachment: async ({ reusable, type, ...attachment }) => {
       /* istanbul ignore else */
       if ("url" in attachment) {
-        const { attachment_id: attachmentID } = await post({
+        const { attachment_id: attachmentID } = await post<
+          Readonly<{ attachment_id: string }>
+        >({
           additionalPaths: ["me", "message_attachments"],
           body: {
             message: {
@@ -107,7 +109,9 @@ export function createFacebookClient(
 
         formData.append("filedata", attachment.fileData, attachment);
 
-        const { attachment_id: attachmentID } = await post({
+        const { attachment_id: attachmentID } = await post<
+          Readonly<{ attachment_id: string }>
+        >({
           additionalPaths: ["me", "message_attachments"],
           body: formData,
           headers: formData.getHeaders(),

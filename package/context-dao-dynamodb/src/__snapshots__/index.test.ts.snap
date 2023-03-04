@@ -1,36 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamoDB context DAO Getting context update arguments should work correctly 1`] = `
-Object {
-  "ExpressionAttributeNames": Object {
+{
+  "ExpressionAttributeNames": {
     "#a": "a",
     "#b": "b",
     "#c": "c",
     "#d": "d",
     "#e": "e",
   },
-  "ExpressionAttributeValues": Object {
+  "ExpressionAttributeValues": {
     ":a": 1,
-    ":b": Array [],
+    ":b": [],
     ":b_0": 1,
     ":b_1": 2,
     ":b_2": 3,
-    ":c": Object {},
+    ":c": {},
     ":c_a": 1,
     ":c_b": 2,
     ":c_c": 3,
-    ":d": Array [],
-    ":d_0": Object {},
+    ":d": [],
+    ":d_0": {},
     ":d_0_a": 1,
-    ":d_1": Object {},
+    ":d_1": {},
     ":d_1_b": 2,
-    ":d_2": Object {},
+    ":d_2": {},
     ":d_2_c": 3,
-    ":e": Array [],
-    ":e_0": Object {},
-    ":e_0_a": Array [],
-    ":e_0_a_0": Object {},
-    ":e_0_a_0_b": Object {},
+    ":e": [],
+    ":e_0": {},
+    ":e_0_a": [],
+    ":e_0_a_0": {},
+    ":e_0_a_0_b": {},
     ":e_0_a_0_b_c": 1,
   },
   "UpdateExpression": "

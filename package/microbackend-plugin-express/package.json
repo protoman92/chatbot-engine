@@ -1,27 +1,25 @@
 {
   "author": "Hai Pham <swiften.svc@gmail.com>",
-  "dependencies": {},
+  "dependencies": {
+    "@haipham/chatbot-engine-core": "workspace:*",
+    "@microbackend/common-utils": "workspace:*",
+    "@microbackend/plugin-chatbot-engine-core": "workspace:*",
+    "@microbackend/plugin-core": "workspace:*",
+    "@microbackend/plugin-express": "workspace:*"
+  },
   "description": "Micro-backend chatbot-engine plugin for express.js",
   "devDependencies": {
-    "@haipham/chatbot-engine-core": "^1.0.0",
-    "@microbackend/common-utils": "^1.0.1",
-    "@microbackend/plugin-chatbot-engine-core": "^1.0.0",
-    "@microbackend/plugin-core": "^1.0.1",
-    "@microbackend/plugin-express": "^1.0.1",
+    "@types/jest": "^29.4.0",
+    "jest": "^29.4.3",
+    "sort-json": "^2.0.1",
     "ts-essentials": "^9.1.2",
+    "ts-jest": "^29.0.5",
     "typescript": "^4.5.4",
     "webpack": "^5.68.0"
   },
   "license": "MIT",
   "main": "build/src/index.js",
   "name": "@microbackend/plugin-chatbot-engine-express",
-  "peerDependencies": {
-    "@haipham/chatbot-engine-core": "^1.0.0",
-    "@microbackend/common-utils": "^1.0.1",
-    "@microbackend/plugin-chatbot-engine-core": "^1.0.0",
-    "@microbackend/plugin-core": "^1.0.1",
-    "@microbackend/plugin-express": "^1.0.1"
-  },
   "publishConfig": {
     "access": "public"
   },

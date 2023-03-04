@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Common utilities Switching cross platform request should work 1`] = `"Unsupported platform for {\\"targetPlatform\\":\\"abc\\"}"`;
+exports[`Common utilities Switching cross platform request should work 1`] = `"Unsupported platform for {"targetPlatform":"abc"}"`;
 
-exports[`Common utilities Switching cross platform request should work 2`] = `"Unsupported platform for {\\"targetPlatform\\":\\"facebook\\"}"`;
+exports[`Common utilities Switching cross platform request should work 2`] = `"Unsupported platform for {"targetPlatform":"facebook"}"`;
 
-exports[`Common utilities Switching cross platform request should work 3`] = `"Unsupported platform for {\\"targetPlatform\\":\\"telegram\\"}"`;
+exports[`Common utilities Switching cross platform request should work 3`] = `"Unsupported platform for {"targetPlatform":"telegram"}"`;
