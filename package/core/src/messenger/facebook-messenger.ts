@@ -67,12 +67,12 @@ function createFacebookRequest(
                 return {
                   image: attachment.payload.url,
                   stickerID: `${attachment.payload.sticker_id}`,
-                  type: "sticker",
+                  type: "facebook.sticker",
                 };
               } else {
                 return {
                   image: attachment.payload.url,
-                  type: "image",
+                  type: "facebook.image",
                 };
               }
 
@@ -90,7 +90,7 @@ function createFacebookRequest(
     }
 
     if ("referral" in rawMessaging) {
-      return [{ param: rawMessaging.referral.ref, type: "deeplink" }];
+      return [{ param: rawMessaging.referral.ref, type: "facebook.deeplink" }];
     }
 
     throw facebookError(`Invalid request ${JSON.stringify(rawMessaging)}`);

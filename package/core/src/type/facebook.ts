@@ -30,11 +30,11 @@ export namespace _FacebookGenericRequest {
     extends BaseRequest,
       StrictOmit<GenericMessageTriggerRequest<FacebookRawRequest>, "input"> {
     readonly input:
-      | Readonly<{ param: string; type: "deeplink" }>
+      | Readonly<{ param: string; type: "facebook.deeplink" }>
       | Readonly<{ payload: string; type: "postback" }>
       | Readonly<{ coordinate: Coordinates; type: "location" }>
-      | Readonly<{ image: string; type: "image" }>
-      | Readonly<{ image: string; stickerID: string; type: "sticker" }>
+      | Readonly<{ image: string; type: "facebook.image" }>
+      | Readonly<{ image: string; stickerID: string; type: "facebook.sticker" }>
       | GenericMessageTriggerRequest<FacebookRawRequest>["input"];
   }
 }

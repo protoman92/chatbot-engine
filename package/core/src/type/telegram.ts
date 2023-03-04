@@ -45,29 +45,29 @@ export namespace _TelegramGenericRequest {
           isMeantForThisBot: boolean;
           pingedBotUsername: string | undefined;
           text: string | undefined;
-          type: "command";
+          type: "telegram.command";
         }
       | { coordinate: Coordinates; type: "location" }
       | {
           document: _TelegramRawRequest.DocumentDetails;
-          type: "document";
+          type: "telegram.document";
         }
       | {
           images: readonly _TelegramRawRequest.PhotoDetails[];
-          type: "image";
+          type: "telegram.image";
         }
       | {
           areAllMembersAdministrators: boolean;
           groupName: string;
-          type: "group_chat_created";
+          type: "telegram.group_chat_created";
         }
       | {
           leftChatMembers: readonly (TelegramBot | TelegramUser)[];
-          type: "left_chat";
+          type: "telegram.left_chat";
         }
       | {
           newChatMembers: readonly (TelegramBot | TelegramUser)[];
-          type: "joined_chat";
+          type: "telegram.joined_chat";
         }
       | { payload: string; type: "postback" }
       /**
@@ -79,7 +79,7 @@ export namespace _TelegramGenericRequest {
           checkoutID: string;
           currency: string;
           payload: string;
-          type: "pre_checkout";
+          type: "telegram.pre_checkout";
         }
       | {
           amount: number;
@@ -87,9 +87,9 @@ export namespace _TelegramGenericRequest {
           payload: string;
           providerPaymentChargeID: string;
           telegramPaymentChargeID: string;
-          type: "successful_payment";
+          type: "telegram.successful_payment";
         }
-      | { video: _TelegramRawRequest.VideoDetails; type: "video" }
+      | { video: _TelegramRawRequest.VideoDetails; type: "telegram.video" }
       | GenericMessageTriggerRequest<TelegramRawRequest>["input"]
     >;
   }

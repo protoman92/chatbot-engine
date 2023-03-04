@@ -88,7 +88,7 @@ function processMessageRequest({
               !botUsername || botUsername === currentBot.username,
             pingedBotUsername: botUsername,
             text: text || undefined,
-            type: "command",
+            type: "telegram.command",
           },
         ],
       };
@@ -101,7 +101,7 @@ function processMessageRequest({
     return {
       user,
       chat: message.chat,
-      inputs: [{ document: message.document, type: "document" }],
+      inputs: [{ document: message.document, type: "telegram.document" }],
     };
   }
 
@@ -114,7 +114,7 @@ function processMessageRequest({
           areAllMembersAdministrators:
             message.chat.all_members_are_administrators,
           groupName: message.chat.title,
-          type: "group_chat_created",
+          type: "telegram.group_chat_created",
         },
       ],
     };
@@ -133,7 +133,10 @@ function processMessageRequest({
       user,
       chat: message.chat,
       inputs: [
-        { newChatMembers: message.new_chat_members, type: "joined_chat" },
+        {
+          newChatMembers: message.new_chat_members,
+          type: "telegram.joined_chat",
+        },
       ],
     };
   }
@@ -143,7 +146,10 @@ function processMessageRequest({
       user,
       chat: message.chat,
       inputs: [
-        { leftChatMembers: [message.left_chat_member], type: "left_chat" },
+        {
+          leftChatMembers: [message.left_chat_member],
+          type: "telegram.left_chat",
+        },
       ],
     };
   }
@@ -152,7 +158,7 @@ function processMessageRequest({
     return {
       user,
       chat: message.chat,
-      inputs: [{ images: message.photo, type: "image" }],
+      inputs: [{ images: message.photo, type: "telegram.image" }],
     };
   }
 
@@ -160,7 +166,7 @@ function processMessageRequest({
     return {
       user,
       chat: message.chat,
-      inputs: [{ type: "video", video: message.video }],
+      inputs: [{ type: "telegram.video", video: message.video }],
     };
   }
 
@@ -197,7 +203,9 @@ function processPreCheckoutRequest({
   return {
     user,
     chat: undefined,
-    inputs: [{ amount, checkoutID, currency, payload, type: "pre_checkout" }],
+    inputs: [
+      { amount, checkoutID, currency, payload, type: "telegram.pre_checkout" },
+    ],
   };
 }
 
@@ -228,7 +236,7 @@ function processSuccessfulPaymentRequest({
         payload,
         providerPaymentChargeID,
         telegramPaymentChargeID,
-        type: "successful_payment",
+        type: "telegram.successful_payment",
       },
     ],
   };
