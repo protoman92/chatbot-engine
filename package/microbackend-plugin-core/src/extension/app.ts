@@ -4,11 +4,11 @@ import {
   defaultAxiosClient,
   FacebookConfig,
   TelegramConfig,
-  _TelegramRawResponse,
+  _TelegramRawResponse
 } from "@haipham/chatbot-engine-core";
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
-import joi, { ObjectSchema, StrictSchemaMap } from "joi";
+import joi from "joi";
 import { PLUGIN_NAME } from "../utils";
 
 export default {
@@ -28,7 +28,7 @@ export default {
                   apiVersion: joi.string().min(1).required(),
                   pageToken: joi.string().min(1).required(),
                   verifyToken: joi.string().min(1).required(),
-                }) as ObjectSchema<StrictSchemaMap<FacebookConfig>>,
+                }) ,
                 isEnabled: joi
                   .boolean()
                   .required()
@@ -77,7 +77,7 @@ export default {
                     )
                     .optional(),
                   defaultPaymentProviderToken: joi.string().min(1),
-                }) as ObjectSchema<StrictSchemaMap<TelegramConfig>>,
+                }),
                 isEnabled: joi
                   .boolean()
                   .equal(true)

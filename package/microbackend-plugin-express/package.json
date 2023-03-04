@@ -5,10 +5,12 @@
     "@microbackend/common-utils": "workspace:*",
     "@microbackend/plugin-chatbot-engine-core": "workspace:*",
     "@microbackend/plugin-core": "workspace:*",
-    "@microbackend/plugin-express": "workspace:*"
+    "@microbackend/plugin-express": "workspace:*",
+    "express": "^4.17.2"
   },
   "description": "Micro-backend chatbot-engine plugin for express.js",
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/jest": "^29.4.0",
     "jest": "^29.4.3",
     "sort-json": "^2.0.1",
