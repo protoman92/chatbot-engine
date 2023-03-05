@@ -650,6 +650,7 @@ importers:
       form-data: 3.0.0
       grapheme-splitter: 1.0.4
       jest: ^29.4.3
+      lodash: ^4.17.21
       lodash-es: 4.17.21
       nodemon: ^2.0.14
       prettier: 2.0.5
@@ -668,6 +669,7 @@ importers:
       axios: 0.25.0
       form-data: 3.0.0
       grapheme-splitter: 1.0.4
+      lodash: 4.17.21
       lodash-es: 4.17.21
     devDependencies:
       '@types/formidable': 1.0.31
