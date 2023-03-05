@@ -52,18 +52,18 @@ export namespace _FacebookGenericResponseOutput {
   export namespace QuickReply {
     export interface Location {
       readonly text: string;
-      readonly type: "location";
+      readonly type: "facebook.location";
     }
 
     export interface Postback {
       readonly payload: string;
       readonly text: string;
-      readonly type: "postback";
+      readonly type: "facebook.postback";
     }
 
     export interface Text {
       readonly text: string;
-      readonly type: "text";
+      readonly type: "facebook.text";
     }
   }
 
@@ -93,7 +93,7 @@ export namespace _FacebookGenericResponseOutput {
     export interface Button {
       readonly actions: readonly Action[];
       readonly text: string;
-      readonly type: "button";
+      readonly type: "facebook.button";
     }
 
     export interface Carousel {
@@ -104,26 +104,26 @@ export namespace _FacebookGenericResponseOutput {
         image?: string;
         actions?: readonly Action[];
       }>[];
-      readonly type: "carousel";
+      readonly type: "facebook.carousel";
     }
 
     export namespace FileAttachment {
       export interface Ambiguous {
         readonly attachmentIDOrURL: string;
         readonly attachmentType: _FacebookRawResponse.FileAttachmentType;
-        readonly type: "attachment";
+        readonly type: "facebook.attachment";
       }
 
       export interface ByID {
         readonly attachmentID: string;
         readonly attachmentType: _FacebookRawResponse.FileAttachmentType;
-        readonly type: "attachment";
+        readonly type: "facebook.attachment";
       }
 
       export interface ByURL {
         readonly attachmentType: _FacebookRawResponse.FileAttachmentType;
         readonly reusable?: boolean;
-        readonly type: "attachment";
+        readonly type: "facebook.attachment";
         readonly url: string;
       }
     }
@@ -137,12 +137,12 @@ export namespace _FacebookGenericResponseOutput {
       export interface Image {
         readonly actions: readonly Action[];
         readonly image: string;
-        readonly type: "media";
+        readonly type: "facebook.media";
       }
 
       export interface Video {
         readonly actions: readonly Action[];
-        readonly type: "media";
+        readonly type: "facebook.media";
         readonly video: string;
       }
     }
@@ -157,7 +157,7 @@ export namespace _FacebookGenericResponseOutput {
         size: "large" | "small";
         actions?: readonly Action[];
       }>[];
-      readonly type: "list";
+      readonly type: "facebook.list";
     }
 
     export interface Text {
@@ -178,7 +178,7 @@ export namespace _FacebookGenericResponseOutput {
 
   export interface Menu {
     readonly actions: readonly [Action, ...Action[]];
-    readonly type: "menu";
+    readonly type: "facebook.menu";
   }
 }
 

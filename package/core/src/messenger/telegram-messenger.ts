@@ -455,13 +455,13 @@ function createRawTelegramResponse({
     quickReply: _TelegramGenericResponseOutput.QuickReply
   ): _TelegramRawResponse.ReplyMarkup {
     switch (quickReply.type) {
-      case "inline_markup":
+      case "telegram.inline_markup":
         return createInlineMarkups(quickReply.content);
 
-      case "reply_markup":
+      case "telegram.reply_markup":
         return createReplyMarkups(quickReply.content);
 
-      case "remove_reply_keyboard":
+      case "telegram.remove_reply_keyboard":
         return { remove_keyboard: true };
     }
   }
@@ -476,7 +476,7 @@ function createRawTelegramResponse({
   ): TelegramRawResponse[] {
     const reply_markup = quickReplies && createQuickReplies(quickReplies);
 
-    if (content.type === "document") {
+    if (content.type === "telegram.document") {
       const documentForm = createDocumentResponse(
         targetID,
         reply_markup,
@@ -491,7 +491,7 @@ function createRawTelegramResponse({
           headers: documentForm.getHeaders(),
         },
       ];
-    } else if (content.type === "image") {
+    } else if (content.type === "telegram.image") {
       const [imageBody, ...textBodies] = createImageResponses(content);
 
       const mergedResponses = [
@@ -516,7 +516,7 @@ function createRawTelegramResponse({
       ];
 
       return mergedResponses;
-    } else if (content.type === "invoice") {
+    } else if (content.type === "telegram.invoice") {
       const invoiceResponse = createInvoiceResponse(content);
 
       return [
@@ -526,7 +526,7 @@ function createRawTelegramResponse({
           body: { ...invoiceResponse, chat_id: targetID },
         },
       ];
-    } else if (content.type === "pre_checkout_confirmation") {
+    } else if (content.type === "telegram.pre_checkout_confirmation") {
       const answerResponse = createPreCheckoutConfirmationResponse(content);
 
       return [

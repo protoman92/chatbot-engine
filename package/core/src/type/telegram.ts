@@ -149,16 +149,16 @@ export namespace _TelegramGenericResponseOutput {
 
   export interface InlineMarkupQuickReply {
     readonly content: InlineMarkupMatrix;
-    readonly type: "inline_markup";
+    readonly type: "telegram.inline_markup";
   }
 
   export interface ReplyMarkupQuickReply {
     readonly content: ReplyMarkupMatrix;
-    readonly type: "reply_markup";
+    readonly type: "telegram.reply_markup";
   }
 
   export interface RemoveReplyKeyboardQuickReply {
-    readonly type: "remove_reply_keyboard";
+    readonly type: "telegram.remove_reply_keyboard";
   }
 
   export type QuickReply =
@@ -171,13 +171,13 @@ export namespace _TelegramGenericResponseOutput {
       readonly fileData: ReadStream;
       readonly fileName?: string;
       readonly text?: string;
-      readonly type: "document";
+      readonly type: "telegram.document";
     }
 
     export interface Image {
       readonly image: string;
       readonly text?: string;
-      readonly type: "image";
+      readonly type: "telegram.image";
     }
 
     export namespace Invoice {
@@ -193,13 +193,13 @@ export namespace _TelegramGenericResponseOutput {
       readonly payload: string;
       readonly prices: readonly Invoice.Price[];
       readonly title: string;
-      readonly type: "invoice";
+      readonly type: "telegram.invoice";
     }
 
     export type PreCheckoutConfirmation = Readonly<
       {
         checkoutID: string;
-        type: "pre_checkout_confirmation";
+        type: "telegram.pre_checkout_confirmation";
       } & (
         | { error: Error | string; isOK?: undefined }
         | { error?: undefined; isOK: true }

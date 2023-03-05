@@ -328,19 +328,19 @@ function createFacebookResponse({
     content: _FacebookGenericResponseOutput.Content
   ): readonly _FacebookRawResponse.Message["message"][] {
     switch (content.type) {
-      case "attachment":
+      case "facebook.attachment":
         return createFileAttachmentMessages(content);
 
-      case "button":
+      case "facebook.button":
         return createButtonMessages(content);
 
-      case "carousel":
+      case "facebook.carousel":
         return createCarouselMessages(content);
 
-      case "list":
+      case "facebook.list":
         return createListMessages(content);
 
-      case "media":
+      case "facebook.media":
         return createMediaMessages(content);
 
       case "text":
@@ -355,17 +355,17 @@ function createFacebookResponse({
     const { text } = quickReply;
 
     switch (quickReply.type) {
-      case "location":
+      case "facebook.location":
         return { title: text, content_type: "location", payload: text };
 
-      case "postback":
+      case "facebook.postback":
         return {
           title: text,
           content_type: "text",
           payload: quickReply.payload,
         };
 
-      case "text":
+      case "facebook.text":
         return { title: text, content_type: "text", payload: text };
     }
   }
@@ -374,7 +374,7 @@ function createFacebookResponse({
     targetID: string,
     response: FacebookGenericResponse["output"][number]
   ): readonly (FacebookRawResponse | null)[] {
-    if (response.content.type === "menu") {
+    if (response.content.type === "facebook.menu") {
       return [null];
     }
 
@@ -443,7 +443,7 @@ export async function createFacebookMessageProcessor(
       >
     ) => {
       for (const output of genericResponse.output) {
-        if (output.content.type === "menu") {
+        if (output.content.type === "facebook.menu") {
           await client.sendMenuSettings({
             persistent_menu: [
               {
