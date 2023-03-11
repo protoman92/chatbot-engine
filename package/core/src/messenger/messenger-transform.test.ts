@@ -1,5 +1,6 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
-import { joinObjects, transform } from "../common/utils";
+import { transform } from "../common/utils";
+import { createInMemoryContextDAO } from "../context/InMemoryContextDAO";
 import {
   AmbiguousGenericRequest,
   AmbiguousGenericResponse,
@@ -68,29 +69,25 @@ beforeEach(async () => {
 });
 
 describe("Save context on send", () => {
+  beforeEach(() => {
+    contextDAO = createInMemoryContextDAO();
+  });
+
   it("Should save context on send", async () => {
     // Setup
-    const oldContext: {} = { a: 1, b: 2 };
-    const additionalContext: {} = { a: 1, b: 2, c: 3 };
-    const finalContext = joinObjects(oldContext, additionalContext);
-
-    when(contextDAO.appendContext(anything())).thenResolve({
-      oldContext,
-      newContext: finalContext,
-    });
     when(msgProcessor.sendResponse(anything())).thenResolve(undefined);
     when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
 
     const transformed = await transform(
       instance(msgProcessor),
-      saveContextOnSend({ contextDAO: instance(contextDAO) })(middlewareInput)
+      saveContextOnSend({ contextDAO })(middlewareInput)
     );
 
     const genericResponse: AmbiguousGenericResponse = {
       targetID,
-      additionalContext,
+      additionalContext: { a: 3, b: 4, c: 5 },
       originalRequest: {
-        currentContext: {},
+        currentContext: { a: 1, b: 2 },
         input: { text: "", type: "text" },
         targetID: "some-other-id",
         rawRequest: {} as FacebookRawRequest,
@@ -98,38 +95,84 @@ describe("Save context on send", () => {
         triggerType: "message",
       },
       output: [],
-      targetPlatform: "telegram",
+      targetPlatform: "facebook",
     };
 
     // When
     await transformed.sendResponse({ genericResponse });
 
     // Then
-    verify(
-      contextDAO.appendContext(
-        deepEqual({
-          additionalContext,
-          targetID,
-          oldContext: {},
-          targetPlatform: "telegram",
-        })
-      )
-    ).once();
     verify(msgProcessor.sendResponse(deepEqual({ genericResponse }))).once();
     verify(
       msgProcessor.receiveRequest(
         deepEqual({
           genericRequest: {
             targetID,
-            currentContext: finalContext,
+            currentContext: { a: 3, b: 4, c: 5 },
             input: {
-              oldContext,
-              changedContext: additionalContext,
-              newContext: finalContext,
+              oldContext: { a: 1, b: 2 },
+              changedContext: { a: 3, b: 4, c: 5 },
+              newContext: { a: 3, b: 4, c: 5 },
               type: "context_change",
             },
             originalRequest: genericResponse.originalRequest,
-            targetPlatform: "telegram",
+            targetPlatform: "facebook",
+            triggerType: "manual",
+          },
+        })
+      )
+    ).once();
+  });
+
+  it("Should modify context before saving if preSaveContextMapper is provided", async () => {
+    // Setup
+    when(msgProcessor.sendResponse(anything())).thenResolve(undefined);
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
+
+    const transformed = await transform(
+      instance(msgProcessor),
+      saveContextOnSend({
+        contextDAO,
+        preSaveContextMapper: (context) => {
+          return { ...context, d: 4 };
+        },
+      })(middlewareInput)
+    );
+
+    const genericResponse: AmbiguousGenericResponse = {
+      targetID,
+      additionalContext: { a: 1, b: 2, c: 3 },
+      originalRequest: {
+        currentContext: { a: 1, b: 2 },
+        input: { text: "", type: "text" },
+        targetID: "some-other-id",
+        rawRequest: {} as FacebookRawRequest,
+        targetPlatform: "facebook",
+        triggerType: "message",
+      },
+      output: [],
+      targetPlatform: "facebook",
+    };
+
+    // When
+    await transformed.sendResponse({ genericResponse });
+
+    // Then
+    verify(msgProcessor.sendResponse(deepEqual({ genericResponse }))).once();
+    verify(
+      msgProcessor.receiveRequest(
+        deepEqual({
+          genericRequest: {
+            targetID,
+            currentContext: { a: 1, b: 2, c: 3, d: 4 },
+            input: {
+              oldContext: { a: 1, b: 2 },
+              changedContext: { a: 1, b: 2, c: 3, d: 4 },
+              newContext: { a: 1, b: 2, c: 3, d: 4 },
+              type: "context_change",
+            },
+            originalRequest: genericResponse.originalRequest,
+            targetPlatform: "facebook",
             triggerType: "manual",
           },
         })

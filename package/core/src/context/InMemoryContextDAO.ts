@@ -11,7 +11,7 @@ export type InMemoryContextData = {
 };
 
 /** Create an in-memory context DAO store. This is useful for debugging */
-function createInMemoryContextDAO() {
+export function createInMemoryContextDAO() {
   const synchronizer = createAsyncSynchronizer();
   let storage: InMemoryContextData = { facebook: {}, telegram: {} };
 

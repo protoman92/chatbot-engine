@@ -491,9 +491,9 @@ importers:
       handlebars: ^4.7.7
       jest: ^29.4.3
       prettier: 2.0.5
-      serverless: ^3.2.0
+      serverless: ^3.28.1
       serverless-http: ^2.7.0
-      serverless-webpack: ^5.6.0
+      serverless-webpack: ^5.11.0
       sort-json: ^2.0.1
       ts-essentials: ^9.3.1
       ts-jest: ^29.0.5
@@ -3464,7 +3464,7 @@ packages:
     resolution: {integrity: sha512-xq+q3SRMOxGivLhBNaUdC64hDTQwejJ+H0T/NB1XMtTVEwNTrfFF3gAxiyW0Bu/xWEGhjVKgUcMhCrUy2+uCWg==}
     dependencies:
       base64-js: 1.5.1
-      ieee754: 1.1.13
+      ieee754: 1.2.1
       isarray: 1.0.0
     dev: false
 

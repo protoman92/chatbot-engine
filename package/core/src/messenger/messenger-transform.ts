@@ -68,8 +68,12 @@ export { injectFacebookContextOnReceive };
  */
 export function saveContextOnSend({
   contextDAO,
+  preSaveContextMapper,
 }: Readonly<{
   contextDAO: Pick<ContextDAO, "getContext" | "appendContext">;
+  preSaveContextMapper?: (
+    context: Partial<ChatbotContext>
+  ) => Promise<Partial<ChatbotContext>> | Partial<ChatbotContext>;
 }>): MessageProcessorMiddleware {
   return ({ getFinalMessageProcessor }) => async (processor) => {
     return {
@@ -87,8 +91,14 @@ export function saveContextOnSend({
          * listens to context changes and sends related messages.
          */
         if (genericResponse.additionalContext != null) {
+          let additionalContext = genericResponse.additionalContext;
+
+          if (preSaveContextMapper != null) {
+            additionalContext = await preSaveContextMapper(additionalContext);
+          }
+
           const { newContext, oldContext } = await contextDAO.appendContext({
-            additionalContext: genericResponse.additionalContext,
+            additionalContext,
             targetID: genericResponse.targetID,
             targetPlatform: genericResponse.targetPlatform,
             oldContext: genericResponse.originalRequest?.currentContext,
@@ -103,7 +113,7 @@ export function saveContextOnSend({
               input: {
                 newContext,
                 oldContext,
-                changedContext: genericResponse.additionalContext,
+                changedContext: additionalContext,
                 type: "context_change",
               },
               originalRequest: genericResponse.originalRequest,
