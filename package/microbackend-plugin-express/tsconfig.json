@@ -2,7 +2,8 @@
   "compilerOptions": {
     "noEmit": false,
     "outDir": "build",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "target": "ES5"
   },
   "exclude": ["build"],
   "extends": "../../tsconfig.json"

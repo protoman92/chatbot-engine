@@ -8,7 +8,7 @@ export default ({
   allPlugins,
   currentProjectDir,
   environment,
-}: IPluginOptions): Configuration => {
+}: IPluginOptions): Promise<Configuration> => {
   return mergeConfigs(
     createMicrobackendExtension({
       environment,
