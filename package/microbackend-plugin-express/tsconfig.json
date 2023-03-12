@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "outDir": "build"
+    "outDir": "build",
+    "skipLibCheck": true
   },
   "exclude": ["build"],
-  "extends": "../../lib/microbackend/tsconfig.json"
+  "extends": "../../tsconfig.json"
 }

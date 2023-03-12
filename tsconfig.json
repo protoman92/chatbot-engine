@@ -1,27 +1,41 @@
 {
   "compilerOptions": {
     "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
     "alwaysStrict": true,
+    "checkJs": false,
     "declaration": true,
-    "downlevelIteration": true,
-    "exactOptionalPropertyTypes": false,
+    "downlevelIteration": false,
     "esModuleInterop": true,
+    "exactOptionalPropertyTypes": false,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
+    "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "build",
     "removeComments": true,
+    "resolveJsonModule": true,
     "skipLibCheck": false,
     "strict": true,
+    "strictBindCallApply": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "target": "es2017"
+    "target": "es2017",
+    "useUnknownInCatchVariables": false
   },
-  "exclude": ["./node_modules/*"]
+  "exclude": [
+    "build"
+  ]
 }

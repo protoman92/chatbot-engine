@@ -185,7 +185,7 @@ describe("Default error leaf", () => {
     ).once();
 
     expect(output).toHaveLength(1);
-    const [{ content: response }] = output;
+    const response = output[0]!.content;
 
     if (isType<_FacebookGenericResponseOutput.Content.Text>(response, "text")) {
       expect(response.text).toContain(error.message);
