@@ -4,7 +4,7 @@ import {
   ContextDAO,
   FacebookMessageProcessorMiddleware,
   MessageProcessorMiddleware,
-  PlatformClient,
+  PlatformClientTypingIndicatorSetter,
 } from "../type";
 
 /**
@@ -199,7 +199,7 @@ export function setTypingIndicator({
     throw error;
   },
 }: Readonly<{
-  client: PlatformClient<unknown>;
+  client: PlatformClientTypingIndicatorSetter;
   onSetTypingError?: (e: Error) => void;
 }>): MessageProcessorMiddleware {
   return () => {

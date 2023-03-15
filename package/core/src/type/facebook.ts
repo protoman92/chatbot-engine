@@ -3,7 +3,10 @@ import { ReadStream } from "fs";
 import { StrictOmit } from "ts-essentials";
 import { GenericManualTriggerRequest } from ".";
 import { NextResult } from "../content/leaf";
-import { PlatformClient } from "./client";
+import {
+  PlatformClientResponseSender,
+  PlatformClientTypingIndicatorSetter,
+} from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import {
@@ -475,7 +478,9 @@ export interface FacebookConfig {
 }
 
 /** Represents a Facebook-specific client */
-export interface FacebookClient extends PlatformClient<FacebookRawResponse> {
+export interface FacebookClient
+  extends PlatformClientResponseSender<FacebookRawResponse, unknown>,
+    PlatformClientTypingIndicatorSetter {
   /** Get the user associated with a sender ID */
   getUser(targetID: string): Promise<FacebookUser>;
 

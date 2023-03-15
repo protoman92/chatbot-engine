@@ -16,7 +16,7 @@ import {
   FacebookMessageProcessor,
   FacebookRawRequest,
   LeafSelector,
-  PlatformClient,
+  PlatformClientResponseSender,
   TelegramMessageProcessor,
   TelegramRawRequest,
 } from "../type";
@@ -31,7 +31,7 @@ const targetPlatform = "facebook" as const;
 
 describe("Generic message processor", () => {
   let leafSelector: LeafSelector;
-  let client: PlatformClient<unknown>;
+  let client: PlatformClientResponseSender<unknown, unknown>;
 
   beforeEach(async () => {
     leafSelector = spy<LeafSelector>({
@@ -39,9 +39,8 @@ describe("Generic message processor", () => {
       subscribe: () => Promise.reject(""),
     });
 
-    client = spy<PlatformClient<unknown>>({
+    client = spy<typeof client>({
       sendResponse: () => Promise.reject(""),
-      setTypingIndicator: () => Promise.reject(""),
     });
   });
 

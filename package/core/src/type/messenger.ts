@@ -1,10 +1,13 @@
-import { ContentObservable, ContentObserver } from ".";
+import {
+  ContentObservable,
+  ContentObserver,
+  PlatformClientResponseSender,
+} from ".";
 import {
   GenericRequestToReceive,
   GenericResponseToSend,
   RawRequestToGeneralize,
 } from "..";
-import { PlatformClient } from "./client";
 import { Transformer } from "./common";
 import { LeafSelector } from "./leaf";
 import { AmbiguousGenericRequest } from "./request";
@@ -16,7 +19,7 @@ export type AmbiguousPlatform = "facebook" | "telegram";
 export interface BaseMessageProcessorConfig {
   readonly targetPlatform: AmbiguousPlatform;
   readonly leafSelector: LeafSelector;
-  readonly client: PlatformClient<unknown>;
+  readonly client: PlatformClientResponseSender<unknown, unknown>;
   readonly mapRequest: BaseMessageProcessor["generalizeRequest"];
   mapResponse: (res: AmbiguousGenericResponse) => Promise<readonly unknown[]>;
 }

@@ -32,15 +32,12 @@ export interface HTTPClient {
   ): Promise<HTTPResponse<Data, Error>>;
 }
 
-/**
- * Represents an object that handles the client to/from the relevant
- * platform. For example, a Facebook platform client should be able to
- * handle all methods specified here.
- */
-export interface PlatformClient<RawResponse> {
+export interface PlatformClientResponseSender<RawResponse, SendResult> {
   /** Send a response to the related platform */
-  sendResponse(data: RawResponse): Promise<unknown>;
+  sendResponse(data: RawResponse): Promise<SendResult>;
+}
 
+export interface PlatformClientTypingIndicatorSetter {
   /** Toggle typing indicator */
   setTypingIndicator(targetID: string, enabled: boolean): Promise<unknown>;
 }

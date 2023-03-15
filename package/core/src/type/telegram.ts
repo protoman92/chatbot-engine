@@ -8,7 +8,10 @@ import {
   RawRequestGeneralizer,
 } from ".";
 import { NextResult } from "../content/leaf";
-import { PlatformClient } from "./client";
+import {
+  PlatformClientResponseSender,
+  PlatformClientTypingIndicatorSetter,
+} from "./client";
 import { Coordinates } from "./common";
 import { LeafSelector } from "./leaf";
 import {
@@ -677,8 +680,21 @@ export namespace _TelegramClient {
   }
 }
 
+export namespace TelegramClientSendResponseResult {
+  export type PreCheckoutConfirmation = true;
+}
+
+export type TelegramClientSendResponseResult =
+  | _TelegramRawRequest.Message["message"]
+  | TelegramClientSendResponseResult.PreCheckoutConfirmation;
+
 /** A Telegram-specific client */
-export interface TelegramClient extends PlatformClient<TelegramRawResponse> {
+export interface TelegramClient
+  extends PlatformClientResponseSender<
+      TelegramRawResponse,
+      TelegramClientSendResponseResult
+    >,
+    PlatformClientTypingIndicatorSetter {
   deleteMessage(
     args: Readonly<{ chatID: number | string; messageID: number | string }>
   ): Promise<void>;

@@ -8,8 +8,8 @@ import {
   HTTPClient,
   TelegramBot,
   TelegramClient,
+  TelegramClientSendResponseResult,
   TelegramConfig,
-  TelegramRawRequest,
   _TelegramClient,
   _TelegramRawRequest,
 } from "../type";
@@ -92,7 +92,7 @@ export function createTelegramClient(
       headers = {},
       parseMode: parse_mode = defaultParseMode,
     }) => {
-      return communicate<TelegramRawRequest>({
+      return communicate<TelegramClientSendResponseResult>({
         headers,
         body: {
           ...body,

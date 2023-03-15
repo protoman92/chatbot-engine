@@ -7,7 +7,7 @@ import {
   BaseMessageProcessor,
   ContextDAO,
   FacebookRawRequest,
-  PlatformClient,
+  PlatformClientTypingIndicatorSetter,
   _MessageProcessorMiddleware,
 } from "../type";
 import {
@@ -23,7 +23,7 @@ declare module ".." {
 const targetID = "target-id";
 const targetPlatform = "facebook";
 let msgProcessor: BaseMessageProcessor;
-let client: PlatformClient<unknown>;
+let client: PlatformClientTypingIndicatorSetter;
 let contextDAO: ContextDAO;
 let middlewareInput: _MessageProcessorMiddleware.Input;
 
@@ -40,10 +40,7 @@ beforeEach(async () => {
     },
   });
 
-  client = spy<PlatformClient<unknown>>({
-    sendResponse: () => {
-      return Promise.reject("");
-    },
+  client = spy<typeof client>({
     setTypingIndicator: () => {
       return Promise.reject("");
     },
