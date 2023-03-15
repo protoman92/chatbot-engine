@@ -431,6 +431,10 @@
       "projectFolder": "lib/javascript-helper/package/preconditions"
     },
     {
+      "packageName": "@haipham/javascript-helper-test-utils",
+      "projectFolder": "lib/javascript-helper/package/test_utils"
+    },
+    {
       "packageName": "@microbackend/build-utils",
       "projectFolder": "lib/microbackend/package/build_utils"
     },

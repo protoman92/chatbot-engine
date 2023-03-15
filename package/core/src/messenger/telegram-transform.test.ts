@@ -1,5 +1,6 @@
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { transform } from "../common/utils";
+import { createInMemoryContextDAO } from "../context/InMemoryContextDAO";
 import {
   AmbiguousGenericRequest,
   ContextDAO,
@@ -17,6 +18,7 @@ import {
   saveTelegramMessages,
   saveTelegramUser,
 } from "./telegram-transform";
+import { mockSomething } from "@haipham/javascript-helper-test-utils";
 
 declare module ".." {
   interface ChatbotContext extends Record<string, unknown> {}
@@ -254,18 +256,10 @@ describe("Save Telegram user for target ID", () => {
 });
 
 describe("Save Telegram messages", () => {
-  let saveTelegramMessageArgs: Parameters<typeof saveTelegramMessages>[0];
-
   beforeEach(() => {
-    saveTelegramMessageArgs = spy<typeof saveTelegramMessageArgs>({
-      contextDAO: instance(contextDAO),
-      isEnabled: () => {
-        return Promise.reject("");
-      },
-      saveMessages: () => {
-        return Promise.reject("");
-      },
-    });
+    contextDAO = createInMemoryContextDAO();
+
+    msgProcessor = 1;
   });
 
   it("Should allow saving Telegram messages when appropriate", async () => {
@@ -273,6 +267,69 @@ describe("Save Telegram messages", () => {
     const inRawRequest = {
       callback_query: { message: {} },
     } as _TelegramRawRequest.Callback;
+
+    const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
+    when(contextDAO.getContext(anything())).thenResolve({});
+    when(saveTelegramMessageArgs.isEnabled()).thenReturn(true);
+    when(saveTelegramMessageArgs.saveMessages(anything())).thenResolve(
+      undefined
+    );
+    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
+    when(msgProcessor.sendResponse(anything())).thenResolve([
+      outRawRequest.message,
+    ]);
+
+    const transformed = await transform(
+      instance(msgProcessor),
+      saveTelegramMessages(instance(saveTelegramMessageArgs))({
+        getFinalMessageProcessor: () => {
+          return instance(msgProcessor);
+        },
+      })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      genericRequest: {
+        targetID,
+        targetPlatform,
+        currentContext: {},
+        rawRequest: inRawRequest,
+        triggerType: "message",
+      } as TelegramGenericRequest,
+    });
+
+    await transformed.receiveRequest({
+      genericRequest: {
+        targetID,
+        targetPlatform,
+        triggerType: "manual",
+      } as TelegramGenericRequest,
+    });
+
+    await transformed.sendResponse({
+      genericResponse: { targetID, targetPlatform } as TelegramGenericResponse,
+    });
+
+    // Then
+    verify(
+      saveTelegramMessageArgs.saveMessages(
+        deepEqual({
+          currentContext: {},
+          rawRequestMessages: [inRawRequest.callback_query.message],
+        })
+      )
+    ).twice();
+    verify(
+      contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
+    ).once();
+  });
+
+  it("Should not trigger saveMessages if request type is my_chat_member", async () => {
+    // Setup
+    const inRawRequest = {
+      my_chat_member: {},
+    } as _TelegramRawRequest.MyChatMember;
 
     const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
     when(contextDAO.getContext(anything())).thenResolve({});

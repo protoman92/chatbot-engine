@@ -83,6 +83,10 @@ export function saveTelegramMessages({
     if (isType<_TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
       return rawRequest.callback_query.message;
     } else if (
+      isType<_TelegramRawRequest.MyChatMember>(rawRequest, "my_chat_member")
+    ) {
+      return undefined;
+    } else if (
       isType<_TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
     ) {
       return undefined;
@@ -136,7 +140,7 @@ export function saveTelegramMessages({
             });
 
             const rawRequestMessages: Exclude<
-              typeof sendResults[number],
+              (typeof sendResults)[number],
               boolean
             >[] = [];
 
@@ -188,12 +192,8 @@ export function saveTelegramUser({
           return processor.receiveRequest({ ...args, genericRequest });
         }
 
-        let {
-          currentContext,
-          targetID,
-          targetPlatform,
-          telegramUser,
-        } = genericRequest;
+        let { currentContext, targetID, targetPlatform, telegramUser } =
+          genericRequest;
 
         if (await Promise.resolve(isEnabled({ currentContext }))) {
           const { additionalContext = {} } = await Promise.resolve(

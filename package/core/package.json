@@ -13,6 +13,7 @@
   },
   "description": "chatbot-engine core",
   "devDependencies": {
+    "@haipham/javascript-helper-test-utils": "workspace:*",
     "@types/formidable": "1.0.31",
     "@types/jest": "^29.4.0",
     "@types/lodash": "^4.14.178",

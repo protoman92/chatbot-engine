@@ -477,6 +477,42 @@ describe("Create generic Telegram requests", () => {
       },
     ]);
   });
+
+  it("Should return chat_member_updated input type if my_chat_member is returned", async () => {
+    // Setup
+    const rawRequest: TelegramRawRequest = {
+      my_chat_member: {
+        chat,
+        from,
+        date: 0,
+        old_chat_member: { status: "member", user: from },
+        new_chat_member: { status: "kicked", user: from, until_date: 100 },
+      },
+      update_id: 0,
+    };
+
+    // When
+    const genericRequest = createGenericTelegramRequest(rawRequest, currentBot);
+
+    // Then
+    expect(genericRequest).toEqual([
+      {
+        currentBot,
+        rawRequest,
+        chatType: "private",
+        currentContext: {},
+        input: {
+          newMember: { status: "kicked", until_date: 100, user: from },
+          oldMember: { status: "member", user: from },
+          type: "telegram.chat_member_updated",
+        },
+        targetID: "0",
+        targetPlatform: "telegram",
+        telegramUser: from,
+        triggerType: "message",
+      },
+    ]);
+  });
 });
 
 describe("Utilities", () => {

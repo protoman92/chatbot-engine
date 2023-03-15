@@ -34,17 +34,18 @@ const MESSAGE_TEXT_CHARACTER_LIMIT = 4096;
  * should give [start, 123], i.e. the command and the instruction. If the
  * command does not exist, fallback to the base input text for instruction.
  */
-export function extractCommand(
-  textWithCommand: string
-): Readonly<{
+export function extractCommand(textWithCommand: string): Readonly<{
   botUsername: string | undefined;
   command: string | undefined;
   text: string;
 }> {
-  const { command, text = textWithCommand, username: botUsername } =
-    textWithCommand.match(
-      /^\/(?<command>\w*)\s*(\@(?<username>\w+))*\s*(?<text>(.|\s)*)$/
-    )?.groups ?? {};
+  const {
+    command,
+    text = textWithCommand,
+    username: botUsername,
+  } = textWithCommand.match(
+    /^\/(?<command>\w*)\s*(\@(?<username>\w+))*\s*(?<text>(.|\s)*)$/
+  )?.groups ?? {};
 
   return {
     botUsername: botUsername?.trim(),
@@ -187,6 +188,26 @@ function processCallbackRequest({
   };
 }
 
+function processMyChatMemberRequest({
+  my_chat_member: { chat, from: user, new_chat_member, old_chat_member },
+}: _TelegramRawRequest.MyChatMember): Readonly<{
+  chat: _TelegramRawRequest.Chat | undefined;
+  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+  user: TelegramUser;
+}> {
+  return {
+    chat,
+    user,
+    inputs: [
+      {
+        newMember: new_chat_member,
+        oldMember: old_chat_member,
+        type: "telegram.chat_member_updated",
+      },
+    ],
+  };
+}
+
 function processPreCheckoutRequest({
   pre_checkout_query: {
     currency,
@@ -258,6 +279,10 @@ export function createGenericTelegramRequest(
   if (isType<_TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
     requestData = processCallbackRequest(rawRequest);
   } else if (
+    isType<_TelegramRawRequest.MyChatMember>(rawRequest, "my_chat_member")
+  ) {
+    requestData = processMyChatMemberRequest(rawRequest);
+  } else if (
     isType<_TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
   ) {
     requestData = processPreCheckoutRequest(rawRequest);
@@ -292,21 +317,19 @@ export function createGenericTelegramRequest(
 
   const { chat, inputs, user: telegramUser } = requestData;
 
-  return inputs.map(
-    (input): TelegramGenericRequest => {
-      return {
-        currentBot,
-        input,
-        rawRequest,
-        telegramUser,
-        chatType: chat?.type,
-        targetPlatform: "telegram",
-        currentContext: {} as ChatbotContext,
-        targetID: chat?.id.toString() || telegramUser.id.toString(),
-        triggerType: "message",
-      };
-    }
-  );
+  return inputs.map((input): TelegramGenericRequest => {
+    return {
+      currentBot,
+      input,
+      rawRequest,
+      telegramUser,
+      chatType: chat?.type,
+      targetPlatform: "telegram",
+      currentContext: {} as ChatbotContext,
+      targetID: chat?.id.toString() || telegramUser.id.toString(),
+      triggerType: "message",
+    };
+  });
 }
 
 /** Create a Telegram response from multiple generic responses */

@@ -32,7 +32,7 @@ export namespace _TelegramGenericRequest {
   export interface MessageTrigger
     extends BaseRequest,
       StrictOmit<GenericMessageTriggerRequest<TelegramRawRequest>, "input"> {
-    readonly chatType: TelegramChatType | undefined;
+    readonly chatType: _TelegramRawRequest.Chat["type"] | undefined;
     readonly currentBot: TelegramBot;
     readonly telegramUser: TelegramUser;
     readonly input: Readonly<
@@ -46,6 +46,11 @@ export namespace _TelegramGenericRequest {
           pingedBotUsername: string | undefined;
           text: string | undefined;
           type: "telegram.command";
+        }
+      | {
+          newMember: TelegramChatMember;
+          oldMember: TelegramChatMember;
+          type: "telegram.chat_member_updated";
         }
       | { coordinate: Coordinates; type: "location" }
       | {
@@ -227,31 +232,28 @@ export interface TelegramGenericResponseOutput
   readonly parseMode?: "html" | "markdown";
 }
 
-export namespace _TelegramChatType {
-  export type Group = "group";
-  export type Private = "private";
-}
-
-export type TelegramChatType =
-  | _TelegramChatType.Group
-  | _TelegramChatType.Private;
-
 export namespace _TelegramRawRequest {
   namespace Chat {
     export interface Private {
       readonly id: number;
-      readonly type: _TelegramChatType.Private;
+      readonly type: "private";
     }
 
     export interface Group {
       readonly all_members_are_administrators: boolean;
       readonly id: number;
       readonly title: string;
-      readonly type: _TelegramChatType.Group;
+      readonly type: "group";
+    }
+
+    export interface SuperGroup {
+      readonly id: number;
+      readonly title: string;
+      readonly type: "supergroup";
     }
   }
 
-  export type Chat = Chat.Group | Chat.Private;
+  export type Chat = Chat.Group | Chat.Private | Chat.SuperGroup;
 
   export interface DocumentDetails {
     readonly file_name: string;
@@ -269,10 +271,10 @@ export namespace _TelegramRawRequest {
   }
 
   export interface FileDetails {
-    file_id: string;
-    file_unique_id: string;
-    file_size: number;
-    file_path: string;
+    readonly file_id: string;
+    readonly file_unique_id: string;
+    readonly file_size: number;
+    readonly file_path: string;
   }
 
   export interface PhotoDetails {
@@ -382,6 +384,17 @@ export namespace _TelegramRawRequest {
     readonly update_id: number;
   }
 
+  export interface MyChatMember {
+    readonly my_chat_member: Readonly<{
+      chat: Chat;
+      from: TelegramUser;
+      date: number;
+      old_chat_member: TelegramChatMember;
+      new_chat_member: TelegramChatMember;
+    }>;
+    readonly update_id: number;
+  }
+
   export interface PreCheckout {
     readonly pre_checkout_query: Readonly<{
       currency: string;
@@ -414,6 +427,7 @@ export namespace _TelegramRawRequest {
 export type TelegramRawRequest =
   | _TelegramRawRequest.Message
   | _TelegramRawRequest.Callback
+  | _TelegramRawRequest.MyChatMember
   | _TelegramRawRequest.PreCheckout
   | _TelegramRawRequest.SuccessfulPayment;
 
@@ -545,9 +559,8 @@ export interface TelegramMessageProcessor
       )[]
     > {}
 
-export type TelegramMessageProcessorMiddleware = MessageProcessorMiddleware<
-  TelegramMessageProcessor
->;
+export type TelegramMessageProcessorMiddleware =
+  MessageProcessorMiddleware<TelegramMessageProcessor>;
 
 export type TelegramLeafObserver = ContentObserver<
   TelegramGenericRequest,
@@ -568,6 +581,79 @@ export interface TelegramUser extends TelegramBot {
   readonly last_name: string;
   readonly language_code: "en";
 }
+
+export namespace TelegramChatMember {
+  export interface Owner {
+    readonly custom_title: string | undefined;
+    readonly is_anonymous: boolean;
+    readonly status: "creator";
+    readonly user: TelegramUser;
+  }
+
+  export interface Administrator {
+    readonly can_be_edited: boolean;
+    readonly can_change_info: boolean;
+    readonly can_delete_messages: boolean;
+    readonly can_edit_messages: boolean | undefined;
+    readonly can_invite_users: boolean;
+    readonly can_manage_chat: boolean;
+    readonly can_manage_topics: boolean | undefined;
+    readonly can_manage_video_chats: boolean;
+    readonly can_pin_messages: boolean | undefined;
+    readonly can_post_messages: boolean | undefined;
+    readonly can_promote_members: boolean;
+    readonly can_restrict_members: boolean;
+    readonly custom_title: string | undefined;
+    readonly is_anonymous: boolean;
+    readonly status: "administrator";
+    readonly user: TelegramUser;
+  }
+
+  export interface Member {
+    readonly status: "member";
+    readonly user: TelegramUser;
+  }
+
+  export interface Restricted {
+    readonly can_add_web_page_previews: boolean;
+    readonly can_change_info: boolean;
+    readonly can_invite_users: boolean;
+    readonly can_pin_messages: boolean;
+    readonly can_manage_topics: boolean;
+    readonly can_send_audios: boolean;
+    readonly can_send_documents: boolean;
+    readonly can_send_messages: boolean;
+    readonly can_send_other_messages: boolean;
+    readonly can_send_photos: boolean;
+    readonly can_send_polls: boolean;
+    readonly can_send_videos: boolean;
+    readonly can_send_video_notes: boolean;
+    readonly can_send_voice_notes: boolean;
+    readonly is_member: boolean;
+    readonly status: "restricted";
+    readonly until_date: number;
+    readonly user: TelegramUser;
+  }
+
+  export interface Left {
+    readonly status: "left";
+    readonly user: TelegramUser;
+  }
+
+  export interface Banned {
+    readonly status: "kicked";
+    readonly until_date: number;
+    readonly user: TelegramUser;
+  }
+}
+
+export type TelegramChatMember =
+  | TelegramChatMember.Administrator
+  | TelegramChatMember.Banned
+  | TelegramChatMember.Left
+  | TelegramChatMember.Member
+  | TelegramChatMember.Owner
+  | TelegramChatMember.Restricted;
 
 /** Represents Telegram configurations */
 export interface TelegramConfig {
