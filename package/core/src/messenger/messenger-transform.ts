@@ -75,59 +75,60 @@ export function saveContextOnSend({
     context: Partial<ChatbotContext>
   ) => Promise<Partial<ChatbotContext>> | Partial<ChatbotContext>;
 }>): MessageProcessorMiddleware {
-  return ({ getFinalMessageProcessor }) => async (processor) => {
-    return {
-      ...processor,
-      sendResponse: async ({ genericResponse, ...args }) => {
-        const result = await processor.sendResponse({
-          ...args,
-          genericResponse,
-        });
-
-        /**
-         * We could send the response and emit the context_change request at
-         * the same time (which would improve performance), but it might cause
-         * issue with message ordering, especially if we have a handler that
-         * listens to context changes and sends related messages.
-         */
-        if (genericResponse.additionalContext != null) {
-          let additionalContext = genericResponse.additionalContext;
-
-          if (preSaveContextMapper != null) {
-            additionalContext = await preSaveContextMapper(additionalContext);
-          }
-
-          const { newContext, oldContext } = await contextDAO.appendContext({
-            additionalContext,
-            targetID: genericResponse.targetID,
-            targetPlatform: genericResponse.targetPlatform,
-            oldContext: genericResponse.originalRequest?.currentContext,
+  return ({ getFinalMessageProcessor }) =>
+    async (processor) => {
+      return {
+        ...processor,
+        sendResponse: async ({ genericResponse, ...args }) => {
+          const result = await processor.sendResponse({
+            ...args,
+            genericResponse,
           });
 
-          const finalProcessor = getFinalMessageProcessor();
+          /**
+           * We could send the response and emit the context_change request at
+           * the same time (which would improve performance), but it might cause
+           * issue with message ordering, especially if we have a handler that
+           * listens to context changes and sends related messages.
+           */
+          if (genericResponse.additionalContext != null) {
+            let additionalContext = genericResponse.additionalContext;
 
-          await finalProcessor.receiveRequest({
-            ...args,
-            genericRequest: {
-              currentContext: newContext,
-              input: {
-                newContext,
-                oldContext,
-                changedContext: additionalContext,
-                type: "context_change",
-              },
-              originalRequest: genericResponse.originalRequest,
+            if (preSaveContextMapper != null) {
+              additionalContext = await preSaveContextMapper(additionalContext);
+            }
+
+            const { newContext, oldContext } = await contextDAO.appendContext({
+              additionalContext,
               targetID: genericResponse.targetID,
               targetPlatform: genericResponse.targetPlatform,
-              triggerType: "manual",
-            },
-          });
-        }
+              oldContext: genericResponse.originalRequest?.currentContext,
+            });
 
-        return result;
-      },
+            const finalProcessor = getFinalMessageProcessor();
+
+            await finalProcessor.receiveRequest({
+              ...args,
+              genericRequest: {
+                currentContext: newContext,
+                input: {
+                  newContext,
+                  oldContext,
+                  changedContext: additionalContext,
+                  type: "context_change",
+                },
+                originalRequest: genericResponse.originalRequest,
+                targetID: genericResponse.targetID,
+                targetPlatform: genericResponse.targetPlatform,
+                triggerType: "manual",
+              },
+            });
+          }
+
+          return result;
+        },
+      };
     };
-  };
 }
 
 export interface SaveUserForTargetIDArgs<RawUser> {

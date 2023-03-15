@@ -450,9 +450,8 @@ export interface FacebookMessageProcessor
     GenericRequestReceiver<FacebookGenericRequest>,
     GenericResponseSender<FacebookGenericResponse, unknown> {}
 
-export type FacebookMessageProcessorMiddleware = MessageProcessorMiddleware<
-  FacebookMessageProcessor
->;
+export type FacebookMessageProcessorMiddleware =
+  MessageProcessorMiddleware<FacebookMessageProcessor>;
 
 export type FacebookLeafObserver = ContentObserver<
   FacebookGenericRequest,

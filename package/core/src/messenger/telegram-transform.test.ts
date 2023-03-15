@@ -1,3 +1,4 @@
+import { mockSomething } from "@haipham/javascript-helper-test-utils";
 import { anything, deepEqual, instance, spy, verify, when } from "ts-mockito";
 import { transform } from "../common/utils";
 import { createInMemoryContextDAO } from "../context/InMemoryContextDAO";
@@ -11,14 +12,12 @@ import {
   TelegramRawRequest,
   TelegramUser,
   _MessageProcessorMiddleware,
-  _TelegramRawRequest,
 } from "../type";
 import {
   injectTelegramContextOnReceive,
   saveTelegramMessages,
   saveTelegramUser,
 } from "./telegram-transform";
-import { mockSomething } from "@haipham/javascript-helper-test-utils";
 
 declare module ".." {
   interface ChatbotContext extends Record<string, unknown> {}
@@ -256,166 +255,286 @@ describe("Save Telegram user for target ID", () => {
 });
 
 describe("Save Telegram messages", () => {
+  let saveMessages: jest.Mock;
+
   beforeEach(() => {
     contextDAO = createInMemoryContextDAO();
-
-    msgProcessor = 1;
+    saveMessages = jest.fn();
   });
 
-  it("Should allow saving Telegram messages when appropriate", async () => {
+  it("Should save Telegram messages when receiving a callback_query request", async () => {
     // Setup
-    const inRawRequest = {
-      callback_query: { message: {} },
-    } as _TelegramRawRequest.Callback;
-
-    const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
-    when(contextDAO.getContext(anything())).thenResolve({});
-    when(saveTelegramMessageArgs.isEnabled()).thenReturn(true);
-    when(saveTelegramMessageArgs.saveMessages(anything())).thenResolve(
-      undefined
-    );
-    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
-    when(msgProcessor.sendResponse(anything())).thenResolve([
-      outRawRequest.message,
-    ]);
+    const receiveRequest = jest.fn();
 
     const transformed = await transform(
-      instance(msgProcessor),
-      saveTelegramMessages(instance(saveTelegramMessageArgs))({
+      mockSomething<typeof msgProcessor>({ receiveRequest }),
+      saveTelegramMessages({
+        contextDAO,
+        saveMessages,
+        isEnabled: () => {
+          return true;
+        },
+      })({
         getFinalMessageProcessor: () => {
-          return instance(msgProcessor);
+          return mockSomething<typeof msgProcessor>({});
         },
       })
     );
 
     // When
     await transformed.receiveRequest({
-      genericRequest: {
+      genericRequest: mockSomething<TelegramGenericRequest>({
         targetID,
         targetPlatform,
         currentContext: {},
-        rawRequest: inRawRequest,
+        rawRequest: { callback_query: { message: { text: "some-text" } } },
         triggerType: "message",
-      } as TelegramGenericRequest,
-    });
-
-    await transformed.receiveRequest({
-      genericRequest: {
-        targetID,
-        targetPlatform,
-        triggerType: "manual",
-      } as TelegramGenericRequest,
-    });
-
-    await transformed.sendResponse({
-      genericResponse: { targetID, targetPlatform } as TelegramGenericResponse,
+      }),
     });
 
     // Then
-    verify(
-      saveTelegramMessageArgs.saveMessages(
-        deepEqual({
-          currentContext: {},
-          rawRequestMessages: [inRawRequest.callback_query.message],
-        })
-      )
-    ).twice();
-    verify(
-      contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
-    ).once();
+    expect.assertions(4);
+    expect(receiveRequest).toHaveBeenCalledTimes(1);
+    expect(receiveRequest).toHaveBeenCalledWith({
+      genericRequest: {
+        targetID,
+        currentContext: {},
+        rawRequest: { callback_query: { message: { text: "some-text" } } },
+        targetPlatform: "telegram",
+        triggerType: "message",
+      },
+    });
+    expect(saveMessages).toHaveBeenCalledTimes(1);
+    expect(saveMessages).toHaveBeenNthCalledWith(1, {
+      currentContext: {},
+      rawRequestMessages: [{ text: "some-text" }],
+    });
   });
 
-  it("Should not trigger saveMessages if request type is my_chat_member", async () => {
+  it("Should not save Telegram messages when receiving a my_chat_member request", async () => {
     // Setup
-    const inRawRequest = {
-      my_chat_member: {},
-    } as _TelegramRawRequest.MyChatMember;
-
-    const outRawRequest = { message: {} } as _TelegramRawRequest.Message;
-    when(contextDAO.getContext(anything())).thenResolve({});
-    when(saveTelegramMessageArgs.isEnabled()).thenReturn(true);
-    when(saveTelegramMessageArgs.saveMessages(anything())).thenResolve(
-      undefined
-    );
-    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
-    when(msgProcessor.sendResponse(anything())).thenResolve([
-      outRawRequest.message,
-    ]);
+    const receiveRequest = jest.fn();
 
     const transformed = await transform(
-      instance(msgProcessor),
-      saveTelegramMessages(instance(saveTelegramMessageArgs))({
+      mockSomething<typeof msgProcessor>({ receiveRequest }),
+      saveTelegramMessages({
+        contextDAO,
+        saveMessages,
+        isEnabled: () => {
+          return true;
+        },
+      })({
         getFinalMessageProcessor: () => {
-          return instance(msgProcessor);
+          return mockSomething<typeof msgProcessor>({});
         },
       })
     );
 
     // When
     await transformed.receiveRequest({
-      genericRequest: {
+      genericRequest: mockSomething<TelegramGenericRequest>({
         targetID,
         targetPlatform,
         currentContext: {},
-        rawRequest: inRawRequest,
+        rawRequest: { my_chat_member: {} },
         triggerType: "message",
-      } as TelegramGenericRequest,
-    });
-
-    await transformed.receiveRequest({
-      genericRequest: {
-        targetID,
-        targetPlatform,
-        triggerType: "manual",
-      } as TelegramGenericRequest,
-    });
-
-    await transformed.sendResponse({
-      genericResponse: { targetID, targetPlatform } as TelegramGenericResponse,
+      }),
     });
 
     // Then
-    verify(
-      saveTelegramMessageArgs.saveMessages(
-        deepEqual({
-          currentContext: {},
-          rawRequestMessages: [inRawRequest.callback_query.message],
-        })
-      )
-    ).twice();
-    verify(
-      contextDAO.getContext(deepEqual({ targetID, targetPlatform }))
-    ).once();
+    expect.assertions(3);
+    expect(receiveRequest).toHaveBeenCalledTimes(1);
+    expect(receiveRequest).toHaveBeenCalledWith({
+      genericRequest: {
+        targetID,
+        currentContext: {},
+        rawRequest: { my_chat_member: {} },
+        targetPlatform: "telegram",
+        triggerType: "message",
+      },
+    });
+    expect(saveMessages).not.toHaveBeenCalled();
+  });
+
+  it("Should not save Telegram messages when receiving a pre_checkout_query request", async () => {
+    // Setup
+    const receiveRequest = jest.fn();
+
+    const transformed = await transform(
+      mockSomething<typeof msgProcessor>({ receiveRequest }),
+      saveTelegramMessages({
+        contextDAO,
+        saveMessages,
+        isEnabled: () => {
+          return true;
+        },
+      })({
+        getFinalMessageProcessor: () => {
+          return mockSomething<typeof msgProcessor>({});
+        },
+      })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      genericRequest: mockSomething<TelegramGenericRequest>({
+        targetID,
+        targetPlatform,
+        currentContext: {},
+        rawRequest: { pre_checkout_query: {} },
+        triggerType: "message",
+      }),
+    });
+
+    // Then
+    expect.assertions(3);
+    expect(receiveRequest).toHaveBeenCalledTimes(1);
+    expect(receiveRequest).toHaveBeenCalledWith({
+      genericRequest: {
+        targetID,
+        currentContext: {},
+        rawRequest: { pre_checkout_query: {} },
+        targetPlatform: "telegram",
+        triggerType: "message",
+      },
+    });
+    expect(saveMessages).not.toHaveBeenCalled();
+  });
+
+  it("Should save Telegram messages when receiving a normal message request", async () => {
+    // Setup
+    const receiveRequest = jest.fn();
+
+    const transformed = await transform(
+      mockSomething<typeof msgProcessor>({ receiveRequest }),
+      saveTelegramMessages({
+        contextDAO,
+        saveMessages,
+        isEnabled: () => {
+          return true;
+        },
+      })({
+        getFinalMessageProcessor: () => {
+          return mockSomething<typeof msgProcessor>({});
+        },
+      })
+    );
+
+    // When
+    await transformed.receiveRequest({
+      genericRequest: mockSomething<TelegramGenericRequest>({
+        targetID,
+        targetPlatform,
+        currentContext: {},
+        rawRequest: { message: { text: "some-text" } },
+        triggerType: "message",
+      }),
+    });
+
+    // Then
+    expect.assertions(4);
+    expect(receiveRequest).toHaveBeenCalledTimes(1);
+    expect(receiveRequest).toHaveBeenCalledWith({
+      genericRequest: {
+        targetID,
+        currentContext: {},
+        rawRequest: { message: { text: "some-text" } },
+        targetPlatform: "telegram",
+        triggerType: "message",
+      },
+    });
+    expect(saveMessages).toHaveBeenCalledTimes(1);
+    expect(saveMessages).toHaveBeenNthCalledWith(1, {
+      currentContext: {},
+      rawRequestMessages: [{ text: "some-text" }],
+    });
+  });
+
+  it("Should save Telegram messages when sending response", async () => {
+    // Setup
+    const sendResponse = jest.fn();
+
+    sendResponse.mockResolvedValueOnce([
+      { data: "some-data-1" },
+      { data: "some-data-2" },
+      true,
+    ]);
+
+    const transformed = await transform(
+      mockSomething<typeof msgProcessor>({ sendResponse }),
+      saveTelegramMessages({
+        contextDAO,
+        saveMessages,
+        isEnabled: () => {
+          return true;
+        },
+      })({
+        getFinalMessageProcessor: () => {
+          return mockSomething<typeof msgProcessor>({});
+        },
+      })
+    );
+
+    // When
+    await transformed.sendResponse({
+      genericResponse: mockSomething<TelegramGenericResponse>({
+        targetID,
+        targetPlatform,
+      }),
+    });
+
+    // Then
+    expect.assertions(4);
+    expect(saveMessages).toHaveBeenCalledTimes(1);
+    expect(saveMessages).toHaveBeenCalledWith({
+      currentContext: {},
+      rawRequestMessages: [{ data: "some-data-1" }, { data: "some-data-2" }],
+    });
+    expect(sendResponse).toHaveBeenCalledTimes(1);
+    expect(sendResponse).toHaveBeenCalledWith({
+      genericResponse: { targetID, targetPlatform: "telegram" },
+    });
   });
 
   it("Should not trigger if not enabled", async () => {
     // Setup
-    when(saveTelegramMessageArgs.isEnabled()).thenReturn(false);
-    when(msgProcessor.receiveRequest(anything())).thenResolve(undefined);
-    when(msgProcessor.sendResponse(anything())).thenResolve([
-      {} as _TelegramRawRequest.Message["message"],
-    ]);
+    const receiveRequest = jest.fn();
+    const sendResponse = jest.fn();
 
     const transformed = await transform(
-      instance(msgProcessor),
-      saveTelegramMessages(instance(saveTelegramMessageArgs))({
+      mockSomething<typeof msgProcessor>({ receiveRequest, sendResponse }),
+      saveTelegramMessages({
+        contextDAO,
+        saveMessages,
+        isEnabled: () => {
+          return false;
+        },
+      })({
         getFinalMessageProcessor: () => {
-          return instance(msgProcessor);
+          return mockSomething<typeof msgProcessor>({});
         },
       })
     );
 
     // When
     await transformed.receiveRequest({
-      genericRequest: { triggerType: "message" } as TelegramGenericRequest,
+      genericRequest: mockSomething<TelegramGenericRequest>({
+        triggerType: "message",
+      }),
     });
 
     await transformed.sendResponse({
-      genericResponse: {} as TelegramGenericResponse,
+      genericResponse: mockSomething<TelegramGenericResponse>({}),
     });
 
     // Then
-    verify(saveTelegramMessageArgs.saveMessages(anything())).never();
-    verify(contextDAO.getContext(anything())).never;
+    expect.assertions(5);
+    expect(receiveRequest).toHaveBeenCalledTimes(1);
+    expect(receiveRequest).toHaveBeenCalledWith({
+      genericRequest: { triggerType: "message" },
+    });
+    expect(saveMessages).not.toHaveBeenCalled();
+    expect(sendResponse).toHaveBeenCalledTimes(1);
+    expect(sendResponse).toHaveBeenCalledWith({ genericResponse: {} });
   });
 });
