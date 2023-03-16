@@ -1,6 +1,6 @@
 import {
   isType,
-  requireNotNull,
+  requireNotNull
 } from "@haipham/javascript-helper-preconditions";
 import GraphemeSplitter from "grapheme-splitter";
 import { AsyncOrSync } from "ts-essentials";
@@ -13,7 +13,7 @@ import {
   TelegramGenericRequest,
   TelegramGenericResponseOutput,
   TelegramRawRequest,
-  Transformer,
+  Transformer
 } from "../type";
 
 export function chunkArray<TArr extends any[] | readonly any[]>(
@@ -97,6 +97,26 @@ export function generateUniqueTargetKey({
   targetPlatform,
 }: Readonly<{ targetID: string; targetPlatform: AmbiguousPlatform }>) {
   return `${targetPlatform}_${targetID}`;
+}
+
+export function isPrivateChatTelegramRequest(
+  request: AmbiguousGenericRequest
+): request is TelegramGenericRequest.MessageTrigger {
+  return (
+    request.targetPlatform === "telegram" &&
+    request.triggerType === "message" &&
+    request.chatType === "private"
+  );
+}
+
+export function isGroupChatTelegramRequest(
+  request: AmbiguousGenericRequest
+): request is TelegramGenericRequest.MessageTrigger {
+  return (
+    request.targetPlatform === "telegram" &&
+    request.triggerType === "message" &&
+    request.chatType !== "private"
+  );
 }
 
 /** Join two objects to form a new object */

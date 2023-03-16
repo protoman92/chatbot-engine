@@ -1,9 +1,12 @@
 import { omitNull } from "@haipham/javascript-helper-object";
+import { DeepPartial } from "ts-essentials";
 import { switchPlatformRequest } from ".";
 import { AmbiguousGenericRequest, AmbiguousPlatform } from "..";
 import {
   chunkString,
   firstSubString,
+  isGroupChatTelegramRequest,
+  isPrivateChatTelegramRequest,
   lastSubstring,
   mapSeries,
   switchOutputForPlatform,
@@ -136,6 +139,90 @@ describe("Common utilities", () => {
     expect(lastSubstring("👶🏻👦🏻👧🏻", 1)).toEqual({
       lastSubstring: "👧🏻",
       restSubstring: "👶🏻👦🏻",
+    });
+  });
+
+  describe("isPrivateChatTelegramRequest", () => {
+    it.each<{
+      request: DeepPartial<AmbiguousGenericRequest>;
+      expectedResult: boolean;
+    }>([
+      { request: { targetPlatform: "facebook" }, expectedResult: false },
+      { request: { targetPlatform: "telegram" }, expectedResult: false },
+      { request: { targetPlatform: "telegram" }, expectedResult: false },
+      {
+        request: { targetPlatform: "telegram", triggerType: "manual" },
+        expectedResult: false,
+      },
+      {
+        request: {
+          chatType: "group",
+          targetPlatform: "telegram",
+          triggerType: "message",
+        },
+        expectedResult: false,
+      },
+      {
+        request: {
+          chatType: "private",
+          targetPlatform: "telegram",
+          triggerType: "message",
+        },
+        expectedResult: true,
+      },
+    ])("returns the correct result", ({ request, expectedResult }) => {
+      // Setup
+      // When
+      // Then
+      expect(
+        isPrivateChatTelegramRequest(request as AmbiguousGenericRequest)
+      ).toEqual(expectedResult);
+    });
+  });
+
+  describe("isGroupChatTelegramRequest", () => {
+    it.each<{
+      request: DeepPartial<AmbiguousGenericRequest>;
+      expectedResult: boolean;
+    }>([
+      { request: { targetPlatform: "facebook" }, expectedResult: false },
+      { request: { targetPlatform: "telegram" }, expectedResult: false },
+      { request: { targetPlatform: "telegram" }, expectedResult: false },
+      {
+        request: { targetPlatform: "telegram", triggerType: "manual" },
+        expectedResult: false,
+      },
+      {
+        request: {
+          chatType: "private",
+          targetPlatform: "telegram",
+          triggerType: "message",
+        },
+        expectedResult: false,
+      },
+      {
+        request: {
+          chatType: "group",
+          targetPlatform: "telegram",
+          triggerType: "message",
+        },
+        expectedResult: true,
+      },
+      {
+        request: {
+          chatType: "supergroup",
+          targetPlatform: "telegram",
+          triggerType: "message",
+        },
+        expectedResult: true,
+      },
+    ])("returns the correct result", ({ request, expectedResult }) => {
+      // Setup
+      // When
+      // Then
+      expect(
+        isGroupChatTelegramRequest(request as AmbiguousGenericRequest)
+      ).toEqual(expectedResult);
     });
   });
 });
