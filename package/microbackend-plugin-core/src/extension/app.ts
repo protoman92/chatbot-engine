@@ -4,7 +4,7 @@ import {
   defaultAxiosClient,
   FacebookConfig,
   TelegramConfig,
-  _TelegramRawResponse,
+  TelegramRawResponse,
 } from "@haipham/chatbot-engine-core";
 import { createPluginHelpers } from "@microbackend/common-utils";
 import { IMicrobackendApp, initializeOnce } from "@microbackend/plugin-core";
@@ -69,7 +69,7 @@ export default {
                     .valid(
                       ...Object.keys(
                         ((): {
-                          [K in _TelegramRawResponse.ParseMode]: boolean;
+                          [K in TelegramRawResponse.ParseMode]: boolean;
                         } => {
                           return { html: true, markdown: true };
                         })()
