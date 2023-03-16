@@ -8,7 +8,6 @@ import {
   TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramUser,
-  _TelegramRawRequest,
 } from "../type";
 
 /**
@@ -68,8 +67,8 @@ export function saveTelegramMessages({
     args: Readonly<{
       currentContext: ChatbotContext;
       rawRequestMessages: readonly (
-        | _TelegramRawRequest.Message["message"]
-        | _TelegramRawRequest.SuccessfulPayment["message"]
+        | TelegramRawRequest.Message["message"]
+        | TelegramRawRequest.SuccessfulPayment["message"]
       )[];
     }>
   ) => AsyncOrSync<void>;
@@ -77,17 +76,17 @@ export function saveTelegramMessages({
   function extractRawRequestMessage(
     rawRequest: TelegramRawRequest
   ):
-    | _TelegramRawRequest.Message["message"]
-    | _TelegramRawRequest.SuccessfulPayment["message"]
+    | TelegramRawRequest.Message["message"]
+    | TelegramRawRequest.SuccessfulPayment["message"]
     | undefined {
-    if (isType<_TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
+    if (isType<TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
       return rawRequest.callback_query.message;
     } else if (
-      isType<_TelegramRawRequest.MyChatMember>(rawRequest, "my_chat_member")
+      isType<TelegramRawRequest.MyChatMember>(rawRequest, "my_chat_member")
     ) {
       return undefined;
     } else if (
-      isType<_TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
+      isType<TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
     ) {
       return undefined;
     } else {

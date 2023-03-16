@@ -4,16 +4,13 @@ import { chunkString, facebookError } from "../common/utils";
 import {
   FacebookGenericRequest,
   FacebookGenericResponse,
+  FacebookGenericResponseOutput,
   FacebookMessageProcessor,
   FacebookMessageProcessorConfig,
   FacebookMessageProcessorMiddleware,
   FacebookRawRequest,
   FacebookRawResponse,
   MessageProcessorMiddleware,
-  _FacebookGenericRequest,
-  _FacebookGenericResponseOutput,
-  _FacebookRawRequest,
-  _FacebookRawResponse,
 } from "../type";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -26,9 +23,9 @@ function createFacebookRequest(
   rawRequest: FacebookRawRequest
 ): readonly FacebookGenericRequest[] {
   /** Group requests based on target ID */
-  function groupRequests(reqs: readonly _FacebookRawRequest.Entry.Messaging[]) {
+  function groupRequests(reqs: readonly FacebookRawRequest.Entry.Messaging[]) {
     const requestMap: {
-      [K: string]: readonly _FacebookRawRequest.Entry.Messaging[];
+      [K: string]: readonly FacebookRawRequest.Entry.Messaging[];
     } = {};
 
     reqs.forEach((req) => {
@@ -40,8 +37,8 @@ function createFacebookRequest(
   }
 
   function processRequest(
-    rawMessaging: _FacebookRawRequest.Entry.Messaging
-  ): readonly _FacebookGenericRequest.MessageTrigger["input"][] {
+    rawMessaging: FacebookRawRequest.Entry.Messaging
+  ): readonly FacebookGenericRequest.MessageTrigger["input"][] {
     if ("postback" in rawMessaging) {
       return [{ payload: rawMessaging.postback.payload, type: "postback" }];
     }
@@ -77,10 +74,8 @@ function createFacebookRequest(
               }
 
             case "location":
-              const {
-                lat: latitude,
-                long: longitude,
-              } = attachment.payload.coordinates;
+              const { lat: latitude, long: longitude } =
+                attachment.payload.coordinates;
 
               const coordinate = { latitude, longitude };
               return { coordinate, type: "location" };
@@ -114,7 +109,7 @@ function createFacebookRequest(
       ...requests.map(processRequest).reduce((acc1, inputs) => {
         acc1.push(
           ...inputs.map(
-            (input): _FacebookGenericRequest.MessageTrigger => ({
+            (input): FacebookGenericRequest.MessageTrigger => ({
               input,
               targetID,
               currentContext: {} as ChatbotContext,
@@ -126,16 +121,16 @@ function createFacebookRequest(
         );
 
         return acc1;
-      }, [] as _FacebookGenericRequest.MessageTrigger[])
+      }, [] as FacebookGenericRequest.MessageTrigger[])
     );
 
     return acc;
-  }, [] as _FacebookGenericRequest.MessageTrigger[]);
+  }, [] as FacebookGenericRequest.MessageTrigger[]);
 }
 
 function createSingleAction(
-  action: _FacebookGenericResponseOutput.Action
-): _FacebookRawResponse.Button {
+  action: FacebookGenericResponseOutput.Action
+): FacebookRawResponse.Button {
   const { text: title } = action;
 
   switch (action.type) {
@@ -155,7 +150,7 @@ function createFacebookResponse({
   function createFileAttachmentMessages({
     attachmentType: type,
     ...attachment
-  }: _FacebookGenericResponseOutput.Content.FileAttachment): readonly _FacebookRawResponse.Message.Attachment["message"][] {
+  }: FacebookGenericResponseOutput.Content.FileAttachment): readonly FacebookRawResponse.Message.Attachment["message"][] {
     if ("attachmentID" in attachment) {
       return [
         {
@@ -197,9 +192,9 @@ function createFacebookResponse({
   function createButtonMessages({
     text: fullText,
     actions,
-  }: _FacebookGenericResponseOutput.Content.Button): readonly (
-    | _FacebookRawResponse.Message.Text["message"]
-    | _FacebookRawResponse.Message.Button["message"]
+  }: FacebookGenericResponseOutput.Content.Button): readonly (
+    | FacebookRawResponse.Message.Text["message"]
+    | FacebookRawResponse.Message.Button["message"]
   )[] {
     const chunkTexts = chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT);
 
@@ -224,7 +219,7 @@ function createFacebookResponse({
 
   function createCarouselMessages({
     items,
-  }: _FacebookGenericResponseOutput.Content.Carousel): readonly _FacebookRawResponse.Message.Carousel["message"][] {
+  }: FacebookGenericResponseOutput.Content.Carousel): readonly FacebookRawResponse.Message.Carousel["message"][] {
     return [
       {
         attachment: {
@@ -253,7 +248,7 @@ function createFacebookResponse({
   function createMediaMessages({
     actions,
     ...media
-  }: _FacebookGenericResponseOutput.Content.Media): readonly _FacebookRawResponse.Message.RichMedia["message"][] {
+  }: FacebookGenericResponseOutput.Content.Media): readonly FacebookRawResponse.Message.RichMedia["message"][] {
     let url: string;
     let media_type: "image" | "video";
 
@@ -281,8 +276,8 @@ function createFacebookResponse({
   }
 
   function createListMessages(
-    content: _FacebookGenericResponseOutput.Content.List
-  ): readonly _FacebookRawResponse.Message.List["message"][] {
+    content: FacebookGenericResponseOutput.Content.List
+  ): readonly FacebookRawResponse.Message.List["message"][] {
     const { items, actions: listActions } = content;
 
     return [
@@ -316,7 +311,7 @@ function createFacebookResponse({
 
   function createTextMessages({
     text,
-  }: _FacebookGenericResponseOutput.Content.Text): readonly _FacebookRawResponse.Message.Text["message"][] {
+  }: FacebookGenericResponseOutput.Content.Text): readonly FacebookRawResponse.Message.Text["message"][] {
     return [
       ...chunkString(text, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => {
         return { text };
@@ -325,8 +320,8 @@ function createFacebookResponse({
   }
 
   function createResponseMessages(
-    content: _FacebookGenericResponseOutput.Content
-  ): readonly _FacebookRawResponse.Message["message"][] {
+    content: FacebookGenericResponseOutput.Content
+  ): readonly FacebookRawResponse.Message["message"][] {
     switch (content.type) {
       case "facebook.attachment":
         return createFileAttachmentMessages(content);
@@ -350,8 +345,8 @@ function createFacebookResponse({
 
   /** Create a Facebook quick reply from a generic quick reply */
   function createRawQuickReply(
-    quickReply: _FacebookGenericResponseOutput.QuickReply
-  ): _FacebookRawResponse.QuickReply {
+    quickReply: FacebookGenericResponseOutput.QuickReply
+  ): FacebookRawResponse.QuickReply {
     const { text } = quickReply;
 
     switch (quickReply.type) {

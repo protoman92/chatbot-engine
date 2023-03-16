@@ -10,8 +10,8 @@ import {
   TelegramClient,
   TelegramClientSendResponseResult,
   TelegramConfig,
-  _TelegramClient,
-  _TelegramRawRequest,
+  TelegramRawRequest,
+  TelegramRawResponse,
 } from "../type";
 import defaultAxiosClient from "./axios-client";
 
@@ -37,8 +37,8 @@ export function createTelegramClient(
     ...params: Parameters<HTTPClient["requestWithErrorCapture"]>
   ): Promise<Result> {
     const response = await client.requestWithErrorCapture<
-      _TelegramClient.APIResponse.Success<Result>,
-      _TelegramClient.APIResponse.Failure
+      TelegramRawResponse.APIResponse.Success<Result>,
+      TelegramRawResponse.APIResponse.Failure
     >(...params);
 
     if (response.data != null) {
@@ -63,7 +63,7 @@ export function createTelegramClient(
       });
     },
     getFile: (file_id) => {
-      return communicate<_TelegramRawRequest.FileDetails>({
+      return communicate<TelegramRawRequest.FileDetails>({
         url: formatURL("getFile"),
         method: "GET",
         query: { file_id },

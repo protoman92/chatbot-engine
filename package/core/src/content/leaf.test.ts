@@ -6,7 +6,7 @@ import {
   AmbiguousGenericResponse,
   ErrorLeafConfig,
   FacebookRawRequest,
-  _FacebookGenericResponseOutput,
+  FacebookGenericResponseOutput,
 } from "../type";
 import {
   bridgeEmission,
@@ -187,7 +187,7 @@ describe("Default error leaf", () => {
     expect(output).toHaveLength(1);
     const response = output[0]!.content;
 
-    if (isType<_FacebookGenericResponseOutput.Content.Text>(response, "text")) {
+    if (isType<FacebookGenericResponseOutput.Content.Text>(response, "text")) {
       expect(response.text).toContain(error.message);
     } else {
       throw new Error("Never should have come here");

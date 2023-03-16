@@ -23,7 +23,7 @@ import { BaseGenericResponse } from "./response";
 import { ContentObservable, ContentObserver } from "./stream";
 import { BaseGenericResponseOutput } from "./visual-content";
 
-export namespace _TelegramGenericRequest {
+export namespace TelegramGenericRequest {
   interface BaseRequest extends CommonGenericRequest {
     readonly targetPlatform: "telegram";
   }
@@ -35,7 +35,7 @@ export namespace _TelegramGenericRequest {
   export interface MessageTrigger
     extends BaseRequest,
       StrictOmit<GenericMessageTriggerRequest<TelegramRawRequest>, "input"> {
-    readonly chatType: _TelegramRawRequest.Chat["type"] | undefined;
+    readonly chatType: TelegramRawRequest.Chat["type"] | undefined;
     readonly currentBot: TelegramBot;
     readonly telegramUser: TelegramUser;
     readonly input: Readonly<
@@ -57,11 +57,11 @@ export namespace _TelegramGenericRequest {
         }
       | { coordinate: Coordinates; type: "location" }
       | {
-          document: _TelegramRawRequest.DocumentDetails;
+          document: TelegramRawRequest.DocumentDetails;
           type: "telegram.document";
         }
       | {
-          images: readonly _TelegramRawRequest.PhotoDetails[];
+          images: readonly TelegramRawRequest.PhotoDetails[];
           type: "telegram.image";
         }
       | {
@@ -97,22 +97,22 @@ export namespace _TelegramGenericRequest {
           telegramPaymentChargeID: string;
           type: "telegram.successful_payment";
         }
-      | { video: _TelegramRawRequest.VideoDetails; type: "telegram.video" }
+      | { video: TelegramRawRequest.VideoDetails; type: "telegram.video" }
       | GenericMessageTriggerRequest<TelegramRawRequest>["input"]
     >;
   }
 }
 
 export type TelegramGenericRequest =
-  | _TelegramGenericRequest.ManualTrigger
-  | _TelegramGenericRequest.MessageTrigger;
+  | TelegramGenericRequest.ManualTrigger
+  | TelegramGenericRequest.MessageTrigger;
 
 export interface TelegramGenericResponse extends BaseGenericResponse {
   readonly output: readonly TelegramGenericResponseOutput[];
   readonly targetPlatform: "telegram";
 }
 
-export namespace _TelegramGenericResponseOutput {
+export namespace TelegramGenericResponseOutput {
   export namespace QuickReply {
     export interface Contact {
       readonly text: string;
@@ -230,12 +230,12 @@ export namespace _TelegramGenericResponseOutput {
 
 export interface TelegramGenericResponseOutput
   extends BaseGenericResponseOutput {
-  readonly content: _TelegramGenericResponseOutput.Content;
-  readonly quickReplies?: _TelegramGenericResponseOutput.QuickReply;
+  readonly content: TelegramGenericResponseOutput.Content;
+  readonly quickReplies?: TelegramGenericResponseOutput.QuickReply;
   readonly parseMode?: "html" | "markdown";
 }
 
-export namespace _TelegramRawRequest {
+export namespace TelegramRawRequest {
   namespace Chat {
     export interface Private {
       readonly id: number;
@@ -428,13 +428,13 @@ export namespace _TelegramRawRequest {
 }
 
 export type TelegramRawRequest =
-  | _TelegramRawRequest.Message
-  | _TelegramRawRequest.Callback
-  | _TelegramRawRequest.MyChatMember
-  | _TelegramRawRequest.PreCheckout
-  | _TelegramRawRequest.SuccessfulPayment;
+  | TelegramRawRequest.Message
+  | TelegramRawRequest.Callback
+  | TelegramRawRequest.MyChatMember
+  | TelegramRawRequest.PreCheckout
+  | TelegramRawRequest.SuccessfulPayment;
 
-export namespace _TelegramRawResponse {
+export namespace TelegramRawResponse {
   export type ParseMode = "html" | "markdown";
 
   export namespace ReplyMarkup {
@@ -492,10 +492,7 @@ export namespace _TelegramRawResponse {
   export type SendDocument = FormData;
 
   export interface SendInvoice
-    extends StrictOmit<
-      _TelegramGenericResponseOutput.Content.Invoice,
-      "type"
-    > {}
+    extends StrictOmit<TelegramGenericResponseOutput.Content.Invoice, "type"> {}
 
   export interface SendMessage {
     readonly text: string;
@@ -510,35 +507,35 @@ export namespace _TelegramRawResponse {
 export type TelegramRawResponse = Readonly<
   {
     headers?: Readonly<{ [x: string]: string }>;
-    parseMode?: _TelegramRawResponse.ParseMode | undefined;
+    parseMode?: TelegramRawResponse.ParseMode | undefined;
   } & (
     | {
         action: "answerPreCheckoutQuery";
-        body: _TelegramRawResponse.AnswerPreCheckoutQuery &
+        body: TelegramRawResponse.AnswerPreCheckoutQuery &
           Readonly<{ chat_id: string }>;
       }
     | {
         action: "sendDocument";
-        body: _TelegramRawResponse.SendDocument;
+        body: TelegramRawResponse.SendDocument;
       }
     | {
         action: "sendInvoice";
-        body: _TelegramRawResponse.SendInvoice & Readonly<{ chat_id: string }>;
+        body: TelegramRawResponse.SendInvoice & Readonly<{ chat_id: string }>;
       }
     | {
         action: "sendMessage";
-        body: _TelegramRawResponse.SendMessage &
+        body: TelegramRawResponse.SendMessage &
           Readonly<{
             chat_id: string;
-            reply_markup?: _TelegramRawResponse.ReplyMarkup | undefined;
+            reply_markup?: TelegramRawResponse.ReplyMarkup | undefined;
           }>;
       }
     | {
         action: "sendPhoto";
-        body: _TelegramRawResponse.SendPhoto &
+        body: TelegramRawResponse.SendPhoto &
           Readonly<{
             chat_id: string;
-            reply_markup?: _TelegramRawResponse.ReplyMarkup | undefined;
+            reply_markup?: TelegramRawResponse.ReplyMarkup | undefined;
           }>;
       }
   )
@@ -555,11 +552,7 @@ export interface TelegramMessageProcessor
     GenericRequestReceiver<TelegramGenericRequest>,
     GenericResponseSender<
       TelegramGenericResponse,
-      readonly (
-        | _TelegramRawRequest.Message["message"]
-        /** If response is pre_checkout_confirmation */
-        | true
-      )[]
+      readonly TelegramClientSendResponseResult[]
     > {}
 
 export type TelegramMessageProcessorMiddleware =
@@ -661,11 +654,11 @@ export type TelegramChatMember =
 /** Represents Telegram configurations */
 export interface TelegramConfig {
   readonly authToken: string;
-  readonly defaultParseMode?: _TelegramRawResponse.ParseMode;
+  readonly defaultParseMode?: TelegramRawResponse.ParseMode;
   readonly defaultPaymentProviderToken?: string;
 }
 
-export namespace _TelegramClient {
+export namespace TelegramRawResponse {
   export namespace APIResponse {
     export interface Success<Result> {
       readonly description: string;
@@ -685,7 +678,7 @@ export namespace TelegramClientSendResponseResult {
 }
 
 export type TelegramClientSendResponseResult =
-  | _TelegramRawRequest.Message["message"]
+  | TelegramRawRequest.Message["message"]
   | TelegramClientSendResponseResult.PreCheckoutConfirmation;
 
 /** A Telegram-specific client */
@@ -703,7 +696,7 @@ export interface TelegramClient
   getCurrentBot(): Promise<TelegramBot>;
 
   /** Get a file using its ID */
-  getFile(fileID: string): Promise<_TelegramRawRequest.FileDetails>;
+  getFile(fileID: string): Promise<TelegramRawRequest.FileDetails>;
 
   /** Get the URL to a file in Telegram */
   getFileURL(filePath: string): Promise<string>;

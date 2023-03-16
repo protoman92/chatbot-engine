@@ -12,16 +12,13 @@ import {
   TelegramBot,
   TelegramGenericRequest,
   TelegramGenericResponse,
+  TelegramGenericResponseOutput,
   TelegramMessageProcessor,
   TelegramMessageProcessorConfig,
   TelegramMessageProcessorMiddleware,
   TelegramRawRequest,
   TelegramRawResponse,
   TelegramUser,
-  _TelegramGenericRequest,
-  _TelegramGenericResponseOutput,
-  _TelegramRawRequest,
-  _TelegramRawResponse,
 } from "../type";
 import { createMessageProcessor } from "./generic-messenger";
 
@@ -61,11 +58,11 @@ function processMessageRequest({
   },
 }: Readonly<{
   currentBot: TelegramBot;
-  message: _TelegramRawRequest.Message;
+  message: TelegramRawRequest.Message;
 }>):
   | Readonly<{
-      chat: _TelegramRawRequest.Chat;
-      inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+      chat: TelegramRawRequest.Chat;
+      inputs: readonly TelegramGenericRequest.MessageTrigger["input"][];
       user: TelegramUser;
     }>
   | undefined {
@@ -176,9 +173,9 @@ function processMessageRequest({
 
 function processCallbackRequest({
   callback_query: { data, from: user, message },
-}: _TelegramRawRequest.Callback): Readonly<{
-  chat: _TelegramRawRequest.Chat;
-  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+}: TelegramRawRequest.Callback): Readonly<{
+  chat: TelegramRawRequest.Chat;
+  inputs: readonly TelegramGenericRequest.MessageTrigger["input"][];
   user: TelegramUser;
 }> {
   return {
@@ -190,9 +187,9 @@ function processCallbackRequest({
 
 function processMyChatMemberRequest({
   my_chat_member: { chat, from: user, new_chat_member, old_chat_member },
-}: _TelegramRawRequest.MyChatMember): Readonly<{
-  chat: _TelegramRawRequest.Chat | undefined;
-  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+}: TelegramRawRequest.MyChatMember): Readonly<{
+  chat: TelegramRawRequest.Chat | undefined;
+  inputs: readonly TelegramGenericRequest.MessageTrigger["input"][];
   user: TelegramUser;
 }> {
   return {
@@ -216,9 +213,9 @@ function processPreCheckoutRequest({
     invoice_payload: payload,
     total_amount: amount,
   },
-}: _TelegramRawRequest.PreCheckout): Readonly<{
-  chat: _TelegramRawRequest.Chat | undefined;
-  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+}: TelegramRawRequest.PreCheckout): Readonly<{
+  chat: TelegramRawRequest.Chat | undefined;
+  inputs: readonly TelegramGenericRequest.MessageTrigger["input"][];
   user: TelegramUser;
 }> {
   return {
@@ -242,9 +239,9 @@ function processSuccessfulPaymentRequest({
       total_amount: amount,
     },
   },
-}: _TelegramRawRequest.SuccessfulPayment): Readonly<{
-  chat: _TelegramRawRequest.Chat | undefined;
-  inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+}: TelegramRawRequest.SuccessfulPayment): Readonly<{
+  chat: TelegramRawRequest.Chat | undefined;
+  inputs: readonly TelegramGenericRequest.MessageTrigger["input"][];
   user: TelegramUser;
 }> {
   return {
@@ -270,27 +267,27 @@ export function createGenericTelegramRequest(
 ): readonly TelegramGenericRequest[] {
   let requestData:
     | Readonly<{
-        chat: _TelegramRawRequest.Chat | undefined;
-        inputs: readonly _TelegramGenericRequest.MessageTrigger["input"][];
+        chat: TelegramRawRequest.Chat | undefined;
+        inputs: readonly TelegramGenericRequest.MessageTrigger["input"][];
         user: TelegramUser;
       }>
     | undefined;
 
-  if (isType<_TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
+  if (isType<TelegramRawRequest.Callback>(rawRequest, "callback_query")) {
     requestData = processCallbackRequest(rawRequest);
   } else if (
-    isType<_TelegramRawRequest.MyChatMember>(rawRequest, "my_chat_member")
+    isType<TelegramRawRequest.MyChatMember>(rawRequest, "my_chat_member")
   ) {
     requestData = processMyChatMemberRequest(rawRequest);
   } else if (
-    isType<_TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
+    isType<TelegramRawRequest.PreCheckout>(rawRequest, "pre_checkout_query")
   ) {
     requestData = processPreCheckoutRequest(rawRequest);
   } else if ("message" in rawRequest) {
     const { message, ...restRequest } = rawRequest;
 
     if (
-      isType<_TelegramRawRequest.SuccessfulPayment["message"]>(
+      isType<TelegramRawRequest.SuccessfulPayment["message"]>(
         message,
         "successful_payment"
       )
@@ -339,13 +336,13 @@ function createRawTelegramResponse({
 }: TelegramGenericResponse): readonly TelegramRawResponse[] {
   function createDocumentResponse(
     chat_id: string,
-    reply_markup: _TelegramRawResponse.ReplyMarkup | undefined,
+    reply_markup: TelegramRawResponse.ReplyMarkup | undefined,
     {
       fileData: document,
       fileName,
       text: caption,
-    }: _TelegramGenericResponseOutput.Content.Document
-  ): _TelegramRawResponse.SendDocument {
+    }: TelegramGenericResponseOutput.Content.Document
+  ): TelegramRawResponse.SendDocument {
     const formData = new FormData();
     if (caption) {
       formData.append("caption", caption);
@@ -364,9 +361,9 @@ function createRawTelegramResponse({
   function createImageResponses({
     image: photo,
     text: fullCaption = "",
-  }: _TelegramGenericResponseOutput.Content.Image): readonly [
-    _TelegramRawResponse.SendPhoto,
-    ...(readonly _TelegramRawResponse.SendMessage[])
+  }: TelegramGenericResponseOutput.Content.Image): readonly [
+    TelegramRawResponse.SendPhoto,
+    ...(readonly TelegramRawResponse.SendMessage[])
   ] {
     const { firstSubstring: caption, restSubstring } = firstSubString(
       fullCaption,
@@ -386,7 +383,7 @@ function createRawTelegramResponse({
   function createInvoiceResponse({
     type,
     ...args
-  }: _TelegramGenericResponseOutput.Content.Invoice): _TelegramRawResponse.SendInvoice {
+  }: TelegramGenericResponseOutput.Content.Invoice): TelegramRawResponse.SendInvoice {
     return { ...args };
   }
 
@@ -394,7 +391,7 @@ function createRawTelegramResponse({
     checkoutID: pre_checkout_query_id,
     error,
     isOK,
-  }: _TelegramGenericResponseOutput.Content.PreCheckoutConfirmation): _TelegramRawResponse.AnswerPreCheckoutQuery {
+  }: TelegramGenericResponseOutput.Content.PreCheckoutConfirmation): TelegramRawResponse.AnswerPreCheckoutQuery {
     return {
       ok: isOK || false,
       pre_checkout_query_id,
@@ -404,7 +401,7 @@ function createRawTelegramResponse({
 
   function createTextResponses({
     text: fullText,
-  }: _TelegramGenericResponseOutput.Content.Text): _TelegramRawResponse.SendMessage[] {
+  }: TelegramGenericResponseOutput.Content.Text): TelegramRawResponse.SendMessage[] {
     return chunkString(fullText, MESSAGE_TEXT_CHARACTER_LIMIT).map((text) => {
       return { text };
     });
@@ -412,8 +409,8 @@ function createRawTelegramResponse({
 
   /** Only certain quick reply types supports inline markups. */
   function createInlineMarkups(
-    matrix: _TelegramGenericResponseOutput.InlineMarkupMatrix
-  ): _TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
+    matrix: TelegramGenericResponseOutput.InlineMarkupMatrix
+  ): TelegramRawResponse.ReplyMarkup.InlineKeyboardMarkup {
     return {
       inline_keyboard: matrix.map((quickReplies) => {
         return quickReplies.map((quickReply) => {
@@ -436,8 +433,8 @@ function createRawTelegramResponse({
 
   /** Only certain quick reply types support reply markups. */
   function createReplyMarkups(
-    matric: _TelegramGenericResponseOutput.ReplyMarkupMatrix
-  ): _TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
+    matric: TelegramGenericResponseOutput.ReplyMarkupMatrix
+  ): TelegramRawResponse.ReplyMarkup.ReplyKeyboardMarkup {
     return {
       keyboard: matric.map((quickReplies) => {
         return quickReplies.map((quickReply) => {
@@ -475,8 +472,8 @@ function createRawTelegramResponse({
 
   /** Create a Telegram quick reply from a generic quick reply. */
   function createQuickReplies(
-    quickReply: _TelegramGenericResponseOutput.QuickReply
-  ): _TelegramRawResponse.ReplyMarkup {
+    quickReply: TelegramGenericResponseOutput.QuickReply
+  ): TelegramRawResponse.ReplyMarkup {
     switch (quickReply.type) {
       case "telegram.inline_markup":
         return createInlineMarkups(quickReply.content);

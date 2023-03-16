@@ -224,8 +224,8 @@ export function switchOutputForPlatform<P extends AmbiguousPlatform>(
     facebook?: readonly FacebookGenericResponseOutput[];
     telegram?: readonly TelegramGenericResponseOutput[];
   }>
-): NonNullable<typeof args[P]> {
-  return requireNotNull(args[platform]) as NonNullable<typeof args[P]>;
+): NonNullable<(typeof args)[P]> {
+  return requireNotNull(args[platform]) as NonNullable<(typeof args)[P]>;
 }
 
 /** Allow platform-specific request handling logic that returns any result */
